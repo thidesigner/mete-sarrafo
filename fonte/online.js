@@ -645,7 +645,6 @@ acoes.jogar = () => { if ((G.modo || "fp") === "online") { criarSala(); return; 
 const _telaLobby = TELAS.lobby;
 TELAS.lobby = () => {
   const h = _telaLobby();
-  if ((G.modo || "fp") !== "online") return h;
   return h.replace('<div class="lb-bottom">', '<button class="lb-cont" data-a="irEntrar">Entrar na sala de um amigo</button>\n    <div class="lb-bottom">');
 };
 acoes.irEntrar = () => { ON.codeEntrar = ""; ir("entrar"); };
