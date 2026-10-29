@@ -16,7 +16,15 @@
     send(d) { bc.postMessage({ type: "data", connId: this.connId, to: this.peer, payload: d }); }
     close() { this.open = false; bc.postMessage({ type: "close", connId: this.connId, to: this.peer }); this._emit("close"); } }
   window.Peer = class extends Emissor {
-    constructor(id) { super(); this.id = typeof id === "string" ? id : "anon-" + Math.random().toString(36).slice(2); peers[this.id] = this; setTimeout(() => this._emit("open", this.id), 20); }
+    constructor(id) {
+      super(); this.id = typeof id === "string" ? id : "anon-" + Math.random().toString(36).slice(2);
+      if (typeof id !== "string") { peers[this.id] = this; setTimeout(() => this._emit("open", this.id), 20); return; }
+      // como no servidor de verdade: um id que já está em uso devolve "unavailable-id"
+      const eu = "chk-" + Math.random().toString(36).slice(2); let ocupado = false;
+      peers[eu] = { _waiting: who => { if (who === id) ocupado = true; } };
+      bc.postMessage({ type: "exists?", id, asker: eu });
+      setTimeout(() => { delete peers[eu]; if (ocupado || (peers[id] && peers[id] !== this)) this._emit("error", { type: "unavailable-id" }); else { peers[this.id] = this; this._emit("open", this.id); } }, 80);
+    }
     connect(to) {
       const id = Math.random().toString(36).slice(2), c = new Conn(id, this.id, to); conns[id + this.id] = c;
       let achou = false; this._waiting = who => { if (who === to) achou = true; };

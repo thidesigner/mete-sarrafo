@@ -2363,17 +2363,22 @@ TELAS_COM_MUSICA.push("salaHost", "esperando", "entrar", "criandoSala");
 
 /* ---------- Anfitrião: criar sala ---------- */
 function usarSalaFixa() { return G.salaFixa ?? (perfil().toLowerCase() === "andre"); }
-function criarSala(fixa = usarSalaFixa()) {
+/* auto: nome de quem chegou pelo QR e achou a sala fechada; essa pessoa abre a sala */
+function criarSala(fixa = usarSalaFixa(), auto = null) {
   if (typeof Peer === "undefined") { toast("A conexão online não carregou. Confira a internet."); return; }
   if (ON.peer) { try { ON.peer.destroy(); } catch {} }
   ON.host = true; ON.on = false; ON.code = fixa ? SALA_DO_ANDRE : gerarCodigo(); ON.sala = [];
   const peer = new Peer(PREFIXO + ON.code, { debug: 0 });
   ON.peer = peer;
   ir("criandoSala");
-  peer.on("open", () => { if (G.tela === "criandoSala") ir("salaHost"); });
+  peer.on("open", () => {
+    if (G.tela === "criandoSala") ir("salaHost");
+    if (auto) toast("A sala estava fechada, então você abriu! Chame a turma e toque em Começar.");
+  });
   peer.on("error", e => {
+    if (e.type === "unavailable-id" && auto) { entrarSala(ON.code, auto, true); return; }   // alguém abriu ao mesmo tempo
     if (e.type === "unavailable-id") {
-      if (fixa) toast("A Sala do Andre já está aberta em outro aparelho ou aba. Abri uma sala com outro código.");
+      if (fixa) { toast("A Sala do Andre já está aberta. Entrando nela…"); ON.codeEntrar = SALA_DO_ANDRE; entrarSala(SALA_DO_ANDRE, perfil(), true); return; }
       criarSala(false); return;
     }
     if (e.type === "peer-unavailable") return;
@@ -2854,7 +2859,7 @@ TELAS.esperando = () => `
   <section data-fundo="${fundoAtual()}" class="bgf lobby" aria-label="Esperando começar">
     <div class="lb-top"><button class="lb-pill" data-a="sairSala">← Sair</button><span class="lb-pill">Sala <b style="font-family:var(--display);font-size:20px;margin-left:6px">${esc(ON.codeEntrar || "")}</b></span></div>
     <h1 class="lb-title" style="font-size:38px">Você entrou!</h1>
-    <p class="lb-sub">Esperando ${esc(ON.salaNomes[0] || "o anfitrião")} começar a partida.</p>
+    <p class="lb-sub">Esperando ${esc(ON.salaNomes[0] || "quem abriu a sala")} começar a partida.</p>
     <div class="card" style="background:rgba(11,27,51,.6)">
       <h3>Na sala</h3>
       <div class="chips">${ON.salaNomes.map(n => `<span class="chip">${esc(n)}${n === ON.meuNome ? " (você)" : ""}</span>`).join("")}${ON.robos ? `<span class="chip">+ ${ON.robos} ${ON.robos === 1 ? "robô" : "robôs"}</span>` : ""}</div>
@@ -2875,12 +2880,12 @@ Object.assign(acoes, {
   },
   sairSala() { sairOnline(); },
 });
-function entrarSala(code, nome) {
+function entrarSala(code, nome, naoAbrir = false) {
   if (typeof Peer === "undefined") { toast("A conexão online não carregou. Confira a internet."); return; }
   if (ON.peer) { try { ON.peer.destroy(); } catch {} }
   ON.host = false; ON.conectando = true; render();
   const peer = new Peer({ debug: 0 }); ON.peer = peer;
-  const desiste = setTimeout(() => { if (ON.conectando) { ON.conectando = false; toast("Não consegui entrar. Confira o código e se o Andre está com a sala aberta."); render(); } }, 15000);
+  const desiste = setTimeout(() => { if (ON.conectando) { ON.conectando = false; toast("Não consegui entrar. Confira a internet e tente de novo."); render(); } }, 15000);
   peer.on("open", () => {
     const conn = peer.connect(PREFIXO + code, { reliable: true, serialization: "json" });
     ON.hostConn = conn;
@@ -2890,6 +2895,8 @@ function entrarSala(code, nome) {
   });
   peer.on("error", e => {
     clearTimeout(desiste); ON.conectando = false;
+    // a Sala do Andre está fechada: quem chegou primeiro abre a sala
+    if (e.type === "peer-unavailable" && code === SALA_DO_ANDRE && !naoAbrir) { criarSala(true, nome); return; }
     toast(e.type === "peer-unavailable" ? "Sala não encontrada. Confira o código." : "Problema na conexão: " + e.type);
     if (G.tela === "entrar") render();
   });
