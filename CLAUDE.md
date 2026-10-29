@@ -10,6 +10,15 @@ Este repositório é a fonte única: sessões do Claude Code na nuvem e no deskt
 - As ideias são do Andre: ajude a pensar e a testar, sem trocar a ideia dele pela sua. Antes de mudar uma regra do jogo, confirme.
 - Moedas são só do jogo. Nunca crie compra com dinheiro de verdade.
 
+## Privacidade (o repositório é público)
+
+Qualquer pessoa pode ler tudo o que estiver aqui, inclusive o histórico. Por isso:
+
+- Nunca coloque nome completo, sobrenome, escola, endereço, telefone, e-mail ou fotos do Andre, dos amigos ou da família. Nos textos, use só o primeiro nome ou apelido.
+- Ao salvar sugestões em `sugestoes/`, guarde só o primeiro nome ou apelido de quem sugeriu.
+- Nunca coloque senhas, chaves, tokens ou links privados. Do Formulário Google, use só o link de **responder** (nunca o de editar o formulário nem o da planilha).
+- Se algo assim já tiver sido enviado, avise o pai: apagar o arquivo não basta, porque continua no histórico.
+
 ## Estrutura
 
 | Caminho | O que é |
