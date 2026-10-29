@@ -32,6 +32,7 @@ Qualquer pessoa pode ler tudo o que estiver aqui, inclusive o histórico. Por is
 | `ferramentas/teste/` | Teste automático do modo online (dois navegadores com conexão imitada) |
 | `ideias/` | Regras combinadas e dúvidas em aberto de cada jogo |
 | `sugestoes/` | Sugestões dos amigos (coladas ou lidas do formulário) |
+| `materiais/` | Coisas para imprimir, como o convite com o QR code da Sala do Andre |
 
 ## Fluxo de trabalho
 
@@ -46,6 +47,10 @@ Sites (GitHub Pages, branch `main`, pasta raiz):
 - Oficial: https://thidesigner.github.io/mete-sarrafo/
 - Teste: https://thidesigner.github.io/mete-sarrafo/teste/
 
+## Sala do Andre
+
+O modo online tem uma sala de código fixo, `ANDREK7Q` (`SALA_DO_ANDRE` em `fonte/online.js`). O QR do convite impresso (`materiais/convite-sala-do-andre.pdf`) aponta para `teste/?sala=ANDREK7Q`. Não troque esse código sem refazer o convite. No celular com o perfil "Andre", criar sala usa esse código automaticamente.
+
 ## Testes
 
 - Sintaxe: extraia os `<script>` de `teste/index.html` e rode `node --check`.
@@ -54,10 +59,12 @@ Sites (GitHub Pages, branch `main`, pasta raiz):
 
 ## Artefatos no Claude (só abrem em sessões do claude.ai com a conta do pai)
 
-- Caderno de ideias: https://claude.ai/artifact/DYkdMsKkZuaB1Q1ypu3EPc
-  Banco `ideias` (fichas com etapas, chat com o Claude e diário) e `simulacoes/mete-sarrafo` (ajustes da simulação).
-- Modo Festa (jogo dentro do Claude, sem modo online): https://claude.ai/artifact/HScxqjvd7pwdFzZHTsxmms
-  Banco `sugestoes`, `partidas` e `placar/moedas`. Publicado a partir de `fonte/jogo.html`.
+Os endereços não ficam no repositório. Ache cada um pelo nome na lista de artefatos da conta.
+
+- **Ideias do Jogo do Andre** (caderno de ideias): banco `ideias` (fichas com etapas, chat com o Claude e diário) e `simulacoes/mete-sarrafo` (ajustes da simulação). Código em `fonte/caderno-de-ideias.html`.
+- **Mete Sarrafo: Modo Festa** (jogo dentro do Claude, sem modo online): banco `sugestoes`, `partidas` e `placar/moedas`. Publicado a partir de `fonte/jogo.html`.
+
+Nos arquivos de `fonte/`, o endereço do Modo Festa aparece como `https://claude.ai/artifact/PENDENTE`. Ao publicar um desses artefatos, troque só na cópia publicada, sem gravar o endereço aqui.
 
 ## Pendências
 

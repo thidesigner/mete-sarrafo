@@ -2352,6 +2352,7 @@ if (G.tela === "lobby") render();
 const ON = { on: false, host: false, peer: null, code: "", sala: [], robos: 2, fp: true, timer: null, hostConn: null, myIdx: 0,
   meuNome: "", salaNomes: [], pedido: null, esperaTxt: "", actKey: "", fimVisto: false, movT: 0, movUlt: "", conectando: false };
 const PREFIXO = "metesarrafo-v1-";
+const SALA_DO_ANDRE = "ANDREK7Q";   // código fixo: é o que está no QR impresso (materiais/)
 const onHost = () => ON.on && ON.host;
 const onCli = () => ON.on && !ON.host;
 function gerarCodigo() { const L = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; let c = ""; for (let i = 0; i < 4; i++) c += L[Math.floor(Math.random() * L.length)]; return c; }
@@ -2361,16 +2362,20 @@ function agir(msg) { if (onHost()) entrada(A.P[ON.myIdx], msg); else if (ON.host
 TELAS_COM_MUSICA.push("salaHost", "esperando", "entrar", "criandoSala");
 
 /* ---------- Anfitrião: criar sala ---------- */
-function criarSala() {
+function usarSalaFixa() { return G.salaFixa ?? (perfil().toLowerCase() === "andre"); }
+function criarSala(fixa = usarSalaFixa()) {
   if (typeof Peer === "undefined") { toast("A conexão online não carregou. Confira a internet."); return; }
   if (ON.peer) { try { ON.peer.destroy(); } catch {} }
-  ON.host = true; ON.on = false; ON.code = gerarCodigo(); ON.sala = [];
+  ON.host = true; ON.on = false; ON.code = fixa ? SALA_DO_ANDRE : gerarCodigo(); ON.sala = [];
   const peer = new Peer(PREFIXO + ON.code, { debug: 0 });
   ON.peer = peer;
   ir("criandoSala");
   peer.on("open", () => { if (G.tela === "criandoSala") ir("salaHost"); });
   peer.on("error", e => {
-    if (e.type === "unavailable-id") { criarSala(); return; }
+    if (e.type === "unavailable-id") {
+      if (fixa) toast("A Sala do Andre já está aberta em outro aparelho ou aba. Abri uma sala com outro código.");
+      criarSala(false); return;
+    }
     if (e.type === "peer-unavailable") return;
     toast("Problema na conexão: " + e.type);
     if (G.tela === "criandoSala") ir("lobby");
@@ -2400,6 +2405,7 @@ TELAS.salaHost = () => {
     <div class="lb-top"><button class="lb-pill" data-a="encerrarSala">← Fechar sala</button><span class="lb-pill">Sala <b style="font-family:var(--display);font-size:20px;margin-left:6px">${esc(ON.code)}</b></span></div>
     <h1 class="lb-title" style="font-size:38px">Chame os amigos</h1>
     <p class="lb-sub">Eles escaneiam o QR code ou abrem o link no celular deles. Ninguém precisa de conta.</p>
+    ${ON.sala.length ? "" : `<button class="lb-cont" data-a="trocarSala">${ON.code === SALA_DO_ANDRE ? "Usar um código sorteado" : "Usar a Sala do Andre (QR impresso)"}</button>`}
     <div class="qr" id="qr-sala" role="img" aria-label="QR code da sala"></div>
     <div class="url" style="color:#fff">${esc(linkSala(ON.code))}</div>
     <div class="card" style="background:rgba(11,27,51,.6)">
@@ -2419,6 +2425,7 @@ TELAS.salaHost = () => {
 };
 Object.assign(acoes, {
   encerrarSala() { encerrarOnline(); },
+  trocarSala() { const fixa = ON.code !== SALA_DO_ANDRE; G.salaFixa = fixa; salvar(); criarSala(fixa); },
   robosMenos() { ON.robos = Math.max(0, ON.robos - 1); enviarSala(); render(); },
   robosMais() { if (1 + ON.sala.length + ON.robos < 20) ON.robos++; enviarSala(); render(); },
   visaoFp() { guardarDigitado(); ON.fp = true; G.visaoOnline = true; salvar(); render(); },
@@ -2826,7 +2833,7 @@ function encerrarOnline() {
 function sairOnline() { limparOnline(); }
 
 /* ---------- Amigo: entrar numa sala ---------- */
-const codigoUrl = (new URLSearchParams(location.search).get("sala") || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4);
+const codigoUrl = (new URLSearchParams(location.search).get("sala") || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8);
 if (codigoUrl) { ON.codeEntrar = codigoUrl; G.tela = "entrar"; }
 TELAS.entrar = () => `
   <section data-fundo="${fundoAtual()}" class="bgf lobby" aria-label="Entrar na sala">
@@ -2835,7 +2842,7 @@ TELAS.entrar = () => `
     <form class="card" data-a="entrarSala" autocomplete="off" style="background:rgba(11,27,51,.6)">
       <label for="en-nome">Seu nome</label>
       <input id="en-nome" maxlength="20" value="${esc(ON.nomeDigitado ?? G.perfil ?? "")}" placeholder="Como te chamam?" required>
-      ${ON.codeEntrar ? "" : `<label for="en-code">Código da sala</label><input id="en-code" maxlength="4" autocapitalize="characters" placeholder="Ex.: K7QM" value="${esc(ON.codeDigitado || "")}">`}
+      ${ON.codeEntrar ? "" : `<label for="en-code">Código da sala</label><input id="en-code" maxlength="8" autocapitalize="characters" placeholder="Ex.: K7QM" value="${esc(ON.codeDigitado || "")}">`}
       <label>Visão</label>
       <span class="seg2" role="group" aria-label="Visão do jogo" style="align-self:flex-start">
         <button type="button" data-a="visaoFp" aria-pressed="${G.visaoOnline !== false}">1ª pessoa</button><button type="button" data-a="visaoCima" aria-pressed="${G.visaoOnline === false}">De cima</button>
@@ -2861,8 +2868,8 @@ Object.assign(acoes, {
   entrarSala() {
     const nome = $("en-nome").value.replace(/\s+/g, " ").trim().slice(0, 20);
     if (!nome) { toast("Escreva seu nome"); return; }
-    const code = ON.codeEntrar || ($("en-code") ? $("en-code").value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4) : "");
-    if (code.length !== 4) { toast("O código da sala tem 4 letras"); return; }
+    const code = ON.codeEntrar || ($("en-code") ? $("en-code").value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8) : "");
+    if (code.length < 4) { toast("Confira o código da sala"); return; }
     G.perfil = nome; salvar(); ON.codeEntrar = code;
     entrarSala(code, nome);
   },
@@ -2983,6 +2990,13 @@ function voltarEsperando() {
 MODOS.online = "Online · cada um no seu celular";
 const _jogar = acoes.jogar;
 acoes.jogar = () => { if ((G.modo || "fp") === "online") { criarSala(); return; } _jogar(); };
+const _telaLobby = TELAS.lobby;
+TELAS.lobby = () => {
+  const h = _telaLobby();
+  if ((G.modo || "fp") !== "online") return h;
+  return h.replace('<div class="lb-bottom">', '<button class="lb-cont" data-a="irEntrar">Entrar na sala de um amigo</button>\n    <div class="lb-bottom">');
+};
+acoes.irEntrar = () => { ON.codeEntrar = ""; ir("entrar"); };
 ON.fp = G.visaoOnline !== false;
 
 if (codigoUrl) render();
