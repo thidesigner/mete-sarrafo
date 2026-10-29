@@ -1304,7 +1304,7 @@ const aCv = $("a-canvas"), aCtx = aCv.getContext("2d");
 function desenharA() {
   const w = aCv.clientWidth; if (!w) return;
   const dpr = window.devicePixelRatio || 1, px = Math.round(w * dpr);
-  if (aCv.width !== px) { aCv.width = px; aCv.height = px; }
+  if (aCv.width !== px || aCv.height !== px) { aCv.width = px; aCv.height = px; }
   const c = aCtx, k = px / AW;
   c.setTransform(k, 0, 0, k, 0, 0);
   c.fillStyle = "#0f3057"; c.fillRect(0, 0, AW, AW);
@@ -2003,7 +2003,7 @@ function animarLobby() {
     lbT = ts / 1000;
     const w = cv.clientWidth, dpr = window.devicePixelRatio || 1, px = Math.round(w * dpr);
     if (!w) { lbRaf = requestAnimationFrame(quadro); return; }
-    if (cv.width !== px) { cv.width = px; cv.height = px; }
+    if (cv.width !== px || cv.height !== px) { cv.width = px; cv.height = px; }
     const c = cv.getContext("2d");
     c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, px, px);
     const k = px / 200;
@@ -2998,7 +2998,7 @@ TELAS.lobby = () => {
 acoes.irEntrar = () => { ON.codeEntrar = ""; ir("entrar"); };
 ON.fp = G.visaoOnline !== false;
 
-if (codigoUrl) render();
+render();
 </script>
 </body>
 </html>

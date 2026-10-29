@@ -27,7 +27,7 @@ def montar_teste():
     s = rep(s, '<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>',
             '<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>\n'
             '<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>')
-    s = s.rstrip() + "\n\n<script>\n" + online + "\nif (codigoUrl) render();\n</script>\n"
+    s = s.rstrip() + "\n\n<script>\n" + online + "\nrender();\n</script>\n"
     i = s.index('<div class="app"')
     head, body = s[:i], s[i:]
     reset = (":root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}"

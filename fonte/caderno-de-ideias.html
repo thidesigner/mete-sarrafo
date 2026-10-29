@@ -1238,7 +1238,7 @@ function desenhar() {
   const S = sim.S; if (!S) return;
   const w = cv.clientWidth; if (!w) return;
   const dpr = window.devicePixelRatio || 1, px = Math.round(w * dpr);
-  if (cv.width !== px) { cv.width = px; cv.height = px; }
+  if (cv.width !== px || cv.height !== px) { cv.width = px; cv.height = px; }
   const k = px / ARENA;
   ctx.setTransform(k, 0, 0, k, 0, 0);
   const ink = cor("--ink"), muted = cor("--muted"), line = cor("--line"), accent = cor("--accent"), card = cor("--card"), paper = cor("--paper"), bola = cor("--s-teste"), danger = cor("--s-off");
