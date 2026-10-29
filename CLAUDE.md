@@ -1,0 +1,56 @@
+# Jogos do Andre
+
+Ambiente onde o Andre (uma criança) cria e testa jogos com a ajuda do pai e do Claude.
+O primeiro jogo é o **Mete Sarrafo**: forca misturada com queimada.
+Este repositório é a fonte única: sessões do Claude Code na nuvem e no desktop trabalham aqui.
+
+## Como conversar
+
+- Responda em português do Brasil, com linguagem simples. Quem pede pode ser o Andre ou o pai.
+- As ideias são do Andre: ajude a pensar e a testar, sem trocar a ideia dele pela sua. Antes de mudar uma regra do jogo, confirme.
+- Moedas são só do jogo. Nunca crie compra com dinheiro de verdade.
+
+## Estrutura
+
+| Caminho | O que é |
+|---|---|
+| `index.html` | **Versão oficial**, a que os amigos jogam (gerada, não edite à mão) |
+| `teste/index.html` | **Versão de teste**, com a faixa "VERSÃO DE TESTE" (gerada) |
+| `fonte/jogo.html` | Código do jogo (mesma página do artefato "Mete Sarrafo: Modo Festa" no Claude) |
+| `fonte/online.js` | Modo online: cada um no seu celular, via PeerJS (só no site, não funciona dentro do Claude) |
+| `fonte/caderno-de-ideias.html` | Código do artefato "Ideias do Jogo do Andre" (caderno + simulação) |
+| `ferramentas/montar.py` | Gera a versão de teste e promove para a oficial |
+| `ferramentas/teste/` | Teste automático do modo online (dois navegadores com conexão imitada) |
+| `ideias/` | Regras combinadas e dúvidas em aberto de cada jogo |
+| `sugestoes/` | Sugestões dos amigos (coladas ou lidas do formulário) |
+
+## Fluxo de trabalho
+
+1. Comece com `git pull` (o desktop e a nuvem mexem no mesmo repositório).
+2. Edite `fonte/jogo.html` e/ou `fonte/online.js`.
+3. `python3 ferramentas/montar.py` gera `teste/index.html`.
+4. Teste (abaixo), faça commit e push. Em ~1 minuto a versão de teste está no ar.
+5. Só promova para a oficial quando o pai ou o Andre pedirem: `python3 ferramentas/montar.py --oficial`, commit e push.
+6. Ao terminar, registre em `ideias/` o que mudou nas regras.
+
+Sites (GitHub Pages, branch `main`, pasta raiz):
+- Oficial: https://thidesigner.github.io/mete-sarrafo/
+- Teste: https://thidesigner.github.io/mete-sarrafo/teste/
+
+## Testes
+
+- Sintaxe: extraia os `<script>` de `teste/index.html` e rode `node --check`.
+- Partida online de ponta a ponta: `ferramentas/teste/teste-online.js` (Playwright). Ele serve a raiz do repositório em `localhost:8765`, troca o PeerJS pela imitação `mockpeer.js` e precisa do three.js em `ferramentas/teste/vendor/three.min.js` (fora do git; baixe com `npm pack three@0.128.0` e copie `package/build/three.min.js`).
+- Em nuvens com rede restrita, `cdnjs` pode estar bloqueado: o teste já substitui o que precisa.
+
+## Artefatos no Claude (só abrem em sessões do claude.ai com a conta do pai)
+
+- Caderno de ideias: https://claude.ai/artifact/DYkdMsKkZuaB1Q1ypu3EPc
+  Banco `ideias` (fichas com etapas, chat com o Claude e diário) e `simulacoes/mete-sarrafo` (ajustes da simulação).
+- Modo Festa (jogo dentro do Claude, sem modo online): https://claude.ai/artifact/HScxqjvd7pwdFzZHTsxmms
+  Banco `sugestoes`, `partidas` e `placar/moedas`. Publicado a partir de `fonte/jogo.html`.
+
+## Pendências
+
+- Formulário Google para as sugestões do site chegarem numa planilha do Drive (o pai vai criar; depois ligar em `fonte/online.js` e no fim de partida).
+- Dúvidas de regra em aberto: veja `ideias/mete-sarrafo.md`.

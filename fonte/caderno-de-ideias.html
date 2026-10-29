@@ -1,0 +1,1486 @@
+<title>Ideias do Jogo do Andre</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: caderno quadriculado de game design. Fichas em grade; tocar numa ficha abre a trilha de 5 etapas + diário. */
+:root {
+  --paper: #f3f5fa;
+  --grid: #dfe4f0;
+  --card: #ffffff;
+  --ink: #1b2033;
+  --muted: #5d6680;
+  --line: #cfd5e4;
+  --accent: #2f4fe0;
+  --accent-soft: #e4e9ff;
+  --accent-ink: #ffffff;
+  --tape: #ffe27a;
+  --s-solta: #8a93ad;
+  --s-teste: #d98a00;
+  --s-ok: #1d9a5b;
+  --s-off: #b0435a;
+  --scrim: rgba(18, 21, 34, .45);
+  --display: "Chakra Petch", "Trebuchet MS", sans-serif;
+  --body: "Nunito Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #121522; --grid: #1c2134; --card: #1a1f31; --ink: #e8ebf5; --muted: #9aa3bd;
+    --line: #2c3350; --accent: #7d93ff; --accent-soft: #232b4d; --accent-ink: #0f1220; --tape: #6b5a1a;
+    --s-solta: #9aa3bd; --s-teste: #f0a92c; --s-ok: #3fc483; --s-off: #e2708a; --scrim: rgba(0,0,0,.6);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #121522; --grid: #1c2134; --card: #1a1f31; --ink: #e8ebf5; --muted: #9aa3bd;
+  --line: #2c3350; --accent: #7d93ff; --accent-soft: #232b4d; --accent-ink: #0f1220; --tape: #6b5a1a;
+  --s-solta: #9aa3bd; --s-teste: #f0a92c; --s-ok: #3fc483; --s-off: #e2708a; --scrim: rgba(0,0,0,.6);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 64px;
+}
+body.locked { overflow: hidden; }
+.wrap { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+header { display: flex; flex-direction: column; gap: 6px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(30px, 7vw, 46px); line-height: 1.05; margin: 0; text-wrap: balance; }
+h1 span { background: var(--tape); padding: 0 .15em; }
+.lead { color: var(--muted); margin: 4px 0 0; max-width: 62ch; }
+
+.how { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.how div { background: var(--card); border: 1px solid var(--line); border-radius: 4px; padding: 10px 12px; font-size: 14px; color: var(--muted); min-width: 0; }
+.how b { display: block; font-family: var(--display); color: var(--ink); font-size: 15px; }
+
+form.new {
+  background: var(--card); border: 1.5px solid var(--ink); border-radius: 6px;
+  box-shadow: 5px 5px 0 var(--accent);
+  padding: 20px; display: grid; gap: 14px;
+  grid-template-columns: 1fr 1fr;
+}
+form.new h2 { grid-column: 1 / -1; margin: 0; font-family: var(--display); font-size: 20px; }
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.field.full { grid-column: 1 / -1; }
+label, .lbl-txt { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+input, textarea, select {
+  font: inherit; font-size: 16px; color: var(--ink); background: var(--paper);
+  border: 1.5px solid var(--line); border-radius: 4px; padding: 10px 12px; width: 100%;
+}
+textarea { min-height: 88px; resize: vertical; }
+input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible, .idea:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px; border-color: var(--accent);
+}
+.actions { grid-column: 1 / -1; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+button { font: inherit; cursor: pointer; }
+.btn {
+  font-family: var(--display); font-weight: 700; font-size: 16px; letter-spacing: .02em;
+  background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 4px; padding: 11px 18px;
+}
+.btn.ghost { background: transparent; color: var(--accent); border: 1.5px solid var(--accent); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.msg { color: var(--muted); font-size: 13px; }
+
+.toolbar { display: flex; flex-direction: column; gap: 10px; }
+.chips { display: flex; gap: 8px; align-items: center; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.chips::-webkit-scrollbar { display: none; }
+.chips .lbl { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-right: 4px; flex: none; }
+.chip {
+  flex: none; font-size: 14px; font-weight: 600; padding: 6px 13px; border-radius: 999px;
+  border: 1.5px solid var(--line); background: var(--card); color: var(--ink);
+}
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.count { font-family: var(--mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+.idea {
+  background: var(--card); border: 1px solid var(--line); border-radius: 4px; text-align: left; color: var(--ink);
+  padding: 18px 18px 14px; display: flex; flex-direction: column; gap: 10px; position: relative; min-width: 0; width: 100%;
+}
+.idea::before {
+  content: ""; position: absolute; top: -9px; left: 50%; width: 64px; height: 18px; margin-left: -32px;
+  background: var(--tape); opacity: .85; transform: rotate(-2deg);
+}
+.top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.cat { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); }
+.num { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.idea h3 { margin: 0; font-family: var(--display); font-size: 20px; line-height: 1.2; overflow-wrap: anywhere; }
+.idea p { margin: 0; color: var(--ink); overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.meta { font-size: 13px; color: var(--muted); }
+.track { display: flex; flex-direction: column; gap: 6px; }
+.bars { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+.bars i { height: 6px; border-radius: 2px; background: var(--line); }
+.bars i.on { background: var(--accent); }
+.track small { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; border-top: 1px dashed var(--line); padding-top: 10px; margin-top: auto; }
+.stat { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--s-solta); flex: none; }
+.dot[data-s="teste"] { background: var(--s-teste); }
+.dot[data-s="aprovada"] { background: var(--s-ok); }
+.dot[data-s="descartada"] { background: var(--s-off); }
+.open-hint { font-family: var(--display); font-weight: 700; font-size: 14px; color: var(--accent); }
+.idea[data-s="descartada"] h3, .idea[data-s="descartada"] p { opacity: .55; text-decoration: line-through; text-decoration-thickness: 1px; }
+.empty {
+  border: 2px dashed var(--line); border-radius: 6px; padding: 32px 20px; text-align: center; color: var(--muted);
+  background: var(--card);
+}
+.empty strong { display: block; font-family: var(--display); font-size: 20px; color: var(--ink); margin-bottom: 4px; }
+.notice { background: var(--card); border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px; color: var(--muted); font-size: 14px; }
+
+/* Painel da ideia */
+.scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 20; }
+.sheet {
+  position: fixed; z-index: 21; inset: 0 0 0 auto; width: min(640px, 100%);
+  background: var(--paper); border-left: 1.5px solid var(--ink);
+  display: flex; flex-direction: column;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.sheet-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px max(16px, env(safe-area-inset-right, 0px)) 12px 16px;
+  background: var(--card); border-bottom: 1px solid var(--line);
+}
+.sheet-head .back { background: none; border: 0; color: var(--accent); font-family: var(--display); font-weight: 700; font-size: 16px; padding: 6px 4px; }
+.saved { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.sheet-body {
+  overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 22px;
+  padding: 20px max(16px, env(safe-area-inset-right, 0px)) calc(40px + env(safe-area-inset-bottom, 0px)) 16px;
+}
+.sheet h2 { margin: 0; font-family: var(--display); font-size: 26px; line-height: 1.15; overflow-wrap: anywhere; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.section-title { font-family: var(--display); font-size: 18px; margin: 0; display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.section-title small { font-family: var(--mono); font-size: 11px; color: var(--muted); font-weight: 500; }
+
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; }
+.step { display: grid; grid-template-columns: 34px 1fr; gap: 12px; position: relative; padding-bottom: 18px; }
+.step:not(:last-child)::after { content: ""; position: absolute; left: 16px; top: 34px; bottom: 0; width: 2px; background: var(--line); }
+.step.done:not(:last-child)::after { background: var(--accent); }
+.badge {
+  width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+  font-family: var(--display); font-weight: 700; font-size: 15px;
+  border: 2px solid var(--line); background: var(--card); color: var(--muted); position: relative; z-index: 1;
+}
+.step.done .badge { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.step.current .badge { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.step-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.step-body h4 { margin: 4px 0 0; font-family: var(--display); font-size: 17px; }
+.step-body .hint { margin: 0; font-size: 14px; color: var(--muted); }
+.step.current .step-body { background: var(--card); border: 1.5px solid var(--accent); border-radius: 6px; padding: 10px 12px 12px; margin-top: -4px; }
+.now-tag { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+
+.helper { background: var(--card); border: 1.5px dashed var(--accent); border-radius: 6px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.helper p { margin: 0; font-size: 14px; color: var(--muted); }
+.helper .actions { grid-column: auto; }
+.chat { display: flex; flex-direction: column; gap: 10px; max-height: 60vh; overflow-y: auto; }
+.chat:empty { display: none; }
+.bubble { max-width: 88%; padding: 10px 12px; border-radius: 12px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 15px; display: flex; flex-direction: column; gap: 6px; }
+.bubble.user { align-self: flex-end; background: var(--accent); color: var(--accent-ink); border-bottom-right-radius: 3px; }
+.bubble.assistant { align-self: flex-start; background: var(--paper); color: var(--ink); border: 1px solid var(--line); border-bottom-left-radius: 3px; }
+.bubble .keep { align-self: flex-start; background: none; border: 0; padding: 0; color: var(--accent); font-size: 13px; font-weight: 700; text-decoration: underline; }
+.quick { display: flex; gap: 8px; flex-wrap: wrap; }
+.quick button { font-size: 14px; padding: 6px 12px; border-radius: 999px; border: 1.5px solid var(--accent); background: var(--card); color: var(--accent); font-weight: 600; }
+.chat-form { display: flex; flex-direction: column; gap: 8px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.diary { display: flex; flex-direction: column; gap: 10px; }
+.entry { background: var(--card); border: 1px solid var(--line); border-radius: 4px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
+.entry time { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.entry div { white-space: pre-wrap; overflow-wrap: anywhere; }
+.entry.claude { border-color: var(--accent); }
+.entry .who { font-family: var(--mono); font-size: 11px; color: var(--accent); }
+.add-entry { display: flex; flex-direction: column; gap: 8px; }
+.link { background: none; border: 0; color: var(--muted); font-size: 14px; text-decoration: underline; padding: 6px 0; align-self: flex-start; }
+.link.danger { color: var(--s-off); }
+.danger-zone { border-top: 1px dashed var(--line); padding-top: 14px; }
+
+/* Abas */
+.tabs { display: flex; gap: 6px; border-bottom: 1.5px solid var(--ink); }
+.tab {
+  font-family: var(--display); font-weight: 700; font-size: 16px; text-decoration: none; color: var(--muted);
+  padding: 10px 14px; border: 1.5px solid transparent; border-bottom: 0; border-radius: 6px 6px 0 0; margin-bottom: -1.5px;
+}
+.tab[aria-current="page"] { color: var(--ink); background: var(--card); border-color: var(--ink); }
+.view { display: flex; flex-direction: column; gap: 24px; }
+
+/* Simulação */
+.sim h2 { font-family: var(--display); font-size: 26px; margin: 0; }
+.sim h3 { font-family: var(--display); font-size: 18px; margin: 0; }
+.sim-intro p { margin: 6px 0 0; color: var(--muted); max-width: 62ch; }
+.sim-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+.sim-controls .field { min-width: 180px; flex: 1 1 180px; }
+.sim-controls input[type="range"] { padding: 0; accent-color: var(--accent); background: none; border: 0; }
+.seg { display: inline-flex; border: 1.5px solid var(--line); border-radius: 4px; overflow: hidden; }
+.seg button { border: 0; background: var(--card); color: var(--ink); padding: 10px 12px; font-weight: 700; font-family: var(--mono); font-size: 13px; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.sim-main { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.stage { background: var(--card); border: 1.5px solid var(--ink); border-radius: 6px; overflow: hidden; min-width: 0; }
+.hud { padding: 12px 14px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 4px; }
+.hud-top { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.hud-top b { color: var(--accent); font-weight: 500; }
+.word { font-family: var(--display); font-weight: 700; font-size: clamp(20px, 4.5vw, 28px); letter-spacing: .08em; overflow-wrap: anywhere; }
+.hud-sub { font-size: 14px; color: var(--muted); }
+canvas#s-canvas { display: block; width: 100%; aspect-ratio: 1; max-width: 100%; }
+.side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.score-wrap { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: 4px; max-height: 340px; overflow-y: auto; }
+table.score { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+table.score th { text-align: left; font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--card); }
+table.score td { padding: 6px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+table.score td.num { text-align: right; }
+table.score tr.out td { opacity: .45; }
+.pdot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+.role { font-family: var(--mono); font-size: 10px; color: var(--accent); margin-left: 6px; text-transform: uppercase; }
+.hearts { color: var(--s-off); letter-spacing: 1px; }
+ol.log { list-style: none; margin: 0; padding: 0; background: var(--card); border: 1px solid var(--line); border-radius: 4px; max-height: 260px; overflow-y: auto; font-size: 14px; }
+ol.log li { padding: 6px 10px; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 42px 1fr; gap: 8px; }
+ol.log time { font-family: var(--mono); font-size: 11px; color: var(--muted); padding-top: 2px; }
+ol.log li.big { font-weight: 700; }
+
+.panel { background: var(--card); border: 1.5px solid var(--ink); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.panel-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.panel-head p { margin: 4px 0 0; font-size: 14px; color: var(--muted); }
+.knobs { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.knob { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.knob .row { display: flex; align-items: center; gap: 6px; }
+.knob input { padding: 8px 10px; }
+.knob .unit { font-family: var(--mono); font-size: 12px; color: var(--muted); flex: none; }
+.knob.changed input { border-color: var(--s-teste); }
+.knob small { font-size: 12px; color: var(--muted); }
+.toggles { display: flex; gap: 18px; flex-wrap: wrap; }
+.toggles label { display: inline-flex; gap: 8px; align-items: center; font-family: var(--body); font-size: 15px; text-transform: none; letter-spacing: 0; color: var(--ink); }
+.toggles input { width: 18px; height: 18px; accent-color: var(--accent); }
+.batch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.kpi { background: var(--paper); border-radius: 4px; padding: 10px 12px; min-width: 0; }
+.kpi b { display: block; font-family: var(--display); font-size: 22px; font-variant-numeric: tabular-nums; }
+.kpi span { font-size: 12px; color: var(--muted); }
+.reading { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+.hist-wrap { overflow-x: auto; }
+table.hist { border-collapse: collapse; font-size: 13px; width: 100%; font-variant-numeric: tabular-nums; }
+table.hist th, table.hist td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+table.hist th { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+details.rules { background: var(--card); border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px; }
+details.rules summary { cursor: pointer; font-family: var(--display); font-weight: 700; }
+details.rules ul { margin: 10px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+
+@media (max-width: 760px) {
+  .sim-main { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  form.new { grid-template-columns: 1fr; box-shadow: 3px 3px 0 var(--accent); }
+  .how { grid-template-columns: 1fr; }
+  .sheet { border-left: 0; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .idea { transition: transform .15s ease; }
+  .idea:hover { transform: rotate(-.4deg) translateY(-2px); }
+  .sheet { animation: slide .2s ease-out; }
+  @keyframes slide { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Caderno de game design · fase de testes</div>
+    <h1>Ideias do <span>Jogo do Andre</span></h1>
+    <p class="lead">Cada ideia vira uma ficha. Toque numa ficha para levar a ideia adiante, uma etapa de cada vez.</p>
+  </header>
+
+  <nav class="tabs" aria-label="Seções">
+    <a class="tab" id="tab-ideias" href="#ideias">Ideias</a>
+    <a class="tab" id="tab-sim" href="#simulacao">Simulação: Mete sarrafo</a>
+  </nav>
+
+  <div class="view" id="view-ideias">
+  <div class="how" aria-label="Como funciona">
+    <div><b>1. Anote</b>Escreva a ideia do jeito que vier, mesmo incompleta.</div>
+    <div><b>2. Evolua</b>Abra a ficha e responda as 5 etapas, na ordem.</div>
+    <div><b>3. Teste</b>Registre no diário o que deu certo e o que mudou.</div>
+  </div>
+
+  <div id="notice" class="notice" hidden></div>
+
+  <form class="new" id="form" autocomplete="off">
+    <h2>Nova ideia</h2>
+    <div class="field full">
+      <label for="f-titulo">Nome da ideia</label>
+      <input id="f-titulo" maxlength="120" required placeholder="Ex.: Pulo duplo que gasta energia">
+    </div>
+    <div class="field">
+      <label for="f-cat">Tipo</label>
+      <select id="f-cat"></select>
+    </div>
+    <div class="field">
+      <label for="f-autor">Quem teve a ideia</label>
+      <input id="f-autor" maxlength="40" value="Andre">
+    </div>
+    <div class="field full">
+      <label for="f-desc">Conte a ideia</label>
+      <textarea id="f-desc" maxlength="4000" placeholder="Do jeito que veio na cabeça. Depois você melhora nas etapas."></textarea>
+    </div>
+    <div class="actions">
+      <button class="btn" id="f-save" type="submit">Salvar ideia</button>
+      <span class="msg" id="f-msg" role="status"></span>
+    </div>
+  </form>
+
+  <section class="toolbar" aria-label="Filtros">
+    <div class="chips" id="chips-cat"><span class="lbl">Tipo</span></div>
+    <div class="chips" id="chips-status"><span class="lbl">Status</span></div>
+    <div class="count" id="count"></div>
+  </section>
+
+  <section class="grid" id="grid" aria-live="polite"></section>
+  <div class="empty" id="empty">
+    <strong>Nenhuma ideia ainda</strong>
+    A primeira ficha aparece aqui assim que alguém salvar uma ideia no formulário acima.
+  </div>
+  </div>
+
+  <section class="view sim" id="view-sim" hidden>
+    <div class="sim-intro">
+      <h2>Simulação do Mete sarrafo</h2>
+      <p>Robôs jogam com as regras que o Andre decidiu. Assista uma partida, mude os números nos ajustes e simule 50 partidas para ver se o jogo fica equilibrado.</p>
+      <p>Para jogar de verdade com os amigos, use o <a href="https://claude.ai/artifact/HScxqjvd7pwdFzZHTsxmms" target="_blank" rel="noopener" style="color:var(--accent);font-weight:700">Modo Festa</a>: um celular vira o juiz da partida.</p>
+    </div>
+
+    <div class="sim-controls">
+      <div class="field">
+        <label for="s-n">Jogadores: <b id="s-n-val">6</b></label>
+        <input type="range" id="s-n" min="3" max="20" value="6">
+      </div>
+      <div class="seg" role="group" aria-label="Velocidade" id="s-speed">
+        <button type="button" data-v="1" aria-pressed="true">1x</button>
+        <button type="button" data-v="2" aria-pressed="false">2x</button>
+        <button type="button" data-v="4" aria-pressed="false">4x</button>
+        <button type="button" data-v="10" aria-pressed="false">10x</button>
+      </div>
+      <button class="btn" id="s-play" type="button">Pausar</button>
+      <button class="btn ghost" id="s-new" type="button">Nova partida</button>
+    </div>
+
+    <div class="sim-main">
+      <div class="stage">
+        <div class="hud">
+          <div class="hud-top"><b id="s-phase">Pergunta</b><span id="s-clock">0:00</span></div>
+          <div class="word" id="s-word">…</div>
+          <div class="hud-sub" id="s-sub"></div>
+        </div>
+        <canvas id="s-canvas" aria-label="Arena da simulação"></canvas>
+      </div>
+      <div class="side">
+        <h3>Placar</h3>
+        <div class="score-wrap">
+          <table class="score"><thead><tr><th>Jogador</th><th>Vidas</th><th class="num">Moedas</th></tr></thead><tbody id="s-score"></tbody></table>
+        </div>
+        <h3>O que aconteceu</h3>
+        <ol class="log" id="s-log"></ol>
+      </div>
+    </div>
+
+    <section class="panel" id="s-knobs-panel">
+      <div class="panel-head">
+        <div>
+          <h3>Ajustes do jogo</h3>
+          <p id="s-cfg-status">Mude um número e veja o efeito na partida ou no teste de 50 partidas.</p>
+        </div>
+        <div class="actions">
+          <button class="btn" id="s-save" type="button">Salvar ajustes</button>
+          <button class="btn ghost" id="s-reset" type="button">Voltar ao combinado</button>
+        </div>
+      </div>
+      <div class="knobs" id="s-knobs"></div>
+      <div class="toggles">
+        <label><input type="checkbox" id="s-t-voto"> Botão "tá difícil"</label>
+        <label><input type="checkbox" id="s-t-comprar"> Comprar vida extra com moedas</label>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h3>Teste de equilíbrio</h3>
+          <p>Roda 50 partidas seguidas, com as moedas guardadas de uma partida para a outra, e mostra as médias.</p>
+        </div>
+        <button class="btn" id="s-batch" type="button">Simular 50 partidas</button>
+      </div>
+      <div id="s-batch-out"></div>
+      <div class="hist-wrap" id="s-hist-wrap" hidden>
+        <table class="hist"><thead><tr><th>Teste</th><th>Ajustes</th><th>Partida</th><th>Moedas/partida</th><th>Até a vida extra</th></tr></thead><tbody id="s-hist"></tbody></table>
+      </div>
+    </section>
+
+    <details class="rules">
+      <summary>Como os robôs jogam</summary>
+      <ul>
+        <li>Respondem em ordem, começando pelo primeiro à esquerda do perguntador. Quem chuta errado perde a vez.</li>
+        <li>A chance de acertar cresce conforme as letras aparecem. Às vezes um robô deixa o tempo acabar.</li>
+        <li>Se todo mundo errar, aparece mais uma letra. Depois de 2 voltas sem acerto, alguém pode apertar "tá difícil".</li>
+        <li>Quem acerta vai para o meio com a bola. Os outros correm para o lado oposto e voltam para o lugar. O atirador mira em quem está mais perto, e pode errar.</li>
+        <li>Quem está no próprio lugar não pode ser atingido. A rodada acaba quando todo mundo volta, e quem acertou a palavra vira o perguntador.</li>
+        <li>"Sobreviver" conta por rodada de bola: quem não foi atingido ganha as moedas de sobreviver.</li>
+        <li>Quem perde a última vida compra uma vida extra se tiver moedas suficientes (se a opção estiver ligada).</li>
+      </ul>
+    </details>
+  </section>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="d-title">
+  <div class="sheet-head">
+    <button class="back" id="d-close" type="button">← Voltar</button>
+    <span class="saved" id="d-saved" role="status"></span>
+  </div>
+  <div class="sheet-body">
+    <div class="top"><span class="cat" id="d-cat"></span><span class="num" id="d-num"></span></div>
+    <h2 id="d-title"></h2>
+    <div class="row2">
+      <div class="field">
+        <label for="d-status">Status</label>
+        <select id="d-status"></select>
+      </div>
+      <div class="field">
+        <label for="d-tipo">Tipo</label>
+        <select id="d-tipo"></select>
+      </div>
+    </div>
+    <div class="field">
+      <label for="d-desc">Como a ideia começou</label>
+      <textarea id="d-desc" data-key="descricao" maxlength="4000"></textarea>
+    </div>
+
+    <section>
+      <h3 class="section-title">Trilha da ideia <small id="d-prog"></small></h3>
+      <ol class="steps" id="d-steps"></ol>
+    </section>
+
+    <section class="helper" id="helper" hidden>
+      <h3 class="section-title">Conversa com o Claude <small id="c-count"></small></h3>
+      <p>O Claude lê esta ficha inteira. Pergunte, peça ideias ou peça para ele te desafiar. A conversa fica salva aqui.</p>
+      <div class="chat" id="c-list" aria-live="polite"></div>
+      <div class="quick" id="c-quick"></div>
+      <form class="chat-form" id="c-form" autocomplete="off">
+        <label for="c-input" class="sr">Mensagem para o Claude</label>
+        <textarea id="c-input" maxlength="2000" rows="2" placeholder="Escreva para o Claude…"></textarea>
+        <div class="actions">
+          <button class="btn" id="c-send" type="submit">Enviar</button>
+          <button class="btn ghost" id="c-stop" type="button" hidden>Parar</button>
+          <span class="msg" id="c-msg" role="status"></span>
+        </div>
+      </form>
+    </section>
+
+    <section class="diary">
+      <h3 class="section-title">Diário de testes <small id="d-count"></small></h3>
+      <div class="add-entry">
+        <label for="d-entry">Nova anotação</label>
+        <textarea id="d-entry" maxlength="2000" placeholder="Testei assim… aconteceu isso… vou mudar aquilo…"></textarea>
+        <button class="btn" id="d-add" type="button">Anotar</button>
+      </div>
+      <div id="d-list" class="diary"></div>
+    </section>
+
+    <div class="danger-zone">
+      <button class="link danger" id="d-del" type="button">Apagar esta ideia</button>
+    </div>
+  </div>
+</aside>
+
+<script>
+const CATS = ["Mecânica", "Personagem", "Fase / Mundo", "História", "Visual e som", "Outro"];
+const STATUS = [
+  { v: "solta", t: "Ideia solta" },
+  { v: "teste", t: "Testando" },
+  { v: "aprovada", t: "Aprovada" },
+  { v: "descartada", t: "Descartada" },
+];
+const STEPS = [
+  { k: "frase", t: "A ideia em uma frase", h: "Como você explicaria em 10 segundos para um amigo?" },
+  { k: "jogador", t: "O que o jogador faz", h: "Qual é o objetivo? Que botões ou ações ele usa? Como ganha e como perde?" },
+  { k: "diversao", t: "Por que é divertido", h: "Qual é o desafio? O que faz querer jogar de novo?" },
+  { k: "teste", t: "Teste rápido", h: "Teste no papel, desenhando, com dados ou explicando para alguém. O que aconteceu?" },
+  { k: "decisao", t: "Decisão e próximo passo", h: "Depois do teste: a ideia fica, muda ou sai? O que fazer agora?" },
+];
+const statusText = v => (STATUS.find(s => s.v === v) || STATUS[0]).t;
+const filled = d => STEPS.filter(s => ((d.etapas || {})[s.k] || "").trim()).length;
+const currentStep = d => { const i = STEPS.findIndex(s => !((d.etapas || {})[s.k] || "").trim()); return i === -1 ? STEPS.length : i; };
+
+const $ = id => document.getElementById(id);
+const state = { ideas: [], cat: "todos", status: "todos", canWrite: true, openId: null };
+let col = null, sampleFn = null;
+
+function fillSelect(sel, opts) {
+  sel.innerHTML = "";
+  for (const o of opts) { const op = document.createElement("option"); op.value = o.v; op.textContent = o.t; sel.appendChild(op); }
+}
+fillSelect($("f-cat"), CATS.map(c => ({ v: c, t: c })));
+fillSelect($("d-tipo"), CATS.map(c => ({ v: c, t: c })));
+fillSelect($("d-status"), STATUS);
+
+try { const a = localStorage.getItem("autor"); if (a) $("f-autor").value = a; } catch {}
+
+function chip(container, key, value, text) {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "chip"; b.textContent = text;
+  b.setAttribute("aria-pressed", String(state[key] === value));
+  b.addEventListener("click", () => { state[key] = value; renderChips(); render(); });
+  container.appendChild(b);
+}
+function renderChips() {
+  const c1 = $("chips-cat"), c2 = $("chips-status");
+  c1.querySelectorAll(".chip").forEach(n => n.remove());
+  c2.querySelectorAll(".chip").forEach(n => n.remove());
+  chip(c1, "cat", "todos", "Todos"); CATS.forEach(c => chip(c1, "cat", c, c));
+  chip(c2, "status", "todos", "Todos"); STATUS.forEach(s => chip(c2, "status", s.v, s.t));
+}
+renderChips();
+
+function fmtDate(ms, withTime) {
+  if (!ms) return "";
+  try {
+    return new Date(ms).toLocaleString("pt-BR", withTime
+      ? { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }
+      : { day: "2-digit", month: "short" });
+  } catch { return ""; }
+}
+function numberOf(id) {
+  const order = [...state.ideas].sort((a, b) => (a.data.criadaEm || 0) - (b.data.criadaEm || 0)).map(i => i.id);
+  return "#" + String(order.indexOf(id) + 1).padStart(2, "0");
+}
+function bars(n) {
+  const w = document.createElement("div"); w.className = "bars";
+  for (let i = 0; i < STEPS.length; i++) { const b = document.createElement("i"); if (i < n) b.className = "on"; w.append(b); }
+  return w;
+}
+
+function render() {
+  const all = state.ideas;
+  const list = all.filter(i =>
+    (state.cat === "todos" || i.data.categoria === state.cat) &&
+    (state.status === "todos" || i.data.status === state.status));
+  const grid = $("grid");
+  grid.innerHTML = "";
+  $("empty").hidden = all.length > 0;
+  $("count").textContent = all.length ? `${list.length} de ${all.length} ${all.length === 1 ? "ideia" : "ideias"}` : "";
+
+  for (const i of list) {
+    const d = i.data;
+    const card = document.createElement("button");
+    card.type = "button"; card.className = "idea"; card.dataset.s = d.status || "solta";
+    card.addEventListener("click", () => openIdea(i.id));
+
+    const top = document.createElement("div"); top.className = "top";
+    const cat = document.createElement("span"); cat.className = "cat"; cat.textContent = d.categoria || "Outro";
+    const num = document.createElement("span"); num.className = "num"; num.textContent = numberOf(i.id);
+    top.append(cat, num);
+    const h = document.createElement("h3"); h.textContent = d.titulo || "Sem título";
+    card.append(top, h);
+    const resumo = ((d.etapas || {}).frase || d.descricao || "").trim();
+    if (resumo) { const p = document.createElement("p"); p.textContent = resumo; card.append(p); }
+
+    const n = filled(d);
+    const track = document.createElement("div"); track.className = "track";
+    const small = document.createElement("small");
+    small.textContent = n >= STEPS.length ? "Trilha completa" : `Próxima etapa: ${STEPS[currentStep(d)].t}`;
+    track.append(bars(n), small);
+    card.append(track);
+
+    const meta = document.createElement("div"); meta.className = "meta";
+    const passos = (d.passos || []).length;
+    meta.textContent = [d.autorNome && `por ${d.autorNome}`, fmtDate(d.criadaEm), passos && `${passos} ${passos === 1 ? "anotação" : "anotações"}`].filter(Boolean).join(" · ");
+    if (meta.textContent) card.append(meta);
+
+    const foot = document.createElement("div"); foot.className = "foot";
+    const st = document.createElement("span"); st.className = "stat";
+    const dot = document.createElement("span"); dot.className = "dot"; dot.dataset.s = d.status || "solta";
+    st.append(dot, document.createTextNode(statusText(d.status)));
+    const go = document.createElement("span"); go.className = "open-hint"; go.textContent = "Abrir →";
+    foot.append(st, go);
+    card.append(foot);
+    grid.append(card);
+  }
+  if (state.openId) syncSheet();
+}
+
+function showNotice(text) { const n = $("notice"); n.textContent = text; n.hidden = !text; }
+function setReadOnly(reason) {
+  state.canWrite = false;
+  $("form").hidden = true;
+  if (reason) showNotice(reason);
+  document.querySelectorAll("#sheet textarea, #sheet select").forEach(el => el.disabled = true);
+  $("d-add").hidden = true; $("d-del").hidden = true; $("c-form").hidden = true; $("c-quick").hidden = true;
+  render();
+}
+function handleWriteError(e, fallback) {
+  if (e && e.code === "invalid_argument") setReadOnly("Você pode ver as ideias, mas não tem permissão para mudar nada aqui.");
+  else if (e && e.code === "quota_exceeded") flash("O caderno está cheio. Apague ideias antigas para abrir espaço.");
+  else flash(fallback);
+}
+
+/* ---------- Nova ideia ---------- */
+$("form").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  if (!col) { $("f-msg").textContent = "Ainda conectando, tente de novo em instantes."; return; }
+  const titulo = $("f-titulo").value.trim();
+  if (!titulo) { $("f-msg").textContent = "Dê um nome para a ideia."; $("f-titulo").focus(); return; }
+  const autorNome = $("f-autor").value.trim();
+  try { localStorage.setItem("autor", autorNome); } catch {}
+  const btn = $("f-save"); btn.disabled = true; $("f-msg").textContent = "Salvando…";
+  const doc = {
+    titulo, autorNome,
+    descricao: $("f-desc").value.trim(),
+    categoria: $("f-cat").value,
+    status: "solta",
+    etapas: {},
+    passos: [],
+    criadaEm: Date.now(),
+  };
+  try {
+    const ref = await col.add(doc);
+    $("f-titulo").value = ""; $("f-desc").value = "";
+    $("f-msg").textContent = "Ideia salva. Agora é só evoluir a ideia, etapa por etapa.";
+    openIdea(ref.id, doc);
+  } catch (e) {
+    if (e && e.code === "invalid_argument") setReadOnly("Você pode ver as ideias, mas não tem permissão para adicionar.");
+    else if (e && e.code === "quota_exceeded") $("f-msg").textContent = "O caderno está cheio. Apague ideias antigas para abrir espaço.";
+    else $("f-msg").textContent = "Não foi possível salvar. Tente de novo.";
+  }
+  btn.disabled = false;
+});
+
+/* ---------- Painel da ideia ---------- */
+const dirty = new Set();       // campos com texto ainda não salvo
+const timers = {};
+let savedTimer = null;
+function flash(text) {
+  const s = $("d-saved"); s.textContent = text;
+  clearTimeout(savedTimer); savedTimer = setTimeout(() => { s.textContent = ""; }, 2500);
+}
+function idea() { return state.ideas.find(i => i.id === state.openId); }
+let pendingDoc = null;
+function data() { const i = idea(); return i ? i.data : (pendingDoc || {}); }
+
+function buildSteps() {
+  const ol = $("d-steps"); ol.innerHTML = "";
+  STEPS.forEach((s, idx) => {
+    const li = document.createElement("li"); li.className = "step"; li.dataset.k = s.k;
+    const b = document.createElement("span"); b.className = "badge"; b.textContent = idx + 1;
+    const body = document.createElement("div"); body.className = "step-body";
+    const tag = document.createElement("span"); tag.className = "now-tag"; tag.textContent = "Você está aqui"; tag.hidden = true;
+    const h = document.createElement("h4"); h.textContent = s.t;
+    const hint = document.createElement("p"); hint.className = "hint"; hint.textContent = s.h;
+    const ta = document.createElement("textarea");
+    ta.id = "st-" + s.k; ta.dataset.key = "etapas." + s.k; ta.maxLength = 3000;
+    ta.setAttribute("aria-label", s.t);
+    body.append(tag, h, hint, ta);
+    li.append(b, body);
+    ol.append(li);
+  });
+  document.querySelectorAll("#sheet textarea[data-key]").forEach(wireAutosave);
+}
+
+function wireAutosave(ta) {
+  const key = ta.dataset.key;
+  ta.addEventListener("input", () => {
+    dirty.add(key); flash("Digitando…");
+    clearTimeout(timers[key]); timers[key] = setTimeout(() => saveField(ta), 1200);
+  });
+  ta.addEventListener("blur", () => { if (dirty.has(key)) { clearTimeout(timers[key]); saveField(ta); } });
+}
+
+const writing = {};
+async function saveField(ta) {
+  const key = ta.dataset.key;
+  if (!col || !state.openId || writing[key]) return;
+  writing[key] = true;
+  const value = ta.value;
+  const patch = key.startsWith("etapas.")
+    ? { etapas: { [key.slice(7)]: value }, atualizadaEm: Date.now() }
+    : { [key]: value, atualizadaEm: Date.now() };
+  try {
+    await col.doc(state.openId).update(patch);
+    if (ta.value === value) dirty.delete(key);
+    flash("Salvo");
+  } catch (e) { handleWriteError(e, "Não foi possível salvar. Verifique a conexão."); }
+  writing[key] = false;
+  if (dirty.has(key) && ta.value !== value) saveField(ta);
+}
+
+function syncSheet() {
+  const d = data();
+  if (!idea() && !pendingDoc) { closeIdea(); return; }
+  $("d-title").textContent = d.titulo || "Sem título";
+  $("d-cat").textContent = d.categoria || "Outro";
+  $("d-num").textContent = idea() ? numberOf(state.openId) : "";
+  if (document.activeElement !== $("d-status")) $("d-status").value = d.status || "solta";
+  if (document.activeElement !== $("d-tipo")) $("d-tipo").value = d.categoria || "Outro";
+  document.querySelectorAll("#sheet textarea[data-key]").forEach(ta => {
+    const key = ta.dataset.key;
+    if (dirty.has(key) || document.activeElement === ta) return;
+    const v = key.startsWith("etapas.") ? ((d.etapas || {})[key.slice(7)] || "") : (d[key] || "");
+    if (ta.value !== v) ta.value = v;
+  });
+  const cur = currentStep(d), n = filled(d);
+  document.querySelectorAll("#d-steps .step").forEach((li, idx) => {
+    const done = (((d.etapas || {})[li.dataset.k]) || "").trim();
+    li.classList.toggle("done", !!done);
+    li.classList.toggle("current", idx === cur);
+    li.querySelector(".now-tag").hidden = idx !== cur;
+  });
+  $("d-prog").textContent = `${n} de ${STEPS.length} etapas`;
+  renderChat();
+
+  const list = $("d-list"); list.innerHTML = "";
+  const passos = [...(d.passos || [])].sort((a, b) => (b.em || 0) - (a.em || 0));
+  $("d-count").textContent = passos.length ? `${passos.length} ${passos.length === 1 ? "anotação" : "anotações"}` : "";
+  if (!passos.length) {
+    const e = document.createElement("p"); e.className = "meta"; e.style.margin = "0";
+    e.textContent = "Ainda sem anotações. Depois de cada teste, conte aqui o que aconteceu.";
+    list.append(e);
+  }
+  for (const p of passos) {
+    const e = document.createElement("div"); e.className = "entry" + (p.claude ? " claude" : "");
+    const t = document.createElement("time"); t.textContent = fmtDate(p.em, true);
+    if (p.claude) { const w = document.createElement("span"); w.className = "who"; w.textContent = "Sugestão do Claude"; e.append(w); }
+    const tx = document.createElement("div"); tx.textContent = p.texto;
+    e.append(t, tx);
+    list.append(e);
+  }
+}
+
+function openIdea(id, doc) {
+  state.openId = id; pendingDoc = doc || null; dirty.clear();
+  $("d-entry").value = ""; $("c-input").value = ""; $("c-msg").textContent = ""; streaming = null;
+  delArmed = false; $("d-del").textContent = "Apagar esta ideia";
+  document.querySelectorAll("#sheet textarea[data-key]").forEach(ta => ta.value = "");
+  $("scrim").hidden = false; $("sheet").hidden = false; document.body.classList.add("locked");
+  syncSheet();
+  $("sheet").querySelector(".sheet-body").scrollTop = 0;
+  $("d-close").focus();
+}
+async function closeIdea() {
+  // salva o que estiver pendente antes de fechar
+  document.querySelectorAll("#sheet textarea[data-key]").forEach(ta => {
+    if (dirty.has(ta.dataset.key)) { clearTimeout(timers[ta.dataset.key]); saveField(ta); }
+  });
+  if (ctl) ctl.abort();
+  state.openId = null; pendingDoc = null;
+  $("scrim").hidden = true; $("sheet").hidden = true; document.body.classList.remove("locked");
+}
+$("d-close").addEventListener("click", closeIdea);
+$("scrim").addEventListener("click", closeIdea);
+document.addEventListener("keydown", e => { if (e.key === "Escape" && state.openId) closeIdea(); });
+
+async function setField(patch, okMsg) {
+  if (!col || !state.openId) return;
+  try { await col.doc(state.openId).update({ ...patch, atualizadaEm: Date.now() }); flash(okMsg || "Salvo"); }
+  catch (e) { handleWriteError(e, "Não foi possível salvar."); syncSheet(); }
+}
+$("d-status").addEventListener("change", () => setField({ status: $("d-status").value }));
+$("d-tipo").addEventListener("change", () => setField({ categoria: $("d-tipo").value }));
+
+async function addEntry(texto, claude) {
+  if (!col || !state.openId || !texto.trim()) return false;
+  if ((data().passos || []).some(p => p.texto === texto.trim())) { flash("Já está no diário"); return true; }
+  const passos =[...(data().passos || []), { texto: texto.trim(), em: Date.now(), ...(claude ? { claude: true } : {}) }];
+  try { await col.doc(state.openId).update({ passos, atualizadaEm: Date.now() }); flash("Anotado"); return true; }
+  catch (e) { handleWriteError(e, "Não foi possível anotar."); return false; }
+}
+$("d-add").addEventListener("click", async () => {
+  const btn = $("d-add"); btn.disabled = true;
+  if (await addEntry($("d-entry").value)) $("d-entry").value = "";
+  btn.disabled = false;
+});
+
+let delArmed = false, delTimer = null;
+$("d-del").addEventListener("click", async () => {
+  const btn = $("d-del");
+  if (!delArmed) {
+    delArmed = true; btn.textContent = "Toque de novo para apagar de vez";
+    delTimer = setTimeout(() => { delArmed = false; btn.textContent = "Apagar esta ideia"; }, 4000);
+    return;
+  }
+  clearTimeout(delTimer); btn.disabled = true;
+  const id = state.openId;
+  try { dirty.clear(); await col.doc(id).delete(); closeIdea(); }
+  catch (e) { handleWriteError(e, "Não foi possível apagar."); }
+  btn.disabled = false; delArmed = false; btn.textContent = "Apagar esta ideia";
+});
+
+/* ---------- Conversa com o Claude ---------- */
+let ctl = null;
+let streaming = null;          // { user, text } enquanto o Claude responde
+const MAX_CHAT = 120;          // mensagens guardadas por ideia
+
+function fichaTexto(d) {
+  const cur = currentStep(d);
+  const etapas = STEPS.map((s, i) => `${i + 1}. ${s.t}: ${((d.etapas || {})[s.k] || "").trim() || "(vazio)"}`).join("\n");
+  const diario = (d.passos || []).slice(-8).map(p => `- ${p.texto}`).join("\n") || "(sem anotações)";
+  const foco = cur < STEPS.length
+    ? `Etapa atual: ${cur + 1} - "${STEPS[cur].t}" (${STEPS[cur].h})`
+    : "Todas as 5 etapas estão preenchidas.";
+  return `Ideia: ${d.titulo || ""}
+Quem teve a ideia: ${d.autorNome || "Andre"}
+Tipo: ${d.categoria || ""}
+Status: ${statusText(d.status)}
+Como começou: ${(d.descricao || "").trim() || "(vazio)"}
+
+Trilha (5 etapas):
+${etapas}
+${foco}
+
+Diário de testes (mais recentes):
+${diario}`;
+}
+const RULES = d => `Você é o parceiro de game design do Andre, que está criando um jogo e testando ideias num caderno.
+Converse em português do Brasil, com linguagem simples, animada e direta, sem jargão. Respostas curtas (até 120 palavras), sem títulos nem markdown.
+Ajude-o a pensar e evoluir a ideia passo a passo: faça perguntas, dê exemplos de jogos conhecidos quando ajudar, sugira testes simples (papel, desenho, dados, contar para alguém).
+Não preencha as etapas por ele; quando ele tiver uma boa resposta, diga em qual etapa ela pode ser escrita.
+
+Ficha atual (ela pode mudar entre as mensagens):
+${fichaTexto(d)}`;
+
+function quickPrompts(d) {
+  const cur = currentStep(d);
+  const q = [];
+  if (cur < STEPS.length) q.push(`Me ajude na etapa ${cur + 1}: ${STEPS[cur].t}`);
+  else q.push("Como posso melhorar essa ideia?");
+  q.push("Como eu testo isso rápido?");
+  q.push("Que jogo parecido já existe?");
+  return q;
+}
+
+function renderChat() {
+  const d = data();
+  const msgs = d.chat || [];
+  const list = $("c-list"); list.innerHTML = "";
+  $("c-count").textContent = msgs.length ? `${msgs.length} mensagens` : "";
+  const all = streaming ? [...msgs, { role: "user", content: streaming.user }, { role: "assistant", content: streaming.text, live: true }] : msgs;
+  for (const m of all) {
+    const b = document.createElement("div"); b.className = "bubble " + (m.role === "user" ? "user" : "assistant");
+    const t = document.createElement("span"); t.textContent = m.content; b.append(t);
+    if (m.role === "assistant" && !m.live && state.canWrite) {
+      const k = document.createElement("button"); k.type = "button"; k.className = "keep";
+      const ja = (d.passos || []).some(p => p.texto === (m.content || "").trim());
+      k.textContent = ja ? "Já está no diário" : "Guardar no diário"; k.disabled = ja;
+      k.addEventListener("click", async () => { k.disabled = true; if (await addEntry(m.content, true)) k.textContent = "Guardado"; else k.disabled = false; });
+      b.append(k);
+    }
+    list.append(b);
+  }
+  list.scrollTop = list.scrollHeight;
+  const qb = $("c-quick"); qb.innerHTML = "";
+  if (!streaming) for (const q of quickPrompts(d)) {
+    const btn = document.createElement("button"); btn.type = "button"; btn.textContent = q;
+    btn.addEventListener("click", () => send(q));
+    qb.append(btn);
+  }
+}
+
+async function send(texto) {
+  texto = (texto || "").trim();
+  if (!sampleFn || !texto || streaming || !state.openId) return;
+  const id = state.openId;
+  const d = data();
+  const history = (d.chat || []).slice(-30).map(m => ({ role: m.role, content: m.content }));
+  const turns = [{ role: "user", content: RULES(d) }, ...history, { role: "user", content: texto }];
+  streaming = { user: texto, text: "Pensando…" };
+  $("c-input").value = ""; $("c-msg").textContent = "";
+  $("c-send").disabled = true; $("c-stop").hidden = false;
+  ctl = new AbortController();
+  renderChat();
+  let reply = "";
+  try {
+    const r = await sampleFn(turns, { cache: false, signal: ctl.signal, onText: ({ text }) => {
+      if (streaming) { streaming.text = text; renderChat(); }
+    } });
+    reply = r.text;
+  } catch (e) {
+    reply = (e && e.text) || "";
+    if (!e || e.code === "cancelled") {}
+    else if (["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"].includes(e.code)) {
+      $("helper").hidden = true; reply = "";
+    }
+    else if (e.code === "rate_limited") $("c-msg").textContent = "Muitas mensagens seguidas. Espere um pouco e tente de novo.";
+    else if (e.code === "refused") { reply = ""; $("c-msg").textContent = "O Claude não respondeu a essa mensagem. Tente escrever de outro jeito."; }
+    else $("c-msg").textContent = "A resposta foi interrompida. Tente de novo.";
+    if (!reply) $("c-input").value = texto;
+  }
+  streaming = null; ctl = null;
+  $("c-send").disabled = false; $("c-stop").hidden = true;
+  if (reply && col) {
+    const base = state.ideas.find(i => i.id === id);
+    const prev = (base ? base.data.chat : d.chat) || [];
+    const now = Date.now();
+    const chat = [...prev, { role: "user", content: texto, em: now }, { role: "assistant", content: reply, em: now + 1 }].slice(-MAX_CHAT);
+    try { await col.doc(id).update({ chat, atualizadaEm: now }); }
+    catch (e) { handleWriteError(e, "A conversa não foi salva."); }
+  }
+  if (state.openId === id) renderChat();
+}
+$("c-form").addEventListener("submit", e => { e.preventDefault(); send($("c-input").value); });
+$("c-input").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing && window.matchMedia("(pointer: fine)").matches) { e.preventDefault(); send($("c-input").value); } });
+$("c-stop").addEventListener("click", () => ctl && ctl.abort());
+
+buildSteps();
+render();
+
+/* ---------- Conexão ---------- */
+(async () => {
+  if (!window.claude || !window.claude.use) { setReadOnly("Abra esta página no claude.ai para ver e salvar ideias."); return; }
+  const [db, user, sample] = await Promise.all([claude.use("db"), claude.use("user"), claude.use("sample")]);
+  if (sample) { sampleFn = sample; $("helper").hidden = false; }
+  if (!db) { setReadOnly("Entre na sua conta do claude.ai para ver e salvar as ideias."); return; }
+  if (user) {
+    try { const w = await user.can("data.write"); if (w === false) setReadOnly("Você está vendo as ideias em modo leitura."); } catch {}
+  }
+  col = db.collection("ideias");
+  if (typeof simConectar === "function") simConectar(db);
+  col.orderBy("criadaEm", "desc").onSnapshot(
+    snap => {
+      state.ideas = snap.docs.map(d => ({ id: d.id, data: d.data() || {} }));
+      if (pendingDoc && idea()) pendingDoc = null;
+      render();
+    },
+    () => showNotice("A conexão com as ideias caiu. Recarregue a página para tentar de novo.")
+  );
+})();
+</script>
+
+<script>
+/* ================= Simulação: Mete sarrafo ================= */
+const PADRAO = { vidas: 3, tempo: 15, recarga: 3, mAcerto: 1, mSobreviver: 4.5, mErro: 1.5, preco: 250, maxCompra: 3, perdaVoto: 50, voto: true, comprar: true };
+const KNOBS = [
+  { k: "vidas", t: "Vidas por jogador", min: 1, max: 10, step: 1, u: "" },
+  { k: "tempo", t: "Tempo para digitar", min: 5, max: 60, step: 1, u: "s" },
+  { k: "recarga", t: "Recarga da bola", min: 0.5, max: 10, step: 0.5, u: "s" },
+  { k: "mAcerto", t: "Moedas por acertar a palavra", min: 0, max: 1000, step: 0.5, u: "" },
+  { k: "mSobreviver", t: "Moedas por sobreviver à rodada", min: 0, max: 1000, step: 0.5, u: "" },
+  { k: "mErro", t: "Perguntador ganha por erro", min: 0, max: 1000, step: 0.5, u: "" },
+  { k: "preco", t: "Preço da vida extra", min: 0, max: 100000, step: 10, u: "moedas" },
+  { k: "maxCompra", t: "Vidas extras por partida", min: 0, max: 10, step: 1, u: "" },
+  { k: "perdaVoto", t: "Perda no voto \"tá difícil\"", min: 0, max: 100, step: 5, u: "%" },
+];
+let CFG = { ...PADRAO };
+let cfgSalva = { ...PADRAO };
+let simDb = null, cfgRef = null;
+
+const NOMES = ["Andre", "Maria", "João", "Lia", "Theo", "Bia", "Davi", "Nina", "Leo", "Malu", "Gabi", "Rafa", "Duda", "Caio", "Íris", "Enzo", "Tati", "Beto", "Zoe", "Gui"];
+const CORES = ["#e4572e", "#2f80ed", "#27ae60", "#e0b43a", "#9b51e0", "#f2994a", "#2bb5c9", "#d64570", "#6c8a1f", "#8a6be8"];
+const TEMAS = [
+  { nome: "Animais", w: ["GATO", "CACHORRO", "GIRAFA", "ELEFANTE", "TUBARAO", "CORUJA", "TARTARUGA", "MACACO"] },
+  { nome: "Frutas", w: ["BANANA", "MORANGO", "ABACAXI", "UVA", "MELANCIA", "LARANJA", "MANGA"] },
+  { nome: "Objetos", w: ["CADEIRA", "MOCHILA", "CELULAR", "TESOURA", "RELOGIO", "LANTERNA"] },
+  { nome: "Jogos", w: ["MINECRAFT", "ROBLOX", "FORTNITE", "XADREZ", "QUEIMADA", "FUTEBOL"] },
+  { nome: "Lugares", w: ["PRAIA", "ESCOLA", "MERCADO", "CINEMA", "FAZENDA", "PARQUE"] },
+];
+const ARENA = 1000, CEN = 500, RAIO = 400, VEL = 230, VEL_BOLA = 900, ALCANCE = 36;
+
+const rnd = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const gauss = () => { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+const fmtT = s => { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
+const fmtM = v => (Math.round(v * 10) / 10).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+function criarSim(n, banco) {
+  const S = { t: 0, n, players: [], log: [], balls: [], fim: null, ph: null,
+    st: { rodadas: 0, palavras: 0, votos: 0, votosOk: 0, arremessos: 0, acertosBola: 0, erros: 0, acertos: 0, compras: 0, timeouts: 0, mAcerto: 0, mSobreviver: 0, mErro: 0 } };
+  for (let i = 0; i < n; i++) {
+    const a = -Math.PI / 2 + i * 2 * Math.PI / n;
+    const home = { x: CEN + RAIO * Math.cos(a), y: CEN + RAIO * Math.sin(a) };
+    S.players.push({ i, nome: NOMES[i], cor: CORES[i % CORES.length], vidas: CFG.vidas, vivo: true,
+      moedas: banco ? (banco[i] || 0) : 0, ganho: 0, compradas: 0, home, x: home.x, y: home.y,
+      alvo: null, modo: "casa", vel: VEL * rnd(.85, 1.15), habil: rnd(-.08, .08), flash: 0, vx: 0, vy: 0 });
+  }
+  novaPalavra(S, pick(S.players));
+  return S;
+}
+function addLog(S, txt, big) { S.log.push({ t: S.t, txt, big: !!big }); if (S.log.length > 200) S.log.shift(); }
+function vivos(S) { return S.players.filter(p => p.vivo); }
+function ganhar(S, p, v, tipo) { p.moedas += v; p.ganho += v; S.st[tipo] += v; }
+
+function revelar(rev, palavra) {
+  const faltam = [...palavra].map((c, i) => ({ c, i })).filter(o => !rev.has(o.i));
+  if (!faltam.length) return null;
+  const c = pick(faltam).c;
+  [...palavra].forEach((ch, i) => { if (ch === c) rev.add(i); });
+  return c;
+}
+function agendar(S) {
+  const ph = S.ph;
+  const chanceTempo = Math.min(.4, Math.max(.03, .35 - CFG.tempo * .02));
+  if (Math.random() < chanceTempo) { ph.wait = CFG.tempo; ph.timeout = true; }
+  else { ph.wait = rnd(2, Math.max(2.5, Math.min(9, CFG.tempo - .5))); ph.timeout = false; }
+}
+function novaPalavra(S, perg) {
+  const tema = pick(TEMAS), palavra = pick(tema.w);
+  const rev = new Set(); const letra = revelar(rev, palavra);
+  const ordem = [];
+  for (let k = 1; k < S.n; k++) { const p = S.players[(perg.i + k) % S.n]; if (p.vivo) ordem.push(p); }
+  if (!ordem.length) { terminar(S, perg); return; }
+  S.ph = { k: "pergunta", perg, tema: tema.nome, palavra, rev, ordem, idx: 0, voltas: 0, votou: false };
+  S.st.palavras++;
+  addLog(S, `${perg.nome} pergunta. Tema: ${tema.nome}, letra ${letra}.`);
+  agendar(S);
+}
+function chance(ph, p) {
+  const frac = ph.rev.size / ph.palavra.length;
+  return Math.min(.95, Math.max(.02, .05 + .8 * Math.pow(frac, 1.4) + p.habil));
+}
+function tentar(S) {
+  const ph = S.ph, p = ph.ordem[ph.idx], perg = ph.perg;
+  if (!ph.timeout && Math.random() < chance(ph, p)) {
+    ganhar(S, p, CFG.mAcerto, "mAcerto"); S.st.acertos++;
+    addLog(S, `${p.nome} acertou: ${ph.palavra}!`, true);
+    iniciarBola(S, p); return;
+  }
+  ganhar(S, perg, CFG.mErro, "mErro"); S.st.erros++;
+  if (ph.timeout) S.st.timeouts++;
+  addLog(S, ph.timeout ? `${p.nome} não respondeu a tempo e perdeu a vez.` : `${p.nome} chutou errado e perdeu a vez.`);
+  ph.idx++;
+  if (ph.idx >= ph.ordem.length) {
+    ph.idx = 0; ph.voltas++;
+    const frac = ph.rev.size / ph.palavra.length;
+    if (CFG.voto && !ph.votou && ph.voltas >= 2 && frac < .6 && Math.random() < .5) { iniciarVoto(S); return; }
+    if (ph.rev.size < ph.palavra.length - 1) { const l = revelar(ph.rev, ph.palavra); addLog(S, `Ninguém acertou. Dica de ${perg.nome}: tem a letra ${l}.`); }
+  }
+  agendar(S);
+}
+function iniciarVoto(S) {
+  const ph = S.ph; ph.votou = true; S.st.votos++;
+  const frac = ph.rev.size / ph.palavra.length;
+  const total = ph.ordem.length;
+  let sim = 0; for (let i = 0; i < total; i++) if (Math.random() < .8 - frac * .6) sim++;
+  const quem = pick(ph.ordem);
+  addLog(S, `${quem.nome} apertou "tá difícil". Votação!`, true);
+  S.ph = { k: "voto", volta: ph, wait: 2.5, sim, total };
+}
+function resolverVoto(S) {
+  const v = S.ph, ph = v.volta, perg = ph.perg;
+  if (v.sim > v.total / 2) {
+    S.st.votosOk++;
+    const perda = perg.moedas * CFG.perdaVoto / 100;
+    perg.moedas -= perda; perg.ganho -= perda;
+    const outros = vivos(S).filter(p => p !== perg);
+    const novo = pick(outros);
+    addLog(S, `Votação passou (${v.sim} de ${v.total}). ${perg.nome} perde ${fmtM(perda)} moedas e escolhe ${novo.nome} para perguntar.`, true);
+    novaPalavra(S, novo);
+  } else {
+    addLog(S, `Votação não passou (${v.sim} de ${v.total}). O jogo segue.`);
+    S.ph = ph;
+    if (ph.rev.size < ph.palavra.length - 1) { const l = revelar(ph.rev, ph.palavra); addLog(S, `Dica de ${perg.nome}: tem a letra ${l}.`); }
+    agendar(S);
+  }
+}
+function iniciarBola(S, atir) {
+  S.ph = { k: "bola", atir, cd: .8, atingidos: new Set(), palavra: S.ph.palavra };
+  atir.alvo = { x: CEN, y: CEN }; atir.modo = "centro";
+  for (const p of vivos(S)) {
+    if (p === atir) continue;
+    const a = Math.atan2(p.home.y - CEN, p.home.x - CEN) + Math.PI + rnd(-.5, .5);
+    p.alvo = { x: CEN + RAIO * Math.cos(a), y: CEN + RAIO * Math.sin(a) }; p.modo = "fugindo";
+  }
+}
+function correndo(S) { return vivos(S).filter(p => p !== S.ph.atir && (p.modo === "fugindo" || p.modo === "voltando")); }
+function atingir(S, p) {
+  const ph = S.ph;
+  p.vidas--; p.flash = .8; S.st.acertosBola++; ph.atingidos.add(p);
+  if (p.vidas > 0) { addLog(S, `${ph.atir.nome} acertou ${p.nome} com a bola! Restam ${p.vidas} vidas.`); return; }
+  if (CFG.comprar && CFG.preco >= 0 && p.moedas >= CFG.preco && p.compradas < CFG.maxCompra) {
+    p.moedas -= CFG.preco; p.compradas++; p.vidas = 1; S.st.compras++;
+    addLog(S, `${p.nome} perdeu a última vida e comprou uma vida extra por ${CFG.preco} moedas.`, true);
+    return;
+  }
+  p.vivo = false; p.alvo = null; p.modo = "fora";
+  addLog(S, `${ph.atir.nome} acertou ${p.nome}, que perdeu todas as vidas e saiu.`, true);
+  const v = vivos(S);
+  if (v.length === 1) terminar(S, v[0]);
+}
+function terminar(S, vencedor) {
+  if (S.fim) return;
+  S.fim = { vencedor, t: S.t };
+  S.balls = [];
+  addLog(S, `Fim! ${vencedor.nome} venceu em ${fmtT(S.t)}.`, true);
+}
+function passo(S, dt) {
+  if (S.fim) return;
+  S.t += dt;
+  for (const p of S.players) {
+    p.flash = Math.max(0, p.flash - dt);
+    if (!p.vivo || !p.alvo) { p.vx = p.vy = 0; continue; }
+    const d = dist(p, p.alvo), passoV = p.vel * dt;
+    if (d <= passoV) {
+      p.x = p.alvo.x; p.y = p.alvo.y; p.alvo = null; p.vx = p.vy = 0;
+      if (p.modo === "fugindo") { p.modo = "voltando"; p.alvo = { ...p.home }; }
+      else if (p.modo === "voltando") p.modo = "casa";
+      else if (p.modo === "centro") p.modo = "mira";
+    } else {
+      p.vx = (p.alvo.x - p.x) / d * p.vel; p.vy = (p.alvo.y - p.y) / d * p.vel;
+      p.x += p.vx * dt; p.y += p.vy * dt;
+    }
+  }
+  for (const b of S.balls) {
+    b.t += dt;
+    if (b.t >= b.T && !b.done) {
+      b.done = true;
+      if (S.ph.k !== "bola") continue;
+      let best = null, bd = ALCANCE;
+      for (const p of correndo(S)) { const d = dist(p, b.to); if (d < bd) { bd = d; best = p; } }
+      if (best) atingir(S, best);
+      if (S.fim) return;
+    }
+  }
+  S.balls = S.balls.filter(b => !b.done);
+  const ph = S.ph;
+  if (ph.k === "pergunta") { ph.wait -= dt; if (ph.wait <= 0) tentar(S); }
+  else if (ph.k === "voto") { ph.wait -= dt; if (ph.wait <= 0) resolverVoto(S); }
+  else if (ph.k === "bola") {
+    const atir = ph.atir, corr = correndo(S);
+    if (atir.modo === "mira") {
+      ph.cd -= dt;
+      if (ph.cd <= 0 && corr.length) {
+        let alvo = corr[0]; for (const p of corr) if (dist(p, atir) < dist(alvo, atir)) alvo = p;
+        const T0 = dist(alvo, atir) / VEL_BOLA, lead = rnd(.3, 1);
+        const to = { x: alvo.x + alvo.vx * T0 * lead + gauss() * 40, y: alvo.y + alvo.vy * T0 * lead + gauss() * 40 };
+        S.balls.push({ from: { x: atir.x, y: atir.y }, to, t: 0, T: dist(atir, to) / VEL_BOLA });
+        S.st.arremessos++; ph.cd = CFG.recarga;
+      }
+      if (!corr.length && !S.balls.length) {
+        const sobreviventes = vivos(S).filter(p => p !== atir && !ph.atingidos.has(p));
+        for (const p of sobreviventes) ganhar(S, p, CFG.mSobreviver, "mSobreviver");
+        S.st.rodadas++;
+        addLog(S, `Todo mundo voltou. ${sobreviventes.length} ${sobreviventes.length === 1 ? "sobreviveu" : "sobreviveram"} à bola. ${atir.nome} vira o perguntador.`);
+        atir.alvo = { ...atir.home }; atir.modo = "voltando";
+        S.ph = { k: "troca", atir };
+      }
+    }
+  } else if (ph.k === "troca") {
+    if (ph.atir.modo === "casa") novaPalavra(S, ph.atir);
+  }
+  if (!S.fim && S.t > 3600) { const v = vivos(S).sort((a, b) => b.vidas - a.vidas)[0]; addLog(S, "A partida passou de 1 hora e foi encerrada.", true); terminar(S, v); }
+}
+
+/* ---------- Teste de 50 partidas ---------- */
+function lote(n, partidas) {
+  const banco = Array(n).fill(0), chegou = Array(n).fill(null);
+  const soma = { t: 0, rodadas: 0, palavras: 0, votos: 0, votosOk: 0, arremessos: 0, acertosBola: 0, compras: 0, erros: 0, acertos: 0, timeouts: 0, ganho: 0, mAcerto: 0, mSobreviver: 0, mErro: 0 };
+  for (let g = 0; g < partidas; g++) {
+    const S = criarSim(n, banco);
+    while (!S.fim) passo(S, .1);
+    soma.t += S.t;
+    for (const k of Object.keys(S.st)) if (k in soma) soma[k] += S.st[k];
+    for (const p of S.players) {
+      banco[p.i] = p.moedas; soma.ganho += p.ganho;
+      if (chegou[p.i] === null && (p.compradas > 0 || p.moedas >= CFG.preco)) chegou[p.i] = g + 1;
+    }
+  }
+  const alcancaram = chegou.filter(x => x !== null);
+  return {
+    n, partidas, cfg: { ...CFG },
+    dur: soma.t / partidas, rodadas: soma.rodadas / partidas, palavras: soma.palavras / partidas,
+    votos: soma.votos, votosOk: soma.votosOk, compras: soma.compras,
+    pctBola: soma.arremessos ? soma.acertosBola / soma.arremessos : 0,
+    arremessos: soma.arremessos / partidas,
+    ganho: soma.ganho / partidas / n,
+    origem: { acerto: soma.mAcerto, sobreviver: soma.mSobreviver, erro: soma.mErro },
+    chegou: alcancaram.length ? alcancaram.reduce((a, b) => a + b, 0) / alcancaram.length : null,
+    quantos: alcancaram.length,
+  };
+}
+function leitura(r) {
+  const L = [];
+  const min = r.dur / 60;
+  if (min > 10) L.push(`A partida dura ${fmtT(r.dur)} em média. Para celular é longa: tente menos vidas, recarga menor ou menos jogadores.`);
+  else if (min < 2) L.push(`A partida dura só ${fmtT(r.dur)} em média. Pode acabar rápido demais: tente mais vidas ou recarga maior.`);
+  else L.push(`A partida dura ${fmtT(r.dur)} em média, um tamanho bom para celular.`);
+  if (!r.cfg.comprar) L.push("A compra de vida extra está desligada neste teste.");
+  else if (r.chegou === null) L.push(`Em ${r.partidas} partidas ninguém juntou ${r.cfg.preco} moedas. A vida extra está cara demais para o que as moedas rendem (${fmtM(r.ganho)} por partida).`);
+  else if (r.chegou <= 1.5) L.push(`Quase todo mundo já consegue comprar vida extra na primeira partida. Está barata demais: as vidas perdem o valor.`);
+  else L.push(`Em média, um jogador leva ${fmtM(r.chegou)} partidas para juntar ${r.cfg.preco} moedas (${r.quantos} de ${r.n} conseguiram).`);
+  const tot = r.origem.acerto + r.origem.sobreviver + r.origem.erro || 1;
+  const pErro = r.origem.erro / tot;
+  if (pErro > .5) L.push(`${Math.round(pErro * 100)}% das moedas vêm de erros dos outros. Ser perguntador rende mais que jogar bem.`);
+  else L.push(`De onde vêm as moedas: ${Math.round(r.origem.sobreviver / tot * 100)}% de sobreviver, ${Math.round(r.origem.erro / tot * 100)}% de erros dos outros, ${Math.round(r.origem.acerto / tot * 100)}% de acertar a palavra.`);
+  L.push(`A bola acerta ${Math.round(r.pctBola * 100)}% dos arremessos (${fmtM(r.arremessos)} arremessos por partida).`);
+  if (r.cfg.voto) L.push(`"Tá difícil" foi usado ${r.votos} vezes e passou ${r.votosOk}.`);
+  return L;
+}
+function resumoCfg(c) {
+  return `${c.vidas} vidas, recarga ${String(c.recarga).replace(".", ",")} s, vida extra ${c.preco}${c.comprar ? "" : " (desligada)"}, moedas ${String(c.mAcerto).replace(".", ",")}/${String(c.mSobreviver).replace(".", ",")}/${String(c.mErro).replace(".", ",")}`;
+}
+
+/* ---------- Tela ---------- */
+const sim = { S: null, n: 6, speed: 1, paused: false, ativo: false, raf: null, last: 0, banco: null, logLen: -1, hudT: 0, hist: [], ultimo: null };
+const cv = $("s-canvas"), ctx = cv.getContext("2d");
+
+function novaPartidaSim(resetBanco) {
+  if (resetBanco || !sim.banco || sim.banco.length !== sim.n) sim.banco = Array(sim.n).fill(0);
+  if (sim.S) sim.S.players.forEach(p => { sim.banco[p.i] = p.moedas; });
+  sim.S = criarSim(sim.n, sim.banco);
+  sim.logLen = -1; sim.paused = false; $("s-play").textContent = "Pausar";
+  atualizarPainel(true);
+}
+function cor(nome) { return getComputedStyle(document.documentElement).getPropertyValue(nome).trim(); }
+function desenhar() {
+  const S = sim.S; if (!S) return;
+  const w = cv.clientWidth; if (!w) return;
+  const dpr = window.devicePixelRatio || 1, px = Math.round(w * dpr);
+  if (cv.width !== px) { cv.width = px; cv.height = px; }
+  const k = px / ARENA;
+  ctx.setTransform(k, 0, 0, k, 0, 0);
+  const ink = cor("--ink"), muted = cor("--muted"), line = cor("--line"), accent = cor("--accent"), card = cor("--card"), paper = cor("--paper"), bola = cor("--s-teste"), danger = cor("--s-off");
+  ctx.fillStyle = card; ctx.fillRect(0, 0, ARENA, ARENA);
+  ctx.fillStyle = paper; ctx.beginPath(); ctx.arc(CEN, CEN, RAIO + 60, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = line; ctx.lineWidth = 3; ctx.stroke();
+  ctx.setLineDash([10, 12]); ctx.beginPath(); ctx.arc(CEN, CEN, 60, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+  for (const p of S.players) {
+    ctx.strokeStyle = line; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(p.home.x, p.home.y, 30, 0, Math.PI * 2); ctx.stroke();
+  }
+  const ph = S.ph || {};
+  for (const p of S.players) {
+    if (!p.vivo) {
+      ctx.strokeStyle = muted; ctx.lineWidth = 4; const h = p.home, r = 12;
+      ctx.beginPath(); ctx.moveTo(h.x - r, h.y - r); ctx.lineTo(h.x + r, h.y + r); ctx.moveTo(h.x + r, h.y - r); ctx.lineTo(h.x - r, h.y + r); ctx.stroke();
+      continue;
+    }
+    const isPerg = (ph.k === "pergunta" || ph.k === "voto") && (ph.perg === p || (ph.volta && ph.volta.perg === p));
+    const isAtir = (ph.k === "bola" || ph.k === "troca") && ph.atir === p;
+    const isVez = ph.k === "pergunta" && ph.ordem[ph.idx] === p;
+    if (p.flash > 0) { ctx.strokeStyle = danger; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(p.x, p.y, 34 + (1 - p.flash) * 20, 0, Math.PI * 2); ctx.stroke(); }
+    if (isPerg || isVez) { ctx.strokeStyle = accent; ctx.lineWidth = 5; ctx.setLineDash(isPerg ? [8, 6] : []); ctx.beginPath(); ctx.arc(p.x, p.y, 33, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]); }
+    ctx.fillStyle = p.cor; ctx.beginPath(); ctx.arc(p.x, p.y, 24, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#ffffff"; ctx.font = "700 24px 'Chakra Petch', sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(p.nome[0], p.x, p.y + 1);
+    ctx.fillStyle = ink; ctx.font = "600 22px 'Nunito Sans', sans-serif"; ctx.fillText(p.nome, p.x, p.y + 50);
+    for (let v = 0; v < Math.min(p.vidas, 10); v++) {
+      ctx.fillStyle = danger; ctx.beginPath(); ctx.arc(p.x - (Math.min(p.vidas, 10) - 1) * 8 + v * 16, p.y - 44, 6, 0, Math.PI * 2); ctx.fill();
+    }
+    if (isPerg) { ctx.fillStyle = accent; ctx.font = "700 28px 'Chakra Petch', sans-serif"; ctx.fillText("?", p.x + 34, p.y - 30); }
+    if (isAtir && !S.balls.length) { ctx.fillStyle = bola; ctx.strokeStyle = ink; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(p.x + 26, p.y - 18, 11, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
+  }
+  for (const b of S.balls) {
+    const f = Math.min(1, b.t / b.T), x = b.from.x + (b.to.x - b.from.x) * f, y = b.from.y + (b.to.y - b.from.y) * f;
+    ctx.fillStyle = bola; ctx.strokeStyle = ink; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, 12, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  }
+}
+function mascara(ph) { return [...ph.palavra].map((c, i) => ph.rev.has(i) ? c : "_").join(" "); }
+function atualizarPainel(force) {
+  const S = sim.S; if (!S) return;
+  const ph = S.ph || {};
+  $("s-clock").textContent = fmtT(S.t);
+  if (S.fim) {
+    $("s-phase").textContent = "Fim de partida";
+    $("s-word").textContent = `${S.fim.vencedor.nome} venceu!`;
+    $("s-sub").textContent = `${fmtT(S.fim.t)} de partida · ${S.st.rodadas} rodadas de bola · ${S.st.palavras} palavras`;
+  } else if (ph.k === "pergunta") {
+    const p = ph.ordem[ph.idx];
+    $("s-phase").textContent = "Pergunta";
+    $("s-word").textContent = `${ph.tema}: ${mascara(ph)}`;
+    $("s-sub").textContent = `${ph.perg.nome} pergunta · vez de ${p ? p.nome : "…"} · ${Math.max(0, Math.ceil(ph.wait))} s · volta ${ph.voltas + 1}`;
+  } else if (ph.k === "voto") {
+    $("s-phase").textContent = "Votação: tá difícil";
+    $("s-word").textContent = `${ph.volta.tema}: ${mascara(ph.volta)}`;
+    $("s-sub").textContent = `${ph.sim} de ${ph.total} votaram que está difícil`;
+  } else if (ph.k === "bola") {
+    $("s-phase").textContent = "Bola!";
+    $("s-word").textContent = `${ph.atir.nome} acertou ${ph.palavra}`;
+    $("s-sub").textContent = `${correndo(S).length} correndo · próxima bola em ${Math.max(0, ph.cd).toFixed(1).replace(".", ",")} s`;
+  } else if (ph.k === "troca") {
+    $("s-phase").textContent = "Troca de papéis";
+    $("s-word").textContent = `${ph.atir.nome} vai perguntar`;
+    $("s-sub").textContent = "";
+  }
+  const tb = $("s-score"); tb.innerHTML = "";
+  for (const p of S.players) {
+    const tr = document.createElement("tr"); if (!p.vivo) tr.className = "out";
+    const td1 = document.createElement("td");
+    const dot = document.createElement("span"); dot.className = "pdot"; dot.style.background = p.cor;
+    td1.append(dot, document.createTextNode(p.nome));
+    const papel = (ph.perg === p || (ph.volta && ph.volta.perg === p)) ? "pergunta" : (ph.atir === p ? "bola" : "");
+    if (papel && !S.fim) { const r = document.createElement("span"); r.className = "role"; r.textContent = papel; td1.append(r); }
+    const td2 = document.createElement("td");
+    if (p.vivo) { td2.className = "hearts"; td2.textContent = "●".repeat(Math.min(p.vidas, 10)) + (p.compradas ? ` +${p.compradas}` : ""); } else td2.textContent = "fora";
+    const td3 = document.createElement("td"); td3.className = "num"; td3.textContent = fmtM(p.moedas);
+    tr.append(td1, td2, td3); tb.append(tr);
+  }
+  if (force || S.log.length !== sim.logLen) {
+    sim.logLen = S.log.length;
+    const ol = $("s-log"); ol.innerHTML = "";
+    for (const e of S.log.slice(-60).reverse()) {
+      const li = document.createElement("li"); if (e.big) li.className = "big";
+      const t = document.createElement("time"); t.textContent = fmtT(e.t);
+      const s = document.createElement("span"); s.textContent = e.txt;
+      li.append(t, s); ol.append(li);
+    }
+  }
+}
+function quadro(ts) {
+  if (!sim.ativo) { sim.raf = null; return; }
+  const dt = Math.min(.1, (ts - (sim.last || ts)) / 1000); sim.last = ts;
+  if (!sim.paused && sim.S && !sim.S.fim) {
+    let resto = dt * sim.speed;
+    while (resto > 0 && !sim.S.fim) { const h = Math.min(.05, resto); passo(sim.S, h); resto -= h; }
+  }
+  desenhar();
+  sim.hudT += dt;
+  if (sim.hudT > .2) { sim.hudT = 0; atualizarPainel(); }
+  sim.raf = requestAnimationFrame(quadro);
+}
+function ligarSim(on) {
+  sim.ativo = on;
+  if (on) { if (!sim.S) novaPartidaSim(true); if (!sim.raf) { sim.last = 0; sim.raf = requestAnimationFrame(quadro); } }
+}
+
+$("s-n").addEventListener("input", () => { sim.n = +$("s-n").value; $("s-n-val").textContent = sim.n; });
+$("s-n").addEventListener("change", () => { sim.S = null; novaPartidaSim(true); });
+$("s-speed").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  sim.speed = +b.dataset.v;
+  $("s-speed").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+});
+$("s-play").addEventListener("click", () => {
+  if (sim.S && sim.S.fim) { novaPartidaSim(false); return; }
+  sim.paused = !sim.paused; $("s-play").textContent = sim.paused ? "Continuar" : "Pausar";
+});
+$("s-new").addEventListener("click", () => novaPartidaSim(false));
+
+/* ---------- Ajustes ---------- */
+function montarKnobs() {
+  const box = $("s-knobs"); box.innerHTML = "";
+  for (const k of KNOBS) {
+    const d = document.createElement("div"); d.className = "knob"; d.dataset.k = k.k;
+    const l = document.createElement("label"); l.htmlFor = "k-" + k.k; l.textContent = k.t;
+    const row = document.createElement("div"); row.className = "row";
+    const inp = document.createElement("input"); inp.type = "number"; inp.id = "k-" + k.k; inp.inputMode = "decimal";
+    inp.min = k.min; inp.max = k.max; inp.step = k.step;
+    inp.addEventListener("input", () => {
+      const v = parseFloat(String(inp.value).replace(",", "."));
+      if (!isFinite(v)) return;
+      CFG[k.k] = Math.min(k.max, Math.max(k.min, v));
+      marcarMudancas();
+    });
+    row.append(inp);
+    if (k.u) { const u = document.createElement("span"); u.className = "unit"; u.textContent = k.u; row.append(u); }
+    const s = document.createElement("small"); s.textContent = `combinado: ${String(PADRAO[k.k]).replace(".", ",")}`;
+    d.append(l, row, s); box.append(d);
+  }
+  $("s-t-voto").addEventListener("change", () => { CFG.voto = $("s-t-voto").checked; marcarMudancas(); });
+  $("s-t-comprar").addEventListener("change", () => { CFG.comprar = $("s-t-comprar").checked; marcarMudancas(); });
+}
+function mostrarCfg() {
+  for (const k of KNOBS) { const inp = $("k-" + k.k); if (document.activeElement !== inp) inp.value = CFG[k.k]; }
+  $("s-t-voto").checked = !!CFG.voto; $("s-t-comprar").checked = !!CFG.comprar;
+  marcarMudancas();
+}
+function marcarMudancas() {
+  let dif = 0;
+  for (const k of KNOBS) {
+    const ch = CFG[k.k] !== PADRAO[k.k];
+    document.querySelector(`.knob[data-k="${k.k}"]`).classList.toggle("changed", ch);
+  }
+  const naoSalvo = Object.keys(PADRAO).some(k => CFG[k] !== cfgSalva[k]);
+  dif = Object.keys(PADRAO).filter(k => CFG[k] !== PADRAO[k]).length;
+  $("s-cfg-status").textContent = naoSalvo
+    ? "Ajustes ainda não salvos. A vida inicial muda na próxima partida, o resto muda na hora."
+    : (dif ? `Ajustes salvos (${dif} ${dif === 1 ? "mudança" : "mudanças"} em relação ao combinado).` : "Usando as regras combinadas no chat.");
+}
+$("s-reset").addEventListener("click", () => { CFG = { ...PADRAO }; mostrarCfg(); });
+$("s-save").addEventListener("click", async () => {
+  if (!cfgRef) { $("s-cfg-status").textContent = "Não deu para salvar agora. Os ajustes valem só nesta visita."; return; }
+  const b = $("s-save"); b.disabled = true;
+  try { await cfgRef.set({ ...CFG, atualizadaEm: Date.now() }); cfgSalva = { ...CFG }; marcarMudancas(); }
+  catch (e) { $("s-cfg-status").textContent = "Não foi possível salvar os ajustes. Tente de novo."; }
+  b.disabled = false;
+});
+montarKnobs(); mostrarCfg();
+
+function simConectar(db) {
+  simDb = db;
+  cfgRef = db.doc("simulacoes/mete-sarrafo");
+  cfgRef.onSnapshot(snap => {
+    if (!snap.exists) return;
+    const d = snap.data() || {};
+    const novo = { ...PADRAO };
+    for (const k of Object.keys(PADRAO)) if (k in d) novo[k] = d[k];
+    const naoSalvo = Object.keys(PADRAO).some(k => CFG[k] !== cfgSalva[k]);
+    cfgSalva = novo;
+    if (!naoSalvo) { CFG = { ...novo }; mostrarCfg(); } else marcarMudancas();
+  }, () => {});
+}
+
+/* ---------- Teste de equilíbrio (tela) ---------- */
+function ideiaMete() { return state.ideas.find(i => /mete\s*sarrafo/i.test(i.data.titulo || "")); }
+$("s-batch").addEventListener("click", () => {
+  const b = $("s-batch"); b.disabled = true; b.textContent = "Simulando…";
+  setTimeout(() => {
+    const r = lote(sim.n, 50);
+    sim.ultimo = r; sim.hist.unshift(r); sim.hist = sim.hist.slice(0, 8);
+    mostrarLote(r);
+    b.disabled = false; b.textContent = "Simular 50 partidas";
+  }, 30);
+});
+function mostrarLote(r) {
+  const out = $("s-batch-out"); out.innerHTML = "";
+  const g = document.createElement("div"); g.className = "batch-grid";
+  const kpis = [
+    [fmtT(r.dur), "duração média da partida"],
+    [fmtM(r.rodadas), "rodadas de bola por partida"],
+    [fmtM(r.ganho), "moedas por jogador por partida"],
+    [r.chegou === null ? "nunca" : fmtM(r.chegou), `partidas até juntar ${r.cfg.preco} moedas`],
+    [Math.round(r.pctBola * 100) + "%", "dos arremessos acertam"],
+    [String(r.compras), "vidas extras compradas em 50 partidas"],
+  ];
+  for (const [v, t] of kpis) { const k = document.createElement("div"); k.className = "kpi"; const bb = document.createElement("b"); bb.textContent = v; const s = document.createElement("span"); s.textContent = t; k.append(bb, s); g.append(k); }
+  const h = document.createElement("p"); h.className = "meta"; h.style.margin = "0";
+  h.textContent = `${r.partidas} partidas com ${r.n} jogadores · ${resumoCfg(r.cfg)}`;
+  const ul = document.createElement("ul"); ul.className = "reading";
+  for (const l of leitura(r)) { const li = document.createElement("li"); li.textContent = l; ul.append(li); }
+  const act = document.createElement("div"); act.className = "actions";
+  const keep = document.createElement("button"); keep.type = "button"; keep.className = "btn ghost"; keep.textContent = "Guardar no diário da ideia";
+  const msg = document.createElement("span"); msg.className = "msg";
+  keep.addEventListener("click", async () => {
+    const ideia = ideiaMete();
+    if (!col || !ideia) { msg.textContent = "Não achei a ficha do Mete sarrafo para guardar."; return; }
+    keep.disabled = true;
+    const texto = `Simulação: ${r.partidas} partidas com ${r.n} jogadores (${resumoCfg(r.cfg)}).\n` + leitura(r).map(l => "- " + l).join("\n");
+    const passos = [...(ideia.data.passos || []), { texto, em: Date.now(), sim: true }];
+    try { await col.doc(ideia.id).update({ passos, atualizadaEm: Date.now() }); keep.textContent = "Guardado no diário"; }
+    catch (e) { msg.textContent = "Não foi possível guardar."; keep.disabled = false; }
+  });
+  act.append(keep, msg);
+  out.append(h, g, ul, act);
+
+  const tb = $("s-hist"); tb.innerHTML = "";
+  sim.hist.forEach((x, i) => {
+    const tr = document.createElement("tr");
+    const cells = [i === 0 ? "agora" : `#${sim.hist.length - i}`, `${x.n} jog. · ${resumoCfg(x.cfg)}`, fmtT(x.dur), fmtM(x.ganho), x.chegou === null ? "nunca" : `${fmtM(x.chegou)} partidas`];
+    for (const c of cells) { const td = document.createElement("td"); td.textContent = c; tr.append(td); }
+    tb.append(tr);
+  });
+  $("s-hist-wrap").hidden = sim.hist.length < 2;
+}
+
+/* ---------- Abas ---------- */
+function rota() {
+  const naSim = location.hash === "#simulacao";
+  $("view-ideias").hidden = naSim; $("view-sim").hidden = !naSim;
+  $("tab-ideias").setAttribute("aria-current", naSim ? "false" : "page");
+  $("tab-sim").setAttribute("aria-current", naSim ? "page" : "false");
+  ligarSim(naSim);
+}
+window.addEventListener("hashchange", rota);
+rota();
+</script>
