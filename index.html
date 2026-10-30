@@ -241,6 +241,17 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .fd-prev { display: block; width: 100%; aspect-ratio: 1.3; border-radius: 9px; overflow: hidden; border: 2px solid #0b1b33; }
 .fd-tile b { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
 .fd-tile i { font-style: normal; font-size: 11px; background: #ffd23f; color: #0b1b33; border-radius: 6px; padding: 1px 6px; }
+.pin-pontos { display: flex; justify-content: center; gap: 14px; margin: 6px 0; }
+.pin-pontos i { width: 18px; height: 18px; border-radius: 50%; border: 3px solid #0b1b33; background: rgba(255,255,255,.25); }
+.pin-pontos i.on { background: #ffd23f; }
+.pin-msg { text-align: center; color: #fff; font-weight: 800; min-height: 1.4em; margin: 0; text-shadow: 0 2px 0 rgba(11,27,51,.8); }
+.pin-teclado { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 300px; width: 100%; margin: 0 auto; }
+.pin-t { min-height: 64px; border-radius: 14px; border: 3px solid #0b1b33; background: rgba(11,27,51,.6); color: #fff; font-family: var(--display); font-size: 28px; box-shadow: 0 4px 0 #0b1b33; }
+.pin-t:active { transform: translateY(2px); box-shadow: 0 2px 0 #0b1b33; }
+.pin-t2 { font-size: 22px; }
+.sk-heroi { font-style: normal; font-size: 10px; background: #ff4d6d; color: #fff; border-radius: 6px; padding: 1px 6px; }
+.sk-prev { display: block; width: 100%; aspect-ratio: 1.3; max-width: 100%; border-radius: 9px; border: 2px solid #0b1b33; background: radial-gradient(circle at 50% 75%, #2a6fd6, #133a68 75%); }
+.fd-travado .sk-prev { filter: saturate(.6) brightness(.85); }
 .lb-secao { font-family: var(--display); color: #fff; font-size: 22px; margin: 6px 0 0; -webkit-text-stroke: 1.5px #0b1b33; paint-order: stroke fill; text-shadow: 0 3px 0 #0b1b33; }
 .lb-comprar-p { min-height: 44px; font-size: 17px; }
 .lb-comprar-p.lb-tenho-btn { background: linear-gradient(180deg, #6fb2ff, #2f80ed); }
@@ -335,7 +346,7 @@ function carregar() { try { const s = localStorage.getItem("ms-festa"); return s
 let db = null, podeGravar = false, sample = null, sugestoes = [], partidasSalvas = 0, modoLocal = false;
 try { sugestoes = JSON.parse(localStorage.getItem("ms-sug-pendentes") || "[]").reverse(); } catch {}
 
-function ir(tela) { if (!["inicio", "convidado", "lobby", "loja", "perfil", "fundos"].includes(G.tela)) G.telaAntes = G.tela; G.tela = tela; salvar(); render(); window.scrollTo(0, 0); }
+function ir(tela) { if (!["inicio", "convidado", "lobby", "loja", "perfil", "fundos", "cadeado", "ajustes"].includes(G.tela)) G.telaAntes = G.tela; G.tela = tela; salvar(); render(); window.scrollTo(0, 0); }
 function evento(tipo, extra) { if (!G.p) return; G.p.eventos.push({ t: agora() - G.p.inicio, tipo, ...extra }); if (G.p.eventos.length > 400) G.p.eventos.shift(); }
 function vivos() { return G.j.filter(p => p.vivo); }
 function ganhar(p, v, tipo) { p.moedas += v; p.ganho += v; if (G.p) G.p.moedas[tipo] = (G.p.moedas[tipo] || 0) + v; }
@@ -506,12 +517,6 @@ TELAS.inicio = () => {
     <div class="chips">${G.nomes.map((n, i) => `<span class="chip"><span class="seat">${i + 1}</span>${esc(n)}<button type="button" data-a="tirar" data-i="${i}" aria-label="Tirar ${esc(n)}">×</button></span>`).join("")}</div>
   </form>
   <button class="btn" data-a="comecar" ${ok ? "" : "disabled"}>${ok ? "Começar partida" : "Coloque pelo menos 3 jogadores"}</button>
-  <details class="card">
-    <summary>Ajustes do jogo</summary>
-    <p class="dim">Já vem com as regras que o Andre combinou. Mude para testar outras ideias.</p>
-    <div class="knobs">${AJUSTES.map(([k, t, mn, mx, st]) => `<div class="field"><label for="cfg-${k}">${esc(t)}</label><input type="number" inputmode="decimal" id="cfg-${k}" data-k="${k}" min="${mn}" max="${mx}" step="${st}" value="${G.cfg[k]}"></div>`).join("")}</div>
-    <button class="link" data-a="cfgPadrao" type="button">Voltar às regras combinadas</button>
-  </details>
   <div class="card">
     <h3>Regras rápidas</h3>
     ${regrasHTML()}
@@ -967,6 +972,22 @@ const AP = {
 };
 const A_CORES = ["#e4572e", "#2f80ed", "#27ae60", "#e0b43a", "#9b51e0", "#f2994a", "#2bb5c9", "#d64570", "#6c8a1f", "#8a6be8"];
 const A_PELE = ["#f1c27d", "#e0ac69", "#c68642", "#8d5524", "#ffdbac"];
+/* Skins da loja: mudam a roupa (camisa), às vezes a pele, e põem um acessório */
+const SKINS = [
+  { k: "classico", nome: "Clássico", preco: 0 },
+  { k: "bone", nome: "Boné", preco: 60, camisa: "#e63946" },
+  { k: "oculos", nome: "Óculos escuros", preco: 80, camisa: "#2b2f38" },
+  { k: "ninja", nome: "Ninja", preco: 120, camisa: "#2d2d3a" },
+  { k: "zumbi", nome: "Zumbi", preco: 150, camisa: "#6b5b95", pele: "#8fbf6a" },
+  { k: "astronauta", nome: "Astronauta", preco: 150, camisa: "#e9eef5" },
+  { k: "rei", nome: "Rei", preco: 200, camisa: "#7b2cbf" },
+  // heróis criados para o Mete Sarrafo (visual próprio, sem copiar personagens de outros jogos)
+  { k: "feiticeiro", nome: "Feiticeiro Azul", preco: 250, camisa: "#1d2b53", heroi: true },
+  { k: "relampago", nome: "Ninja Relâmpago", preco: 250, camisa: "#2a9d55", heroi: true },
+  { k: "guepardo", nome: "Guepardo Veloz", preco: 300, camisa: "#f4a261", pele: "#f4a261", heroi: true },
+];
+const skinInfo = k => SKINS.find(s => s.k === k) || SKINS[0];
+function vestir(p, k) { const s = skinInfo(k); p.skin = s.k; if (s.camisa) p.cor = s.camisa; if (s.pele) p.pele = s.pele; return p; }
 const AW = 1000, AC = 500, AH = 380, A_VEL = 230, A_BOLA = 700, A_RAIO = 44, A_MAXBOLA = 25;
 const aRnd = (a, b) => a + Math.random() * (b - a);
 const aPick = a => a[Math.floor(Math.random() * a.length)];
@@ -1063,6 +1084,7 @@ function comecarArena() {
       home, x: home.x, y: home.y, alvo: null, modo: "casa", vel: A_VEL * aRnd(.88, 1.12), habil: aRnd(-.08, .08),
       flash: 0, passo: 0, ctrl: false, tocou: false, saiuEm: null };
   });
+  A.P.forEach(p => { if (p.humano) vestir(p, skinDe(p.nome)); });
   A.cel = Math.max(0, A.P.findIndex(p => p.nome === s.dono));
   A.balls = []; A.fx = []; A.t = 0; A.fim = null; A.ptr = null; A.inicio = Date.now();
   A.st = { palavras: 0, acertos: 0, erros: 0, timeouts: 0, votos: 0, votosOk: 0, arremessos: 0, acertosBola: 0, rodadas: 0, compras: 0, moedas: {}, eventos: [] };
@@ -1303,7 +1325,7 @@ const aCv = $("a-canvas"), aCtx = aCv.getContext("2d");
 function desenharA() {
   const w = aCv.clientWidth; if (!w) return;
   const dpr = window.devicePixelRatio || 1, px = Math.round(w * dpr);
-  if (aCv.width !== px) { aCv.width = px; aCv.height = px; }
+  if (aCv.width !== px || aCv.height !== px) { aCv.width = px; aCv.height = px; }
   const c = aCtx, k = px / AW;
   c.setTransform(k, 0, 0, k, 0, 0);
   c.fillStyle = "#0f3057"; c.fillRect(0, 0, AW, AW);
@@ -1367,6 +1389,7 @@ function desenharBoneco2(c, p, ph) {
     c.fillStyle = p.pele; c.beginPath(); c.arc(x, y - 34, 15, 0, Math.PI * 2); c.fill();
     c.fillStyle = "#1b1b2b"; c.beginPath(); c.arc(x - 5, y - 36, 2.4, 0, Math.PI * 2); c.arc(x + 5, y - 36, 2.4, 0, Math.PI * 2); c.fill();
     c.strokeStyle = "#1b1b2b"; c.lineWidth = 2; c.beginPath(); c.arc(x, y - 31, 5, .2, Math.PI - .2); c.stroke();
+    if (p.skin && p.skin !== "classico") desenharAcessorio2D(c, p.skin, x, y);
   } else {
     c.fillStyle = "#c8d3e0"; c.beginPath(); c.roundRect ? c.roundRect(x - 14, y - 48, 28, 26, 6) : c.rect(x - 14, y - 48, 28, 26); c.fill();
     c.fillStyle = "#2bb5c9"; c.fillRect(x - 9, y - 40, 6, 6); c.fillRect(x + 3, y - 40, 6, 6);
@@ -1384,6 +1407,66 @@ function desenharBoneco2(c, p, ph) {
   if (isAtir && !A.balls.length) {
     c.fillStyle = "#ff8a1f"; c.strokeStyle = "#2a1300"; c.lineWidth = 3;
     c.beginPath(); c.arc(x + 24, y - 12, 12, 0, Math.PI * 2); c.fill(); c.stroke();
+  }
+}
+
+function desenharAcessorio2D(c, skin, x, y) {
+  const hx = x, hy = y - 34;
+  const ret = (a, b, w, h, r) => { c.beginPath(); c.roundRect ? c.roundRect(a, b, w, h, r) : c.rect(a, b, w, h); c.fill(); };
+  switch (skin) {
+    case "bone":
+      c.fillStyle = "#2f80ed"; c.beginPath(); c.arc(hx, hy - 3, 15.5, Math.PI, 0); c.fill();
+      ret(hx - 2, hy - 6, 24, 5, 2); break;
+    case "oculos":
+      c.fillStyle = "#111318"; ret(hx - 12, hy - 5, 10, 6, 2); ret(hx + 2, hy - 5, 10, 6, 2); c.fillRect(hx - 2, hy - 4, 4, 2);
+      c.fillStyle = "rgba(255,255,255,.5)"; c.fillRect(hx - 10, hy - 4, 3, 1.5); c.fillRect(hx + 4, hy - 4, 3, 1.5); break;
+    case "ninja":
+      c.fillStyle = "#2d2d3a"; c.beginPath(); c.arc(hx, hy, 15.6, .08 * Math.PI, .92 * Math.PI); c.closePath(); c.fill();
+      c.fillStyle = "#e63946"; c.fillRect(hx - 15.6, hy - 11, 31.2, 5);
+      c.beginPath(); c.moveTo(hx + 13, hy - 9); c.lineTo(hx + 25, hy - 15); c.lineTo(hx + 23, hy - 5); c.closePath(); c.fill(); break;
+    case "zumbi":
+      c.strokeStyle = "#3d5a2a"; c.lineWidth = 1.5; c.beginPath(); c.moveTo(hx - 9, hy - 9); c.lineTo(hx + 3, hy - 11);
+      for (let k = 0; k < 4; k++) { c.moveTo(hx - 7 + k * 3, hy - 12.5 + k * -.5); c.lineTo(hx - 7.5 + k * 3, hy - 8 + k * -.5); }
+      c.stroke();
+      c.fillStyle = "rgba(0,0,0,.28)"; c.beginPath(); c.moveTo(x - 15, y + 10); c.lineTo(x - 9, y + 2); c.lineTo(x - 4, y + 10); c.moveTo(x + 4, y + 10); c.lineTo(x + 10, y + 4); c.lineTo(x + 15, y + 10); c.fill(); break;
+    case "astronauta":
+      c.fillStyle = "rgba(170,220,255,.35)"; c.beginPath(); c.arc(hx, hy, 20, 0, Math.PI * 2); c.fill();
+      c.strokeStyle = "#e9eef5"; c.lineWidth = 3; c.stroke();
+      c.fillStyle = "rgba(255,255,255,.55)"; c.beginPath(); c.ellipse(hx - 8, hy - 9, 4, 2.5, -.6, 0, Math.PI * 2); c.fill(); break;
+    case "feiticeiro": {
+      c.fillStyle = "#bfe6ff"; c.beginPath(); c.moveTo(hx - 15, hy - 4);
+      [[-15, -20], [-9, -10], [-5, -26], [0, -12], [5, -27], [9, -11], [15, -21], [15, -4]].forEach(([a, b]) => c.lineTo(hx + a, hy + b));
+      c.arc(hx, hy - 2, 15, 0, Math.PI, true); c.closePath(); c.fill();
+      c.fillStyle = "#ffd23f"; c.fillRect(x - 15, y - 20, 30, 3);
+      for (const lado of [-1, 1]) {
+        const g = c.createRadialGradient(x + lado * 21, y + 4, 1, x + lado * 21, y + 4, 10);
+        g.addColorStop(0, "rgba(120,220,255,.95)"); g.addColorStop(1, "rgba(120,220,255,0)");
+        c.fillStyle = g; c.beginPath(); c.arc(x + lado * 21, y + 4, 10, 0, Math.PI * 2); c.fill();
+      }
+      break;
+    }
+    case "relampago":
+      c.fillStyle = "#d9480f"; c.beginPath(); c.moveTo(hx - 15, hy - 2);
+      [[-19, -12], [-12, -14], [-14, -24], [-5, -17], [0, -29], [5, -17], [14, -24], [12, -14], [19, -12], [15, -2]].forEach(([a, b]) => c.lineTo(hx + a, hy + b));
+      c.closePath(); c.fill();
+      c.fillStyle = "#ffd23f"; c.fillRect(hx - 15.5, hy - 11, 31, 6);
+      c.strokeStyle = "#1b1b2b"; c.lineWidth = 1.6; c.beginPath(); c.moveTo(hx + 1.5, hy - 10.5); c.lineTo(hx - 1.5, hy - 8); c.lineTo(hx + 1.5, hy - 8); c.lineTo(hx - 1.5, hy - 5.5); c.stroke();
+      break;
+    case "guepardo":
+      c.fillStyle = "#f4a261"; c.strokeStyle = "#8a4b14"; c.lineWidth = 1.5;
+      for (const lado of [-1, 1]) { c.beginPath(); c.moveTo(hx + lado * 6, hy - 13); c.lineTo(hx + lado * 13, hy - 24); c.lineTo(hx + lado * 15, hy - 9); c.closePath(); c.fill(); c.stroke(); }
+      c.fillStyle = "#5a3412";
+      [[-9, -6], [8, -8], [-3, -11], [10, 2], [-11, 3]].forEach(([a, b]) => { c.beginPath(); c.arc(hx + a, hy + b, 1.6, 0, Math.PI * 2); c.fill(); });
+      [[-9, -12], [6, -14], [-2, -4], [9, 2], [-7, 4]].forEach(([a, b]) => { c.beginPath(); c.arc(x + a, y + b, 2.2, 0, Math.PI * 2); c.fill(); });
+      c.strokeStyle = "#5a3412"; c.lineWidth = 1; c.beginPath();
+      for (const lado of [-1, 1]) { c.moveTo(hx + lado * 4, hy + 1); c.lineTo(hx + lado * 13, hy - 1); c.moveTo(hx + lado * 4, hy + 2.5); c.lineTo(hx + lado * 13, hy + 3.5); }
+      c.stroke();
+      break;
+    case "rei":
+      c.fillStyle = "#ffd23f"; c.strokeStyle = "#b8860b"; c.lineWidth = 1.5; c.beginPath();
+      c.moveTo(hx - 12, hy - 11); c.lineTo(hx - 13, hy - 23); c.lineTo(hx - 6, hy - 16); c.lineTo(hx, hy - 25); c.lineTo(hx + 6, hy - 16); c.lineTo(hx + 13, hy - 23); c.lineTo(hx + 12, hy - 11);
+      c.closePath(); c.fill(); c.stroke();
+      c.fillStyle = "#ff4d6d"; c.beginPath(); c.arc(hx, hy - 15, 2.2, 0, Math.PI * 2); c.fill(); break;
   }
 }
 
@@ -1705,6 +1788,7 @@ function montarBonecos3D() {
       const olho = new THREE.Mesh(new THREE.SphereGeometry(.03, 8, 6), escuro);
       const o1 = olho.clone(); o1.position.set(-.07, .03, -.18); const o2 = olho.clone(); o2.position.set(.07, .03, -.18);
       cabeca.add(o1, o2);
+      acessorio3D(cabeca, p.skin);
     } else {
       cabeca = new THREE.Mesh(new THREE.BoxGeometry(.36, .32, .32), new THREE.MeshLambertMaterial({ color: "#c8d3e0" }));
       const visor = new THREE.Mesh(new THREE.BoxGeometry(.26, .08, .02), new THREE.MeshBasicMaterial({ color: "#2bb5c9" })); visor.position.set(0, .02, -.17);
@@ -1721,6 +1805,38 @@ function montarBonecos3D() {
     const seat = new THREE.Mesh(new THREE.RingGeometry(.3, .36, 32), new THREE.MeshBasicMaterial({ color: "#8fb0d8" }));
     seat.rotation.x = -Math.PI / 2; seat.position.set(p.home.x * U - AC * U, .02, p.home.y * U - AC * U);
     F.scene.add(seat); F.seats.push(seat);
+  }
+}
+function acessorio3D(cabeca, skin) {
+  const mat = (cor, extra) => new THREE.MeshLambertMaterial({ color: cor, ...(extra || {}) });
+  const add = (geo, cor, x, y, z, extra) => { const m = new THREE.Mesh(geo, mat(cor, extra)); m.position.set(x, y, z); cabeca.add(m); return m; };
+  switch (skin) {
+    case "bone":
+      add(new THREE.SphereGeometry(.208, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), "#2f80ed", 0, .02, 0);
+      add(new THREE.BoxGeometry(.2, .025, .18), "#2f80ed", 0, .03, -.22); break;
+    case "oculos":
+      add(new THREE.BoxGeometry(.3, .07, .03), "#111318", 0, .03, -.19); break;
+    case "ninja":
+      add(new THREE.CylinderGeometry(.205, .205, .06, 18, 1, true), "#e63946", 0, .1, 0, { side: THREE.DoubleSide });
+      add(new THREE.BoxGeometry(.3, .11, .06), "#2d2d3a", 0, -.07, -.16); break;
+    case "astronauta":
+      add(new THREE.SphereGeometry(.28, 18, 14), "#aee0ff", 0, 0, 0, { transparent: true, opacity: .3 });
+      add(new THREE.TorusGeometry(.2, .03, 8, 20), "#e9eef5", 0, -.2, 0).rotation.x = Math.PI / 2; break;
+    case "feiticeiro":
+      for (let k = 0; k < 9; k++) { const a = k / 9 * Math.PI * 2; const m = add(new THREE.ConeGeometry(.06, .2, 6), "#bfe6ff", Math.cos(a) * .12, .19, Math.sin(a) * .12); m.rotation.z = -Math.cos(a) * .6; m.rotation.x = Math.sin(a) * .6; }
+      add(new THREE.ConeGeometry(.07, .24, 6), "#bfe6ff", 0, .3, 0); break;
+    case "relampago":
+      for (let k = 0; k < 9; k++) { const a = k / 9 * Math.PI * 2; const m = add(new THREE.ConeGeometry(.06, .2, 6), "#d9480f", Math.cos(a) * .13, .17, Math.sin(a) * .13); m.rotation.z = -Math.cos(a) * .9; m.rotation.x = Math.sin(a) * .9; }
+      add(new THREE.CylinderGeometry(.206, .206, .07, 18, 1, true), "#ffd23f", 0, .09, 0, { side: THREE.DoubleSide }); break;
+    case "guepardo":
+      for (const lado of [-1, 1]) add(new THREE.ConeGeometry(.06, .14, 4), "#f4a261", lado * .12, .2, 0);
+      for (const [a, b, z] of [[-.1, .06, -.16], [.09, .1, -.17], [.12, -.04, -.14], [-.13, -.03, -.13]]) add(new THREE.SphereGeometry(.022, 6, 4), "#5a3412", a, b, z);
+      break;
+    case "rei": {
+      add(new THREE.CylinderGeometry(.15, .15, .1, 10, 1, true), "#ffd23f", 0, .21, 0, { side: THREE.DoubleSide });
+      for (let k = 0; k < 5; k++) { const a = k / 5 * Math.PI * 2; add(new THREE.ConeGeometry(.04, .09, 6), "#ffd23f", Math.cos(a) * .14, .3, Math.sin(a) * .14); }
+      break;
+    }
   }
 }
 const W3 = v => (v - AC) * U;   // coordenada do motor -> cena (centrada)
@@ -1903,6 +2019,7 @@ TELAS.lobby = () => {
       <div class="lb-dir">
         ${invVidas(nome) ? `<div class="lb-pill lb-vidas" aria-label="${invVidas(nome)} vidas extras"><span aria-hidden="true">❤</span><b>${invVidas(nome)}</b></div>` : ""}
         <div class="lb-pill lb-moedas" aria-label="${fmtM(moedas)} moedas"><span class="lb-coin" aria-hidden="true">$</span><b>${fmtM(moedas)}</b></div>
+        <button class="lb-som" data-a="ajustes" aria-label="Ajustes do jogo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.6a3.4 3.4 0 1 0 0 6.8 3.4 3.4 0 0 0 0-6.8zm8.2 4.6l1.6 1.2-1.9 3.3-1.9-.7a7.4 7.4 0 0 1-1.8 1l-.3 2H10.1l-.3-2a7.4 7.4 0 0 1-1.8-1l-1.9.7-1.9-3.3 1.6-1.2a7 7 0 0 1 0-2.4L4.2 9.6l1.9-3.3 1.9.7a7.4 7.4 0 0 1 1.8-1l.3-2h3.8l.3 2a7.4 7.4 0 0 1 1.8 1l1.9-.7 1.9 3.3-1.6 1.2a7 7 0 0 1 0 2.4z" fill="#f4f7fb" stroke="#0b1b33" stroke-width="1.3" stroke-linejoin="round"/></svg></button>
         <button class="lb-som" data-a="som" aria-label="${G.som === false ? "Ligar o som" : "Desligar o som"}" aria-pressed="${G.som !== false}">${G.som === false
           ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#f4f7fb" stroke="#0b1b33" stroke-width="1.5" stroke-linejoin="round"/><path d="M16 9l5 6M21 9l-5 6" stroke="#ff4d6d" stroke-width="2.4" stroke-linecap="round"/></svg>'
           : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#ffd23f" stroke="#0b1b33" stroke-width="1.5" stroke-linejoin="round"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="#f4f7fb" stroke-width="2" stroke-linecap="round"/></svg>'}</button>
@@ -1929,7 +2046,8 @@ TELAS.lobby = () => {
 TELAS.loja = () => {
   const nome = perfil(), moedas = G.banco[nome] || 0, tem = invVidas(nome), preco = G.cfg.preco;
   const pode = moedas >= preco;
-  const breve = [["Skins", "roupas novas", "#2f80ed"], ["Gestos", "dancinhas", "#9b51e0"], ["Emojis", "pra provocar", "#37d99a"]];
+  const breve = [["Gestos", "dancinhas", "#9b51e0"], ["Emojis", "pra provocar", "#37d99a"]];
+  depoisFn = desenharPrevSkins;
   const cadeado = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="10.5" width="12" height="9" rx="2" fill="#0b1b33"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="#0b1b33" stroke-width="2.2"/></svg>`;
   const coracao = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2z" fill="#ffffff" stroke="#0b1b33" stroke-width="1.6"/><path d="M12 11v5M9.5 13.5h5" stroke="#ff4d6d" stroke-width="2.2" stroke-linecap="round"/></svg>`;
   return `
@@ -1948,6 +2066,16 @@ TELAS.loja = () => {
       </div>
       <button class="lb-comprar" data-a="comprarLoja" ${pode ? "" : "disabled"}>${pode ? (G.lojaConf === "vida" ? "Confirmar?" : `<span class="lb-coin" aria-hidden="true">$</span>${preco}`) : `Faltam ${fmtM(preco - moedas)}`}</button>
     </div>
+    <h2 class="lb-secao">Skins</h2>
+    <div class="fd-grid">${SKINS.map(s => {
+      const tem = temSkin(nome, s.k), usando = skinDe(nome) === s.k, podeS = moedas >= s.preco;
+      const rotulo = usando ? "Usando" : tem ? "Usar" : G.lojaConf === "skin:" + s.k ? "Confirmar?" : podeS ? `<span class="lb-coin" aria-hidden="true">$</span>${s.preco}` : `$ ${s.preco}`;
+      return `<div class="fd-tile${tem ? "" : " fd-travado"}"${usando ? ' aria-current="true"' : ""}>
+        <canvas class="sk-prev" data-skin="${s.k}" aria-label="Bonequinho com a skin ${esc(s.nome)}"></canvas>
+        <b>${esc(s.nome)}${s.heroi ? '<i class="sk-heroi">herói</i>' : ""}</b>
+        <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarSkin" data-s="${s.k}" ${usando || (!tem && !podeS) ? "disabled" : ""}>${rotulo}</button>
+      </div>`; }).join("")}
+    </div>
     <h2 class="lb-secao">Fundos</h2>
     <div class="fd-grid">${FUNDOS.filter(([k]) => k !== "basico").map(([k, t]) => {
       const tem = temFundo(nome, k), usando = fundoAtual() === k, pr = PRECO_FUNDO[k], podeF = moedas >= pr;
@@ -1959,7 +2087,7 @@ TELAS.loja = () => {
       </div>`; }).join("")}
     </div>
     <p class="lb-sub">Mais coisas em breve:</p>
-    <div class="lb-itens lb-itens3">${breve.map(([t, s2, c]) => `
+    <div class="lb-itens">${breve.map(([t, s2, c]) => `
       <div class="lb-item"><div class="lb-item-art" style="background:${c}">${cadeado}</div><b>${esc(t)}</b><span>${esc(s2)}</span></div>`).join("")}
     </div>
   </section>`;
@@ -1995,14 +2123,14 @@ let lbRaf = null, lbT = 0;
 function animarLobby() {
   if (lbRaf) cancelAnimationFrame(lbRaf);
   const nome = perfil();
-  const boneco = { i: -1, nome: "", humano: true, cor: A_CORES[0], pele: A_PELE[0], vidas: 0, x: 0, y: 0, passo: 0, flash: 0 };
+  const boneco = vestir({ i: -1, nome: "", humano: true, cor: A_CORES[0], pele: A_PELE[0], vidas: 0, x: 0, y: 0, passo: 0, flash: 0 }, skinDe(nome));
   const quadro = ts => {
     const cv = $("lb-canvas");
     if (!cv || G.tela !== "lobby" || $("app").hidden) { lbRaf = null; return; }
     lbT = ts / 1000;
     const w = cv.clientWidth, dpr = window.devicePixelRatio || 1, px = Math.round(w * dpr);
     if (!w) { lbRaf = requestAnimationFrame(quadro); return; }
-    if (cv.width !== px) { cv.width = px; cv.height = px; }
+    if (cv.width !== px || cv.height !== px) { cv.width = px; cv.height = px; }
     const c = cv.getContext("2d");
     c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, px, px);
     const k = px / 200;
@@ -2015,8 +2143,8 @@ function animarLobby() {
     c.fillStyle = "#2a6fd6"; c.beginPath(); c.ellipse(100, 163, 44, 11, 0, 0, Math.PI * 2); c.fill();
     // bonequinho respirando e acenando
     const bob = Math.sin(lbT * 2.2) * 2;
-    boneco.x = 100; boneco.y = 112 + bob * .4; boneco.passo = Math.sin(lbT * 1.1) * 4;
-    c.save(); c.translate(100, 112); c.scale(2.1, 2.1); c.translate(-100, -112);
+    boneco.x = 100; boneco.y = 120 + bob * .4; boneco.passo = Math.sin(lbT * 1.1) * 4;
+    c.save(); c.translate(100, 120); c.scale(1.95, 1.95); c.translate(-100, -120);
     desenharBoneco2(c, boneco, {});
     c.restore();
     // bola quicando ao lado
@@ -2306,7 +2434,90 @@ acoes.escolherFundo = el => {
   G.fundo = el.dataset.f; salvar(); const y = window.scrollY; render(); window.scrollTo(0, y); };
 if (typeof TELAS_COM_MUSICA !== "undefined") TELAS_COM_MUSICA.push("fundos");
 
-/* ================= Inventário (vida extra da loja) ================= */
+
+/* ================= Ajustes do jogo, trancados com código de 5 dígitos =================
+   O código não fica escrito aqui (o repositório é público): só a "impressão digital"
+   dele (PBKDF2-SHA256). Quem souber o código pode trocá-lo dentro dos Ajustes. */
+const PIN_SAL = "mete-sarrafo-ajustes", PIN_VOLTAS = 100000;
+const PIN_PADRAO = "901cb0b1ff7d4c3efe9494403e275129efc627cd45b8eb4819111cfe320ab232";
+let ajustesAbertos = false, pinDigitado = "", pinErros = 0, pinBloqueadoAte = 0, pinTroca = null, pinMsg = "";
+async function digitalDoPin(pin) {
+  const enc = new TextEncoder();
+  const chave = await crypto.subtle.importKey("raw", enc.encode(pin), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: enc.encode(PIN_SAL), iterations: PIN_VOLTAS }, chave, 256);
+  return [...new Uint8Array(bits)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+TELAS.cadeado = () => {
+  const titulo = pinTroca ? (pinTroca.etapa === 1 ? "Novo código" : "Repita o novo código") : "Ajustes do jogo";
+  const teclas = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "apagar", "0", "ok"];
+  return `
+  <section data-fundo="${fundoAtual()}" class="bgf lobby" aria-label="Código dos ajustes">
+    <div class="lb-top"><button class="lb-pill" data-a="${pinTroca ? "ajustes" : "voltarLobby"}">← Voltar</button></div>
+    <h1 class="lb-title" style="font-size:34px">${titulo}</h1>
+    <p class="lb-sub">${pinTroca ? "Escolha 5 números." : "Digite o código de 5 números."}</p>
+    <div class="pin-pontos" aria-label="${pinDigitado.length} de 5 números">${[0, 1, 2, 3, 4].map(i => `<i class="${i < pinDigitado.length ? "on" : ""}"></i>`).join("")}</div>
+    <p class="pin-msg" role="status">${esc(pinMsg)}</p>
+    <div class="pin-teclado">${teclas.map(t => t === "apagar" ? `<button type="button" class="pin-t pin-t2" data-a="pinApagar" aria-label="Apagar">⌫</button>`
+      : t === "ok" ? `<span></span>` : `<button type="button" class="pin-t" data-a="pinTecla" data-n="${t}">${t}</button>`).join("")}</div>
+  </section>`;
+};
+TELAS.ajustes = () => {
+  if (!ajustesAbertos) { setTimeout(() => ir("cadeado"), 0); return ""; }
+  return `
+  <section data-fundo="${fundoAtual()}" class="bgf lobby" aria-label="Ajustes do jogo">
+    <div class="lb-top"><button class="lb-pill" data-a="trancarAjustes">🔒 Trancar e sair</button></div>
+    <h1 class="lb-title" style="font-size:36px">Ajustes</h1>
+    <p class="lb-sub">Valem para as próximas partidas neste aparelho. No modo online, valem os ajustes de quem abriu a sala.</p>
+    <div class="card" style="background:rgba(11,27,51,.6)">
+      <div class="knobs">${AJUSTES.map(([k, t, mn, mx, st]) => `<div class="field"><label for="cfg-${k}">${esc(t)}</label><input type="number" inputmode="decimal" id="cfg-${k}" data-k="${k}" min="${mn}" max="${mx}" step="${st}" value="${G.cfg[k]}"></div>`).join("")}</div>
+      <button class="btn ghost small" data-a="cfgPadrao" type="button">Voltar às regras combinadas</button>
+    </div>
+    <button class="btn ghost small" data-a="trocarPin" type="button">Trocar o código</button>
+  </section>`;
+};
+async function conferirPin() {
+  const pin = pinDigitado; pinDigitado = "";
+  if (pinTroca) {
+    if (pinTroca.etapa === 1) { pinTroca = { etapa: 2, novo: pin }; pinMsg = ""; render(); return; }
+    if (pin !== pinTroca.novo) { pinTroca = { etapa: 1, novo: "" }; pinMsg = "Os dois códigos ficaram diferentes. Comece de novo."; render(); return; }
+    try { G.pinHash = await digitalDoPin(pin); salvar(); } catch { pinMsg = "Não deu para trocar o código neste aparelho."; render(); return; }
+    pinTroca = null; pinMsg = ""; toast("Código trocado neste aparelho"); ir("ajustes"); return;
+  }
+  if (Date.now() < pinBloqueadoAte) { pinMsg = `Espere ${Math.ceil((pinBloqueadoAte - Date.now()) / 1000)} segundos.`; render(); return; }
+  pinMsg = "Conferindo…"; render();
+  let ok = false;
+  try { ok = (await digitalDoPin(pin)) === (G.pinHash || PIN_PADRAO); } catch { pinMsg = "Não deu para conferir o código neste aparelho."; render(); return; }
+  if (ok) { ajustesAbertos = true; pinErros = 0; pinMsg = ""; ir("ajustes"); return; }
+  pinErros++;
+  if (pinErros >= 3) { pinBloqueadoAte = Date.now() + 30000; pinErros = 0; pinMsg = "Código errado. Espere 30 segundos."; }
+  else pinMsg = "Código errado.";
+  vibrar(200); render();
+}
+Object.assign(acoes, {
+  ajustes() { if (ajustesAbertos) { ir("ajustes"); return; } pinDigitado = ""; pinTroca = null; pinMsg = ""; ir("cadeado"); },
+  pinTecla(el) { if (pinDigitado.length >= 5 || pinMsg === "Conferindo…") return; pinDigitado += el.dataset.n; if (pinMsg && pinMsg !== "Conferindo…") pinMsg = ""; render(); if (pinDigitado.length === 5) conferirPin(); },
+  pinApagar() { pinDigitado = pinDigitado.slice(0, -1); render(); },
+  trocarPin() { pinTroca = { etapa: 1, novo: "" }; pinDigitado = ""; pinMsg = ""; ir("cadeado"); },
+  trancarAjustes() { ajustesAbertos = false; ir("lobby"); },
+});
+if (typeof TELAS_COM_MUSICA !== "undefined") TELAS_COM_MUSICA.push("cadeado", "ajustes");
+
+/* ================= Inventário (vida extra, fundos e skins da loja) ================= */
+function temSkin(n, k) { return k === "classico" || (((G.inv || {})[n] || {}).skins || []).includes(k); }
+function skinDe(n) { const s = ((G.inv || {})[n] || {}).skin; return SKINS.some(x => x.k === s) && temSkin(n, s) ? s : "classico"; }
+function darSkin(n, k) { G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 }; G.inv[n].skins = G.inv[n].skins || []; if (!G.inv[n].skins.includes(k)) G.inv[n].skins.push(k); }
+function usarSkin(n, k) { G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 }; G.inv[n].skin = k; }
+function desenharPrevSkins() {
+  document.querySelectorAll("canvas.sk-prev").forEach(cv => {
+    const w = cv.clientWidth; if (!w) return;
+    const dpr = window.devicePixelRatio || 1, pw = Math.round(w * dpr), ph = Math.round(w / 1.3 * dpr);
+    if (cv.width !== pw || cv.height !== ph) { cv.width = pw; cv.height = ph; }
+    const c = cv.getContext("2d"), k = ph / 150;
+    c.setTransform(k, 0, 0, k, (pw - 200 * k) / 2, 0);
+    const p = vestir({ i: -1, nome: "", humano: true, cor: A_CORES[0], pele: A_PELE[0], vidas: 0, x: 100, y: 96, passo: 0, flash: 0 }, cv.dataset.skin);
+    c.save(); c.translate(100, 96); c.scale(1.7, 1.7); c.translate(-100, -96); desenharBoneco2(c, p, {}); c.restore();
+  });
+}
 function invVidas(n) { return ((G.inv || {})[n] || {}).vidas || 0; }
 function mudarInv(n, d) { G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 }; G.inv[n].vidas = Math.max(0, G.inv[n].vidas + d); }
 async function salvarPlacar() {
@@ -2318,6 +2529,18 @@ function pedirConfirmacao(chave) {
   G.lojaConf = chave; const y = window.scrollY; render(); window.scrollTo(0, y);
   clearTimeout(lojaConfT); lojaConfT = setTimeout(() => { G.lojaConf = false; if (G.tela === "loja") { const y2 = window.scrollY; render(); window.scrollTo(0, y2); } }, 3000);
 }
+acoes.comprarSkin = el => {
+  const k = el.dataset.s, nome = perfil(), s = skinInfo(k);
+  if (temSkin(nome, k)) { usarSkin(nome, k); salvarPlacar(); const y = window.scrollY; render(); window.scrollTo(0, y); toast(`Agora você está de ${s.nome}`); return; }
+  if ((G.banco[nome] || 0) < s.preco) return;
+  if (G.lojaConf !== "skin:" + k) { pedirConfirmacao("skin:" + k); return; }
+  clearTimeout(lojaConfT); G.lojaConf = false;
+  G.banco[nome] = Math.round(((G.banco[nome] || 0) - s.preco) * 10) / 10;
+  darSkin(nome, k); usarSkin(nome, k); salvarPlacar();
+  if (typeof sfxJogar === "function") sfxJogar();
+  toast(`${nome} comprou a skin ${s.nome}!`);
+  const y = window.scrollY; render(); window.scrollTo(0, y);
+};
 acoes.comprarFundo = el => {
   const k = el.dataset.f, nome = perfil(), preco = PRECO_FUNDO[k];
   if (temFundo(nome, k)) { G.fundo = k; salvar(); const y = window.scrollY; render(); window.scrollTo(0, y); toast("Fundo trocado"); return; }
@@ -2351,6 +2574,7 @@ if (G.tela === "lobby") render();
 const ON = { on: false, host: false, peer: null, code: "", sala: [], robos: 2, fp: true, timer: null, hostConn: null, myIdx: 0,
   meuNome: "", salaNomes: [], pedido: null, esperaTxt: "", actKey: "", fimVisto: false, movT: 0, movUlt: "", conectando: false };
 const PREFIXO = "metesarrafo-v1-";
+const SALA_DO_ANDRE = "ANDREK7Q";   // código fixo: é o que está no QR impresso (materiais/)
 const onHost = () => ON.on && ON.host;
 const onCli = () => ON.on && !ON.host;
 function gerarCodigo() { const L = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; let c = ""; for (let i = 0; i < 4; i++) c += L[Math.floor(Math.random() * L.length)]; return c; }
@@ -2360,16 +2584,25 @@ function agir(msg) { if (onHost()) entrada(A.P[ON.myIdx], msg); else if (ON.host
 TELAS_COM_MUSICA.push("salaHost", "esperando", "entrar", "criandoSala");
 
 /* ---------- Anfitrião: criar sala ---------- */
-function criarSala() {
+function usarSalaFixa() { return G.salaFixa ?? (perfil().toLowerCase() === "andre"); }
+/* auto: nome de quem chegou pelo QR e achou a sala fechada; essa pessoa abre a sala */
+function criarSala(fixa = usarSalaFixa(), auto = null) {
   if (typeof Peer === "undefined") { toast("A conexão online não carregou. Confira a internet."); return; }
   if (ON.peer) { try { ON.peer.destroy(); } catch {} }
-  ON.host = true; ON.on = false; ON.code = gerarCodigo(); ON.sala = [];
+  ON.host = true; ON.on = false; ON.code = fixa ? SALA_DO_ANDRE : gerarCodigo(); ON.sala = [];
   const peer = new Peer(PREFIXO + ON.code, { debug: 0 });
   ON.peer = peer;
   ir("criandoSala");
-  peer.on("open", () => { if (G.tela === "criandoSala") ir("salaHost"); });
+  peer.on("open", () => {
+    if (G.tela === "criandoSala") ir("salaHost");
+    if (auto) toast("A sala estava fechada, então você abriu! Chame a turma e toque em Começar.");
+  });
   peer.on("error", e => {
-    if (e.type === "unavailable-id") { criarSala(); return; }
+    if (e.type === "unavailable-id" && auto) { entrarSala(ON.code, auto, true); return; }   // alguém abriu ao mesmo tempo
+    if (e.type === "unavailable-id") {
+      if (fixa) { toast("A Sala do Andre já está aberta. Entrando nela…"); ON.codeEntrar = SALA_DO_ANDRE; entrarSala(SALA_DO_ANDRE, perfil(), true); return; }
+      criarSala(false); return;
+    }
     if (e.type === "peer-unavailable") return;
     toast("Problema na conexão: " + e.type);
     if (G.tela === "criandoSala") ir("lobby");
@@ -2399,6 +2632,7 @@ TELAS.salaHost = () => {
     <div class="lb-top"><button class="lb-pill" data-a="encerrarSala">← Fechar sala</button><span class="lb-pill">Sala <b style="font-family:var(--display);font-size:20px;margin-left:6px">${esc(ON.code)}</b></span></div>
     <h1 class="lb-title" style="font-size:38px">Chame os amigos</h1>
     <p class="lb-sub">Eles escaneiam o QR code ou abrem o link no celular deles. Ninguém precisa de conta.</p>
+    ${ON.sala.length ? "" : `<button class="lb-cont" data-a="trocarSala">${ON.code === SALA_DO_ANDRE ? "Usar um código sorteado" : "Usar a Sala do Andre (QR impresso)"}</button>`}
     <div class="qr" id="qr-sala" role="img" aria-label="QR code da sala"></div>
     <div class="url" style="color:#fff">${esc(linkSala(ON.code))}</div>
     <div class="card" style="background:rgba(11,27,51,.6)">
@@ -2418,6 +2652,7 @@ TELAS.salaHost = () => {
 };
 Object.assign(acoes, {
   encerrarSala() { encerrarOnline(); },
+  trocarSala() { const fixa = ON.code !== SALA_DO_ANDRE; G.salaFixa = fixa; salvar(); criarSala(fixa); },
   robosMenos() { ON.robos = Math.max(0, ON.robos - 1); enviarSala(); render(); },
   robosMais() { if (1 + ON.sala.length + ON.robos < 20) ON.robos++; enviarSala(); render(); },
   visaoFp() { guardarDigitado(); ON.fp = true; G.visaoOnline = true; salvar(); render(); },
@@ -2434,7 +2669,7 @@ function hostRecebe(conn, d) {
     const base = String(d.nome || "Amigo").replace(/\s+/g, " ").trim().slice(0, 20) || "Amigo";
     const usados = [perfil(), ...ON.sala.map(s => s.nome)];
     let nome = base, k = 2; while (usados.some(u => u.toLowerCase() === nome.toLowerCase())) nome = base + " " + (k++);
-    ON.sala.push({ conn, nome, moedas: Math.max(0, +d.moedas || 0), vidasInv: Math.max(0, Math.floor(+d.vidas || 0)) });
+    ON.sala.push({ conn, nome, moedas: Math.max(0, +d.moedas || 0), vidasInv: Math.max(0, Math.floor(+d.vidas || 0)), skin: skinInfo(d.skin).k });
     enviar(conn, { t: "bemvindo", nome, code: ON.code });
     enviarSala(); toast(`${nome} entrou na sala`); bip(880, .08);
     if (G.tela === "salaHost") render();
@@ -2466,7 +2701,7 @@ function hostSaiu(conn) {
 
 /* ---------- Anfitrião: começar ---------- */
 function comecarOnline() {
-  const lista = [{ nome: perfil(), local: true }].concat(ON.sala.filter(s => s.conn.open).map(s => ({ nome: s.nome, conn: s.conn, moedas: s.moedas, vidasInv: s.vidasInv })));
+  const lista = [{ nome: perfil(), local: true }].concat(ON.sala.filter(s => s.conn.open).map(s => ({ nome: s.nome, conn: s.conn, moedas: s.moedas, vidasInv: s.vidasInv, skin: s.skin })));
   for (let k = 1; k <= ON.robos; k++) lista.push({ nome: "Robô " + k, robo: true });
   if (lista.length < 3) { toast("Precisa de pelo menos 3 jogadores"); return; }
   const n = lista.length;
@@ -2480,12 +2715,13 @@ function comecarOnline() {
       home, x: home.x, y: home.y, alvo: null, modo: "casa", vel: A_VEL * aRnd(.88, 1.12), habil: aRnd(-.08, .08),
       flash: 0, passo: 0, ctrl: false, tocou: false, saiuEm: null };
   });
+  A.P.forEach((p, i) => { if (p.humano) vestir(p, lista[i].local ? skinDe(p.nome) : lista[i].skin); });
   A.cel = 0; ON.myIdx = 0; A.balls = []; A.fx = []; A.t = 0; A.fim = null; A.ptr = null; A.inicio = Date.now();
   A.st = { palavras: 0, acertos: 0, erros: 0, timeouts: 0, votos: 0, votosOk: 0, arremessos: 0, acertosBola: 0, rodadas: 0, compras: 0, moedas: {}, eventos: [] };
   ON.on = true; ON.pedido = null; ON.esperaTxt = ""; ON.fimVisto = false;
   $("app").hidden = true; $("arena").hidden = false; $("a-setup").hidden = true; $("a-game").hidden = false;
   window.scrollTo(0, 0);
-  const estatico = A.P.map(p => ({ nome: p.nome, cor: p.cor, pele: p.pele, humano: p.humano, hx: Math.round(p.home.x), hy: Math.round(p.home.y) }));
+  const estatico = A.P.map(p => ({ nome: p.nome, cor: p.cor, pele: p.pele, skin: p.skin || "classico", humano: p.humano, hx: Math.round(p.home.x), hy: Math.round(p.home.y) }));
   A.P.forEach(p => { if (p.conn) enviar(p.conn, { t: "start", P: estatico, eu: p.i, cfg: A.cfg }); });
   A.fp = false;
   novaPalavraA(aPick(A.P));
@@ -2802,7 +3038,7 @@ function mostrarFimOnline() {
 }
 function novaRodadaSala() {
   clearInterval(ON.timer); fecharOv(); pararLoop();
-  ON.sala = A.P.filter(p => p.remoto && p.conn && p.conn.open).map(p => ({ conn: p.conn, nome: p.nome, moedas: Math.round(p.moedas * 10) / 10, vidasInv: p.vidasInv || 0 }));
+  ON.sala = A.P.filter(p => p.remoto && p.conn && p.conn.open).map(p => ({ conn: p.conn, nome: p.nome, moedas: Math.round(p.moedas * 10) / 10, vidasInv: p.vidasInv || 0, skin: p.skin || "classico" }));
   ON.sala.forEach(s => enviar(s.conn, { t: "voltaSala" }));
   ON.on = false; A.P = []; A.fim = null;
   $("arena").hidden = true; $("app").hidden = false;
@@ -2825,7 +3061,7 @@ function encerrarOnline() {
 function sairOnline() { limparOnline(); }
 
 /* ---------- Amigo: entrar numa sala ---------- */
-const codigoUrl = (new URLSearchParams(location.search).get("sala") || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4);
+const codigoUrl = (new URLSearchParams(location.search).get("sala") || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8);
 if (codigoUrl) { ON.codeEntrar = codigoUrl; G.tela = "entrar"; }
 TELAS.entrar = () => `
   <section data-fundo="${fundoAtual()}" class="bgf lobby" aria-label="Entrar na sala">
@@ -2834,7 +3070,7 @@ TELAS.entrar = () => `
     <form class="card" data-a="entrarSala" autocomplete="off" style="background:rgba(11,27,51,.6)">
       <label for="en-nome">Seu nome</label>
       <input id="en-nome" maxlength="20" value="${esc(ON.nomeDigitado ?? G.perfil ?? "")}" placeholder="Como te chamam?" required>
-      ${ON.codeEntrar ? "" : `<label for="en-code">Código da sala</label><input id="en-code" maxlength="4" autocapitalize="characters" placeholder="Ex.: K7QM" value="${esc(ON.codeDigitado || "")}">`}
+      ${ON.codeEntrar ? "" : `<label for="en-code">Código da sala</label><input id="en-code" maxlength="8" autocapitalize="characters" placeholder="Ex.: K7QM" value="${esc(ON.codeDigitado || "")}">`}
       <label>Visão</label>
       <span class="seg2" role="group" aria-label="Visão do jogo" style="align-self:flex-start">
         <button type="button" data-a="visaoFp" aria-pressed="${G.visaoOnline !== false}">1ª pessoa</button><button type="button" data-a="visaoCima" aria-pressed="${G.visaoOnline === false}">De cima</button>
@@ -2846,7 +3082,7 @@ TELAS.esperando = () => `
   <section data-fundo="${fundoAtual()}" class="bgf lobby" aria-label="Esperando começar">
     <div class="lb-top"><button class="lb-pill" data-a="sairSala">← Sair</button><span class="lb-pill">Sala <b style="font-family:var(--display);font-size:20px;margin-left:6px">${esc(ON.codeEntrar || "")}</b></span></div>
     <h1 class="lb-title" style="font-size:38px">Você entrou!</h1>
-    <p class="lb-sub">Esperando ${esc(ON.salaNomes[0] || "o anfitrião")} começar a partida.</p>
+    <p class="lb-sub">Esperando ${esc(ON.salaNomes[0] || "quem abriu a sala")} começar a partida.</p>
     <div class="card" style="background:rgba(11,27,51,.6)">
       <h3>Na sala</h3>
       <div class="chips">${ON.salaNomes.map(n => `<span class="chip">${esc(n)}${n === ON.meuNome ? " (você)" : ""}</span>`).join("")}${ON.robos ? `<span class="chip">+ ${ON.robos} ${ON.robos === 1 ? "robô" : "robôs"}</span>` : ""}</div>
@@ -2860,28 +3096,30 @@ Object.assign(acoes, {
   entrarSala() {
     const nome = $("en-nome").value.replace(/\s+/g, " ").trim().slice(0, 20);
     if (!nome) { toast("Escreva seu nome"); return; }
-    const code = ON.codeEntrar || ($("en-code") ? $("en-code").value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4) : "");
-    if (code.length !== 4) { toast("O código da sala tem 4 letras"); return; }
+    const code = ON.codeEntrar || ($("en-code") ? $("en-code").value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8) : "");
+    if (code.length < 4) { toast("Confira o código da sala"); return; }
     G.perfil = nome; salvar(); ON.codeEntrar = code;
     entrarSala(code, nome);
   },
   sairSala() { sairOnline(); },
 });
-function entrarSala(code, nome) {
+function entrarSala(code, nome, naoAbrir = false) {
   if (typeof Peer === "undefined") { toast("A conexão online não carregou. Confira a internet."); return; }
   if (ON.peer) { try { ON.peer.destroy(); } catch {} }
   ON.host = false; ON.conectando = true; render();
   const peer = new Peer({ debug: 0 }); ON.peer = peer;
-  const desiste = setTimeout(() => { if (ON.conectando) { ON.conectando = false; toast("Não consegui entrar. Confira o código e se o Andre está com a sala aberta."); render(); } }, 15000);
+  const desiste = setTimeout(() => { if (ON.conectando) { ON.conectando = false; toast("Não consegui entrar. Confira a internet e tente de novo."); render(); } }, 15000);
   peer.on("open", () => {
     const conn = peer.connect(PREFIXO + code, { reliable: true, serialization: "json" });
     ON.hostConn = conn;
-    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome) }); });
+    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome) }); });
     conn.on("data", cliRecebe);
     conn.on("close", () => { if (ON.peer === peer) { toast("A conexão com a sala caiu."); sairOnline(); } });
   });
   peer.on("error", e => {
     clearTimeout(desiste); ON.conectando = false;
+    // a Sala do Andre está fechada: quem chegou primeiro abre a sala
+    if (e.type === "peer-unavailable" && code === SALA_DO_ANDRE && !naoAbrir) { criarSala(true, nome); return; }
     toast(e.type === "peer-unavailable" ? "Sala não encontrada. Confira o código." : "Problema na conexão: " + e.type);
     if (G.tela === "entrar") render();
   });
@@ -2900,7 +3138,7 @@ function cliRecebe(d) {
 }
 function iniciarCliente(d) {
   A.cfg = { ...PADRAO, ...(d.cfg || {}) };
-  A.P = d.P.map((o, i) => ({ i, nome: String(o.nome), cor: o.cor, pele: o.pele, humano: !!o.humano, home: { x: o.hx, y: o.hy },
+  A.P = d.P.map((o, i) => ({ i, nome: String(o.nome), cor: o.cor, pele: o.pele, skin: skinInfo(o.skin).k, humano: !!o.humano, home: { x: o.hx, y: o.hy },
     x: o.hx, y: o.hy, tx: o.hx, ty: o.hy, vidas: A.cfg.vidas, vivo: true, moedas: 0, ganho: 0, compradas: 0,
     alvo: null, modo: "casa", vel: A_VEL, habil: 0, flash: 0, passo: 0, ctrl: false, tocou: false }));
   A.cel = d.eu; ON.myIdx = d.eu; ON.on = true; ON.host = false; ON.fimVisto = false; ON.actKey = "";
@@ -2982,9 +3220,15 @@ function voltarEsperando() {
 MODOS.online = "Online · cada um no seu celular";
 const _jogar = acoes.jogar;
 acoes.jogar = () => { if ((G.modo || "fp") === "online") { criarSala(); return; } _jogar(); };
+const _telaLobby = TELAS.lobby;
+TELAS.lobby = () => {
+  const h = _telaLobby();
+  return h.replace('<div class="lb-bottom">', '<button class="lb-cont" data-a="irEntrar">Entrar na sala de um amigo</button>\n    <div class="lb-bottom">');
+};
+acoes.irEntrar = () => { ON.codeEntrar = ""; ir("entrar"); };
 ON.fp = G.visaoOnline !== false;
 
-if (codigoUrl) render();
+render();
 </script>
 </body>
 </html>
