@@ -760,7 +760,7 @@ function amigoRecebe(conn, d) {
   const amigo = amigos().find(a => a.codigo === de);
   if (amigo && nome && amigo.nome !== nome) { amigo.nome = nome; salvar(); }
   // foto de perfil do amigo: só ícone e cor da lista do jogo
-  const av = d.av && typeof d.av === "object" && AV_ICONES.concat("").includes(d.av.i) && AV_CORES.includes(d.av.cor) ? { i: d.av.i, cor: d.av.cor } : null;
+  const av = d.av && typeof d.av === "object" && avValido(d.av.i) && AV_CORES.includes(d.av.cor) ? { i: d.av.i, cor: d.av.cor } : null;
   if (amigo && av && JSON.stringify(amigo.av) !== JSON.stringify(av)) { amigo.av = av; salvar(); }
   if (d.t === "oi") { if (amigo) reRender(); return; }
   if (d.t === "pedido") {
