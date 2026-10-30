@@ -194,7 +194,23 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .lb-avatar { width: 38px; height: 38px; border-radius: 9px; background: #e4572e; border: 2px solid #0b1b33; display: grid; place-items: center; font-family: var(--display); font-size: 20px; flex: none; }
 .lb-pinfo { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.1; min-width: 0; }
 .lb-pinfo b { font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 40vw; }
-.lb-pinfo span { font-size: 13px; color: #ffd23f; }
+.lb-pinfo span { font-size: 13px; color: #ffd23f; white-space: nowrap; }
+.lb-perfil { min-width: 0; flex: 0 1 auto; }
+.adm h3 { margin-top: 6px; }
+.adm-chip { cursor: pointer; }
+.adm-chip[aria-pressed="true"] { background: #37d99a; color: #03281a; border-color: #0b1b33; }
+.adm-chip:disabled { opacity: .55; cursor: default; }
+.adm-moedas { display: flex; align-items: center; justify-content: center; gap: 10px; font-family: var(--display); font-size: 40px; color: #ffd23f; }
+.adm-grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 8px; }
+.adm-lim { display: grid; gap: 8px; padding: 10px 0; border-bottom: 1px solid rgba(244,247,251,.15); }
+.adm-tab { width: 100%; border-collapse: collapse; font-size: 15px; }
+.adm-tab td { padding: 6px 0; border-bottom: 1px solid rgba(244,247,251,.12); vertical-align: top; }
+.adm-tab td:last-child { text-align: right; padding-left: 10px; color: #ffd23f; font-weight: 800; white-space: nowrap; }
+.adm-kpi > div { background: rgba(255,255,255,.06); border-radius: 12px; padding: 10px; display: grid; text-align: center; }
+.adm-kpi b { font-family: var(--display); font-size: 28px; color: #ffd23f; }
+.adm-kpi span { font-size: 12px; }
+.lb-dir { flex: none; }
+@media (max-width: 380px) { .lb-perfil .lb-avatar { display: none; } .lb-perfil { padding-left: 10px !important; } .lb-pinfo b { max-width: 22vw; } }
 .som-mini { background: none; border: 0; font-size: 20px; padding: 4px 6px; line-height: 1; }
 .top .som-mini { margin-left: auto; }
 .lb-vidas { padding: 6px 10px; gap: 5px; } .lb-vidas span { color: #ff4d6d; font-size: 18px; } .lb-vidas b { font-family: var(--display); font-size: 18px; }
@@ -316,9 +332,10 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .lb-title { font-family: var(--display); color: #ffd23f; text-align: center; font-size: clamp(40px, 13vw, 60px); line-height: .95; margin: 6px 0 0;
   -webkit-text-stroke: 2px #0b1b33; paint-order: stroke fill; text-shadow: 0 5px 0 #0b1b33; transform: rotate(-3deg); }
 .lb-stage { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 280px; }
-#lb-canvas { width: min(300px, 74%); aspect-ratio: 1; max-width: 100%; }
+#lb-canvas { width: min(280px, 56%); aspect-ratio: 1; max-width: 100%; }
 .lb-nome { font-family: var(--display); font-size: 22px; color: #fff; background: #0b1b33; padding: 4px 16px; border-radius: 10px; margin-top: -18px; max-width: 70%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lb-side { position: absolute; left: 0; top: 4px; display: flex; flex-direction: column; gap: 10px; z-index: 2; }
+.lb-side-d { left: auto; right: 0; }
 .lb-btn { position: relative; width: 70px; height: 70px; border-radius: 14px; border: 2px solid #0b1b33; background: rgba(11,27,51,.6); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-weight: 800; font-size: 12px; box-shadow: 0 4px 0 #0b1b33; }
 .lb-btn svg { width: 32px; height: 32px; }
 .lb-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #0b1b33; }
@@ -330,6 +347,16 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .am-on { color: #37d99a; font-size: 13px; font-weight: 800; }
 .am-off { color: rgba(244,247,251,.55); font-size: 13px; }
 .am-tirar { padding: 6px 10px; }
+.am-abrir { background: none; border: 0; color: inherit; text-align: left; padding: 4px 0; cursor: pointer; font: inherit; }
+.am-badge { position: static; display: inline-block; vertical-align: middle; }
+.cv-cab { display: flex; align-items: center; gap: 10px; color: #fff; }
+.cv-msgs { display: flex; flex-direction: column; gap: 8px; background: rgba(11,27,51,.6); border: 2px solid rgba(244,247,251,.15); border-radius: 14px; padding: 12px; height: min(42vh, 360px); overflow-y: auto; }
+.cv-msg { align-self: flex-start; max-width: 78%; background: #f4f7fb; color: #0b1b33; border-radius: 14px 14px 14px 4px; padding: 8px 12px; font-weight: 700; }
+.cv-msg.eu { align-self: flex-end; background: #37d99a; color: #03281a; border-radius: 14px 14px 4px 14px; }
+.cv-msg.emo { font-size: 34px; background: none; padding: 0 4px; }
+.cv-esp { display: block; font-style: normal; font-size: 11px; font-weight: 400; opacity: .7; }
+.cv-frases { display: flex; flex-wrap: wrap; gap: 6px; }
+.cv-frases .chip { cursor: pointer; }
 .am-codigo { font-family: var(--display); font-size: 40px; letter-spacing: .12em; color: #ffd23f; }
 .chip.am-mais { background: #37d99a; color: #03281a; font-weight: 800; border: 0; cursor: pointer; }
 .convite-amigo { position: fixed; left: 12px; right: 12px; top: calc(12px + env(safe-area-inset-top, 0px)); z-index: 60; background: #0f3057; color: #fff; border: 3px solid #37d99a; border-radius: 16px; padding: 14px; display: grid; gap: 10px; box-shadow: 0 8px 30px rgba(0,0,0,.45); font-size: 18px; max-width: 480px; margin: 0 auto; }
@@ -1183,7 +1210,7 @@ function comecarPerguntaA(perg, tema, palavra, letra) {
   for (let k = 1; k < n; k++) { const p = A.P[(perg.i + k) % n]; if (p.vivo) ordem.push(p); }
   if (!ordem.length) { terminarA(perg); return; }
   A.ph = { k: "pergunta", perg, tema, palavra, rev, ordem, idx: 0, voltas: 0, votou: false, pensa: 0, prazo: 0, espera: false };
-  A.st.palavras++; aEvento("palavra", { perg: perg.nome, tema });
+  A.st.palavras++; aEvento("palavra", { perg: perg.nome, tema, palavra });
   aMsg(`${perg.nome} pensou numa palavra. Tema: ${tema}.`);
   prepararVez();
 }
@@ -1294,6 +1321,9 @@ async function terminarA(v) {
   A.balls = [];
   aEvento("fim", { vencedor: v.nome });
   A.P.filter(p => p.humano).forEach(p => { G.banco[p.nome] = Math.round(p.moedas * 10) / 10; });
+  G.historico = (G.historico || []).slice(-99);
+  G.historico.push({ em: Date.now(), dur: Math.round(A.t), vencedor: v.nome, jog: A.P.filter(p => p.humano).map(p => p.nome), robos: A.P.filter(p => !p.humano).length,
+    palavras: A.st.eventos.filter(e => e.tipo === "palavra" && e.palavra).map(e => e.palavra) });
   salvar();
   sfxVitoria();
   aMsg(`${v.nome} venceu!`);
@@ -2153,7 +2183,7 @@ TELAS.lobby = () => {
     <div class="lb-top">
       <button class="lb-pill lb-perfil" data-a="perfil" aria-label="Trocar jogador">
         <span class="lb-avatar">${esc(nome[0] || "?")}</span>
-        <span class="lb-pinfo"><b>${esc(nome)}</b><span>🏆 ${vit} ${vit === 1 ? "vitória" : "vitórias"}</span></span>
+        <span class="lb-pinfo"><b>${esc(nome)}</b><span aria-label="${vit} ${vit === 1 ? "vitória" : "vitórias"}" title="Vitórias">🏆 ${vit}</span></span>
       </button>
       <div class="lb-dir">
         ${invVidas(nome) ? `<div class="lb-pill lb-vidas" aria-label="${invVidas(nome)} vidas extras"><span aria-hidden="true">❤</span><b>${invVidas(nome)}</b></div>` : ""}
@@ -2168,10 +2198,11 @@ TELAS.lobby = () => {
     <div class="lb-stage">
       <div class="lb-side">
         <button class="lb-btn" data-a="loja">${ICONES.loja}<span>Loja</span><i class="lb-tag">${SKINS.some(s => s.limitada && naVenda(s) && !temSkin(nome, s.k)) ? "limitada!" : "novo!"}</i></button>
-        <button class="lb-btn" data-a="mais">${ICONES.sug}<span>Ideias</span>${sugestoes.length ? `<i class="lb-badge">${sugestoes.length}</i>` : ""}</button>
-        <button class="lb-btn" data-a="mais">${ICONES.regras}<span>Regras</span></button>
         <button class="lb-btn" data-a="personagens"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4" fill="#f1c27d" stroke="#0b1b33" stroke-width="1.5"/><path d="M5 21v-3a7 7 0 0 1 14 0v3z" fill="#2f80ed" stroke="#0b1b33" stroke-width="1.5" stroke-linejoin="round"/><path d="M18 3l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" fill="#ffd23f" stroke="#0b1b33" stroke-width="1"/></svg><span>Criar</span></button>
         <button class="lb-btn" data-a="fundos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.3 0 1.9-.8 1.9-1.7 0-1.2-1-1.5-1-2.6 0-1 .8-1.7 1.9-1.7h2.1a3.6 3.6 0 0 0 3.6-3.6C20.5 6.6 16.7 3.5 12 3.5z" fill="#f4f7fb" stroke="#0b1b33" stroke-width="1.6"/><circle cx="7.8" cy="11" r="1.5" fill="#ff4d6d"/><circle cx="10.2" cy="7.4" r="1.5" fill="#ffd23f"/><circle cx="14.6" cy="7.4" r="1.5" fill="#37d99a"/><circle cx="17" cy="11" r="1.5" fill="#2f80ed"/></svg><span>Fundo</span></button>
+      </div>
+      <div class="lb-side lb-side-d"><!--lado-direito-->
+        <button class="lb-btn" data-a="mais">${ICONES.regras}<span>Regras</span>${sugestoes.length ? `<i class="lb-badge">${sugestoes.length}</i>` : ""}</button>
       </div>
       <canvas id="lb-canvas" aria-label="Bonequinho de ${esc(nome)}"></canvas>
       <div class="lb-nome">${esc(nome)}</div>
@@ -2608,7 +2639,7 @@ async function digitalDoPin(pin) {
   return [...new Uint8Array(bits)].map(b => b.toString(16).padStart(2, "0")).join("");
 }
 TELAS.cadeado = () => {
-  const titulo = pinTroca ? (pinTroca.etapa === 1 ? "Novo código" : "Repita o novo código") : "Ajustes do jogo";
+  const titulo = pinTroca ? (pinTroca.etapa === 1 ? "Novo código" : "Repita o novo código") : typeof pinDestino !== "undefined" && pinDestino === "adm" ? "Código" : "Ajustes do jogo";
   const teclas = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "apagar", "0", "ok"];
   return `
   <section data-fundo="${fundoAtual()}" class="bgf lobby" aria-label="Código dos ajustes">
@@ -2651,14 +2682,14 @@ async function conferirPin() {
   pinMsg = "Conferindo…"; render();
   let ok = false;
   try { ok = (await digitalDoPin(pin)) === (G.pinHash || PIN_PADRAO); } catch { pinMsg = "Não deu para conferir o código neste aparelho."; render(); return; }
-  if (ok) { ajustesAbertos = true; pinErros = 0; pinMsg = ""; ir("ajustes"); return; }
+  if (ok) { ajustesAbertos = true; pinErros = 0; pinMsg = ""; const destino = typeof pinDestino !== "undefined" ? pinDestino : "ajustes"; if (typeof pinDestino !== "undefined") pinDestino = "ajustes"; ir(destino); return; }
   pinErros++;
   if (pinErros >= 3) { pinBloqueadoAte = Date.now() + 30000; pinErros = 0; pinMsg = "Código errado. Espere 30 segundos."; }
   else pinMsg = "Código errado.";
   vibrar(200); render();
 }
 Object.assign(acoes, {
-  ajustes() { if (ajustesAbertos) { ir("ajustes"); return; } pinDigitado = ""; pinTroca = null; pinMsg = ""; ir("cadeado"); },
+  ajustes() { if (typeof pinDestino !== "undefined") pinDestino = "ajustes"; if (ajustesAbertos) { ir("ajustes"); return; } pinDigitado = ""; pinTroca = null; pinMsg = ""; ir("cadeado"); },
   pinTecla(el) { if (pinDigitado.length >= 5 || pinMsg === "Conferindo…") return; pinDigitado += el.dataset.n; if (pinMsg && pinMsg !== "Conferindo…") pinMsg = ""; render(); if (pinDigitado.length === 5) conferirPin(); },
   pinApagar() { pinDigitado = pinDigitado.slice(0, -1); render(); },
   trocarPin() { pinTroca = { etapa: 1, novo: "" }; pinDigitado = ""; pinMsg = ""; ir("cadeado"); },
@@ -3446,6 +3477,124 @@ if (typeof TELAS_COM_MUSICA !== "undefined") TELAS_COM_MUSICA.push("personagens"
 if (G.tela === "lobby" || G.tela === "personagens") render();
 if (db) sincronizarPersonagens();  /* se a nuvem respondeu antes deste trecho carregar */
 </script>
+<script>
+/* ================= Painel de ADM (só o pai) =================
+   Abre com 5 toques rápidos no título "Jogo de Pergunta" + o mesmo código dos Ajustes.
+   O código do jogo é público, então o segredo é o código de 5 números, não o toque.
+   Tudo o que muda aqui vale para ESTE aparelho (não existe servidor). */
+const ADM = { aba: "moedas", jog: null, toques: [] };
+let pinDestino = "ajustes";
+document.addEventListener("click", e => {
+  if (G.tela !== "lobby" || !e.target.closest || !e.target.closest(".lb-title")) return;
+  const agora = Date.now(); ADM.toques = ADM.toques.filter(t => agora - t < 2500); ADM.toques.push(agora);
+  if (ADM.toques.length < 5) return;
+  ADM.toques = [];
+  if (ajustesAbertos) { ir("adm"); return; }
+  pinDestino = "adm"; pinDigitado = ""; pinTroca = null; pinMsg = ""; ir("cadeado");
+});
+/* skins limitadas: o ADM pode mudar prazo e preço neste aparelho (G.admLim) */
+SKINS.forEach(s => { if (s.limitada) { s.ateOriginal = s.ate; s.precoOriginal = s.preco; } });
+function aplicarLimitadas() {
+  SKINS.forEach(s => { if (!s.limitada) return; const o = (G.admLim || {})[s.k] || {}; s.ate = o.ate || s.ateOriginal; s.preco = o.preco || s.precoOriginal; });
+}
+aplicarLimitadas();
+function jogadoresDoAparelho() {
+  return [...new Set([perfil(), ...(G.nomes || []), ...Object.keys(G.banco || {}), ...Object.keys(G.inv || {})])].filter(n => n && !/^Robô \d+$/.test(n)).sort((a, b) => a.localeCompare(b));
+}
+const brDataHora = ms => { const d = new Date(ms - 3 * 3600000); return `${d.getUTCDate()}/${d.getUTCMonth() + 1} ${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`; };
+function admMudouInv() { salvarPlacar(); const y = window.scrollY; render(); window.scrollTo(0, y); }
+
+TELAS.adm = () => {
+  if (!ajustesAbertos) { setTimeout(() => ir("lobby"), 0); return ""; }
+  const jogs = jogadoresDoAparelho();
+  if (!ADM.jog || !jogs.includes(ADM.jog)) ADM.jog = jogs.includes(perfil()) ? perfil() : jogs[0];
+  const n = ADM.jog, abas = { moedas: "Moedas", itens: "Itens", limitadas: "Limitadas", numeros: "Números" };
+  const escolherJog = `<div class="chips">${jogs.map(j => `<button type="button" class="chip adm-chip" data-a="admJog" data-n="${esc(j)}" aria-pressed="${j === n}">${esc(j)}</button>`).join("")}</div>`;
+  const chipItem = (tem, gratis, tipo, k, rot) => `<button type="button" class="chip adm-chip" data-a="admItem" data-t="${tipo}" data-k="${k}" aria-pressed="${tem}" ${gratis ? "disabled" : ""}>${rot}</button>`;
+  let corpo = "";
+  if (ADM.aba === "moedas") corpo = `
+    <h3>Jogador</h3>${escolherJog}
+    <div class="adm-moedas"><span class="lb-coin" aria-hidden="true">$</span><b>${fmtM(G.banco[n] || 0)}</b></div>
+    <div class="adm-grade">${[-100, -10, 10, 50, 100, 500].map(v => `<button type="button" class="btn ghost small" data-a="admMoedas" data-v="${v}">${v > 0 ? "+" : ""}${v}</button>`).join("")}</div>
+    <form class="row" data-a="admDefinir" autocomplete="off"><input id="adm-valor" type="number" inputmode="decimal" min="0" max="100000" step="0.5" placeholder="Valor exato" aria-label="Valor exato de moedas"><button class="btn small" type="submit" style="flex:0 0 auto;width:auto">Definir</button></form>`;
+  if (ADM.aba === "itens") corpo = `
+    <h3>Jogador</h3>${escolherJog}
+    <h3>Vidas extras</h3>
+    <div class="stepper"><button class="btn ghost" type="button" data-a="admVida" data-v="-1" aria-label="Menos uma vida">−</button><b>${invVidas(n)}</b><button class="btn ghost" type="button" data-a="admVida" data-v="1" aria-label="Mais uma vida">+</button></div>
+    <h3>Skins</h3><div class="chips">${SKINS.map(s => chipItem(temSkin(n, s.k), s.preco === 0, "skin", s.k, esc(s.nome) + (s.limitada ? " ⭐" : ""))).join("")}</div>
+    <h3>Fundos</h3><div class="chips">${FUNDOS.map(([k, t]) => chipItem(temFundo(n, k), k === "basico", "fundo", k, esc(t))).join("")}</div>
+    <h3>Emojis</h3><div class="chips">${EMOJIS.map(e => chipItem(temEmoji(n, e.k), e.preco === 0, "emoji", e.k, e.e)).join("")}</div>
+    <h3>Gestos</h3><div class="chips">${GESTOS.map(g => chipItem(temGesto(n, g.k), g.preco === 0, "gesto", g.k, g.icone + " " + esc(g.nome))).join("")}</div>
+    <p class="dim" style="font-size:14px">Toque para dar ou tirar. Verde = tem.</p>`;
+  if (ADM.aba === "limitadas") corpo = SKINS.filter(s => s.limitada).map(s => {
+    const venda = naVenda(s), donos = jogadoresDoAparelho().filter(j => temSkin(j, s.k)).length, mexeu = !!(G.admLim || {})[s.k];
+    return `<div class="adm-lim">
+      <h3>${esc(s.nome)} <span class="${venda ? "am-on" : "am-off"}">● ${venda ? "à venda" : "encerrada"}</span></h3>
+      <p>Até <b>${brDataHora(Date.parse(s.ate))}</b> · <b>${s.preco}</b> moedas · ${donos} ${donos === 1 ? "jogador tem" : "jogadores têm"} neste celular</p>
+      <div class="adm-grade">
+        <button type="button" class="btn ghost small" data-a="admLimPrazo" data-k="${s.k}" data-h="24">+1 dia</button>
+        <button type="button" class="btn ghost small" data-a="admLimPrazo" data-k="${s.k}" data-h="168">+7 dias</button>
+        <button type="button" class="btn ghost small" data-a="admLimEncerrar" data-k="${s.k}">Encerrar agora</button>
+      </div>
+      <form class="row" data-a="admLimPreco" data-k="${s.k}" autocomplete="off"><input id="adm-preco-${s.k}" type="number" min="1" max="5000" value="${s.preco}" aria-label="Preço da ${esc(s.nome)}"><button class="btn small" type="submit" style="flex:0 0 auto;width:auto">Mudar preço</button></form>
+      ${mexeu ? `<button type="button" class="lb-pill" data-a="admLimVoltar" data-k="${s.k}">Voltar ao combinado (${brDataHora(Date.parse(s.ateOriginal))}, ${s.precoOriginal})</button>` : ""}
+    </div>`; }).join("") + `<p class="dim" style="font-size:14px">Muda só neste celular. Para valer no celular de todo mundo, ou para criar uma skin limitada nova, peça ao Claude.</p>`;
+  if (ADM.aba === "numeros") {
+    const hist = G.historico || [], vit = Object.entries(G.vitorias || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    const ricos = Object.entries(G.banco || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    const pal = {}; hist.forEach(h => (h.palavras || []).forEach(p => (pal[p] = (pal[p] || 0) + 1)));
+    const topPal = Object.entries(pal).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    const contar = (lista, tem) => lista.map(x => [x, jogadoresDoAparelho().filter(j => tem(j, x)).length]).filter(x => x[1]).sort((a, b) => b[1] - a[1]).slice(0, 6);
+    const skinsPop = contar(SKINS.filter(s => s.preco > 0).map(s => s.k), temSkin).map(([k, q]) => [skinInfo(k).nome, q]);
+    const tabela = (titulo, linhas, vazio) => `<h3>${titulo}</h3>${linhas.length ? `<table class="adm-tab"><tbody>${linhas.map(([a, b]) => `<tr><td>${esc(a)}</td><td>${esc(b)}</td></tr>`).join("")}</tbody></table>` : `<p class="dim">${vazio}</p>`}`;
+    corpo = `
+      <div class="adm-grade adm-kpi"><div><b>${hist.length}</b><span>partidas neste celular</span></div><div><b>${jogadoresDoAparelho().length}</b><span>jogadores</span></div>
+        <div><b>${(G.amigos || []).length}</b><span>amigos</span></div><div><b>${(G.personagens || []).length}</b><span>personagens</span></div></div>
+      ${tabela("Quem mais ganhou", vit.map(([a, b]) => [a, b + (b === 1 ? " vitória" : " vitórias")]), "Ninguém ganhou ainda.")}
+      ${tabela("Quem tem mais moedas", ricos.map(([a, b]) => [a, fmtM(b)]), "Sem moedas ainda.")}
+      ${tabela("Palavras mais usadas", topPal.map(([a, b]) => [a, b + "x"]), "Começa a contar a partir de agora.")}
+      ${tabela("Skins mais compradas", skinsPop.map(([a, b]) => [a, b + (b === 1 ? " jogador" : " jogadores")]), "Ninguém comprou skin ainda.")}
+      ${tabela("Últimas partidas", hist.slice(-8).reverse().map(h => [brDataHora(h.em) + " · " + (h.jog || []).join(", ") + (h.robos ? ` + ${h.robos} 🤖` : ""), "🏆 " + h.vencedor + " · " + Math.round(h.dur / 60) + " min"]), "Começa a contar a partir de agora.")}
+      <p class="dim" style="font-size:14px">Números deste celular. As partidas online contam no celular de quem abriu a sala.</p>`;
+  }
+  return `
+  <section data-fundo="${fundoAtual()}" class="bgf lobby" aria-label="Painel de ADM">
+    <div class="lb-top"><button class="lb-pill" data-a="trancarAjustes">🔒 Trancar e sair</button><span class="lb-pill">ADM</span></div>
+    <h1 class="lb-title" style="font-size:34px">Painel de ADM</h1>
+    <div class="ed-abas" role="tablist">${Object.entries(abas).map(([k, t]) => `<button type="button" role="tab" class="ed-aba" data-a="admAba" data-aba="${k}" aria-selected="${ADM.aba === k}">${t}</button>`).join("")}</div>
+    <div class="card adm" style="background:rgba(11,27,51,.6)">${corpo}</div>
+  </section>`;
+};
+Object.assign(acoes, {
+  admAba(el) { ADM.aba = el.dataset.aba; render(); },
+  admJog(el) { ADM.jog = el.dataset.n; admMudouInv(); },
+  admMoedas(el) { const n = ADM.jog; G.banco[n] = Math.max(0, Math.round(((G.banco[n] || 0) + +el.dataset.v) * 10) / 10); admMudouInv(); },
+  admDefinir() { const v = Number($("adm-valor").value); if (!isFinite(v) || v < 0) { toast("Digite um número"); return; } G.banco[ADM.jog] = Math.round(Math.min(100000, v) * 10) / 10; admMudouInv(); toast("Moedas definidas"); },
+  admVida(el) { mudarInv(ADM.jog, +el.dataset.v); admMudouInv(); },
+  admItem(el) {
+    const n = ADM.jog, k = el.dataset.k, t = el.dataset.t;
+    G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 };
+    const lista = { skin: "skins", fundo: "fundos", emoji: "emojis", gesto: "gestos" }[t];
+    const atual = G.inv[n][lista] || [];
+    if (el.getAttribute("aria-pressed") === "true") {
+      G.inv[n][lista] = atual.filter(x => x !== k);
+      if (t === "skin" && G.inv[n].skin === k) G.inv[n].skin = "classico";
+      if (t === "fundo" && G.fundo === k && n === perfil()) G.fundo = "basico";
+    } else G.inv[n][lista] = [...atual, k];
+    admMudouInv();
+  },
+  admLimPrazo(el) {
+    const s = skinInfo(el.dataset.k); G.admLim = G.admLim || {};
+    const base = Math.max(Date.now(), Date.parse(s.ate));
+    G.admLim[s.k] = { ...(G.admLim[s.k] || {}), ate: new Date(base + el.dataset.h * 3600000).toISOString() };
+    aplicarLimitadas(); salvar(); render(); toast(`${s.nome} vai até ${brDataHora(Date.parse(s.ate))}`);
+  },
+  admLimEncerrar(el) { const s = skinInfo(el.dataset.k); G.admLim = G.admLim || {}; G.admLim[s.k] = { ...(G.admLim[s.k] || {}), ate: new Date(Date.now() - 1000).toISOString() }; aplicarLimitadas(); salvar(); render(); toast(`${s.nome} saiu da loja`); },
+  admLimPreco(el) { const s = skinInfo(el.dataset.k), v = Math.round(Number($("adm-preco-" + s.k).value)); if (!(v >= 1 && v <= 5000)) { toast("Preço de 1 a 5000"); return; } G.admLim = G.admLim || {}; G.admLim[s.k] = { ...(G.admLim[s.k] || {}), preco: v }; aplicarLimitadas(); salvar(); render(); toast(`${s.nome} agora custa ${v}`); },
+  admLimVoltar(el) { if (G.admLim) delete G.admLim[el.dataset.k]; aplicarLimitadas(); salvar(); render(); },
+});
+if (typeof TELAS_COM_MUSICA !== "undefined") TELAS_COM_MUSICA.push("adm");
+</script>
 
 <script>
 /* ================= Online: cada um no seu celular =================
@@ -4123,7 +4272,7 @@ acoes.jogar = () => { if ((G.modo || "fp") === "online") { criarSala(); return; 
 const _telaLobby = TELAS.lobby;
 TELAS.lobby = () => {
   const h = _telaLobby();
-  return h.replace('<div class="lb-bottom">', '<button class="lb-cont" data-a="irEntrar">Entrar na sala de um amigo</button>\n    <div class="lb-bottom">');
+  return h.replace('<div class="lb-bottom">', '<button class="lb-cont lb-entrar" data-a="irEntrar">Entrar na sala de um amigo</button>\n    <div class="lb-bottom">');
 };
 acoes.irEntrar = () => { ON.codeEntrar = ""; ir("entrar"); };
 ON.fp = G.visaoOnline !== false;
@@ -4156,7 +4305,7 @@ function guardarAmigo(codigo, nome) {
   G.amigoPedidos = pedidos().filter(p => p.codigo !== codigo);
   salvar(); return true;
 }
-function telaAmigosAberta() { return ["amigos", "lobby", "salaHost"].includes(G.tela); }
+function telaAmigosAberta() { return ["amigos", "lobby", "salaHost", "conversa"].includes(G.tela); }
 function reRender() { if (telaAmigosAberta() && !$("app").hidden) { const y = window.scrollY; render(); window.scrollTo(0, y); } }
 
 /* ---------- ligar o "telefone" de amigos ---------- */
@@ -4257,11 +4406,11 @@ TELAS.amigos = () => {
     </div>` : ""}
     <div class="card" style="background:rgba(11,27,51,.6)">
       <h3>Meus amigos (${lista.length})</h3>
-      ${lista.length ? lista.map(a => `<div class="am-linha"><span class="lb-avatar">${esc(a.nome[0] || "?")}</span><span class="am-nome"><b>${esc(a.nome)}</b>${status(a.codigo)}</span>
+      ${lista.length ? lista.map(a => `<div class="am-linha"><span class="lb-avatar">${esc(a.nome[0] || "?")}</span><button type="button" class="am-nome am-abrir" data-a="abrirConversa" data-c="${esc(a.codigo)}" aria-label="Conversar com ${esc(a.nome)}"><b>${esc(a.nome)} 💬${naoLidas(a.codigo) ? ` <i class="lb-badge am-badge">${naoLidas(a.codigo)}</i>` : ""}</b>${status(a.codigo)}</button>
         ${AMG.online[a.codigo] ? `<button class="lb-cont" data-a="chamarAmigo" data-c="${esc(a.codigo)}">Chamar</button>` : ""}
         <button class="lb-pill am-tirar" data-a="tirarAmigo" data-c="${esc(a.codigo)}" aria-label="Remover ${esc(a.nome)}">${AMG.tirar === a.codigo ? "Remover?" : "✕"}</button></div>`).join("")
         : `<p class="dim">Você ainda não tem amigos aqui. Mostre o seu código para um amigo ou digite o código dele embaixo.</p>`}
-      <p class="dim" style="font-size:14px">Online = está com o jogo aberto agora. Toque em Chamar e ele recebe um convite para a sua sala.</p>
+      <p class="dim" style="font-size:14px">Toque no nome para conversar. Online = está com o jogo aberto agora. Toque em Chamar e ele recebe um convite para a sua sala.</p>
     </div>
     <form class="card" data-a="addAmigo" autocomplete="off" style="background:rgba(11,27,51,.6)">
       <h3>Adicionar amigo</h3>
@@ -4311,9 +4460,8 @@ TELAS_COM_MUSICA.push("amigos");
 
 /* botão Amigos na tela inicial, com aviso de pedido novo */
 const _telaLobbyAmigos = TELAS.lobby;
-TELAS.lobby = () => _telaLobbyAmigos().replace('<button class="lb-btn" data-a="fundos">',
-  `<button class="lb-btn" data-a="amigos"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.4" fill="#ffd23f" stroke="#0b1b33" stroke-width="1.4"/><circle cx="16.5" cy="9" r="2.8" fill="#37d99a" stroke="#0b1b33" stroke-width="1.4"/><path d="M3 20v-1.5a6 6 0 0 1 12 0V20z" fill="#ffd23f" stroke="#0b1b33" stroke-width="1.4" stroke-linejoin="round"/><path d="M14.5 20v-1.2a5 5 0 0 1 7-4.5V20z" fill="#37d99a" stroke="#0b1b33" stroke-width="1.4" stroke-linejoin="round"/></svg><span>Amigos</span>${pedidos().length ? `<i class="lb-badge">${pedidos().length}</i>` : Object.values(AMG.online).some(Boolean) ? `<i class="lb-tag" style="background:#37d99a;color:#03281a">online</i>` : ""}</button>
-        <button class="lb-btn" data-a="fundos">`);
+TELAS.lobby = () => _telaLobbyAmigos().replace('<!--lado-direito-->',
+  `<button class="lb-btn" data-a="amigos"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.4" fill="#ffd23f" stroke="#0b1b33" stroke-width="1.4"/><circle cx="16.5" cy="9" r="2.8" fill="#37d99a" stroke="#0b1b33" stroke-width="1.4"/><path d="M3 20v-1.5a6 6 0 0 1 12 0V20z" fill="#ffd23f" stroke="#0b1b33" stroke-width="1.4" stroke-linejoin="round"/><path d="M14.5 20v-1.2a5 5 0 0 1 7-4.5V20z" fill="#37d99a" stroke="#0b1b33" stroke-width="1.4" stroke-linejoin="round"/></svg><span>Amigos</span>${pedidos().length + totalNaoLidas() ? `<i class="lb-badge">${pedidos().length + totalNaoLidas()}</i>` : Object.values(AMG.online).some(Boolean) ? `<i class="lb-tag" style="background:#37d99a;color:#03281a">online</i>` : ""}</button>`);
 
 /* sala: mostra amigos online para chamar, e "+ amigo" para quem entrou e ainda não é amigo */
 const _telaSalaHost = TELAS.salaHost;
@@ -4343,6 +4491,89 @@ TELAS.esperando = () => _telaEsperando().replace(/<span class="chip">([^<]*?)(?:
 AMG.codigoUrl = limparCodigoAmigo(new URLSearchParams(location.search).get("amigo"));
 if (AMG.codigoUrl && !codigoUrl) G.tela = "amigos";
 if (typeof Peer !== "undefined") setTimeout(ligarAmigos, 300);
+
+/* ================= Chat dos amigos: só frases prontas e emojis =================
+   Escolha do pai: nada de texto livre (sem moderador). Pela rede vai só o número da frase
+   ou a chave do emoji, então ninguém consegue mandar outra coisa.
+   IMPORTANTE: só acrescente frases no FIM da lista. Mudar a ordem troca o que os outros leem. */
+const FRASES = [
+  "Oi! 👋", "Bora jogar?", "Me chama na sala!", "Já vou!", "Agora não posso", "GG! 🏆",
+  "Boa jogada!", "Kkkkk 😂", "Revanche?", "Você é muito bom!", "Quase!", "Valeu!",
+  "Tô online", "Partiu!", "Daqui a pouco", "Tchau! 👋",
+];
+const chats = () => (G.chat = G.chat || {});
+const conversa = c => (chats()[c] = chats()[c] || []);
+const naoLidas = c => conversa(c).filter(m => m.ele && !m.lida).length;
+const totalNaoLidas = () => amigos().reduce((n, a) => n + naoLidas(a.codigo), 0);
+function textoMsg(m) { return m.e ? (emojiInfo(m.e) || {}).e || "" : FRASES[m.f] || ""; }
+function guardarMsg(c, m) { const l = conversa(c); l.push(m); if (l.length > 60) l.splice(0, l.length - 60); salvar(); }
+
+/* entrega o que está esperando, quando o amigo está online */
+async function entregarPendentes(c) {
+  const pend = conversa(c).filter(m => !m.ele && m.pendente); if (!pend.length || AMG.entregando === c) return;
+  AMG.entregando = c;
+  const ok = await falarComAmigo(c, { t: "msg", itens: pend.map(m => (m.e ? { e: m.e } : { f: m.f })) });
+  AMG.entregando = null;
+  if (ok) { pend.forEach(m => delete m.pendente); salvar(); reRender(); }
+}
+async function mandarMsg(c, m) {
+  const agora = Date.now();
+  if (agora - (AMG.ultimaMsg || 0) < 900) return;   // sem enxurrada
+  AMG.ultimaMsg = agora;
+  guardarMsg(c, { ...m, em: agora, pendente: true }); reRender();
+  await entregarPendentes(c);
+}
+function recebeMsgs(de, d) {
+  if (!ehAmigo(de) || !Array.isArray(d.itens)) return;
+  const a = amigos().find(x => x.codigo === de);
+  let ultima = "";
+  for (const it of d.itens.slice(0, 10)) {
+    const m = it && typeof it === "object" ? it : {};
+    if (Number.isInteger(m.f) && FRASES[m.f]) { guardarMsg(de, { ele: true, f: m.f, em: Date.now() }); ultima = FRASES[m.f]; }
+    else if (typeof m.e === "string" && emojiInfo(m.e)) { guardarMsg(de, { ele: true, e: m.e, em: Date.now() }); ultima = emojiInfo(m.e).e; }
+  }
+  if (!ultima) return;
+  if (G.tela === "conversa" && AMG.com === de && !$("app").hidden) { conversa(de).forEach(x => (x.lida = true)); salvar(); }
+  else if (!ON.on) toast(`${a.nome}: ${ultima}`, "Responder", () => abrirConversa(de));
+  bip(1046, .06); reRender();
+}
+function abrirConversa(c) { AMG.com = c; conversa(c).forEach(m => (m.lida = true)); salvar(); ir("conversa"); entregarPendentes(c); }
+
+TELAS.conversa = () => {
+  const a = amigos().find(x => x.codigo === AMG.com);
+  if (!a) { setTimeout(() => ir("amigos"), 0); return ""; }
+  const l = conversa(a.codigo), on = AMG.online[a.codigo];
+  const meusEmojis = EMOJIS.filter(e => temEmoji(perfil(), e.k));
+  depoisFn = () => { const box = $("cv-msgs"); if (box) box.scrollTop = box.scrollHeight; };
+  return `
+  <section data-fundo="${fundoAtual()}" class="bgf lobby" aria-label="Conversa com ${esc(a.nome)}">
+    <div class="lb-top"><button class="lb-pill" data-a="amigos">← Amigos</button>${on ? `<button class="lb-cont" data-a="chamarAmigo" data-c="${esc(a.codigo)}">Chamar para jogar</button>` : ""}</div>
+    <div class="cv-cab"><span class="lb-avatar">${esc(a.nome[0] || "?")}</span><span class="am-nome"><b>${esc(a.nome)}</b>${on ? `<span class="am-on">● online</span>` : `<span class="am-off">● fora (a mensagem chega quando os dois estiverem online)</span>`}</span></div>
+    <div class="cv-msgs" id="cv-msgs" aria-live="polite">${l.length ? l.map(m => `<div class="cv-msg${m.ele ? "" : " eu"}${m.e ? " emo" : ""}">${esc(textoMsg(m))}${m.pendente ? `<i class="cv-esp">esperando</i>` : ""}</div>`).join("")
+      : `<p class="dim" style="text-align:center">Nenhuma mensagem ainda. Escolha uma frase embaixo.</p>`}</div>
+    <div class="cv-frases" role="group" aria-label="Frases para mandar">${FRASES.map((t, i) => `<button type="button" class="chip" data-a="mandarFrase" data-f="${i}">${esc(t)}</button>`).join("")}</div>
+    <div class="a-emo" role="group" aria-label="Emojis para mandar">${meusEmojis.map(e => `<button type="button" data-a="mandarEmojiChat" data-e="${e.k}" aria-label="Mandar ${esc(e.nome)}">${e.e}</button>`).join("")}</div>
+    <p class="dim" style="font-size:13px;text-align:center">Mais emojis na Loja. As mensagens ficam só neste celular e no do seu amigo.</p>
+  </section>`;
+};
+Object.assign(acoes, {
+  abrirConversa(el) { abrirConversa(el.dataset.c); },
+  mandarFrase(el) { const f = +el.dataset.f; if (FRASES[f] && AMG.com) mandarMsg(AMG.com, { f }); },
+  mandarEmojiChat(el) { const k = el.dataset.e; if (temEmoji(perfil(), k) && AMG.com) mandarMsg(AMG.com, { e: k }); },
+});
+TELAS_COM_MUSICA.push("conversa");
+
+/* recebe "msg" e entrega pendentes quando o amigo aparece */
+const _amigoRecebe = amigoRecebe;
+amigoRecebe = (conn, d) => {
+  _amigoRecebe(conn, d);
+  const de = limparCodigoAmigo(d && d.de);
+  if (!ehAmigo(de)) return;
+  if (d.t === "msg") recebeMsgs(de, d);
+  if (conversa(de).some(m => m.pendente)) setTimeout(() => entregarPendentes(de), 300);
+};
+const _verOnline = verQuemEstaOnline;
+verQuemEstaOnline = async () => { await _verOnline(); amigos().forEach(a => { if (AMG.online[a.codigo] && conversa(a.codigo).some(m => m.pendente)) entregarPendentes(a.codigo); }); };
 
 render();
 </script>
