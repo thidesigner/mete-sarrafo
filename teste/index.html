@@ -2224,7 +2224,7 @@ TELAS.lobby = () => {
     <h1 class="lb-title">Jogo de<br>Pergunta</h1>
     <div class="lb-stage">
       <div class="lb-side">
-        <button class="lb-btn" data-a="loja">${ICONES.loja}<span>Loja</span><i class="lb-tag">${SKINS.some(s => s.limitada && naVenda(s) && !temSkin(nome, s.k)) || FUNDOS_LIM.some(f => naVenda(f) && !temFundo(nome, f.k)) ? "limitada!" : "novo!"}</i></button>
+        <button class="lb-btn" data-a="loja">${ICONES.loja}<span>Loja</span><i class="lb-tag">${SKINS.some(s => s.limitada && naVenda(s) && !temSkin(nome, s.k)) || FUNDOS_LIM.some(f => naVenda(f) && !temFundo(nome, f.k)) || EMOJIS.some(e => e.limitada && naVenda(e) && !temEmoji(nome, e.k)) ? "limitada!" : "novo!"}</i></button>
         <button class="lb-btn" data-a="personagens"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4" fill="#f1c27d" stroke="#0b1b33" stroke-width="1.5"/><path d="M5 21v-3a7 7 0 0 1 14 0v3z" fill="#2f80ed" stroke="#0b1b33" stroke-width="1.5" stroke-linejoin="round"/><path d="M18 3l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" fill="#ffd23f" stroke="#0b1b33" stroke-width="1"/></svg><span>Criar</span></button>
         <button class="lb-btn" data-a="fundos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.3 0 1.9-.8 1.9-1.7 0-1.2-1-1.5-1-2.6 0-1 .8-1.7 1.9-1.7h2.1a3.6 3.6 0 0 0 3.6-3.6C20.5 6.6 16.7 3.5 12 3.5z" fill="#f4f7fb" stroke="#0b1b33" stroke-width="1.6"/><circle cx="7.8" cy="11" r="1.5" fill="#ff4d6d"/><circle cx="10.2" cy="7.4" r="1.5" fill="#ffd23f"/><circle cx="14.6" cy="7.4" r="1.5" fill="#37d99a"/><circle cx="17" cy="11" r="1.5" fill="#2f80ed"/></svg><span>Fundo</span></button>
       </div>
@@ -2288,12 +2288,14 @@ TELAS.loja = () => {
     </div>
     <h2 class="lb-secao">Emojis</h2>
     <p class="lb-sub" style="margin-top:-6px">Para mandar durante a partida. Aparecem em cima do seu bonequinho.</p>
-    <div class="fd-grid">${EMOJIS.map(e => {
+    <div class="fd-grid">${EMOJIS.filter(e => naVenda(e) || temEmoji(nome, e.k)).sort((a, b) => !!b.limitada - !!a.limitada).map(e => {
       const tem = temEmoji(nome, e.k), podeE = moedas >= e.preco;
       const rotulo = tem ? "Você tem" : G.lojaConf === "emoji:" + e.k ? "Confirmar?" : podeE ? `<span class="lb-coin" aria-hidden="true">$</span>${e.preco}` : `$ ${e.preco}`;
-      return `<div class="fd-tile${tem ? "" : " fd-travado"}">
+      return `<div class="fd-tile${tem ? "" : " fd-travado"}${e.limitada ? " sk-limitada" : ""}">
+        ${e.limitada ? `<i class="sk-selo">Edição limitada</i>` : ""}
         <span class="em-art" aria-hidden="true">${e.e}</span>
         <b>${esc(e.nome)}</b>
+        ${e.limitada && !tem && naVenda(e) ? `<span class="sk-prazo">⏳ ${faltaParaAcabar(e)}</span>` : ""}
         <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarEmoji" data-e="${e.k}" ${tem || !podeE ? "disabled" : ""} aria-label="${tem ? "Você tem" : "Comprar"} o emoji ${esc(e.nome)}">${rotulo}</button>
       </div>`; }).join("")}
     </div>
@@ -2760,13 +2762,17 @@ const EMOJIS = [
   { k: "fogo", e: "🔥", nome: "Fogo", preco: 80 },
   { k: "coroa", e: "👑", nome: "Coroa", preco: 100 },
   { k: "trofeu", e: "🏆", nome: "Troféu", preco: 120 },
+  // edição limitada: só dá para comprar até "ate" (horário de Brasília); quem comprou fica com ele
+  { k: "planeta", e: "🪐", nome: "Planeta", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-06T23:59:59-03:00" },
 ];
 const emojiInfo = k => EMOJIS.find(e => e.k === k) || null;
 function temEmoji(n, k) { const e = emojiInfo(k); return !!e && (e.preco === 0 || (((G.inv || {})[n] || {}).emojis || []).includes(k)); }
 function darEmoji(n, k) { G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 }; G.inv[n].emojis = G.inv[n].emojis || []; if (!G.inv[n].emojis.includes(k)) G.inv[n].emojis.push(k); }
 acoes.comprarEmoji = el => {
   const k = el.dataset.e, nome = perfil(), e = emojiInfo(k);
-  if (!e || temEmoji(nome, k) || (G.banco[nome] || 0) < e.preco) return;
+  if (!e || temEmoji(nome, k)) return;
+  if (!naVenda(e)) { toast("Esse emoji de edição limitada já acabou"); return; }
+  if ((G.banco[nome] || 0) < e.preco) return;
   if (G.lojaConf !== "emoji:" + k) { pedirConfirmacao("emoji:" + k); return; }
   clearTimeout(lojaConfT); G.lojaConf = false;
   G.banco[nome] = Math.round(((G.banco[nome] || 0) - e.preco) * 10) / 10;
@@ -2802,6 +2808,7 @@ const SONS_EMOJI = {
   caveira: [[55, 52, 0, .35, "triangle"], [52, 49, .35, .45, "triangle"]],
   fogo: [[40, 76, 0, .35, "sawtooth"]],
   coroa: [[67, 67, 0, .12, "square"], [72, 72, .12, .12, "square"], [76, 76, .24, .3, "square"]],
+  planeta: [[60, 84, 0, .5, "sine"], [91, 91, .45, .12, "sine"], [96, 96, .58, .12, "sine"], [91, 91, .71, .3, "sine"]],
   trofeu: [[72, 72, 0, .1, "square"], [76, 76, .1, .1, "square"], [79, 79, .2, .1, "square"], [84, 84, .3, .35, "square"]],
 };
 function somEmoji(k) { tocarNotas(SONS_EMOJI[k] || SONS_EMOJI.joinha); }
@@ -3529,9 +3536,10 @@ document.addEventListener("click", e => {
 /* skins limitadas: o ADM pode mudar prazo e preço neste aparelho (G.admLim) */
 SKINS.forEach(s => { if (s.limitada) { s.ateOriginal = s.ate; s.precoOriginal = s.preco; } });
 FUNDOS_LIM.forEach(f => { f.ateOriginal = f.ate; f.precoOriginal = f.preco; });
-const todasLimitadas = () => [...SKINS.filter(s => s.limitada), ...FUNDOS_LIM];
+EMOJIS.forEach(e => { if (e.limitada) { e.ateOriginal = e.ate; e.precoOriginal = e.preco; } });
+const todasLimitadas = () => [...SKINS.filter(s => s.limitada), ...FUNDOS_LIM, ...EMOJIS.filter(e => e.limitada)];
 const limInfo = k => todasLimitadas().find(x => x.k === k);
-const temLim = (j, x) => (x.tipo === "fundo" ? temFundo(j, x.k) : temSkin(j, x.k));
+const temLim = (j, x) => (x.tipo === "fundo" ? temFundo(j, x.k) : x.tipo === "emoji" ? temEmoji(j, x.k) : temSkin(j, x.k));
 function aplicarLimitadas() {
   todasLimitadas().forEach(s => { const o = (G.admLim || {})[s.k] || {}; s.ate = o.ate || s.ateOriginal; s.preco = o.preco || s.precoOriginal; if (s.tipo === "fundo") PRECO_FUNDO[s.k] = s.preco; });
 }
@@ -3567,7 +3575,7 @@ TELAS.adm = () => {
   if (ADM.aba === "limitadas") corpo = todasLimitadas().map(s => {
     const venda = naVenda(s), donos = jogadoresDoAparelho().filter(j => temLim(j, s)).length, mexeu = !!(G.admLim || {})[s.k];
     return `<div class="adm-lim">
-      <h3>${s.tipo === "fundo" ? "Fundo" : "Skin"} ${esc(s.nome)} <span class="${venda ? "am-on" : "am-off"}">● ${venda ? "à venda" : "encerrada"}</span></h3>
+      <h3>${s.tipo === "fundo" ? "Fundo" : s.tipo === "emoji" ? "Emoji " + s.e : "Skin"} ${esc(s.nome)} <span class="${venda ? "am-on" : "am-off"}">● ${venda ? "à venda" : "encerrada"}</span></h3>
       <p>Até <b>${brDataHora(Date.parse(s.ate))}</b> · <b>${s.preco}</b> moedas · ${donos} ${donos === 1 ? "jogador tem" : "jogadores têm"} neste celular</p>
       <div class="adm-grade">
         <button type="button" class="btn ghost small" data-a="admLimPrazo" data-k="${s.k}" data-h="24">+1 dia</button>
