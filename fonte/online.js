@@ -673,7 +673,7 @@ acoes.jogar = () => { if ((G.modo || "fp") === "online") { criarSala(); return; 
 const _telaLobby = TELAS.lobby;
 TELAS.lobby = () => {
   const h = _telaLobby();
-  return h.replace('<div class="lb-bottom">', '<button class="lb-cont" data-a="irEntrar">Entrar na sala de um amigo</button>\n    <div class="lb-bottom">');
+  return h.replace('<div class="lb-bottom">', '<button class="lb-cont lb-entrar" data-a="irEntrar">Entrar na sala de um amigo</button>\n    <div class="lb-bottom">');
 };
 acoes.irEntrar = () => { ON.codeEntrar = ""; ir("entrar"); };
 ON.fp = G.visaoOnline !== false;
@@ -861,9 +861,8 @@ TELAS_COM_MUSICA.push("amigos");
 
 /* botão Amigos na tela inicial, com aviso de pedido novo */
 const _telaLobbyAmigos = TELAS.lobby;
-TELAS.lobby = () => _telaLobbyAmigos().replace('<button class="lb-btn" data-a="fundos">',
-  `<button class="lb-btn" data-a="amigos"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.4" fill="#ffd23f" stroke="#0b1b33" stroke-width="1.4"/><circle cx="16.5" cy="9" r="2.8" fill="#37d99a" stroke="#0b1b33" stroke-width="1.4"/><path d="M3 20v-1.5a6 6 0 0 1 12 0V20z" fill="#ffd23f" stroke="#0b1b33" stroke-width="1.4" stroke-linejoin="round"/><path d="M14.5 20v-1.2a5 5 0 0 1 7-4.5V20z" fill="#37d99a" stroke="#0b1b33" stroke-width="1.4" stroke-linejoin="round"/></svg><span>Amigos</span>${pedidos().length + totalNaoLidas() ? `<i class="lb-badge">${pedidos().length + totalNaoLidas()}</i>` : Object.values(AMG.online).some(Boolean) ? `<i class="lb-tag" style="background:#37d99a;color:#03281a">online</i>` : ""}</button>
-        <button class="lb-btn" data-a="fundos">`);
+TELAS.lobby = () => _telaLobbyAmigos().replace('<!--lado-direito-->',
+  `<button class="lb-btn" data-a="amigos"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.4" fill="#ffd23f" stroke="#0b1b33" stroke-width="1.4"/><circle cx="16.5" cy="9" r="2.8" fill="#37d99a" stroke="#0b1b33" stroke-width="1.4"/><path d="M3 20v-1.5a6 6 0 0 1 12 0V20z" fill="#ffd23f" stroke="#0b1b33" stroke-width="1.4" stroke-linejoin="round"/><path d="M14.5 20v-1.2a5 5 0 0 1 7-4.5V20z" fill="#37d99a" stroke="#0b1b33" stroke-width="1.4" stroke-linejoin="round"/></svg><span>Amigos</span>${pedidos().length + totalNaoLidas() ? `<i class="lb-badge">${pedidos().length + totalNaoLidas()}</i>` : Object.values(AMG.online).some(Boolean) ? `<i class="lb-tag" style="background:#37d99a;color:#03281a">online</i>` : ""}</button>`);
 
 /* sala: mostra amigos online para chamar, e "+ amigo" para quem entrou e ainda não é amigo */
 const _telaSalaHost = TELAS.salaHost;

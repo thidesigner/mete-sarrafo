@@ -187,7 +187,10 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .lb-avatar { width: 38px; height: 38px; border-radius: 9px; background: #e4572e; border: 2px solid #0b1b33; display: grid; place-items: center; font-family: var(--display); font-size: 20px; flex: none; }
 .lb-pinfo { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.1; min-width: 0; }
 .lb-pinfo b { font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 40vw; }
-.lb-pinfo span { font-size: 13px; color: #ffd23f; }
+.lb-pinfo span { font-size: 13px; color: #ffd23f; white-space: nowrap; }
+.lb-perfil { min-width: 0; flex: 0 1 auto; }
+.lb-dir { flex: none; }
+@media (max-width: 380px) { .lb-perfil .lb-avatar { display: none; } .lb-perfil { padding-left: 10px !important; } .lb-pinfo b { max-width: 22vw; } }
 .som-mini { background: none; border: 0; font-size: 20px; padding: 4px 6px; line-height: 1; }
 .top .som-mini { margin-left: auto; }
 .lb-vidas { padding: 6px 10px; gap: 5px; } .lb-vidas span { color: #ff4d6d; font-size: 18px; } .lb-vidas b { font-family: var(--display); font-size: 18px; }
@@ -309,9 +312,10 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .lb-title { font-family: var(--display); color: #ffd23f; text-align: center; font-size: clamp(40px, 13vw, 60px); line-height: .95; margin: 6px 0 0;
   -webkit-text-stroke: 2px #0b1b33; paint-order: stroke fill; text-shadow: 0 5px 0 #0b1b33; transform: rotate(-3deg); }
 .lb-stage { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 280px; }
-#lb-canvas { width: min(300px, 74%); aspect-ratio: 1; max-width: 100%; }
+#lb-canvas { width: min(280px, 56%); aspect-ratio: 1; max-width: 100%; }
 .lb-nome { font-family: var(--display); font-size: 22px; color: #fff; background: #0b1b33; padding: 4px 16px; border-radius: 10px; margin-top: -18px; max-width: 70%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lb-side { position: absolute; left: 0; top: 4px; display: flex; flex-direction: column; gap: 10px; z-index: 2; }
+.lb-side-d { left: auto; right: 0; }
 .lb-btn { position: relative; width: 70px; height: 70px; border-radius: 14px; border: 2px solid #0b1b33; background: rgba(11,27,51,.6); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-weight: 800; font-size: 12px; box-shadow: 0 4px 0 #0b1b33; }
 .lb-btn svg { width: 32px; height: 32px; }
 .lb-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #0b1b33; }
@@ -2154,7 +2158,7 @@ TELAS.lobby = () => {
     <div class="lb-top">
       <button class="lb-pill lb-perfil" data-a="perfil" aria-label="Trocar jogador">
         <span class="lb-avatar">${esc(nome[0] || "?")}</span>
-        <span class="lb-pinfo"><b>${esc(nome)}</b><span>🏆 ${vit} ${vit === 1 ? "vitória" : "vitórias"}</span></span>
+        <span class="lb-pinfo"><b>${esc(nome)}</b><span aria-label="${vit} ${vit === 1 ? "vitória" : "vitórias"}" title="Vitórias">🏆 ${vit}</span></span>
       </button>
       <div class="lb-dir">
         ${invVidas(nome) ? `<div class="lb-pill lb-vidas" aria-label="${invVidas(nome)} vidas extras"><span aria-hidden="true">❤</span><b>${invVidas(nome)}</b></div>` : ""}
@@ -2169,10 +2173,11 @@ TELAS.lobby = () => {
     <div class="lb-stage">
       <div class="lb-side">
         <button class="lb-btn" data-a="loja">${ICONES.loja}<span>Loja</span><i class="lb-tag">${SKINS.some(s => s.limitada && naVenda(s) && !temSkin(nome, s.k)) ? "limitada!" : "novo!"}</i></button>
-        <button class="lb-btn" data-a="mais">${ICONES.sug}<span>Ideias</span>${sugestoes.length ? `<i class="lb-badge">${sugestoes.length}</i>` : ""}</button>
-        <button class="lb-btn" data-a="mais">${ICONES.regras}<span>Regras</span></button>
         <button class="lb-btn" data-a="personagens"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4" fill="#f1c27d" stroke="#0b1b33" stroke-width="1.5"/><path d="M5 21v-3a7 7 0 0 1 14 0v3z" fill="#2f80ed" stroke="#0b1b33" stroke-width="1.5" stroke-linejoin="round"/><path d="M18 3l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" fill="#ffd23f" stroke="#0b1b33" stroke-width="1"/></svg><span>Criar</span></button>
         <button class="lb-btn" data-a="fundos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.3 0 1.9-.8 1.9-1.7 0-1.2-1-1.5-1-2.6 0-1 .8-1.7 1.9-1.7h2.1a3.6 3.6 0 0 0 3.6-3.6C20.5 6.6 16.7 3.5 12 3.5z" fill="#f4f7fb" stroke="#0b1b33" stroke-width="1.6"/><circle cx="7.8" cy="11" r="1.5" fill="#ff4d6d"/><circle cx="10.2" cy="7.4" r="1.5" fill="#ffd23f"/><circle cx="14.6" cy="7.4" r="1.5" fill="#37d99a"/><circle cx="17" cy="11" r="1.5" fill="#2f80ed"/></svg><span>Fundo</span></button>
+      </div>
+      <div class="lb-side lb-side-d"><!--lado-direito-->
+        <button class="lb-btn" data-a="mais">${ICONES.regras}<span>Regras</span>${sugestoes.length ? `<i class="lb-badge">${sugestoes.length}</i>` : ""}</button>
       </div>
       <canvas id="lb-canvas" aria-label="Bonequinho de ${esc(nome)}"></canvas>
       <div class="lb-nome">${esc(nome)}</div>
