@@ -12,7 +12,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const T = 
   const abre = async (pref, nome) => {
     const pg = await ctx.newPage(); pg.on('pageerror', e => errs.push(pref + e.message));
     await pg.addInitScript(p => { for (const m of ['getItem', 'setItem', 'removeItem']) { const o = Storage.prototype[m]; Storage.prototype[m] = function (k, ...r) { return o.call(this, p + k, ...r); }; } }, pref);
-    await pg.goto('http://localhost:8765/teste/'); await pg.evaluate(n => { G.perfil = n; salvar(); render(); }, nome); await pg.waitForTimeout(600);
+    await pg.goto('http://localhost:8765/teste/'); { const ab = await pg.$('#abertura'); if (ab) await ab.click(); } await pg.evaluate(n => { G.perfil = n; salvar(); render(); }, nome); await pg.waitForTimeout(600);
     return pg;
   };
   const A = await abre('A:', 'Andre'); let B = await abre('B:', 'Leo');

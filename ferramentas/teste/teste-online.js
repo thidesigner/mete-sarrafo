@@ -10,7 +10,7 @@ const AQUI = __dirname;
   await ctx.route('**/peerjs.min.js', r => r.fulfill({ body: fs.readFileSync(path.join(AQUI, 'mockpeer.js')), contentType: 'application/javascript' }));
   const errs = [];
   const host = await ctx.newPage(); host.on('pageerror', e => errs.push('host: ' + e.message));
-  await host.goto('http://localhost:8765/teste/');
+  await host.goto('http://localhost:8765/teste/'); { const ab = await host.$('#abertura'); if (ab) await ab.click(); }   // passa da tela de abertura
   await host.evaluate(() => { G.modo = "online"; G.banco.Andre = 10; salvar(); render(); });
   await host.click('[data-a="jogar"]'); await host.waitForTimeout(300);
   const code = await host.evaluate(() => ON.code);
