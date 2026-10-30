@@ -167,6 +167,7 @@ function estadoAtual() {
     fim: A.fim ? { v: A.fim.vencedor.i } : null,
     P: A.P.map(p => [Math.round(p.x), Math.round(p.y), p.vidas, p.vivo ? 1 : 0, Math.round(p.moedas * 10) / 10, +p.flash.toFixed(2), p.modo, p.ctrl ? 1 : 0, p.tocou ? 1 : 0, p.humano ? 1 : 0, Math.round(p.ganho * 10) / 10]),
     B: A.balls.map(b => [Math.round(b.from.x), Math.round(b.from.y), Math.round(b.to.x), Math.round(b.to.y), +b.t.toFixed(3), +b.T.toFixed(3)]),
+    E: (A.emo || []).filter(e => e.ate > performance.now()).map(e => [e.i, e.k, Math.round(e.ate - performance.now())]),
     fx: A.fx.filter(f => !f.env).map(f => { f.env = true; return [Math.round(f.x), Math.round(f.y), f.txt, f.cor]; }),
     ph: { k: ph.k || "", perg: idx(ph.perg), atir: idx(ph.atir), ordem: (ph.ordem || []).map(p => p.i), idx: ph.idx || 0, voltas: ph.voltas || 0,
       tema: ph.tema || "", masc, palavra: ph.k === "bola" ? ph.palavra : "", prazo: ph.k === "pergunta" && ph.prazo ? Math.max(0, +(ph.prazo - A.t).toFixed(2)) : 0,
@@ -205,6 +206,9 @@ function entrada(p, d) {
       break;
     case "mov":
       if (p.ctrl && p.remoto) { const x = +d.x || 0, y = +d.y || 0, m = Math.hypot(x, y); p.mov = m > 1 ? { x: x / m, y: y / m } : { x, y }; }
+      break;
+    case "emoji":
+      if (p.vivo) mostrarEmoji(p, String(d.k || ""));
       break;
     case "dificil":
       if (ph.k === "pergunta" && !ph.votou && !ph.voto && !A.ov && ph.ordem.includes(p)) abrirVoto(false);
@@ -589,6 +593,7 @@ function aplicarEstado(s) {
     if (!p.vivo) { p.x = p.tx; p.y = p.ty; }
     if (p.vidas < vidasAntes && i === ON.myIdx) vibrar([60, 40, 60]);
   });
+  if (Array.isArray(s.E)) A.emo = s.E.filter(e => emojiInfo(e[1])).map(e => ({ i: +e[0], k: e[1], ate: performance.now() + Math.min(EMO_DURA, +e[2] || 0) }));
   A.balls = s.B.map(b => ({ from: { x: b[0], y: b[1] }, to: { x: b[2], y: b[3] }, t: b[4], T: b[5] }));
   for (const f of s.fx) {
     A.fx.push({ x: f[0], y: f[1], txt: f[2], cor: f[3], t: 0 });

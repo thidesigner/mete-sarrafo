@@ -143,6 +143,13 @@ details summary { cursor: pointer; font-family: var(--display); font-size: 16px;
 .arena { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
 .a-hud { gap: 4px; padding: 12px; }
 .a-hud .word { font-size: clamp(22px, 7vw, 34px); }
+.a-emo { display: flex; gap: 6px; overflow-x: auto; padding: 2px; scrollbar-width: none; }
+.a-emo button { flex: 0 0 auto; font-size: 26px; line-height: 1; width: 48px; height: 48px; border-radius: 12px; border: 2px solid var(--lines); background: rgba(11,27,51,.55); cursor: pointer; }
+.a-emo button:disabled { opacity: .4; }
+.a-emo-eu { position: absolute; left: 50%; top: 38%; font-size: 84px; transform: translate(-50%, -50%) scale(0); pointer-events: none; z-index: 3; opacity: 0; }
+.a-emo-eu.mostra { animation: emoEu 1.6s ease-out; }
+@keyframes emoEu { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.3); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); } 70% { opacity: 1; transform: translate(-50%, -60%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -80%) scale(.9); } }
+.em-art { font-size: 46px; line-height: 1.3; text-align: center; }
 .stage-wrap { position: relative; border-radius: 14px; overflow: hidden; border: 2px solid var(--lines); touch-action: none; }
 #a-canvas { display: block; width: 100%; aspect-ratio: 1; max-width: 100%; touch-action: none; user-select: none; -webkit-user-select: none; }
 .overlay { position: absolute; inset: 0; z-index: 5; background: rgba(15, 48, 87, .94); display: flex; flex-direction: column; justify-content: center; align-items: stretch; gap: 12px; padding: 20px; overflow-y: auto; text-align: center; }
@@ -339,7 +346,8 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
     <div class="top"><span class="eyebrow" id="a-phase"></span><span class="clock" id="a-clock"></span></div>
     <div class="card a-hud"><div class="tema" id="a-tema"></div><div class="word" id="a-word"></div><div class="dim" id="a-sub" style="text-align:center;font-size:15px"></div></div>
     <div class="scorebar" id="a-bar"></div>
-    <div class="stage-wrap"><canvas id="a-canvas" aria-label="Quadra do Jogo de Pergunta"></canvas><div class="overlay" id="a-ov" hidden></div></div>
+    <div class="stage-wrap"><canvas id="a-canvas" aria-label="Quadra do Jogo de Pergunta"></canvas><span class="a-emo-eu" id="a-emo-eu" aria-hidden="true"></span><div class="overlay" id="a-ov" hidden></div></div>
+    <div class="a-emo" id="a-emo" role="group" aria-label="Mandar emoji"></div>
     <div class="card a-act" id="a-act"></div>
     <div class="row"><button class="btn ghost small" id="a-visao" type="button">Ver de cima</button><button class="btn ghost small" id="a-sair" type="button">Sair da partida</button></div>
   </div>
@@ -1400,6 +1408,7 @@ function desenharA() {
     c.fillText(f.txt, f.x, f.y - f.t * 50);
     c.globalAlpha = 1;
   }
+  desenharEmojis2D(c);
 }
 function desenharBoneco(c, p, ph) {
   c.save(); c.translate(p.x, p.y); c.scale(1.4, 1.4); c.translate(-p.x, -p.y);
@@ -1739,7 +1748,7 @@ function quadroA(ts) {
   A.hudT += dt; if (A.hudT > .15) { A.hudT = 0; hudA(); }
   A.raf = requestAnimationFrame(quadroA);
 }
-function iniciarLoop() { if (!A.raf) { A.last = 0; A.raf = requestAnimationFrame(quadroA); } hudA(); renderAct(); }
+function iniciarLoop() { A.emo = []; if (typeof montarBarraEmoji === "function") montarBarraEmoji(); if (!A.raf) { A.last = 0; A.raf = requestAnimationFrame(quadroA); } hudA(); renderAct(); }
 function pararLoop() { if (A.raf) cancelAnimationFrame(A.raf); A.raf = null; }
 </script>
 
@@ -1984,6 +1993,12 @@ function desenhar3D() {
       b.tag = etiqueta({ nome: p.nome + (p.humano ? "" : " 🤖"), vidas: "●".repeat(Math.min(10, p.vidas)) }); b.tag.position.y = 1.95; b.g.add(b.tag);
     }
     b.perg.visible = (ph.k === "pergunta" || ph.k === "segredo") && ph.perg === p;
+    const emo = emojiAtivo(p), emoK = emo ? emo.e : "";
+    if (emoK !== (b.emoK || "")) {
+      if (b.emo) { b.g.remove(b.emo); b.emo.material.map.dispose(); b.emo = null; }
+      if (emo) { b.emo = spriteEmoji(emo.e); b.g.add(b.emo); }
+      b.emoK = emoK;
+    }
   }
   // bola na mão
   const atir = ph.k === "bola" || ph.k === "troca" ? ph.atir : null;
@@ -2095,7 +2110,7 @@ TELAS.lobby = () => {
 TELAS.loja = () => {
   const nome = perfil(), moedas = G.banco[nome] || 0, tem = invVidas(nome), preco = G.cfg.preco;
   const pode = moedas >= preco;
-  const breve = [["Gestos", "dancinhas", "#9b51e0"], ["Emojis", "pra provocar", "#37d99a"]];
+  const breve = [["Gestos", "dancinhas", "#9b51e0"]];
   depoisFn = desenharPrevSkins;
   const cadeado = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="10.5" width="12" height="9" rx="2" fill="#0b1b33"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="#0b1b33" stroke-width="2.2"/></svg>`;
   const coracao = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2z" fill="#ffffff" stroke="#0b1b33" stroke-width="1.6"/><path d="M12 11v5M9.5 13.5h5" stroke="#ff4d6d" stroke-width="2.2" stroke-linecap="round"/></svg>`;
@@ -2123,6 +2138,17 @@ TELAS.loja = () => {
         <canvas class="sk-prev" data-skin="${s.k}" aria-label="Bonequinho com a skin ${esc(s.nome)}"></canvas>
         <b>${esc(s.nome)}${s.heroi ? '<i class="sk-heroi">herói</i>' : ""}</b>
         <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarSkin" data-s="${s.k}" ${usando || (!tem && !podeS) ? "disabled" : ""}>${rotulo}</button>
+      </div>`; }).join("")}
+    </div>
+    <h2 class="lb-secao">Emojis</h2>
+    <p class="lb-sub" style="margin-top:-6px">Para mandar durante a partida. Aparecem em cima do seu bonequinho.</p>
+    <div class="fd-grid">${EMOJIS.map(e => {
+      const tem = temEmoji(nome, e.k), podeE = moedas >= e.preco;
+      const rotulo = tem ? "Você tem" : G.lojaConf === "emoji:" + e.k ? "Confirmar?" : podeE ? `<span class="lb-coin" aria-hidden="true">$</span>${e.preco}` : `$ ${e.preco}`;
+      return `<div class="fd-tile${tem ? "" : " fd-travado"}">
+        <span class="em-art" aria-hidden="true">${e.e}</span>
+        <b>${esc(e.nome)}</b>
+        <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarEmoji" data-e="${e.k}" ${tem || !podeE ? "disabled" : ""} aria-label="${tem ? "Você tem" : "Comprar"} o emoji ${esc(e.nome)}">${rotulo}</button>
       </div>`; }).join("")}
     </div>
     <h2 class="lb-secao">Fundos</h2>
@@ -2571,6 +2597,82 @@ function desenharPrevSkins() {
     const p = vestir({ i: -1, nome: "", humano: true, cor: A_CORES[0], pele: A_PELE[0], vidas: 0, x: 100, y: 96, passo: 0, flash: 0 }, cv.dataset.skin);
     c.save(); c.translate(100, 96); c.scale(1.7, 1.7); c.translate(-100, -96); desenharBoneco2(c, p, {}); c.restore();
   });
+}
+/* ---------- Emojis: comprados na loja, mandados durante a partida ---------- */
+const EMOJIS = [
+  { k: "joinha", e: "👍", nome: "Joinha", preco: 0 },
+  { k: "rindo", e: "😂", nome: "Rindo", preco: 20 },
+  { k: "oculos", e: "😎", nome: "Estiloso", preco: 30 },
+  { k: "lingua", e: "😜", nome: "Língua", preco: 30 },
+  { k: "bravo", e: "😡", nome: "Bravo", preco: 40 },
+  { k: "frio", e: "🥶", nome: "Congelado", preco: 40 },
+  { k: "susto", e: "😱", nome: "Susto", preco: 50 },
+  { k: "palhaco", e: "🤡", nome: "Palhaço", preco: 60 },
+  { k: "caveira", e: "💀", nome: "Caveira", preco: 80 },
+  { k: "fogo", e: "🔥", nome: "Fogo", preco: 80 },
+  { k: "coroa", e: "👑", nome: "Coroa", preco: 100 },
+  { k: "trofeu", e: "🏆", nome: "Troféu", preco: 120 },
+];
+const emojiInfo = k => EMOJIS.find(e => e.k === k) || null;
+function temEmoji(n, k) { const e = emojiInfo(k); return !!e && (e.preco === 0 || (((G.inv || {})[n] || {}).emojis || []).includes(k)); }
+function darEmoji(n, k) { G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 }; G.inv[n].emojis = G.inv[n].emojis || []; if (!G.inv[n].emojis.includes(k)) G.inv[n].emojis.push(k); }
+acoes.comprarEmoji = el => {
+  const k = el.dataset.e, nome = perfil(), e = emojiInfo(k);
+  if (!e || temEmoji(nome, k) || (G.banco[nome] || 0) < e.preco) return;
+  if (G.lojaConf !== "emoji:" + k) { pedirConfirmacao("emoji:" + k); return; }
+  clearTimeout(lojaConfT); G.lojaConf = false;
+  G.banco[nome] = Math.round(((G.banco[nome] || 0) - e.preco) * 10) / 10;
+  darEmoji(nome, k); salvarPlacar();
+  if (typeof sfxJogar === "function") sfxJogar();
+  toast(`${nome} comprou o emoji ${e.e}!`);
+  const y = window.scrollY; render(); window.scrollTo(0, y);
+};
+/* Emojis na quadra: A.emo = [{ i: jogador, k, ate: hora em que some }] */
+const EMO_DURA = 2600, EMO_ESPERA = 1500;
+const emoOnline = () => typeof ON !== "undefined" && ON.on;
+function euNaPartida() { return A.P ? A.P[emoOnline() ? ON.myIdx : A.cel] : null; }
+function mostrarEmoji(p, k) {
+  if (!p || !emojiInfo(k)) return false;
+  const agora = performance.now();
+  if ((p.emoEm || 0) + EMO_ESPERA > agora) return false;   // sem enxurrada de emojis
+  p.emoEm = agora;
+  A.emo = (A.emo || []).filter(x => x.i !== p.i && x.ate > agora);
+  A.emo.push({ i: p.i, k, ate: agora + EMO_DURA });
+  return true;
+}
+function emojiAtivo(p) { const agora = performance.now(), x = (A.emo || []).find(e => e.i === p.i && e.ate > agora); return x ? emojiInfo(x.k) : null; }
+function montarBarraEmoji() {
+  const box = $("a-emo"); if (!box) return;
+  const meus = EMOJIS.filter(e => temEmoji(perfil(), e.k));
+  box.innerHTML = meus.map(e => `<button type="button" data-emo="${e.k}" aria-label="Mandar ${esc(e.nome)}">${e.e}</button>`).join("");
+}
+document.addEventListener("click", ev => {
+  const b = ev.target.closest && ev.target.closest("[data-emo]"); if (!b) return;
+  const k = b.dataset.emo, eu = euNaPartida();
+  if (!eu || !eu.vivo) return;
+  if (emoOnline()) agir({ t: "emoji", k }); else if (!mostrarEmoji(eu, k)) return;
+  const big = $("a-emo-eu"); big.textContent = emojiInfo(k).e; big.classList.remove("mostra"); void big.offsetWidth; big.classList.add("mostra");
+  const bts = document.querySelectorAll("#a-emo button"); bts.forEach(x => (x.disabled = true));
+  setTimeout(() => bts.forEach(x => (x.disabled = false)), EMO_ESPERA);
+});
+function desenharEmojis2D(c) {
+  for (const p of A.P || []) {
+    const e = p.vivo && emojiAtivo(p); if (!e) continue;
+    const x = p.x, y = Math.max(40, p.y - 112);
+    c.fillStyle = "rgba(244,247,251,.95)"; c.strokeStyle = "#0b1b33"; c.lineWidth = 4;
+    c.beginPath(); c.arc(x, y, 34, 0, Math.PI * 2); c.fill(); c.stroke();
+    c.beginPath(); c.moveTo(x - 9, y + 30); c.lineTo(x, y + 48); c.lineTo(x + 9, y + 30); c.fill();
+    c.font = "40px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(e.e, x, y + 2);
+  }
+}
+function spriteEmoji(e) {
+  const cv = document.createElement("canvas"); cv.width = cv.height = 128;
+  const c = cv.getContext("2d");
+  c.fillStyle = "rgba(244,247,251,.95)"; c.beginPath(); c.arc(64, 64, 58, 0, Math.PI * 2); c.fill();
+  c.font = "76px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(e, 64, 70);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), depthTest: false, transparent: true }));
+  sp.scale.set(.7, .7, 1); sp.position.y = 2.55;
+  return sp;
 }
 function invVidas(n) { return ((G.inv || {})[n] || {}).vidas || 0; }
 function mudarInv(n, d) { G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 }; G.inv[n].vidas = Math.max(0, G.inv[n].vidas + d); }
@@ -3300,6 +3402,7 @@ function estadoAtual() {
     fim: A.fim ? { v: A.fim.vencedor.i } : null,
     P: A.P.map(p => [Math.round(p.x), Math.round(p.y), p.vidas, p.vivo ? 1 : 0, Math.round(p.moedas * 10) / 10, +p.flash.toFixed(2), p.modo, p.ctrl ? 1 : 0, p.tocou ? 1 : 0, p.humano ? 1 : 0, Math.round(p.ganho * 10) / 10]),
     B: A.balls.map(b => [Math.round(b.from.x), Math.round(b.from.y), Math.round(b.to.x), Math.round(b.to.y), +b.t.toFixed(3), +b.T.toFixed(3)]),
+    E: (A.emo || []).filter(e => e.ate > performance.now()).map(e => [e.i, e.k, Math.round(e.ate - performance.now())]),
     fx: A.fx.filter(f => !f.env).map(f => { f.env = true; return [Math.round(f.x), Math.round(f.y), f.txt, f.cor]; }),
     ph: { k: ph.k || "", perg: idx(ph.perg), atir: idx(ph.atir), ordem: (ph.ordem || []).map(p => p.i), idx: ph.idx || 0, voltas: ph.voltas || 0,
       tema: ph.tema || "", masc, palavra: ph.k === "bola" ? ph.palavra : "", prazo: ph.k === "pergunta" && ph.prazo ? Math.max(0, +(ph.prazo - A.t).toFixed(2)) : 0,
@@ -3338,6 +3441,9 @@ function entrada(p, d) {
       break;
     case "mov":
       if (p.ctrl && p.remoto) { const x = +d.x || 0, y = +d.y || 0, m = Math.hypot(x, y); p.mov = m > 1 ? { x: x / m, y: y / m } : { x, y }; }
+      break;
+    case "emoji":
+      if (p.vivo) mostrarEmoji(p, String(d.k || ""));
       break;
     case "dificil":
       if (ph.k === "pergunta" && !ph.votou && !ph.voto && !A.ov && ph.ordem.includes(p)) abrirVoto(false);
@@ -3722,6 +3828,7 @@ function aplicarEstado(s) {
     if (!p.vivo) { p.x = p.tx; p.y = p.ty; }
     if (p.vidas < vidasAntes && i === ON.myIdx) vibrar([60, 40, 60]);
   });
+  if (Array.isArray(s.E)) A.emo = s.E.filter(e => emojiInfo(e[1])).map(e => ({ i: +e[0], k: e[1], ate: performance.now() + Math.min(EMO_DURA, +e[2] || 0) }));
   A.balls = s.B.map(b => ({ from: { x: b[0], y: b[1] }, to: { x: b[2], y: b[3] }, t: b[4], T: b[5] }));
   for (const f of s.fx) {
     A.fx.push({ x: f[0], y: f[1], txt: f[2], cor: f[3], t: 0 });

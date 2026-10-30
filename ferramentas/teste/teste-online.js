@@ -22,6 +22,11 @@ const AQUI = __dirname;
   const telaAmigo = await amigo.evaluate(() => G.tela);
   await host.screenshot({ path: path.join(AQUI, 'saida-sala.png') });
   await host.click('[data-a="comecarOnline"]'); await host.waitForTimeout(800);
+  // emoji: a amiga manda 👍 e o anfitrião vê em cima dela; o anfitrião manda e a amiga vê
+  await amigo.evaluate(() => { fecharOv(); }); await amigo.click('#a-emo [data-emo="joinha"]').catch(() => {}); await host.waitForTimeout(400);
+  const emojiNoHost = await host.evaluate(() => (A.emo || []).map(e => A.P[e.i].nome + ':' + e.k));
+  await host.evaluate(() => { fecharOv(); }); await host.click('#a-emo [data-emo="joinha"]').catch(() => {}); await amigo.waitForTimeout(400);
+  const emojiNoAmigo = await amigo.evaluate(() => (A.emo || []).map(e => A.P[e.i].nome + ':' + e.k));
   // joga ~40s: responde pedidos, chuta certo às vezes, atira e corre
   const t0 = Date.now(); let rodadas = 0, viuAmigoCorrer = false, amigoTiro = false;
   const passo = async (pg, nome) => {
@@ -46,6 +51,6 @@ const AQUI = __dirname;
   }
   const resumo = await host.evaluate(() => ({ t: A.t, st: { palavras: A.st.palavras, acertos: A.st.acertos, erros: A.st.erros, arremessos: A.st.arremessos, acertosBola: A.st.acertosBola, rodadas: A.st.rodadas }, maria: (() => { const m = A.P.find(p => p.nome === 'Maria'); return m && { vidas: m.vidas, remoto: m.remoto, x: Math.round(m.x), y: Math.round(m.y) }; })(), fim: !!A.fim }));
   const cliente = await amigo.evaluate(() => ({ on: ON.on, me: A.P[ON.myIdx] && A.P[ON.myIdx].nome, fase: A.ph && A.ph.k, ok: !!A.ph }));
-  console.log(JSON.stringify({ code, salaHost, telaAmigo, resumo, cliente, viuAmigoCorrer, amigoTiro, errs: errs.slice(0, 8) }));
+  console.log(JSON.stringify({ code, salaHost, telaAmigo, resumo, cliente, viuAmigoCorrer, amigoTiro, emojiNoHost, emojiNoAmigo, errs: errs.slice(0, 8) }));
   await b.close();
 })();
