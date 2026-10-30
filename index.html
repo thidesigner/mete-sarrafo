@@ -347,7 +347,12 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .lb-title { font-family: var(--display); color: #ffd23f; text-align: center; font-size: clamp(40px, 13vw, 60px); line-height: .95; margin: 6px 0 0;
   -webkit-text-stroke: 2px #0b1b33; paint-order: stroke fill; text-shadow: 0 5px 0 #0b1b33; transform: rotate(-3deg); }
 .lb-stage { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 280px; }
-#lb-canvas { width: min(280px, 56%); aspect-ratio: 1; max-width: 100%; }
+#lb-canvas { width: 100%; aspect-ratio: 1; display: block; }
+.lb-boneco { position: relative; width: min(280px, 56%); max-width: 100%; background: none; border: 0; padding: 0; cursor: pointer; color: inherit; }
+.lb-trocar { position: absolute; left: 8%; bottom: 20%; width: 34px; height: 34px; display: grid; place-items: center; background: #ffd23f; border: 2px solid #0b1b33; border-radius: 50%; font-size: 18px; box-shadow: 0 3px 0 #0b1b33; }
+.ms-tile { cursor: pointer; }
+.ms-tile[aria-pressed="true"] { border-color: #ffd23f !important; box-shadow: 0 0 0 2px rgba(255,210,63,.4); }
+.ms-tile canvas.pp-thumb { width: 100%; aspect-ratio: 1.3; display: block; }
 .lb-nome { font-family: var(--display); font-size: 22px; color: #fff; background: #0b1b33; padding: 4px 16px; border-radius: 10px; margin-top: -18px; max-width: 70%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lb-side { position: absolute; left: 0; top: 4px; display: flex; flex-direction: column; gap: 10px; z-index: 2; }
 .lb-side-d { left: auto; right: 0; }
@@ -2231,7 +2236,7 @@ TELAS.lobby = () => {
       <div class="lb-side lb-side-d"><!--lado-direito-->
         <button class="lb-btn" data-a="mais">${ICONES.regras}<span>Regras</span>${sugestoes.length ? `<i class="lb-badge">${sugestoes.length}</i>` : ""}</button>
       </div>
-      <canvas id="lb-canvas" aria-label="Bonequinho de ${esc(nome)}"></canvas>
+      <button type="button" class="lb-boneco" data-a="minhasSkins" aria-label="Trocar a skin de ${esc(nome)}"><canvas id="lb-canvas" aria-hidden="true"></canvas><span class="lb-trocar" aria-hidden="true">👕</span></button>
       <div class="lb-nome">${esc(nome)}</div>
     </div>
     ${G.p && !G.p.fim ? `<button class="lb-cont" data-a="continuar">Continuar partida com bola de verdade</button>` : ""}
@@ -3539,6 +3544,47 @@ document.addEventListener("pointerdown", e => {
   window.addEventListener("pointermove", mover); window.addEventListener("pointerup", soltar); window.addEventListener("pointercancel", soltar);
 });
 if (typeof TELAS_COM_MUSICA !== "undefined") TELAS_COM_MUSICA.push("personagens", "editor");
+
+/* ---------- Tocar no bonequinho da tela inicial: trocar entre as skins e personagens que já tem ---------- */
+TELAS.minhasSkins = () => {
+  const nome = perfil(), minhas = SKINS.filter(s => temSkin(nome, s.k)), pers = G.personagens || [];
+  const ativo = personagemDe(nome), skinAtual = skinDe(nome);
+  depoisFn = () => {
+    desenharPrevSkins();
+    document.querySelectorAll("canvas.pp-thumb").forEach(cv => {
+      const f = pers.find(x => x.id === cv.dataset.id); if (!f) return;
+      const w = cv.clientWidth, dpr = window.devicePixelRatio || 1; cv.width = Math.round(w * dpr); cv.height = Math.round(w / 1.3 * dpr);
+      const c = cv.getContext("2d"), k = cv.height / 150; c.setTransform(k, 0, 0, k, (cv.width - 200 * k) / 2, 0);
+      c.save(); c.translate(100, 96); c.scale(1.7, 1.7); c.translate(-100, -96); desenharPersonagem2D(c, f, 100, 96, 0); c.restore();
+    });
+  };
+  return `
+  <section data-fundo="${fundoAtual()}" class="bgf lobby" aria-label="Minhas skins">
+    <div class="lb-top"><button class="lb-pill" data-a="voltarLobby">← Voltar</button><button class="lb-pill" data-a="loja">Loja</button></div>
+    <h1 class="lb-title" style="font-size:38px">Minhas skins</h1>
+    <p class="lb-sub">Toque para vestir. ${minhas.length} de ${SKINS.length} skins.</p>
+    <div class="fd-grid">${minhas.map(s => `
+      <button type="button" class="fd-tile ms-tile${s.limitada ? " sk-limitada" : ""}" data-a="vestirSkin" data-s="${s.k}" aria-pressed="${!ativo && skinAtual === s.k}">
+        <canvas class="sk-prev" data-skin="${s.k}" aria-hidden="true"></canvas>
+        <b>${esc(s.nome)}${!ativo && skinAtual === s.k ? " ✔" : ""}</b>
+      </button>`).join("")}
+    </div>
+    ${pers.length ? `<h2 class="lb-secao">Meus personagens</h2>
+    <div class="fd-grid">${pers.map(f => `
+      <button type="button" class="fd-tile ms-tile" data-a="vestirPers" data-id="${esc(f.id)}" aria-pressed="${!!ativo && ativo.id === f.id}">
+        <canvas class="pp-thumb" data-id="${esc(f.id)}" aria-hidden="true"></canvas>
+        <b>${esc(f.nome || "Sem nome")}${ativo && ativo.id === f.id ? " ✔" : ""}</b>
+      </button>`).join("")}
+    </div>` : ""}
+    <button class="lb-cont" data-a="loja">Ver mais skins na Loja</button>
+  </section>`;
+};
+Object.assign(acoes, {
+  minhasSkins() { ir("minhasSkins"); },
+  vestirSkin(el) { const n = perfil(); usarSkin(n, el.dataset.s); usarPersonagem(n, null); salvarPlacar(); toast(`Agora você está de ${skinInfo(el.dataset.s).nome}`); ir("lobby"); },
+  vestirPers(el) { const n = perfil(); usarPersonagem(n, el.dataset.id); salvarPlacar(); toast("Pronto! Você vai jogar com esse personagem"); ir("lobby"); },
+});
+if (typeof TELAS_COM_MUSICA !== "undefined") TELAS_COM_MUSICA.push("minhasSkins");
 if (G.tela === "lobby" || G.tela === "personagens") render();
 if (db) sincronizarPersonagens();  /* se a nuvem respondeu antes deste trecho carregar */
 </script>
