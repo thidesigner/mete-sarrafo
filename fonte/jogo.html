@@ -189,6 +189,19 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .lb-pinfo b { font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 40vw; }
 .lb-pinfo span { font-size: 13px; color: #ffd23f; white-space: nowrap; }
 .lb-perfil { min-width: 0; flex: 0 1 auto; }
+.adm h3 { margin-top: 6px; }
+.adm-chip { cursor: pointer; }
+.adm-chip[aria-pressed="true"] { background: #37d99a; color: #03281a; border-color: #0b1b33; }
+.adm-chip:disabled { opacity: .55; cursor: default; }
+.adm-moedas { display: flex; align-items: center; justify-content: center; gap: 10px; font-family: var(--display); font-size: 40px; color: #ffd23f; }
+.adm-grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 8px; }
+.adm-lim { display: grid; gap: 8px; padding: 10px 0; border-bottom: 1px solid rgba(244,247,251,.15); }
+.adm-tab { width: 100%; border-collapse: collapse; font-size: 15px; }
+.adm-tab td { padding: 6px 0; border-bottom: 1px solid rgba(244,247,251,.12); vertical-align: top; }
+.adm-tab td:last-child { text-align: right; padding-left: 10px; color: #ffd23f; font-weight: 800; white-space: nowrap; }
+.adm-kpi > div { background: rgba(255,255,255,.06); border-radius: 12px; padding: 10px; display: grid; text-align: center; }
+.adm-kpi b { font-family: var(--display); font-size: 28px; color: #ffd23f; }
+.adm-kpi span { font-size: 12px; }
 .lb-dir { flex: none; }
 @media (max-width: 380px) { .lb-perfil .lb-avatar { display: none; } .lb-perfil { padding-left: 10px !important; } .lb-pinfo b { max-width: 22vw; } }
 .som-mini { background: none; border: 0; font-size: 20px; padding: 4px 6px; line-height: 1; }
@@ -1188,7 +1201,7 @@ function comecarPerguntaA(perg, tema, palavra, letra) {
   for (let k = 1; k < n; k++) { const p = A.P[(perg.i + k) % n]; if (p.vivo) ordem.push(p); }
   if (!ordem.length) { terminarA(perg); return; }
   A.ph = { k: "pergunta", perg, tema, palavra, rev, ordem, idx: 0, voltas: 0, votou: false, pensa: 0, prazo: 0, espera: false };
-  A.st.palavras++; aEvento("palavra", { perg: perg.nome, tema });
+  A.st.palavras++; aEvento("palavra", { perg: perg.nome, tema, palavra });
   aMsg(`${perg.nome} pensou numa palavra. Tema: ${tema}.`);
   prepararVez();
 }
@@ -1299,6 +1312,9 @@ async function terminarA(v) {
   A.balls = [];
   aEvento("fim", { vencedor: v.nome });
   A.P.filter(p => p.humano).forEach(p => { G.banco[p.nome] = Math.round(p.moedas * 10) / 10; });
+  G.historico = (G.historico || []).slice(-99);
+  G.historico.push({ em: Date.now(), dur: Math.round(A.t), vencedor: v.nome, jog: A.P.filter(p => p.humano).map(p => p.nome), robos: A.P.filter(p => !p.humano).length,
+    palavras: A.st.eventos.filter(e => e.tipo === "palavra" && e.palavra).map(e => e.palavra) });
   salvar();
   sfxVitoria();
   aMsg(`${v.nome} venceu!`);
@@ -2614,7 +2630,7 @@ async function digitalDoPin(pin) {
   return [...new Uint8Array(bits)].map(b => b.toString(16).padStart(2, "0")).join("");
 }
 TELAS.cadeado = () => {
-  const titulo = pinTroca ? (pinTroca.etapa === 1 ? "Novo código" : "Repita o novo código") : "Ajustes do jogo";
+  const titulo = pinTroca ? (pinTroca.etapa === 1 ? "Novo código" : "Repita o novo código") : typeof pinDestino !== "undefined" && pinDestino === "adm" ? "Código" : "Ajustes do jogo";
   const teclas = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "apagar", "0", "ok"];
   return `
   <section data-fundo="${fundoAtual()}" class="bgf lobby" aria-label="Código dos ajustes">
@@ -2657,14 +2673,14 @@ async function conferirPin() {
   pinMsg = "Conferindo…"; render();
   let ok = false;
   try { ok = (await digitalDoPin(pin)) === (G.pinHash || PIN_PADRAO); } catch { pinMsg = "Não deu para conferir o código neste aparelho."; render(); return; }
-  if (ok) { ajustesAbertos = true; pinErros = 0; pinMsg = ""; ir("ajustes"); return; }
+  if (ok) { ajustesAbertos = true; pinErros = 0; pinMsg = ""; const destino = typeof pinDestino !== "undefined" ? pinDestino : "ajustes"; if (typeof pinDestino !== "undefined") pinDestino = "ajustes"; ir(destino); return; }
   pinErros++;
   if (pinErros >= 3) { pinBloqueadoAte = Date.now() + 30000; pinErros = 0; pinMsg = "Código errado. Espere 30 segundos."; }
   else pinMsg = "Código errado.";
   vibrar(200); render();
 }
 Object.assign(acoes, {
-  ajustes() { if (ajustesAbertos) { ir("ajustes"); return; } pinDigitado = ""; pinTroca = null; pinMsg = ""; ir("cadeado"); },
+  ajustes() { if (typeof pinDestino !== "undefined") pinDestino = "ajustes"; if (ajustesAbertos) { ir("ajustes"); return; } pinDigitado = ""; pinTroca = null; pinMsg = ""; ir("cadeado"); },
   pinTecla(el) { if (pinDigitado.length >= 5 || pinMsg === "Conferindo…") return; pinDigitado += el.dataset.n; if (pinMsg && pinMsg !== "Conferindo…") pinMsg = ""; render(); if (pinDigitado.length === 5) conferirPin(); },
   pinApagar() { pinDigitado = pinDigitado.slice(0, -1); render(); },
   trocarPin() { pinTroca = { etapa: 1, novo: "" }; pinDigitado = ""; pinMsg = ""; ir("cadeado"); },
@@ -3451,4 +3467,122 @@ document.addEventListener("pointerdown", e => {
 if (typeof TELAS_COM_MUSICA !== "undefined") TELAS_COM_MUSICA.push("personagens", "editor");
 if (G.tela === "lobby" || G.tela === "personagens") render();
 if (db) sincronizarPersonagens();  /* se a nuvem respondeu antes deste trecho carregar */
+</script>
+<script>
+/* ================= Painel de ADM (só o pai) =================
+   Abre com 5 toques rápidos no título "Jogo de Pergunta" + o mesmo código dos Ajustes.
+   O código do jogo é público, então o segredo é o código de 5 números, não o toque.
+   Tudo o que muda aqui vale para ESTE aparelho (não existe servidor). */
+const ADM = { aba: "moedas", jog: null, toques: [] };
+let pinDestino = "ajustes";
+document.addEventListener("click", e => {
+  if (G.tela !== "lobby" || !e.target.closest || !e.target.closest(".lb-title")) return;
+  const agora = Date.now(); ADM.toques = ADM.toques.filter(t => agora - t < 2500); ADM.toques.push(agora);
+  if (ADM.toques.length < 5) return;
+  ADM.toques = [];
+  if (ajustesAbertos) { ir("adm"); return; }
+  pinDestino = "adm"; pinDigitado = ""; pinTroca = null; pinMsg = ""; ir("cadeado");
+});
+/* skins limitadas: o ADM pode mudar prazo e preço neste aparelho (G.admLim) */
+SKINS.forEach(s => { if (s.limitada) { s.ateOriginal = s.ate; s.precoOriginal = s.preco; } });
+function aplicarLimitadas() {
+  SKINS.forEach(s => { if (!s.limitada) return; const o = (G.admLim || {})[s.k] || {}; s.ate = o.ate || s.ateOriginal; s.preco = o.preco || s.precoOriginal; });
+}
+aplicarLimitadas();
+function jogadoresDoAparelho() {
+  return [...new Set([perfil(), ...(G.nomes || []), ...Object.keys(G.banco || {}), ...Object.keys(G.inv || {})])].filter(n => n && !/^Robô \d+$/.test(n)).sort((a, b) => a.localeCompare(b));
+}
+const brDataHora = ms => { const d = new Date(ms - 3 * 3600000); return `${d.getUTCDate()}/${d.getUTCMonth() + 1} ${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`; };
+function admMudouInv() { salvarPlacar(); const y = window.scrollY; render(); window.scrollTo(0, y); }
+
+TELAS.adm = () => {
+  if (!ajustesAbertos) { setTimeout(() => ir("lobby"), 0); return ""; }
+  const jogs = jogadoresDoAparelho();
+  if (!ADM.jog || !jogs.includes(ADM.jog)) ADM.jog = jogs.includes(perfil()) ? perfil() : jogs[0];
+  const n = ADM.jog, abas = { moedas: "Moedas", itens: "Itens", limitadas: "Limitadas", numeros: "Números" };
+  const escolherJog = `<div class="chips">${jogs.map(j => `<button type="button" class="chip adm-chip" data-a="admJog" data-n="${esc(j)}" aria-pressed="${j === n}">${esc(j)}</button>`).join("")}</div>`;
+  const chipItem = (tem, gratis, tipo, k, rot) => `<button type="button" class="chip adm-chip" data-a="admItem" data-t="${tipo}" data-k="${k}" aria-pressed="${tem}" ${gratis ? "disabled" : ""}>${rot}</button>`;
+  let corpo = "";
+  if (ADM.aba === "moedas") corpo = `
+    <h3>Jogador</h3>${escolherJog}
+    <div class="adm-moedas"><span class="lb-coin" aria-hidden="true">$</span><b>${fmtM(G.banco[n] || 0)}</b></div>
+    <div class="adm-grade">${[-100, -10, 10, 50, 100, 500].map(v => `<button type="button" class="btn ghost small" data-a="admMoedas" data-v="${v}">${v > 0 ? "+" : ""}${v}</button>`).join("")}</div>
+    <form class="row" data-a="admDefinir" autocomplete="off"><input id="adm-valor" type="number" inputmode="decimal" min="0" max="100000" step="0.5" placeholder="Valor exato" aria-label="Valor exato de moedas"><button class="btn small" type="submit" style="flex:0 0 auto;width:auto">Definir</button></form>`;
+  if (ADM.aba === "itens") corpo = `
+    <h3>Jogador</h3>${escolherJog}
+    <h3>Vidas extras</h3>
+    <div class="stepper"><button class="btn ghost" type="button" data-a="admVida" data-v="-1" aria-label="Menos uma vida">−</button><b>${invVidas(n)}</b><button class="btn ghost" type="button" data-a="admVida" data-v="1" aria-label="Mais uma vida">+</button></div>
+    <h3>Skins</h3><div class="chips">${SKINS.map(s => chipItem(temSkin(n, s.k), s.preco === 0, "skin", s.k, esc(s.nome) + (s.limitada ? " ⭐" : ""))).join("")}</div>
+    <h3>Fundos</h3><div class="chips">${FUNDOS.map(([k, t]) => chipItem(temFundo(n, k), k === "basico", "fundo", k, esc(t))).join("")}</div>
+    <h3>Emojis</h3><div class="chips">${EMOJIS.map(e => chipItem(temEmoji(n, e.k), e.preco === 0, "emoji", e.k, e.e)).join("")}</div>
+    <h3>Gestos</h3><div class="chips">${GESTOS.map(g => chipItem(temGesto(n, g.k), g.preco === 0, "gesto", g.k, g.icone + " " + esc(g.nome))).join("")}</div>
+    <p class="dim" style="font-size:14px">Toque para dar ou tirar. Verde = tem.</p>`;
+  if (ADM.aba === "limitadas") corpo = SKINS.filter(s => s.limitada).map(s => {
+    const venda = naVenda(s), donos = jogadoresDoAparelho().filter(j => temSkin(j, s.k)).length, mexeu = !!(G.admLim || {})[s.k];
+    return `<div class="adm-lim">
+      <h3>${esc(s.nome)} <span class="${venda ? "am-on" : "am-off"}">● ${venda ? "à venda" : "encerrada"}</span></h3>
+      <p>Até <b>${brDataHora(Date.parse(s.ate))}</b> · <b>${s.preco}</b> moedas · ${donos} ${donos === 1 ? "jogador tem" : "jogadores têm"} neste celular</p>
+      <div class="adm-grade">
+        <button type="button" class="btn ghost small" data-a="admLimPrazo" data-k="${s.k}" data-h="24">+1 dia</button>
+        <button type="button" class="btn ghost small" data-a="admLimPrazo" data-k="${s.k}" data-h="168">+7 dias</button>
+        <button type="button" class="btn ghost small" data-a="admLimEncerrar" data-k="${s.k}">Encerrar agora</button>
+      </div>
+      <form class="row" data-a="admLimPreco" data-k="${s.k}" autocomplete="off"><input id="adm-preco-${s.k}" type="number" min="1" max="5000" value="${s.preco}" aria-label="Preço da ${esc(s.nome)}"><button class="btn small" type="submit" style="flex:0 0 auto;width:auto">Mudar preço</button></form>
+      ${mexeu ? `<button type="button" class="lb-pill" data-a="admLimVoltar" data-k="${s.k}">Voltar ao combinado (${brDataHora(Date.parse(s.ateOriginal))}, ${s.precoOriginal})</button>` : ""}
+    </div>`; }).join("") + `<p class="dim" style="font-size:14px">Muda só neste celular. Para valer no celular de todo mundo, ou para criar uma skin limitada nova, peça ao Claude.</p>`;
+  if (ADM.aba === "numeros") {
+    const hist = G.historico || [], vit = Object.entries(G.vitorias || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    const ricos = Object.entries(G.banco || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    const pal = {}; hist.forEach(h => (h.palavras || []).forEach(p => (pal[p] = (pal[p] || 0) + 1)));
+    const topPal = Object.entries(pal).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    const contar = (lista, tem) => lista.map(x => [x, jogadoresDoAparelho().filter(j => tem(j, x)).length]).filter(x => x[1]).sort((a, b) => b[1] - a[1]).slice(0, 6);
+    const skinsPop = contar(SKINS.filter(s => s.preco > 0).map(s => s.k), temSkin).map(([k, q]) => [skinInfo(k).nome, q]);
+    const tabela = (titulo, linhas, vazio) => `<h3>${titulo}</h3>${linhas.length ? `<table class="adm-tab"><tbody>${linhas.map(([a, b]) => `<tr><td>${esc(a)}</td><td>${esc(b)}</td></tr>`).join("")}</tbody></table>` : `<p class="dim">${vazio}</p>`}`;
+    corpo = `
+      <div class="adm-grade adm-kpi"><div><b>${hist.length}</b><span>partidas neste celular</span></div><div><b>${jogadoresDoAparelho().length}</b><span>jogadores</span></div>
+        <div><b>${(G.amigos || []).length}</b><span>amigos</span></div><div><b>${(G.personagens || []).length}</b><span>personagens</span></div></div>
+      ${tabela("Quem mais ganhou", vit.map(([a, b]) => [a, b + (b === 1 ? " vitória" : " vitórias")]), "Ninguém ganhou ainda.")}
+      ${tabela("Quem tem mais moedas", ricos.map(([a, b]) => [a, fmtM(b)]), "Sem moedas ainda.")}
+      ${tabela("Palavras mais usadas", topPal.map(([a, b]) => [a, b + "x"]), "Começa a contar a partir de agora.")}
+      ${tabela("Skins mais compradas", skinsPop.map(([a, b]) => [a, b + (b === 1 ? " jogador" : " jogadores")]), "Ninguém comprou skin ainda.")}
+      ${tabela("Últimas partidas", hist.slice(-8).reverse().map(h => [brDataHora(h.em) + " · " + (h.jog || []).join(", ") + (h.robos ? ` + ${h.robos} 🤖` : ""), "🏆 " + h.vencedor + " · " + Math.round(h.dur / 60) + " min"]), "Começa a contar a partir de agora.")}
+      <p class="dim" style="font-size:14px">Números deste celular. As partidas online contam no celular de quem abriu a sala.</p>`;
+  }
+  return `
+  <section data-fundo="${fundoAtual()}" class="bgf lobby" aria-label="Painel de ADM">
+    <div class="lb-top"><button class="lb-pill" data-a="trancarAjustes">🔒 Trancar e sair</button><span class="lb-pill">ADM</span></div>
+    <h1 class="lb-title" style="font-size:34px">Painel de ADM</h1>
+    <div class="ed-abas" role="tablist">${Object.entries(abas).map(([k, t]) => `<button type="button" role="tab" class="ed-aba" data-a="admAba" data-aba="${k}" aria-selected="${ADM.aba === k}">${t}</button>`).join("")}</div>
+    <div class="card adm" style="background:rgba(11,27,51,.6)">${corpo}</div>
+  </section>`;
+};
+Object.assign(acoes, {
+  admAba(el) { ADM.aba = el.dataset.aba; render(); },
+  admJog(el) { ADM.jog = el.dataset.n; admMudouInv(); },
+  admMoedas(el) { const n = ADM.jog; G.banco[n] = Math.max(0, Math.round(((G.banco[n] || 0) + +el.dataset.v) * 10) / 10); admMudouInv(); },
+  admDefinir() { const v = Number($("adm-valor").value); if (!isFinite(v) || v < 0) { toast("Digite um número"); return; } G.banco[ADM.jog] = Math.round(Math.min(100000, v) * 10) / 10; admMudouInv(); toast("Moedas definidas"); },
+  admVida(el) { mudarInv(ADM.jog, +el.dataset.v); admMudouInv(); },
+  admItem(el) {
+    const n = ADM.jog, k = el.dataset.k, t = el.dataset.t;
+    G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 };
+    const lista = { skin: "skins", fundo: "fundos", emoji: "emojis", gesto: "gestos" }[t];
+    const atual = G.inv[n][lista] || [];
+    if (el.getAttribute("aria-pressed") === "true") {
+      G.inv[n][lista] = atual.filter(x => x !== k);
+      if (t === "skin" && G.inv[n].skin === k) G.inv[n].skin = "classico";
+      if (t === "fundo" && G.fundo === k && n === perfil()) G.fundo = "basico";
+    } else G.inv[n][lista] = [...atual, k];
+    admMudouInv();
+  },
+  admLimPrazo(el) {
+    const s = skinInfo(el.dataset.k); G.admLim = G.admLim || {};
+    const base = Math.max(Date.now(), Date.parse(s.ate));
+    G.admLim[s.k] = { ...(G.admLim[s.k] || {}), ate: new Date(base + el.dataset.h * 3600000).toISOString() };
+    aplicarLimitadas(); salvar(); render(); toast(`${s.nome} vai até ${brDataHora(Date.parse(s.ate))}`);
+  },
+  admLimEncerrar(el) { const s = skinInfo(el.dataset.k); G.admLim = G.admLim || {}; G.admLim[s.k] = { ...(G.admLim[s.k] || {}), ate: new Date(Date.now() - 1000).toISOString() }; aplicarLimitadas(); salvar(); render(); toast(`${s.nome} saiu da loja`); },
+  admLimPreco(el) { const s = skinInfo(el.dataset.k), v = Math.round(Number($("adm-preco-" + s.k).value)); if (!(v >= 1 && v <= 5000)) { toast("Preço de 1 a 5000"); return; } G.admLim = G.admLim || {}; G.admLim[s.k] = { ...(G.admLim[s.k] || {}), preco: v }; aplicarLimitadas(); salvar(); render(); toast(`${s.nome} agora custa ${v}`); },
+  admLimVoltar(el) { if (G.admLim) delete G.admLim[el.dataset.k]; aplicarLimitadas(); salvar(); render(); },
+});
+if (typeof TELAS_COM_MUSICA !== "undefined") TELAS_COM_MUSICA.push("adm");
 </script>

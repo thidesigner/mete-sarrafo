@@ -81,6 +81,13 @@ Os Ajustes do jogo (engrenagem na tela inicial) pedem um código de 5 números q
 - Nunca escreva esse código em arquivos, commits, testes guardados aqui ou respostas que fiquem no repositório. No código fica só a "impressão digital" (`PIN_PADRAO`, PBKDF2-SHA256 com o sal `mete-sarrafo-ajustes` e 100 000 voltas).
 - Para trocar o código padrão, gere a nova impressão fora do repositório e substitua `PIN_PADRAO`. Dentro do jogo, quem sabe o código pode trocá-lo só naquele aparelho ("Trocar o código").
 
+## Painel de ADM (só o pai)
+
+Abre com **5 toques rápidos no título "Jogo de Pergunta"** da tela inicial e depois o mesmo código dos Ajustes (`pinDestino = "adm"`). A tela do código diz só "Código", para não chamar atenção.
+- Abas: Moedas (dar/tirar/definir), Itens (dar ou tirar skins, fundos, emojis, gestos e vidas extras de qualquer jogador do aparelho), Limitadas (prazo +1/+7 dias, encerrar, preço; fica em `G.admLim` e vale só naquele aparelho) e Números (vitórias, moedas, palavras mais usadas, skins mais compradas, últimas partidas de `G.historico`).
+- Tudo vale só no aparelho onde foi feito (não há servidor). Skin limitada nova ou mudança para todos: no código.
+- Não descreva o toque escondido em textos para as crianças. O segredo de verdade é o código de 5 números.
+
 ## Testes
 
 - Sintaxe: extraia os `<script>` de `teste/index.html` e rode `node --check`.
