@@ -1499,6 +1499,7 @@ function desenharBoneco(c, p, ph) {
     const passo = p.passo, r = transformarGesto2D(c, p.x, p.y, ges.g.k, ges.f);
     if (r.passo) p.passo = passo + r.passo;
     desenharBoneco2(c, p, ph); p.passo = passo;
+    efeitoGesto2D(c, p.x, p.y, ges.g.k, ges.f);
   } else desenharBoneco2(c, p, ph);
   c.restore();
 }
@@ -2112,7 +2113,7 @@ function desenhar3D() {
     b.ry = b.ry ?? b.g.rotation.y;
     b.ry += ((b.dir - b.ry + Math.PI * 3) % (Math.PI * 2) - Math.PI) * .25;
     const ges = gestoAtivo(p), pose = ges ? poseGesto(ges.g.k, ges.f) : null;
-    const giros = ges ? { giro: 2, piao: 5 }[ges.g.k] || 0 : 0;
+    const giros = ges ? { giro: 2, piao: 5, galactico: 1 }[ges.g.k] || 0 : 0;
     b.g.rotation.set(pose ? pose.volta : 0, b.ry + (ges ? giros * ges.f * Math.PI * 2 : 0), pose ? -pose.incl : 0);
     if (pose) { b.g.position.y = pose.pulo * U * 1.6 + (pose.volta ? .5 * Math.sin(Math.PI * ges.f) : 0); b.g.translateX(pose.desl * U); b.g.scale.set(1 + pose.achata, 1 - pose.achata, 1 + pose.achata); }
     else b.g.scale.set(1, 1, 1);
@@ -2223,7 +2224,7 @@ TELAS.lobby = () => {
     <h1 class="lb-title">Jogo de<br>Pergunta</h1>
     <div class="lb-stage">
       <div class="lb-side">
-        <button class="lb-btn" data-a="loja">${ICONES.loja}<span>Loja</span><i class="lb-tag">${SKINS.some(s => s.limitada && naVenda(s) && !temSkin(nome, s.k)) || FUNDOS_LIM.some(f => naVenda(f) && !temFundo(nome, f.k)) || EMOJIS.some(e => e.limitada && naVenda(e) && !temEmoji(nome, e.k)) ? "limitada!" : "novo!"}</i></button>
+        <button class="lb-btn" data-a="loja">${ICONES.loja}<span>Loja</span><i class="lb-tag">${SKINS.some(s => s.limitada && naVenda(s) && !temSkin(nome, s.k)) || FUNDOS_LIM.some(f => naVenda(f) && !temFundo(nome, f.k)) || EMOJIS.some(e => e.limitada && naVenda(e) && !temEmoji(nome, e.k)) || GESTOS.some(g => g.limitada && naVenda(g) && !temGesto(nome, g.k)) ? "limitada!" : "novo!"}</i></button>
         <button class="lb-btn" data-a="personagens"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4" fill="#f1c27d" stroke="#0b1b33" stroke-width="1.5"/><path d="M5 21v-3a7 7 0 0 1 14 0v3z" fill="#2f80ed" stroke="#0b1b33" stroke-width="1.5" stroke-linejoin="round"/><path d="M18 3l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" fill="#ffd23f" stroke="#0b1b33" stroke-width="1"/></svg><span>Criar</span></button>
         <button class="lb-btn" data-a="fundos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.3 0 1.9-.8 1.9-1.7 0-1.2-1-1.5-1-2.6 0-1 .8-1.7 1.9-1.7h2.1a3.6 3.6 0 0 0 3.6-3.6C20.5 6.6 16.7 3.5 12 3.5z" fill="#f4f7fb" stroke="#0b1b33" stroke-width="1.6"/><circle cx="7.8" cy="11" r="1.5" fill="#ff4d6d"/><circle cx="10.2" cy="7.4" r="1.5" fill="#ffd23f"/><circle cx="14.6" cy="7.4" r="1.5" fill="#37d99a"/><circle cx="17" cy="11" r="1.5" fill="#2f80ed"/></svg><span>Fundo</span></button>
       </div>
@@ -2276,12 +2277,14 @@ TELAS.loja = () => {
     </div>
     <h2 class="lb-secao">Gestos</h2>
     <p class="lb-sub" style="margin-top:-6px">Dancinhas para o seu bonequinho fazer durante a partida.</p>
-    <div class="fd-grid">${GESTOS.map(g => {
+    <div class="fd-grid">${GESTOS.filter(g => naVenda(g) || temGesto(nome, g.k)).sort((a, b) => !!b.limitada - !!a.limitada).map(g => {
       const tem = temGesto(nome, g.k), podeG = moedas >= g.preco;
       const rotulo = tem ? "Você tem" : G.lojaConf === "gesto:" + g.k ? "Confirmar?" : podeG ? `<span class="lb-coin" aria-hidden="true">$</span>${g.preco}` : `$ ${g.preco}`;
-      return `<div class="fd-tile${tem ? "" : " fd-travado"}">
+      return `<div class="fd-tile${tem ? "" : " fd-travado"}${g.limitada ? " sk-limitada" : ""}">
+        ${g.limitada ? `<i class="sk-selo">Edição limitada</i>` : ""}
         <canvas class="ge-prev" data-g="${g.k}" aria-label="Bonequinho fazendo o gesto ${esc(g.nome)}"></canvas>
         <b>${g.icone} ${esc(g.nome)}</b>
+        ${g.limitada && !tem && naVenda(g) ? `<span class="sk-prazo">⏳ ${faltaParaAcabar(g)}</span>` : ""}
         <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarGesto" data-g="${g.k}" ${tem || !podeG ? "disabled" : ""} aria-label="${tem ? "Você tem" : "Comprar"} o gesto ${esc(g.nome)}">${rotulo}</button>
       </div>`; }).join("")}
     </div>
@@ -2869,13 +2872,18 @@ const GESTOS = [
   { k: "deslizada", icone: "🕺", nome: "Deslizada", preco: 120, dura: 2, som: [[64, 64, 0, .15, "triangle"], [67, 67, .25, .15, "triangle"], [71, 71, .5, .15, "triangle"], [74, 74, .75, .35, "triangle"]] },
   { k: "piao", icone: "🌪️", nome: "Pião", preco: 150, dura: 1.6, som: [[60, 96, 0, .8, "square"]] },
   { k: "mortal", icone: "🤸", nome: "Mortal", preco: 200, dura: 1.3, som: [[60, 84, 0, .35, "sine"], [84, 84, .45, .1, "square"], [88, 88, .55, .3, "square"]] },
+  // edição limitada: só dá para comprar até "ate" (horário de Brasília); quem comprou fica com ele
+  { k: "galactico", icone: "🚀", nome: "Galáctico", preco: 250, dura: 2.4, tipo: "gesto", limitada: true, ate: "2026-11-06T23:59:59-03:00",
+    som: [[48, 72, 0, .9, "sine"], [84, 84, .8, .1, "triangle"], [88, 88, .95, .1, "triangle"], [91, 91, 1.1, .1, "triangle"], [96, 96, 1.25, .35, "triangle"], [72, 55, 1.7, .6, "sine"]] },
 ];
 const gestoInfo = k => GESTOS.find(g => g.k === k) || null;
 function temGesto(n, k) { const g = gestoInfo(k); return !!g && (g.preco === 0 || (((G.inv || {})[n] || {}).gestos || []).includes(k)); }
 function darGesto(n, k) { G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 }; G.inv[n].gestos = G.inv[n].gestos || []; if (!G.inv[n].gestos.includes(k)) G.inv[n].gestos.push(k); }
 acoes.comprarGesto = el => {
   const k = el.dataset.g, nome = perfil(), g = gestoInfo(k);
-  if (!g || temGesto(nome, k) || (G.banco[nome] || 0) < g.preco) return;
+  if (!g || temGesto(nome, k)) return;
+  if (!naVenda(g)) { toast("Esse gesto de edição limitada já acabou"); return; }
+  if ((G.banco[nome] || 0) < g.preco) return;
   if (G.lojaConf !== "gesto:" + k) { pedirConfirmacao("gesto:" + k); return; }
   clearTimeout(lojaConfT); G.lojaConf = false;
   G.banco[nome] = Math.round(((G.banco[nome] || 0) - g.preco) * 10) / 10;
@@ -2911,7 +2919,22 @@ function poseGesto(k, f) {
   if (k === "deslizada") { r.desl = Math.sin(f * T * 1.5) * 28; r.passo = f * 260; }
   if (k === "piao") { r.larg = Math.cos(f * T * 5); r.pulo = Math.sin(Math.PI * f) * 18; }
   if (k === "mortal") { r.pulo = Math.sin(Math.PI * f) * 46; r.volta = -f * T; }
+  if (k === "galactico") { r.pulo = Math.sin(Math.PI * f) * 42; r.incl = Math.sin(f * T * 1.5) * .18 * fim; }   // flutua sem gravidade
   return r;
+}
+/* brilho extra do gesto Galáctico: aura de nebulosa e estrelas girando em volta */
+function efeitoGesto2D(c, x, y, k, f) {
+  if (k !== "galactico") return;
+  const forca = Math.sin(Math.PI * Math.min(1, f));
+  const aura = c.createRadialGradient(x, y - 4, 4, x, y - 4, 46);
+  aura.addColorStop(0, `rgba(155,81,224,${.35 * forca})`); aura.addColorStop(.6, `rgba(64,120,255,${.18 * forca})`); aura.addColorStop(1, "rgba(64,120,255,0)");
+  c.fillStyle = aura; c.beginPath(); c.arc(x, y - 4, 46, 0, Math.PI * 2); c.fill();
+  for (let i = 0; i < 6; i++) {
+    const a = f * Math.PI * 4 + i * Math.PI / 3, sx = x + Math.cos(a) * 34, sy = y - 6 + Math.sin(a) * 12, r = (i % 2 ? 2.4 : 3.6) * forca;
+    c.fillStyle = i % 3 === 0 ? "#ffe9a8" : i % 3 === 1 ? "#cfe0ff" : "#ffd6f5"; c.beginPath();
+    for (let j = 0; j < 8; j++) { const rr = j % 2 ? r * .4 : r, aa = j * Math.PI / 4; c.lineTo(sx + Math.cos(aa) * rr, sy + Math.sin(aa) * rr); }
+    c.closePath(); c.fill();
+  }
 }
 /* aplica o gesto no desenho 2D, em volta do bonequinho em (x, y) */
 function transformarGesto2D(c, x, y, k, f) {
@@ -2949,10 +2972,12 @@ function animarPrevGestos() {
       c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, pw, ph);
       c.setTransform(k, 0, 0, k, (pw - 200 * k) / 2, 0);
       const f = parado ? .25 : ((ts / 1000) % (g.dura + .6)) / g.dura;
-      c.save(); c.translate(100, 96); c.scale(1.5, 1.5); c.translate(-100, -96);
+      c.save(); c.translate(100, 96 + (g.k === "galactico" ? 22 : 0)); c.scale(1.5, 1.5); c.translate(-100, -96);   // o Galáctico sobe mais: começa mais embaixo
       const r = f < 1 ? transformarGesto2D(c, 100, 96, g.k, f) : { passo: 0 };
       boneco.passo = r.passo || 0;
-      desenharBoneco2(c, boneco, {}); c.restore();
+      desenharBoneco2(c, boneco, {});
+      if (f < 1) efeitoGesto2D(c, 100, 96, g.k, f);
+      c.restore();
     });
     if (!parado) prevGesRaf = requestAnimationFrame(quadro);
   };
@@ -3535,10 +3560,10 @@ document.addEventListener("click", e => {
 /* skins limitadas: o ADM pode mudar prazo e preço neste aparelho (G.admLim) */
 SKINS.forEach(s => { if (s.limitada) { s.ateOriginal = s.ate; s.precoOriginal = s.preco; } });
 FUNDOS_LIM.forEach(f => { f.ateOriginal = f.ate; f.precoOriginal = f.preco; });
-EMOJIS.forEach(e => { if (e.limitada) { e.ateOriginal = e.ate; e.precoOriginal = e.preco; } });
-const todasLimitadas = () => [...SKINS.filter(s => s.limitada), ...FUNDOS_LIM, ...EMOJIS.filter(e => e.limitada)];
+[...EMOJIS, ...GESTOS].forEach(e => { if (e.limitada) { e.ateOriginal = e.ate; e.precoOriginal = e.preco; } });
+const todasLimitadas = () => [...SKINS.filter(s => s.limitada), ...FUNDOS_LIM, ...EMOJIS.filter(e => e.limitada), ...GESTOS.filter(g => g.limitada)];
 const limInfo = k => todasLimitadas().find(x => x.k === k);
-const temLim = (j, x) => (x.tipo === "fundo" ? temFundo(j, x.k) : x.tipo === "emoji" ? temEmoji(j, x.k) : temSkin(j, x.k));
+const temLim = (j, x) => (x.tipo === "fundo" ? temFundo(j, x.k) : x.tipo === "emoji" ? temEmoji(j, x.k) : x.tipo === "gesto" ? temGesto(j, x.k) : temSkin(j, x.k));
 function aplicarLimitadas() {
   todasLimitadas().forEach(s => { const o = (G.admLim || {})[s.k] || {}; s.ate = o.ate || s.ateOriginal; s.preco = o.preco || s.precoOriginal; if (s.tipo === "fundo") PRECO_FUNDO[s.k] = s.preco; });
 }
@@ -3574,7 +3599,7 @@ TELAS.adm = () => {
   if (ADM.aba === "limitadas") corpo = todasLimitadas().map(s => {
     const venda = naVenda(s), donos = jogadoresDoAparelho().filter(j => temLim(j, s)).length, mexeu = !!(G.admLim || {})[s.k];
     return `<div class="adm-lim">
-      <h3>${s.tipo === "fundo" ? "Fundo" : s.tipo === "emoji" ? "Emoji " + s.e : "Skin"} ${esc(s.nome)} <span class="${venda ? "am-on" : "am-off"}">● ${venda ? "à venda" : "encerrada"}</span></h3>
+      <h3>${s.tipo === "fundo" ? "Fundo" : s.tipo === "emoji" ? "Emoji " + s.e : s.tipo === "gesto" ? "Gesto " + s.icone : "Skin"} ${esc(s.nome)} <span class="${venda ? "am-on" : "am-off"}">● ${venda ? "à venda" : "encerrada"}</span></h3>
       <p>Até <b>${brDataHora(Date.parse(s.ate))}</b> · <b>${s.preco}</b> moedas · ${donos} ${donos === 1 ? "jogador tem" : "jogadores têm"} neste celular</p>
       <div class="adm-grade">
         <button type="button" class="btn ghost small" data-a="admLimPrazo" data-k="${s.k}" data-h="24">+1 dia</button>
