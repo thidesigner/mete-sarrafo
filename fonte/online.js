@@ -142,7 +142,7 @@ function comecarOnline() {
     const home = { x: AC + AH * Math.cos(a), y: AC + AH * Math.sin(a) };
     return { i, nome: o.nome, humano: !o.robo, remoto: !!o.conn, conn: o.conn || null, vidasInv: o.vidasInv || 0, mov: { x: 0, y: 0 },
       cor: A_CORES[i % A_CORES.length], pele: A_PELE[i % A_PELE.length],
-      vidas: A.cfg.vidas, vivo: true, moedas: o.local ? (G.banco[o.nome] || 0) : (o.moedas || 0), ganho: 0, compradas: 0,
+      vidas: A.cfg.vidas, vivo: true, moedas: 0, guardado: o.robo ? 0 : o.local ? (G.banco[o.nome] || 0) : (o.moedas || 0), ganho: 0, compradas: 0,
       home, x: home.x, y: home.y, alvo: null, modo: "casa", vel: A_VEL * aRnd(.88, 1.12), habil: aRnd(-.08, .08),
       flash: 0, passo: 0, ctrl: false, tocou: false, saiuEm: null };
   });
@@ -228,7 +228,7 @@ function entrada(p, d) {
           if (p.remoto) p.vidasInv--;
           p.compradas++; p.vidas = 1; A.st.compras++;
           aEvento("usouVida", { quem: p.nome }); aFx(p.x, p.y - 60, "+1 vida", "#ffd23f"); aMsg(`${p.nome} usou uma vida extra.`);
-        } else if (d.escolha === "comprar" && p.moedas >= A.cfg.preco && p.compradas < A.cfg.maxCompra) comprarA(p);
+        } else if (d.escolha === "comprar" && saldoCompra(p) >= A.cfg.preco && p.compradas < A.cfg.maxCompra) comprarA(p);
         else eliminarA(p);
       }
       break;
@@ -281,13 +281,17 @@ function mostrarPedido(d) {
   }
   if (d.tipo === "compra") {
     const nome = ON.meuNome || perfil(), inv = invVidas(nome);
-    abrirOv(`<h2>Você perdeu a última vida</h2><p>Você tem <b class="coin">${fmtM(d.moedas)}</b> moedas${inv ? ` e <b class="hearts">${inv} ${inv === 1 ? "vida extra guardada" : "vidas extras guardadas"}</b>` : ""}.</p>
+    abrirOv(`<h2>Você perdeu a última vida</h2><p>Você tem <b class="coin">${fmtM(d.moedas)}</b> moedas guardadas${inv ? ` e <b class="hearts">${inv} ${inv === 1 ? "vida extra guardada" : "vidas extras guardadas"}</b>` : ""}.</p>
       ${inv && d.podeMais ? `<button class="btn ok" id="ov-usar" type="button">Usar vida extra guardada</button>` : ""}
       ${d.moedas >= d.preco && d.podeMais ? `<button class="btn ${inv ? "ghost" : "ok"}" id="ov-sim" type="button">Comprar vida extra agora (${d.preco})</button>` : ""}
       <button class="btn no" id="ov-nao" type="button">Sair do jogo</button>`, ov => {
       const usar = ov.querySelector("#ov-usar"), comprar = ov.querySelector("#ov-sim");
       if (usar) usar.addEventListener("click", () => { fecharOv(); mudarInv(nome, -1); if (onHost()) salvarPlacar(); else salvar(); agir({ t: "compra", escolha: "usar" }); });
-      if (comprar) comprar.addEventListener("click", () => { fecharOv(); agir({ t: "compra", escolha: "comprar" }); });
+      if (comprar) comprar.addEventListener("click", () => {
+        fecharOv();
+        if (!onHost()) { G.banco[nome] = Math.round(((G.banco[nome] || 0) - d.preco) * 10) / 10; salvar(); }   // o anfitrião desconta o dele em pagarVida
+        agir({ t: "compra", escolha: "comprar" });
+      });
       ov.querySelector("#ov-nao").addEventListener("click", () => { fecharOv(); agir({ t: "compra", escolha: "sair" }); });
     });
   }
@@ -333,7 +337,7 @@ moverControlado = function (p, dt) {
 const _mostrarCompra = mostrarCompra;
 mostrarCompra = function (p) {
   if (!onHost()) return _mostrarCompra(p);
-  pedir(p, { tipo: "compra", moedas: Math.round(p.moedas * 10) / 10, preco: A.cfg.preco, podeMais: p.compradas < A.cfg.maxCompra });
+  pedir(p, { tipo: "compra", moedas: Math.round(saldoCompra(p) * 10) / 10, preco: A.cfg.preco, podeMais: p.compradas < A.cfg.maxCompra });
 };
 const _invVidas = invVidas;
 invVidas = function (n) {
@@ -477,7 +481,7 @@ function mostrarFimOnline() {
 }
 function novaRodadaSala() {
   clearInterval(ON.timer); fecharOv(); pararLoop();
-  ON.sala = A.P.filter(p => p.remoto && p.conn && p.conn.open).map(p => ({ conn: p.conn, nome: p.nome, moedas: Math.round(p.moedas * 10) / 10, vidasInv: p.vidasInv || 0, skin: p.skin || "classico", ficha: p.ficha || null }));
+  ON.sala = A.P.filter(p => p.remoto && p.conn && p.conn.open).map(p => ({ conn: p.conn, nome: p.nome, moedas: Math.round(((p.guardado || 0) + Math.max(0, p.moedas)) * 10) / 10, vidasInv: p.vidasInv || 0, skin: p.skin || "classico", ficha: p.ficha || null }));
   ON.sala.forEach(s => enviar(s.conn, { t: "voltaSala" }));
   ON.on = false; A.P = []; A.fim = null;
   $("arena").hidden = true; $("app").hidden = false;
@@ -626,7 +630,7 @@ function aplicarEstado(s) {
     ON.fimVisto = true;
     A.fim = { vencedor: A.P[s.fim.v], t: A.t };
     if (me) {
-      G.banco[ON.meuNome] = Math.round(me.moedas * 10) / 10;
+      G.banco[ON.meuNome] = Math.round(((G.banco[ON.meuNome] || 0) + Math.max(0, me.moedas)) * 10) / 10;   // soma o que ganhou na partida
       if (A.fim.vencedor === me) { G.vitorias = G.vitorias || {}; G.vitorias[ON.meuNome] = (G.vitorias[ON.meuNome] || 0) + 1; }
       salvar();
     }
