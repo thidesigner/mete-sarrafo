@@ -2763,7 +2763,7 @@ const EMOJIS = [
   { k: "coroa", e: "👑", nome: "Coroa", preco: 100 },
   { k: "trofeu", e: "🏆", nome: "Troféu", preco: 120 },
   // edição limitada: só dá para comprar até "ate" (horário de Brasília); quem comprou fica com ele
-  { k: "planeta", e: "🪐", nome: "Planeta", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-06T23:59:59-03:00" },
+  { k: "galactico", e: "🌌", nome: "Galáctico", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-06T23:59:59-03:00" },
 ];
 const emojiInfo = k => EMOJIS.find(e => e.k === k) || null;
 function temEmoji(n, k) { const e = emojiInfo(k); return !!e && (e.preco === 0 || (((G.inv || {})[n] || {}).emojis || []).includes(k)); }
@@ -2808,7 +2808,7 @@ const SONS_EMOJI = {
   caveira: [[55, 52, 0, .35, "triangle"], [52, 49, .35, .45, "triangle"]],
   fogo: [[40, 76, 0, .35, "sawtooth"]],
   coroa: [[67, 67, 0, .12, "square"], [72, 72, .12, .12, "square"], [76, 76, .24, .3, "square"]],
-  planeta: [[60, 84, 0, .5, "sine"], [91, 91, .45, .12, "sine"], [96, 96, .58, .12, "sine"], [91, 91, .71, .3, "sine"]],
+  galactico: [[60, 84, 0, .5, "sine"], [91, 91, .45, .12, "sine"], [96, 96, .58, .12, "sine"], [91, 91, .71, .3, "sine"]],
   trofeu: [[72, 72, 0, .1, "square"], [76, 76, .1, .1, "square"], [79, 79, .2, .1, "square"], [84, 84, .3, .35, "square"]],
 };
 function somEmoji(k) { tocarNotas(SONS_EMOJI[k] || SONS_EMOJI.joinha); }
