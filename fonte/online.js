@@ -593,7 +593,12 @@ function aplicarEstado(s) {
     if (!p.vivo) { p.x = p.tx; p.y = p.ty; }
     if (p.vidas < vidasAntes && i === ON.myIdx) vibrar([60, 40, 60]);
   });
-  if (Array.isArray(s.E)) A.emo = s.E.filter(e => emojiInfo(e[1])).map(e => ({ i: +e[0], k: e[1], ate: performance.now() + Math.min(EMO_DURA, +e[2] || 0) }));
+  if (Array.isArray(s.E)) {
+    const antes = A.emo || [];
+    A.emo = s.E.filter(e => emojiInfo(e[1])).map(e => ({ i: +e[0], k: e[1], ate: performance.now() + Math.min(EMO_DURA, +e[2] || 0) }));
+    // emoji novo (não estava na tela antes): toca o barulhinho dele
+    for (const e of A.emo) if (!antes.some(x => x.i === e.i && x.k === e.k && Math.abs(x.ate - e.ate) < 600)) somEmoji(e.k);
+  }
   A.balls = s.B.map(b => ({ from: { x: b[0], y: b[1] }, to: { x: b[2], y: b[3] }, t: b[4], T: b[5] }));
   for (const f of s.fx) {
     A.fx.push({ x: f[0], y: f[1], txt: f[2], cor: f[3], t: 0 });

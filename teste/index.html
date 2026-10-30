@@ -2638,7 +2638,35 @@ function mostrarEmoji(p, k) {
   p.emoEm = agora;
   A.emo = (A.emo || []).filter(x => x.i !== p.i && x.ate > agora);
   A.emo.push({ i: p.i, k, ate: agora + EMO_DURA });
+  somEmoji(k);
   return true;
+}
+/* Cada emoji tem o seu barulhinho: [nota, nota final (deslize), começa em, duração, tipo de onda] */
+const SONS_EMOJI = {
+  joinha: [[72, 72, 0, .1, "square"], [79, 79, .09, .16, "square"]],
+  rindo: [[79, 79, 0, .08, "triangle"], [77, 77, .11, .08, "triangle"], [75, 75, .22, .08, "triangle"], [74, 74, .33, .12, "triangle"]],
+  oculos: [[60, 72, 0, .3, "sine"], [76, 76, .28, .2, "sine"]],
+  lingua: [[67, 70, 0, .07, "sawtooth"], [70, 67, .07, .07, "sawtooth"], [67, 70, .14, .07, "sawtooth"], [70, 67, .21, .1, "sawtooth"]],
+  bravo: [[45, 43, 0, .18, "sawtooth"], [43, 40, .18, .28, "sawtooth"]],
+  frio: [[88, 88, 0, .08, "sine"], [91, 91, .08, .08, "sine"], [88, 88, .16, .08, "sine"], [93, 93, .24, .2, "sine"]],
+  susto: [[86, 62, 0, .45, "square"]],
+  palhaco: [[58, 60, 0, .14, "square"], [58, 60, .2, .2, "square"]],
+  caveira: [[55, 52, 0, .35, "triangle"], [52, 49, .35, .45, "triangle"]],
+  fogo: [[40, 76, 0, .35, "sawtooth"]],
+  coroa: [[67, 67, 0, .12, "square"], [72, 72, .12, .12, "square"], [76, 76, .24, .3, "square"]],
+  trofeu: [[72, 72, 0, .1, "square"], [76, 76, .1, .1, "square"], [79, 79, .2, .1, "square"], [84, 84, .3, .35, "square"]],
+};
+function somEmoji(k) {
+  if (typeof somLigado === "function" && !somLigado()) return;
+  const c = typeof musCtx === "function" && musCtx(); if (!c) return;
+  const t = c.currentTime;
+  for (const [m, m2, ini, d, tipo] of SONS_EMOJI[k] || SONS_EMOJI.joinha) {
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = tipo; o.frequency.setValueAtTime(hz(m), t + ini);
+    if (m2 !== m) o.frequency.exponentialRampToValueAtTime(hz(m2), t + ini + d);
+    g.gain.setValueAtTime(.0001, t + ini); g.gain.exponentialRampToValueAtTime(tipo === "sine" ? .22 : .1, t + ini + .015); g.gain.exponentialRampToValueAtTime(.0001, t + ini + d);
+    o.connect(g); g.connect(c.destination); o.start(t + ini); o.stop(t + ini + d + .02);
+  }
 }
 function emojiAtivo(p) { const agora = performance.now(), x = (A.emo || []).find(e => e.i === p.i && e.ate > agora); return x ? emojiInfo(x.k) : null; }
 function montarBarraEmoji() {
@@ -3828,7 +3856,12 @@ function aplicarEstado(s) {
     if (!p.vivo) { p.x = p.tx; p.y = p.ty; }
     if (p.vidas < vidasAntes && i === ON.myIdx) vibrar([60, 40, 60]);
   });
-  if (Array.isArray(s.E)) A.emo = s.E.filter(e => emojiInfo(e[1])).map(e => ({ i: +e[0], k: e[1], ate: performance.now() + Math.min(EMO_DURA, +e[2] || 0) }));
+  if (Array.isArray(s.E)) {
+    const antes = A.emo || [];
+    A.emo = s.E.filter(e => emojiInfo(e[1])).map(e => ({ i: +e[0], k: e[1], ate: performance.now() + Math.min(EMO_DURA, +e[2] || 0) }));
+    // emoji novo (não estava na tela antes): toca o barulhinho dele
+    for (const e of A.emo) if (!antes.some(x => x.i === e.i && x.k === e.k && Math.abs(x.ate - e.ate) < 600)) somEmoji(e.k);
+  }
   A.balls = s.B.map(b => ({ from: { x: b[0], y: b[1] }, to: { x: b[2], y: b[3] }, t: b[4], T: b[5] }));
   for (const f of s.fx) {
     A.fx.push({ x: f[0], y: f[1], txt: f[2], cor: f[3], t: 0 });

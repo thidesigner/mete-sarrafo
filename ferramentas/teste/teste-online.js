@@ -23,9 +23,9 @@ const AQUI = __dirname;
   await host.screenshot({ path: path.join(AQUI, 'saida-sala.png') });
   await host.click('[data-a="comecarOnline"]'); await host.waitForTimeout(800);
   // emoji: a amiga manda 👍 e o anfitrião vê em cima dela; o anfitrião manda e a amiga vê
-  await amigo.evaluate(() => { fecharOv(); }); await amigo.click('#a-emo [data-emo="joinha"]').catch(() => {}); await host.waitForTimeout(400);
+  await amigo.click('#a-emo [data-emo="joinha"]').catch(() => {}); await host.waitForTimeout(400);
   const emojiNoHost = await host.evaluate(() => (A.emo || []).map(e => A.P[e.i].nome + ':' + e.k));
-  await host.evaluate(() => { fecharOv(); }); await host.click('#a-emo [data-emo="joinha"]').catch(() => {}); await amigo.waitForTimeout(400);
+  await host.click('#a-emo [data-emo="joinha"]').catch(() => {}); await amigo.waitForTimeout(400);
   const emojiNoAmigo = await amigo.evaluate(() => (A.emo || []).map(e => A.P[e.i].nome + ':' + e.k));
   // joga ~40s: responde pedidos, chuta certo às vezes, atira e corre
   const t0 = Date.now(); let rodadas = 0, viuAmigoCorrer = false, amigoTiro = false;
