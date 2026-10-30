@@ -200,6 +200,14 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .av-op { aspect-ratio: 1; border-radius: 12px; border: 2px solid rgba(244,247,251,.2); background: rgba(255,255,255,.06); font-size: 24px; color: #fff; font-family: var(--display); cursor: pointer; }
 .av-op[aria-pressed="true"], .av-cor[aria-pressed="true"] { border-color: #ffd23f; box-shadow: 0 0 0 3px rgba(255,210,63,.45); }
 .av-cores { display: flex; flex-wrap: wrap; gap: 8px; }
+.av-galactico { position: relative; overflow: hidden; border-color: #ffd23f !important; box-shadow: 0 0 10px rgba(155,81,224,.8);
+  background: radial-gradient(1px 1px at 20% 25%, #fff 50%, transparent 52%), radial-gradient(1.2px 1.2px at 75% 20%, #ffe9a8 50%, transparent 52%), radial-gradient(1px 1px at 30% 80%, #fff 50%, transparent 52%), radial-gradient(1px 1px at 82% 72%, #cfe0ff 50%, transparent 52%),
+    radial-gradient(circle at 30% 30%, #6c3fd1 0%, #2b1a6b 55%, #0b0b2a 100%) !important; }
+.lb-avatar.av-galactico { animation: avBrilha 2.4s ease-in-out infinite; }
+@keyframes avBrilha { 50% { box-shadow: 0 0 16px rgba(255,210,63,.7); } }
+@media (prefers-reduced-motion: reduce) { .lb-avatar.av-galactico { animation: none; } }
+.av-loja { display: grid; place-items: center; padding: 8px 0; }
+.av-loja .lb-avatar { width: 84px; height: 84px; border-radius: 18px; font-size: 50px; border-width: 3px; }
 .av-cor { width: 40px; height: 40px; border-radius: 50%; border: 3px solid rgba(244,247,251,.3); cursor: pointer; }
 .lb-pinfo { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.1; min-width: 0; }
 .lb-pinfo b { font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 40vw; }
@@ -219,7 +227,10 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .adm-kpi b { font-family: var(--display); font-size: 28px; color: #ffd23f; }
 .adm-kpi span { font-size: 12px; }
 .lb-dir { flex: none; }
-@media (max-width: 380px) { .lb-perfil .lb-avatar { width: 32px; height: 32px; font-size: 17px; } .lb-perfil .lb-avatar.av-emoji { font-size: 20px; } .lb-perfil .lb-pinfo b { display: none; } }
+@media (max-width: 340px) { .lb-top .lb-pinfo { display: none; } }
+@media (max-width: 420px) { .lb-perfil .lb-avatar { width: 32px; height: 32px; font-size: 17px; } .lb-perfil .lb-avatar.av-emoji { font-size: 20px; } .lb-perfil .lb-pinfo b { display: none; }
+  .lb-top .lb-perfil { flex: none; padding-right: 8px; } .lb-top { gap: 6px; } .lb-top .lb-dir { gap: 5px; min-width: 0; flex: 0 1 auto; } .lb-top .lb-som { width: 40px; height: 44px; }
+  .lb-top .lb-moedas { gap: 5px; padding-right: 9px; min-width: 0; } .lb-top .lb-moedas .lb-coin { width: 24px; height: 24px; font-size: 13px; } .lb-top .lb-moedas b { font-size: 15px; } }
 .som-mini { background: none; border: 0; font-size: 20px; padding: 4px 6px; line-height: 1; }
 .top .som-mini { margin-left: auto; }
 .lb-vidas { padding: 6px 10px; gap: 5px; } .lb-vidas span { color: #ff4d6d; font-size: 18px; } .lb-vidas b { font-family: var(--display); font-size: 18px; }
@@ -2244,7 +2255,7 @@ TELAS.lobby = () => {
       </button>
       <div class="lb-dir">
         ${invVidas(nome) ? `<div class="lb-pill lb-vidas" aria-label="${invVidas(nome)} vidas extras"><span aria-hidden="true">❤</span><b>${invVidas(nome)}</b></div>` : ""}
-        <div class="lb-pill lb-moedas" aria-label="${fmtM(moedas)} moedas"><span class="lb-coin" aria-hidden="true">$</span><b>${fmtM(moedas)}</b></div>
+        <div class="lb-pill lb-moedas" aria-label="${fmtM(moedas)} moedas"><span class="lb-coin" aria-hidden="true">$</span><b>${moedas >= 10000 ? (Math.floor(moedas / 100) / 10).toLocaleString("pt-BR") + " mil" : moedas >= 1000 ? Math.floor(moedas).toLocaleString("pt-BR") : fmtM(moedas)}</b></div>
         <button class="lb-som" data-a="ajustes" aria-label="Ajustes do jogo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.6a3.4 3.4 0 1 0 0 6.8 3.4 3.4 0 0 0 0-6.8zm8.2 4.6l1.6 1.2-1.9 3.3-1.9-.7a7.4 7.4 0 0 1-1.8 1l-.3 2H10.1l-.3-2a7.4 7.4 0 0 1-1.8-1l-1.9.7-1.9-3.3 1.6-1.2a7 7 0 0 1 0-2.4L4.2 9.6l1.9-3.3 1.9.7a7.4 7.4 0 0 1 1.8-1l.3-2h3.8l.3 2a7.4 7.4 0 0 1 1.8 1l1.9-.7 1.9 3.3-1.6 1.2a7 7 0 0 1 0 2.4z" fill="#f4f7fb" stroke="#0b1b33" stroke-width="1.3" stroke-linejoin="round"/></svg></button>
         <button class="lb-som" data-a="som" aria-label="${G.som === false ? "Ligar o som" : "Desligar o som"}" aria-pressed="${G.som !== false}">${G.som === false
           ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#f4f7fb" stroke="#0b1b33" stroke-width="1.5" stroke-linejoin="round"/><path d="M16 9l5 6M21 9l-5 6" stroke="#ff4d6d" stroke-width="2.4" stroke-linecap="round"/></svg>'
@@ -2254,7 +2265,7 @@ TELAS.lobby = () => {
     <h1 class="lb-title">Jogo de<br>Pergunta</h1>
     <div class="lb-stage">
       <div class="lb-side">
-        <button class="lb-btn" data-a="loja">${ICONES.loja}<span>Loja</span><i class="lb-tag">${SKINS.some(s => s.limitada && naVenda(s) && !temSkin(nome, s.k)) || FUNDOS_LIM.some(f => naVenda(f) && !temFundo(nome, f.k)) || EMOJIS.some(e => e.limitada && naVenda(e) && !temEmoji(nome, e.k)) || GESTOS.some(g => g.limitada && naVenda(g) && !temGesto(nome, g.k)) ? "limitada!" : "novo!"}</i></button>
+        <button class="lb-btn" data-a="loja">${ICONES.loja}<span>Loja</span><i class="lb-tag">${SKINS.some(s => s.limitada && naVenda(s) && !temSkin(nome, s.k)) || FUNDOS_LIM.some(f => naVenda(f) && !temFundo(nome, f.k)) || EMOJIS.some(e => e.limitada && naVenda(e) && !temEmoji(nome, e.k)) || GESTOS.some(g => g.limitada && naVenda(g) && !temGesto(nome, g.k)) || AV_ESPECIAIS.some(x => x.limitada && naVenda(x) && !temAvatar(nome, x.k)) ? "limitada!" : "novo!"}</i></button>
         <button class="lb-btn" data-a="personagens"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4" fill="#f1c27d" stroke="#0b1b33" stroke-width="1.5"/><path d="M5 21v-3a7 7 0 0 1 14 0v3z" fill="#2f80ed" stroke="#0b1b33" stroke-width="1.5" stroke-linejoin="round"/><path d="M18 3l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" fill="#ffd23f" stroke="#0b1b33" stroke-width="1"/></svg><span>Criar</span></button>
         <button class="lb-btn" data-a="fundos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.3 0 1.9-.8 1.9-1.7 0-1.2-1-1.5-1-2.6 0-1 .8-1.7 1.9-1.7h2.1a3.6 3.6 0 0 0 3.6-3.6C20.5 6.6 16.7 3.5 12 3.5z" fill="#f4f7fb" stroke="#0b1b33" stroke-width="1.6"/><circle cx="7.8" cy="11" r="1.5" fill="#ff4d6d"/><circle cx="10.2" cy="7.4" r="1.5" fill="#ffd23f"/><circle cx="14.6" cy="7.4" r="1.5" fill="#37d99a"/><circle cx="17" cy="11" r="1.5" fill="#2f80ed"/></svg><span>Fundo</span></button>
       </div>
@@ -2305,6 +2316,18 @@ TELAS.loja = () => {
         <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarSkin" data-s="${s.k}" ${usando || (!tem && !podeS) ? "disabled" : ""}>${rotulo}</button>
       </div>`; }).join("")}
     </div>
+    <h2 class="lb-secao">Fotos de perfil</h2>
+    <div class="fd-grid">${AV_ESPECIAIS.filter(x => naVenda(x) || temAvatar(nome, x.k)).map(x => {
+      const tem = temAvatar(nome, x.k), usando = avatarDe(nome).i === x.k, podeA = moedas >= x.preco;
+      const rotulo = usando ? "Usando" : tem ? "Usar" : G.lojaConf === "avatar:" + x.k ? "Confirmar?" : podeA ? `<span class="lb-coin" aria-hidden="true">$</span>${x.preco}` : `$ ${x.preco}`;
+      return `<div class="fd-tile${tem ? "" : " fd-travado"}${x.limitada ? " sk-limitada" : ""}">
+        ${x.limitada ? `<i class="sk-selo">Edição limitada</i>` : ""}
+        <span class="av-loja">${avatarHTML({ i: x.k }, nome)}</span>
+        <b>${esc(x.nome)}</b>
+        ${x.limitada && !tem && naVenda(x) ? `<span class="sk-prazo">⏳ ${faltaParaAcabar(x)}</span>` : ""}
+        <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarAvatar" data-k="${x.k}" ${usando || (!tem && !podeA) ? "disabled" : ""}>${rotulo}</button>
+      </div>`; }).join("")}
+    </div>
     <h2 class="lb-secao">Gestos</h2>
     <p class="lb-sub" style="margin-top:-6px">Dancinhas para o seu bonequinho fazer durante a partida.</p>
     <div class="fd-grid">${GESTOS.filter(g => naVenda(g) || temGesto(nome, g.k)).sort((a, b) => !!b.limitada - !!a.limitada).map(g => {
@@ -2349,10 +2372,16 @@ TELAS.loja = () => {
 const AV_ICONES = ["🐶", "🐱", "🦊", "🐼", "🐸", "🦁", "🐯", "🐵", "🦄", "🐲", "🦖", "🐙", "🦈", "🐧", "🦉", "🐝",
   "⚽", "🏀", "🎮", "🚀", "⭐", "🔥", "⚡", "👑", "🤖", "👽", "🍕", "🌈"];
 const AV_CORES = ["#e4572e", "#2f80ed", "#37d99a", "#ffd23f", "#9b51e0", "#ff4d6d", "#0b1b33", "#f4a261"];
-function avatarDe(n) { const a = ((G.inv || {})[n] || {}).avatar || {}; return { i: AV_ICONES.includes(a.i) ? a.i : "", cor: AV_CORES.includes(a.cor) ? a.cor : AV_CORES[0] }; }
+/* fotos de perfil especiais (compradas na loja); a de edição limitada só vende até "ate" */
+const AV_ESPECIAIS = [{ k: "galactico", icone: "🪐", nome: "Galáctico", tipo: "avatar", limitada: true, preco: 200, ate: "2026-11-06T23:59:59-03:00" }];
+const avEspecial = k => AV_ESPECIAIS.find(x => x.k === k) || null;
+const avValido = i => i === "" || AV_ICONES.includes(i) || !!avEspecial(i);
+function temAvatar(n, k) { return (((G.inv || {})[n] || {}).avatares || []).includes(k); }
+function avatarDe(n) { const a = ((G.inv || {})[n] || {}).avatar || {}; const ok = AV_ICONES.includes(a.i) || (avEspecial(a.i) && temAvatar(n, a.i)); return { i: ok ? a.i : "", cor: AV_CORES.includes(a.cor) ? a.cor : AV_CORES[0] }; }
 /* desenho do avatar: ícone escolhido, ou a primeira letra do nome */
 function avatarHTML(av, nome, extra = "") {
-  const a = av && typeof av === "object" ? av : {}, i = AV_ICONES.includes(a.i) ? a.i : "", cor = AV_CORES.includes(a.cor) ? a.cor : AV_CORES[0];
+  const a = av && typeof av === "object" ? av : {}, esp = avEspecial(a.i), i = AV_ICONES.includes(a.i) ? a.i : "", cor = AV_CORES.includes(a.cor) ? a.cor : AV_CORES[0];
+  if (esp) return `<span class="lb-avatar av-emoji av-${esp.k}${extra}" aria-hidden="true">${esp.icone}</span>`;
   return `<span class="lb-avatar${i ? " av-emoji" : ""}${extra}" style="background:${cor}" aria-hidden="true">${i || esc((nome || "?")[0])}</span>`;
 }
 TELAS.perfil = () => `
@@ -2367,6 +2396,7 @@ TELAS.perfil = () => `
       <h3>Foto de perfil</h3>
       <div class="av-prev">${avatarHTML(avatarDe(perfil()), perfil(), " av-grande")}<b>${esc(perfil())}</b></div>
       <div class="av-grade" role="group" aria-label="Ícone">
+        ${AV_ESPECIAIS.filter(x => temAvatar(perfil(), x.k)).map(x => `<button type="button" class="av-op av-${x.k}" data-a="avIcone" data-i="${x.k}" aria-pressed="${avatarDe(perfil()).i === x.k}" aria-label="Foto ${esc(x.nome)}">${x.icone}</button>`).join("")}
         <button type="button" class="av-op" data-a="avIcone" data-i="" aria-pressed="${!avatarDe(perfil()).i}" aria-label="Primeira letra do nome">${esc(perfil()[0] || "?")}</button>
         ${AV_ICONES.map(i => `<button type="button" class="av-op" data-a="avIcone" data-i="${i}" aria-pressed="${avatarDe(perfil()).i === i}">${i}</button>`).join("")}
       </div>
@@ -2824,6 +2854,20 @@ const EMOJIS = [
 const emojiInfo = k => EMOJIS.find(e => e.k === k) || null;
 function temEmoji(n, k) { const e = emojiInfo(k); return !!e && (e.preco === 0 || (((G.inv || {})[n] || {}).emojis || []).includes(k)); }
 function darEmoji(n, k) { G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 }; G.inv[n].emojis = G.inv[n].emojis || []; if (!G.inv[n].emojis.includes(k)) G.inv[n].emojis.push(k); }
+acoes.comprarAvatar = el => {
+  const k = el.dataset.k, nome = perfil(), x = avEspecial(k); if (!x) return;
+  const usar = () => { G.inv[nome].avatar = { ...avatarDe(nome), i: k }; salvarPlacar(); };
+  if (temAvatar(nome, k)) { usar(); const y = window.scrollY; render(); window.scrollTo(0, y); toast(`Foto ${x.nome} colocada`); return; }
+  if (!naVenda(x)) { toast("Essa foto de edição limitada já acabou"); return; }
+  if ((G.banco[nome] || 0) < x.preco) return;
+  if (G.lojaConf !== "avatar:" + k) { pedirConfirmacao("avatar:" + k); return; }
+  clearTimeout(lojaConfT); G.lojaConf = false;
+  G.banco[nome] = Math.round(((G.banco[nome] || 0) - x.preco) * 10) / 10;
+  G.inv = G.inv || {}; G.inv[nome] = G.inv[nome] || { vidas: 0 }; G.inv[nome].avatares = [...(G.inv[nome].avatares || []), k]; usar();
+  if (typeof sfxJogar === "function") sfxJogar();
+  toast(`${nome} comprou a foto ${x.nome}!`);
+  const y = window.scrollY; render(); window.scrollTo(0, y);
+};
 acoes.comprarEmoji = el => {
   const k = el.dataset.e, nome = perfil(), e = emojiInfo(k);
   if (!e || temEmoji(nome, k)) return;
@@ -3655,10 +3699,10 @@ document.addEventListener("click", e => {
 /* skins limitadas: o ADM pode mudar prazo e preço neste aparelho (G.admLim) */
 SKINS.forEach(s => { if (s.limitada) { s.ateOriginal = s.ate; s.precoOriginal = s.preco; } });
 FUNDOS_LIM.forEach(f => { f.ateOriginal = f.ate; f.precoOriginal = f.preco; });
-[...EMOJIS, ...GESTOS].forEach(e => { if (e.limitada) { e.ateOriginal = e.ate; e.precoOriginal = e.preco; } });
-const todasLimitadas = () => [...SKINS.filter(s => s.limitada), ...FUNDOS_LIM, ...EMOJIS.filter(e => e.limitada), ...GESTOS.filter(g => g.limitada)];
+[...EMOJIS, ...GESTOS, ...AV_ESPECIAIS].forEach(e => { if (e.limitada) { e.ateOriginal = e.ate; e.precoOriginal = e.preco; } });
+const todasLimitadas = () => [...SKINS.filter(s => s.limitada), ...FUNDOS_LIM, ...EMOJIS.filter(e => e.limitada), ...GESTOS.filter(g => g.limitada), ...AV_ESPECIAIS.filter(x => x.limitada)];
 const limInfo = k => todasLimitadas().find(x => x.k === k);
-const temLim = (j, x) => (x.tipo === "fundo" ? temFundo(j, x.k) : x.tipo === "emoji" ? temEmoji(j, x.k) : x.tipo === "gesto" ? temGesto(j, x.k) : temSkin(j, x.k));
+const temLim = (j, x) => (x.tipo === "fundo" ? temFundo(j, x.k) : x.tipo === "emoji" ? temEmoji(j, x.k) : x.tipo === "gesto" ? temGesto(j, x.k) : x.tipo === "avatar" ? temAvatar(j, x.k) : temSkin(j, x.k));
 function aplicarLimitadas() {
   todasLimitadas().forEach(s => { const o = (G.admLim || {})[s.k] || {}; s.ate = o.ate || s.ateOriginal; s.preco = o.preco || s.precoOriginal; if (s.tipo === "fundo") PRECO_FUNDO[s.k] = s.preco; });
 }
@@ -3690,11 +3734,12 @@ TELAS.adm = () => {
     <h3>Fundos</h3><div class="chips">${FUNDOS.map(([k, t]) => chipItem(temFundo(n, k), k === "basico", "fundo", k, esc(t))).join("")}</div>
     <h3>Emojis</h3><div class="chips">${EMOJIS.map(e => chipItem(temEmoji(n, e.k), e.preco === 0, "emoji", e.k, e.e)).join("")}</div>
     <h3>Gestos</h3><div class="chips">${GESTOS.map(g => chipItem(temGesto(n, g.k), g.preco === 0, "gesto", g.k, g.icone + " " + esc(g.nome))).join("")}</div>
+    <h3>Fotos de perfil</h3><div class="chips">${AV_ESPECIAIS.map(x => chipItem(temAvatar(n, x.k), false, "avatar", x.k, x.icone + " " + esc(x.nome))).join("")}</div>
     <p class="dim" style="font-size:14px">Toque para dar ou tirar. Verde = tem.</p>`;
   if (ADM.aba === "limitadas") corpo = todasLimitadas().map(s => {
     const venda = naVenda(s), donos = jogadoresDoAparelho().filter(j => temLim(j, s)).length, mexeu = !!(G.admLim || {})[s.k];
     return `<div class="adm-lim">
-      <h3>${s.tipo === "fundo" ? "Fundo" : s.tipo === "emoji" ? "Emoji " + s.e : s.tipo === "gesto" ? "Gesto " + s.icone : "Skin"} ${esc(s.nome)} <span class="${venda ? "am-on" : "am-off"}">● ${venda ? "à venda" : "encerrada"}</span></h3>
+      <h3>${s.tipo === "fundo" ? "Fundo" : s.tipo === "emoji" ? "Emoji " + s.e : s.tipo === "gesto" ? "Gesto " + s.icone : s.tipo === "avatar" ? "Foto " + s.icone : "Skin"} ${esc(s.nome)} <span class="${venda ? "am-on" : "am-off"}">● ${venda ? "à venda" : "encerrada"}</span></h3>
       <p>Até <b>${brDataHora(Date.parse(s.ate))}</b> · <b>${s.preco}</b> moedas · ${donos} ${donos === 1 ? "jogador tem" : "jogadores têm"} neste celular</p>
       <div class="adm-grade">
         <button type="button" class="btn ghost small" data-a="admLimPrazo" data-k="${s.k}" data-h="24">+1 dia</button>
@@ -3739,7 +3784,7 @@ Object.assign(acoes, {
   admItem(el) {
     const n = ADM.jog, k = el.dataset.k, t = el.dataset.t;
     G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 };
-    const lista = { skin: "skins", fundo: "fundos", emoji: "emojis", gesto: "gestos" }[t];
+    const lista = { skin: "skins", fundo: "fundos", emoji: "emojis", gesto: "gestos", avatar: "avatares" }[t];
     const atual = G.inv[n][lista] || [];
     if (el.getAttribute("aria-pressed") === "true") {
       G.inv[n][lista] = atual.filter(x => x !== k);
@@ -4592,7 +4637,7 @@ function amigoRecebe(conn, d) {
   const amigo = amigos().find(a => a.codigo === de);
   if (amigo && nome && amigo.nome !== nome) { amigo.nome = nome; salvar(); }
   // foto de perfil do amigo: só ícone e cor da lista do jogo
-  const av = d.av && typeof d.av === "object" && AV_ICONES.concat("").includes(d.av.i) && AV_CORES.includes(d.av.cor) ? { i: d.av.i, cor: d.av.cor } : null;
+  const av = d.av && typeof d.av === "object" && avValido(d.av.i) && AV_CORES.includes(d.av.cor) ? { i: d.av.i, cor: d.av.cor } : null;
   if (amigo && av && JSON.stringify(amigo.av) !== JSON.stringify(av)) { amigo.av = av; salvar(); }
   if (d.t === "oi") { if (amigo) reRender(); return; }
   if (d.t === "pedido") {
