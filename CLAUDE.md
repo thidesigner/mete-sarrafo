@@ -52,6 +52,12 @@ Sites (GitHub Pages, branch `main`, pasta raiz):
 O modo online tem uma sala de código fixo, `ANDREK7Q` (`SALA_DO_ANDRE` em `fonte/online.js`). O QR do convite impresso (`materiais/convite-sala-do-andre.pdf`) aponta para `teste/?sala=ANDREK7Q`. Não troque esse código sem refazer o convite. No celular com o perfil "Andre", criar sala usa esse código automaticamente.
 O Andre não precisa estar: quem entra pelo QR e acha a sala fechada abre a sala no próprio celular e comanda a partida; quem chega depois (inclusive o Andre) entra nela.
 
+## Ajustes trancados
+
+Os Ajustes do jogo (engrenagem na tela inicial) pedem um código de 5 números que só o pai sabe.
+- Nunca escreva esse código em arquivos, commits, testes guardados aqui ou respostas que fiquem no repositório. No código fica só a "impressão digital" (`PIN_PADRAO`, PBKDF2-SHA256 com o sal `mete-sarrafo-ajustes` e 100 000 voltas).
+- Para trocar o código padrão, gere a nova impressão fora do repositório e substitua `PIN_PADRAO`. Dentro do jogo, quem sabe o código pode trocá-lo só naquele aparelho ("Trocar o código").
+
 ## Testes
 
 - Sintaxe: extraia os `<script>` de `teste/index.html` e rode `node --check`.
