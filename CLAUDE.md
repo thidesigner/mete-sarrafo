@@ -1,7 +1,8 @@
 # Jogos do Andre
 
 Ambiente onde o Andre (uma criança) cria e testa jogos com a ajuda do pai e do Claude.
-O primeiro jogo é o **Mete Sarrafo**: forca misturada com queimada.
+O primeiro jogo é o **Jogo de Pergunta** (antes chamado Mete Sarrafo): forca misturada com queimada.
+O nome mudou só no que o jogador vê. Endereço do site, nome do repositório, arquivos, sala online (`metesarrafo-v1-`) e dados guardados (`ms-festa`) continuam com o nome antigo de propósito, para nada quebrar.
 Este repositório é a fonte única: sessões do Claude Code na nuvem e no desktop trabalham aqui.
 
 ## Como conversar

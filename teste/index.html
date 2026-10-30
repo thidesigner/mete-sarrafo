@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0f3057">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;-webkit-text-size-adjust:100%}img{max-width:100%}[hidden]{display:none!important}.faixa-teste{position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:50;background:#ff4d6d;color:#fff;font:800 12px/1 system-ui,sans-serif;letter-spacing:.08em;padding:4px 10px;border-radius:0 0 8px 8px;pointer-events:none}</style>
-<title>Mete Sarrafo: Modo Festa</title>
+<title>Jogo de Pergunta: Modo Festa</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -307,7 +307,7 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
     <div class="top"><span class="eyebrow" id="a-phase"></span><span class="clock" id="a-clock"></span></div>
     <div class="card a-hud"><div class="tema" id="a-tema"></div><div class="word" id="a-word"></div><div class="dim" id="a-sub" style="text-align:center;font-size:15px"></div></div>
     <div class="scorebar" id="a-bar"></div>
-    <div class="stage-wrap"><canvas id="a-canvas" aria-label="Quadra do Mete Sarrafo"></canvas><div class="overlay" id="a-ov" hidden></div></div>
+    <div class="stage-wrap"><canvas id="a-canvas" aria-label="Quadra do Jogo de Pergunta"></canvas><div class="overlay" id="a-ov" hidden></div></div>
     <div class="card a-act" id="a-act"></div>
     <div class="row"><button class="btn ghost small" id="a-visao" type="button">Ver de cima</button><button class="btn ghost small" id="a-sair" type="button">Sair da partida</button></div>
   </div>
@@ -497,7 +497,7 @@ TELAS.inicio = () => {
   <button class="btn ghost small" data-a="voltarLobby" style="align-self:flex-start;width:auto">← Tela inicial</button>
   <header style="display:flex;flex-direction:column;gap:8px">
     <span class="eyebrow">Modo festa · um celular é o juiz</span>
-    <h1>Mete <em>Sarrafo</em></h1>
+    <h1>Jogo de <em>Pergunta</em></h1>
     <p class="dim">Forca com queimada, do jogo que o Andre inventou.</p>
   </header>
   <div class="card hot">
@@ -732,7 +732,7 @@ TELAS.obrigado = () => `
 TELAS.convidado = () => `
   <header style="display:flex;flex-direction:column;gap:8px">
     <span class="eyebrow">Jogo do Andre</span>
-    <h1>Mete <em>Sarrafo</em></h1>
+    <h1>Jogo de <em>Pergunta</em></h1>
     <p class="dim">Forca com queimada. O jogo acontece no celular do Andre, que é o juiz. Aqui estão as regras.</p>
   </header>
   <div class="card"><h3>Regras</h3>${regrasHTML()}</div>
@@ -749,7 +749,7 @@ Object.assign(acoes, {
   },
   tirar(el) { G.nomes.splice(+el.dataset.i, 1); salvar(); render(); },
   copiarSug(el) {
-    const txt = "Sugestões do Mete Sarrafo\n\n" + sugestoes.map(s => `${s.nome || "Alguém"} (${s.nota ? NOTAS[s.nota - 1][1] : "sem nota"})` + (s.legal ? `\nMais legal: ${s.legal}` : "") + (s.mudaria ? `\nMudaria: ${s.mudaria}` : "")).join("\n\n");
+    const txt = "Sugestões do Jogo de Pergunta\n\n" + sugestoes.map(s => `${s.nome || "Alguém"} (${s.nota ? NOTAS[s.nota - 1][1] : "sem nota"})` + (s.legal ? `\nMais legal: ${s.legal}` : "") + (s.mudaria ? `\nMudaria: ${s.mudaria}` : "")).join("\n\n");
     const mostrar = () => { const ta = $("sug-texto"); if (ta) { ta.hidden = false; ta.value = txt; ta.focus(); ta.select(); } toast("Selecionei o texto: é só copiar"); };
     try { navigator.clipboard.writeText(txt).then(() => { el.textContent = "Copiado!"; toast("Copiado. Agora cole no WhatsApp"); }, mostrar); } catch { mostrar(); }
   },
@@ -831,7 +831,7 @@ Object.assign(acoes, {
     out.hidden = false; out.textContent = "Lendo as sugestões…";
     const lista = sugestoes.slice(0, 60).map(s => `- ${s.nome || "Alguém"} (nota ${s.nota || "?"}/5). Mais legal: ${s.legal || "-"}. Mudaria: ${s.mudaria || "-"}`).join("\n");
     try {
-      const r = await sample(`Estas são sugestões de crianças que jogaram "Mete sarrafo", um jogo criado pelo Andre (forca + queimada).
+      const r = await sample(`Estas são sugestões de crianças que jogaram "Jogo de Pergunta", um jogo criado pelo Andre (forca + queimada).
 Resuma para o Andre, em português simples e animado, em até 150 palavras, sem markdown:
 1) o que a turma mais curtiu, 2) as mudanças mais pedidas (diga quantas pessoas pediram cada uma), 3) uma sugestão de próximo teste.
 
@@ -982,7 +982,7 @@ const SKINS = [
   { k: "zumbi", nome: "Zumbi", preco: 150, camisa: "#6b5b95", pele: "#8fbf6a" },
   { k: "astronauta", nome: "Astronauta", preco: 150, camisa: "#e9eef5" },
   { k: "rei", nome: "Rei", preco: 200, camisa: "#7b2cbf" },
-  // heróis criados para o Mete Sarrafo (visual próprio, sem copiar personagens de outros jogos)
+  // heróis criados para o Jogo de Pergunta (visual próprio, sem copiar personagens de outros jogos)
   { k: "feiticeiro", nome: "Feiticeiro Azul", preco: 250, camisa: "#1d2b53", heroi: true },
   { k: "relampago", nome: "Ninja Relâmpago", preco: 250, camisa: "#2a9d55", heroi: true },
   { k: "guepardo", nome: "Guepardo Veloz", preco: 300, camisa: "#f4a261", pele: "#f4a261", heroi: true },
@@ -1017,7 +1017,7 @@ function renderSetup() {
   const box = $("a-setup");
   box.innerHTML = `
     <div style="display:flex;flex-direction:column;gap:14px">
-      <span class="eyebrow">Mete Sarrafo · bonequinhos</span>
+      <span class="eyebrow">Jogo de Pergunta · bonequinhos</span>
       <h2>Quem vai pra quadra?</h2>
       <p class="dim">Um celular só, passando de mão em mão. Cada nome pode ser uma pessoa ou um robô.</p>
       <form class="card" id="as-form" autocomplete="off">
@@ -2026,7 +2026,7 @@ TELAS.lobby = () => {
           : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#ffd23f" stroke="#0b1b33" stroke-width="1.5" stroke-linejoin="round"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="#f4f7fb" stroke-width="2" stroke-linecap="round"/></svg>'}</button>
       </div>
     </div>
-    <h1 class="lb-title">Mete<br>Sarrafo</h1>
+    <h1 class="lb-title">Jogo de<br>Pergunta</h1>
     <div class="lb-stage">
       <div class="lb-side">
         <button class="lb-btn" data-a="loja">${ICONES.loja}<span>Loja</span><i class="lb-tag">novo!</i></button>

@@ -2,9 +2,9 @@
 
 Jogos inventados pelo Andre e construídos com a ajuda do Claude.
 
-## Mete Sarrafo
+## Jogo de Pergunta
 
-Forca misturada com queimada.
+Forca misturada com queimada. (Antes se chamava Mete Sarrafo.)
 
 - **Jogar:** https://thidesigner.github.io/mete-sarrafo/
 - **Versão de teste** (novidades antes de irem para a oficial): https://thidesigner.github.io/mete-sarrafo/teste/

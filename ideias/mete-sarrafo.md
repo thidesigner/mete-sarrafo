@@ -1,4 +1,6 @@
-# Mete Sarrafo: regras combinadas
+# Jogo de Pergunta: regras combinadas
+
+(Antes se chamava Mete Sarrafo. O Andre trocou o nome em 30/out.)
 
 Ideia do Andre: um jogo de celular e PC que mistura forca com queimada. Quem adivinha a palavra pega a bola e tenta acertar os outros. Ganha quem sobrar por último.
 
