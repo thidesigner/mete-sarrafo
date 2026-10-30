@@ -234,6 +234,7 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .fd-prev { display: block; width: 100%; aspect-ratio: 1.3; border-radius: 9px; overflow: hidden; border: 2px solid #0b1b33; }
 .fd-tile b { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
 .fd-tile i { font-style: normal; font-size: 11px; background: #ffd23f; color: #0b1b33; border-radius: 6px; padding: 1px 6px; }
+.sk-heroi { font-style: normal; font-size: 10px; background: #ff4d6d; color: #fff; border-radius: 6px; padding: 1px 6px; }
 .sk-prev { display: block; width: 100%; aspect-ratio: 1.3; max-width: 100%; border-radius: 9px; border: 2px solid #0b1b33; background: radial-gradient(circle at 50% 75%, #2a6fd6, #133a68 75%); }
 .fd-travado .sk-prev { filter: saturate(.6) brightness(.85); }
 .lb-secao { font-family: var(--display); color: #fff; font-size: 22px; margin: 6px 0 0; -webkit-text-stroke: 1.5px #0b1b33; paint-order: stroke fill; text-shadow: 0 3px 0 #0b1b33; }
@@ -969,6 +970,10 @@ const SKINS = [
   { k: "zumbi", nome: "Zumbi", preco: 150, camisa: "#6b5b95", pele: "#8fbf6a" },
   { k: "astronauta", nome: "Astronauta", preco: 150, camisa: "#e9eef5" },
   { k: "rei", nome: "Rei", preco: 200, camisa: "#7b2cbf" },
+  // heróis criados para o Mete Sarrafo (visual próprio, sem copiar personagens de outros jogos)
+  { k: "feiticeiro", nome: "Feiticeiro Azul", preco: 250, camisa: "#1d2b53", heroi: true },
+  { k: "relampago", nome: "Ninja Relâmpago", preco: 250, camisa: "#2a9d55", heroi: true },
+  { k: "guepardo", nome: "Guepardo Veloz", preco: 300, camisa: "#f4a261", pele: "#f4a261", heroi: true },
 ];
 const skinInfo = k => SKINS.find(s => s.k === k) || SKINS[0];
 function vestir(p, k) { const s = skinInfo(k); p.skin = s.k; if (s.camisa) p.cor = s.camisa; if (s.pele) p.pele = s.pele; return p; }
@@ -1417,6 +1422,35 @@ function desenharAcessorio2D(c, skin, x, y) {
       c.fillStyle = "rgba(170,220,255,.35)"; c.beginPath(); c.arc(hx, hy, 20, 0, Math.PI * 2); c.fill();
       c.strokeStyle = "#e9eef5"; c.lineWidth = 3; c.stroke();
       c.fillStyle = "rgba(255,255,255,.55)"; c.beginPath(); c.ellipse(hx - 8, hy - 9, 4, 2.5, -.6, 0, Math.PI * 2); c.fill(); break;
+    case "feiticeiro": {
+      c.fillStyle = "#bfe6ff"; c.beginPath(); c.moveTo(hx - 15, hy - 4);
+      [[-15, -20], [-9, -10], [-5, -26], [0, -12], [5, -27], [9, -11], [15, -21], [15, -4]].forEach(([a, b]) => c.lineTo(hx + a, hy + b));
+      c.arc(hx, hy - 2, 15, 0, Math.PI, true); c.closePath(); c.fill();
+      c.fillStyle = "#ffd23f"; c.fillRect(x - 15, y - 20, 30, 3);
+      for (const lado of [-1, 1]) {
+        const g = c.createRadialGradient(x + lado * 21, y + 4, 1, x + lado * 21, y + 4, 10);
+        g.addColorStop(0, "rgba(120,220,255,.95)"); g.addColorStop(1, "rgba(120,220,255,0)");
+        c.fillStyle = g; c.beginPath(); c.arc(x + lado * 21, y + 4, 10, 0, Math.PI * 2); c.fill();
+      }
+      break;
+    }
+    case "relampago":
+      c.fillStyle = "#d9480f"; c.beginPath(); c.moveTo(hx - 15, hy - 2);
+      [[-19, -12], [-12, -14], [-14, -24], [-5, -17], [0, -29], [5, -17], [14, -24], [12, -14], [19, -12], [15, -2]].forEach(([a, b]) => c.lineTo(hx + a, hy + b));
+      c.closePath(); c.fill();
+      c.fillStyle = "#ffd23f"; c.fillRect(hx - 15.5, hy - 11, 31, 6);
+      c.strokeStyle = "#1b1b2b"; c.lineWidth = 1.6; c.beginPath(); c.moveTo(hx + 1.5, hy - 10.5); c.lineTo(hx - 1.5, hy - 8); c.lineTo(hx + 1.5, hy - 8); c.lineTo(hx - 1.5, hy - 5.5); c.stroke();
+      break;
+    case "guepardo":
+      c.fillStyle = "#f4a261"; c.strokeStyle = "#8a4b14"; c.lineWidth = 1.5;
+      for (const lado of [-1, 1]) { c.beginPath(); c.moveTo(hx + lado * 6, hy - 13); c.lineTo(hx + lado * 13, hy - 24); c.lineTo(hx + lado * 15, hy - 9); c.closePath(); c.fill(); c.stroke(); }
+      c.fillStyle = "#5a3412";
+      [[-9, -6], [8, -8], [-3, -11], [10, 2], [-11, 3]].forEach(([a, b]) => { c.beginPath(); c.arc(hx + a, hy + b, 1.6, 0, Math.PI * 2); c.fill(); });
+      [[-9, -12], [6, -14], [-2, -4], [9, 2], [-7, 4]].forEach(([a, b]) => { c.beginPath(); c.arc(x + a, y + b, 2.2, 0, Math.PI * 2); c.fill(); });
+      c.strokeStyle = "#5a3412"; c.lineWidth = 1; c.beginPath();
+      for (const lado of [-1, 1]) { c.moveTo(hx + lado * 4, hy + 1); c.lineTo(hx + lado * 13, hy - 1); c.moveTo(hx + lado * 4, hy + 2.5); c.lineTo(hx + lado * 13, hy + 3.5); }
+      c.stroke();
+      break;
     case "rei":
       c.fillStyle = "#ffd23f"; c.strokeStyle = "#b8860b"; c.lineWidth = 1.5; c.beginPath();
       c.moveTo(hx - 12, hy - 11); c.lineTo(hx - 13, hy - 23); c.lineTo(hx - 6, hy - 16); c.lineTo(hx, hy - 25); c.lineTo(hx + 6, hy - 16); c.lineTo(hx + 13, hy - 23); c.lineTo(hx + 12, hy - 11);
@@ -1777,6 +1811,16 @@ function acessorio3D(cabeca, skin) {
     case "astronauta":
       add(new THREE.SphereGeometry(.28, 18, 14), "#aee0ff", 0, 0, 0, { transparent: true, opacity: .3 });
       add(new THREE.TorusGeometry(.2, .03, 8, 20), "#e9eef5", 0, -.2, 0).rotation.x = Math.PI / 2; break;
+    case "feiticeiro":
+      for (let k = 0; k < 9; k++) { const a = k / 9 * Math.PI * 2; const m = add(new THREE.ConeGeometry(.06, .2, 6), "#bfe6ff", Math.cos(a) * .12, .19, Math.sin(a) * .12); m.rotation.z = -Math.cos(a) * .6; m.rotation.x = Math.sin(a) * .6; }
+      add(new THREE.ConeGeometry(.07, .24, 6), "#bfe6ff", 0, .3, 0); break;
+    case "relampago":
+      for (let k = 0; k < 9; k++) { const a = k / 9 * Math.PI * 2; const m = add(new THREE.ConeGeometry(.06, .2, 6), "#d9480f", Math.cos(a) * .13, .17, Math.sin(a) * .13); m.rotation.z = -Math.cos(a) * .9; m.rotation.x = Math.sin(a) * .9; }
+      add(new THREE.CylinderGeometry(.206, .206, .07, 18, 1, true), "#ffd23f", 0, .09, 0, { side: THREE.DoubleSide }); break;
+    case "guepardo":
+      for (const lado of [-1, 1]) add(new THREE.ConeGeometry(.06, .14, 4), "#f4a261", lado * .12, .2, 0);
+      for (const [a, b, z] of [[-.1, .06, -.16], [.09, .1, -.17], [.12, -.04, -.14], [-.13, -.03, -.13]]) add(new THREE.SphereGeometry(.022, 6, 4), "#5a3412", a, b, z);
+      break;
     case "rei": {
       add(new THREE.CylinderGeometry(.15, .15, .1, 10, 1, true), "#ffd23f", 0, .21, 0, { side: THREE.DoubleSide });
       for (let k = 0; k < 5; k++) { const a = k / 5 * Math.PI * 2; add(new THREE.ConeGeometry(.04, .09, 6), "#ffd23f", Math.cos(a) * .14, .3, Math.sin(a) * .14); }
@@ -2016,7 +2060,7 @@ TELAS.loja = () => {
       const rotulo = usando ? "Usando" : tem ? "Usar" : G.lojaConf === "skin:" + s.k ? "Confirmar?" : podeS ? `<span class="lb-coin" aria-hidden="true">$</span>${s.preco}` : `$ ${s.preco}`;
       return `<div class="fd-tile${tem ? "" : " fd-travado"}"${usando ? ' aria-current="true"' : ""}>
         <canvas class="sk-prev" data-skin="${s.k}" aria-label="Bonequinho com a skin ${esc(s.nome)}"></canvas>
-        <b>${esc(s.nome)}</b>
+        <b>${esc(s.nome)}${s.heroi ? '<i class="sk-heroi">herói</i>' : ""}</b>
         <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarSkin" data-s="${s.k}" ${usando || (!tem && !podeS) ? "disabled" : ""}>${rotulo}</button>
       </div>`; }).join("")}
     </div>
@@ -2087,8 +2131,8 @@ function animarLobby() {
     c.fillStyle = "#2a6fd6"; c.beginPath(); c.ellipse(100, 163, 44, 11, 0, 0, Math.PI * 2); c.fill();
     // bonequinho respirando e acenando
     const bob = Math.sin(lbT * 2.2) * 2;
-    boneco.x = 100; boneco.y = 112 + bob * .4; boneco.passo = Math.sin(lbT * 1.1) * 4;
-    c.save(); c.translate(100, 112); c.scale(2.1, 2.1); c.translate(-100, -112);
+    boneco.x = 100; boneco.y = 120 + bob * .4; boneco.passo = Math.sin(lbT * 1.1) * 4;
+    c.save(); c.translate(100, 120); c.scale(1.95, 1.95); c.translate(-100, -120);
     desenharBoneco2(c, boneco, {});
     c.restore();
     // bola quicando ao lado
