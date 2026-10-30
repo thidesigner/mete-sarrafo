@@ -253,6 +253,21 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .bgf[data-fundo="floresta"]::before { background:
   repeating-linear-gradient(112deg, rgba(255,255,200,.09) 0 26px, transparent 26px 92px),
   radial-gradient(ellipse 60% 18% at 20% 100%, #0c3326 0 98%, transparent 100%), radial-gradient(ellipse 60% 22% at 85% 100%, #0f3d2e 0 98%, transparent 100%); }
+.bgf[data-fundo="galactico"] { background:
+  radial-gradient(ellipse 15% 3% at 84% 63%, transparent 0 52%, rgba(205,185,255,.95) 56% 80%, transparent 84%),
+  radial-gradient(circle at 84% 63%, #ffd98f 0, #f0a03c 3%, #c4561c 5.2%, transparent 5.5%),
+  radial-gradient(ellipse 60% 40% at 18% 30%, rgba(214,69,170,.55) 0%, transparent 70%),
+  radial-gradient(ellipse 70% 45% at 85% 70%, rgba(64,120,255,.5) 0%, transparent 70%),
+  radial-gradient(ellipse 50% 35% at 40% 85%, rgba(124,58,237,.6) 0%, transparent 70%),
+  linear-gradient(180deg, #07051a 0%, #1b0b45 50%, #0a1640 100%); }
+.bgf[data-fundo="galactico"]::before { background-image:
+  radial-gradient(1.6px 1.6px at 10% 14%, #fff 50%, transparent 52%), radial-gradient(1.2px 1.2px at 26% 58%, #fff 50%, transparent 52%),
+  radial-gradient(2.2px 2.2px at 48% 26%, #ffe9a8 50%, transparent 52%), radial-gradient(1.3px 1.3px at 66% 82%, #fff 50%, transparent 52%),
+  radial-gradient(1.8px 1.8px at 90% 40%, #cfe0ff 50%, transparent 52%), radial-gradient(1.1px 1.1px at 36% 92%, #fff 50%, transparent 52%),
+  radial-gradient(2px 2px at 74% 8%, #ffd6f5 50%, transparent 52%), radial-gradient(1.2px 1.2px at 58% 48%, #fff 50%, transparent 52%);
+  background-size: 180px 180px; animation: galaxia 60s linear infinite; }
+@keyframes galaxia { to { background-position: 180px 90px; } }
+@media (prefers-reduced-motion: reduce) { .bgf[data-fundo="galactico"]::before { animation: none; } }
 .bgf[data-fundo="vulcao"] { background: radial-gradient(ellipse 70% 30% at 50% 100%, #ff7a1a 0%, rgba(255,122,26,0) 70%), linear-gradient(180deg, #1a0a0a 0%, #5a1414 52%, #a32d0d 100%); }
 .bgf[data-fundo="vulcao"]::before { background-image:
   radial-gradient(2px 2px at 20% 30%, #ffb347 50%, transparent 52%), radial-gradient(1.5px 1.5px at 65% 70%, #ff7a1a 50%, transparent 52%),
@@ -2209,7 +2224,7 @@ TELAS.lobby = () => {
     <h1 class="lb-title">Jogo de<br>Pergunta</h1>
     <div class="lb-stage">
       <div class="lb-side">
-        <button class="lb-btn" data-a="loja">${ICONES.loja}<span>Loja</span><i class="lb-tag">${SKINS.some(s => s.limitada && naVenda(s) && !temSkin(nome, s.k)) ? "limitada!" : "novo!"}</i></button>
+        <button class="lb-btn" data-a="loja">${ICONES.loja}<span>Loja</span><i class="lb-tag">${SKINS.some(s => s.limitada && naVenda(s) && !temSkin(nome, s.k)) || FUNDOS_LIM.some(f => naVenda(f) && !temFundo(nome, f.k)) ? "limitada!" : "novo!"}</i></button>
         <button class="lb-btn" data-a="personagens"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4" fill="#f1c27d" stroke="#0b1b33" stroke-width="1.5"/><path d="M5 21v-3a7 7 0 0 1 14 0v3z" fill="#2f80ed" stroke="#0b1b33" stroke-width="1.5" stroke-linejoin="round"/><path d="M18 3l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" fill="#ffd23f" stroke="#0b1b33" stroke-width="1"/></svg><span>Criar</span></button>
         <button class="lb-btn" data-a="fundos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.3 0 1.9-.8 1.9-1.7 0-1.2-1-1.5-1-2.6 0-1 .8-1.7 1.9-1.7h2.1a3.6 3.6 0 0 0 3.6-3.6C20.5 6.6 16.7 3.5 12 3.5z" fill="#f4f7fb" stroke="#0b1b33" stroke-width="1.6"/><circle cx="7.8" cy="11" r="1.5" fill="#ff4d6d"/><circle cx="10.2" cy="7.4" r="1.5" fill="#ffd23f"/><circle cx="14.6" cy="7.4" r="1.5" fill="#37d99a"/><circle cx="17" cy="11" r="1.5" fill="#2f80ed"/></svg><span>Fundo</span></button>
       </div>
@@ -2283,12 +2298,14 @@ TELAS.loja = () => {
       </div>`; }).join("")}
     </div>
     <h2 class="lb-secao">Fundos</h2>
-    <div class="fd-grid">${FUNDOS.filter(([k]) => k !== "basico").map(([k, t]) => {
-      const tem = temFundo(nome, k), usando = fundoAtual() === k, pr = PRECO_FUNDO[k], podeF = moedas >= pr;
+    <div class="fd-grid">${FUNDOS.filter(([k]) => k !== "basico" && (fundoNaVenda(k) || temFundo(nome, k))).sort((a, b) => !!fundoLim(b[0]) - !!fundoLim(a[0])).map(([k, t]) => {
+      const tem = temFundo(nome, k), usando = fundoAtual() === k, pr = PRECO_FUNDO[k], podeF = moedas >= pr, lim = fundoLim(k);
       const rotulo = usando ? "Usando" : tem ? "Usar" : G.lojaConf === "fundo:" + k ? "Confirmar?" : podeF ? `<span class="lb-coin" aria-hidden="true">$</span>${pr}` : `$ ${pr}`;
-      return `<div class="fd-tile${tem ? "" : " fd-travado"}"${usando ? ' aria-current="true"' : ""}>
+      return `<div class="fd-tile${tem ? "" : " fd-travado"}${lim ? " sk-limitada" : ""}"${usando ? ' aria-current="true"' : ""}>
+        ${lim ? `<i class="sk-selo">Edição limitada</i>` : ""}
         <span class="fd-prev bgf" data-fundo="${k}"></span>
         <b>${esc(t)}</b>
+        ${lim && !tem && naVenda(lim) ? `<span class="sk-prazo">⏳ ${faltaParaAcabar(lim)}</span>` : ""}
         <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarFundo" data-f="${k}" ${usando || (!tem && !podeF) ? "disabled" : ""}>${rotulo}</button>
       </div>`; }).join("")}
     </div>
@@ -2611,8 +2628,12 @@ acoes.som = el => { _acaoSom(el); atualizarSomArena(); if (G.som !== false) { mu
 
 <script>
 /* ================= Fundos ================= */
-const FUNDOS = [["basico", "Básico"], ["ceu", "Céu"], ["quadra", "Quadra"], ["floresta", "Floresta"], ["por", "Pôr do sol"], ["doce", "Doce"], ["noite", "Noite estrelada"], ["vulcao", "Vulcão"]];
-const PRECO_FUNDO = { basico: 0, ceu: 50, quadra: 50, floresta: 75, por: 100, doce: 100, noite: 150, vulcao: 200 };
+const FUNDOS = [["basico", "Básico"], ["ceu", "Céu"], ["quadra", "Quadra"], ["floresta", "Floresta"], ["por", "Pôr do sol"], ["doce", "Doce"], ["noite", "Noite estrelada"], ["vulcao", "Vulcão"], ["galactico", "Galáctico"]];
+const PRECO_FUNDO = { basico: 0, ceu: 50, quadra: 50, floresta: 75, por: 100, doce: 100, noite: 150, vulcao: 200, galactico: 300 };
+/* fundos de edição limitada: só dá para comprar até "ate" (horário de Brasília); quem comprou fica com ele */
+const FUNDOS_LIM = [{ k: "galactico", nome: "Galáctico", tipo: "fundo", limitada: true, preco: 300, ate: "2026-11-06T23:59:59-03:00" }];
+const fundoLim = k => FUNDOS_LIM.find(f => f.k === k) || null;
+const fundoNaVenda = k => { const f = fundoLim(k); return !f || naVenda(f); };
 function temFundo(n, k) { return k === "basico" || (((G.inv || {})[n] || {}).fundos || []).includes(k); }
 function darFundo(n, k) { G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 }; G.inv[n].fundos = G.inv[n].fundos || []; if (!G.inv[n].fundos.includes(k)) G.inv[n].fundos.push(k); }
 function fundoAtual() { return FUNDOS.some(f => f[0] === G.fundo) && temFundo(perfil(), G.fundo) ? G.fundo : "basico"; }
@@ -2623,7 +2644,7 @@ TELAS.fundos = () => `
     <div class="lb-top"><button class="lb-pill" data-a="voltarLobby">← Voltar</button></div>
     <h1 class="lb-title" style="font-size:40px">Fundo</h1>
     <p class="lb-sub">Toque para trocar o fundo da tela inicial.</p>
-    <div class="fd-grid">${FUNDOS.map(([k, t]) => { const tem = temFundo(perfil(), k); return `
+    <div class="fd-grid">${FUNDOS.filter(([k]) => fundoNaVenda(k) || temFundo(perfil(), k)).map(([k, t]) => { const tem = temFundo(perfil(), k); return `
       <button class="fd-tile${tem ? "" : " fd-travado"}" data-a="escolherFundo" data-f="${k}" aria-pressed="${fundoAtual() === k}">
         <span class="fd-prev bgf" data-fundo="${k}">${tem ? "" : `<span class="fd-lock" aria-hidden="true">🔒</span>`}</span>
         <b>${esc(t)}${fundoAtual() === k ? "<i>usando</i>" : (tem ? "" : `<em><span class="lb-coin">$</span>${PRECO_FUNDO[k]}</em>`)}</b>
@@ -2958,6 +2979,7 @@ acoes.comprarSkin = el => {
 acoes.comprarFundo = el => {
   const k = el.dataset.f, nome = perfil(), preco = PRECO_FUNDO[k];
   if (temFundo(nome, k)) { G.fundo = k; salvar(); const y = window.scrollY; render(); window.scrollTo(0, y); toast("Fundo trocado"); return; }
+  if (!fundoNaVenda(k)) { toast("Esse fundo de edição limitada já acabou"); return; }
   if ((G.banco[nome] || 0) < preco) return;
   if (G.lojaConf !== "fundo:" + k) { pedirConfirmacao("fundo:" + k); return; }
   clearTimeout(lojaConfT); G.lojaConf = false;
@@ -3506,8 +3528,12 @@ document.addEventListener("click", e => {
 });
 /* skins limitadas: o ADM pode mudar prazo e preço neste aparelho (G.admLim) */
 SKINS.forEach(s => { if (s.limitada) { s.ateOriginal = s.ate; s.precoOriginal = s.preco; } });
+FUNDOS_LIM.forEach(f => { f.ateOriginal = f.ate; f.precoOriginal = f.preco; });
+const todasLimitadas = () => [...SKINS.filter(s => s.limitada), ...FUNDOS_LIM];
+const limInfo = k => todasLimitadas().find(x => x.k === k);
+const temLim = (j, x) => (x.tipo === "fundo" ? temFundo(j, x.k) : temSkin(j, x.k));
 function aplicarLimitadas() {
-  SKINS.forEach(s => { if (!s.limitada) return; const o = (G.admLim || {})[s.k] || {}; s.ate = o.ate || s.ateOriginal; s.preco = o.preco || s.precoOriginal; });
+  todasLimitadas().forEach(s => { const o = (G.admLim || {})[s.k] || {}; s.ate = o.ate || s.ateOriginal; s.preco = o.preco || s.precoOriginal; if (s.tipo === "fundo") PRECO_FUNDO[s.k] = s.preco; });
 }
 aplicarLimitadas();
 function jogadoresDoAparelho() {
@@ -3538,10 +3564,10 @@ TELAS.adm = () => {
     <h3>Emojis</h3><div class="chips">${EMOJIS.map(e => chipItem(temEmoji(n, e.k), e.preco === 0, "emoji", e.k, e.e)).join("")}</div>
     <h3>Gestos</h3><div class="chips">${GESTOS.map(g => chipItem(temGesto(n, g.k), g.preco === 0, "gesto", g.k, g.icone + " " + esc(g.nome))).join("")}</div>
     <p class="dim" style="font-size:14px">Toque para dar ou tirar. Verde = tem.</p>`;
-  if (ADM.aba === "limitadas") corpo = SKINS.filter(s => s.limitada).map(s => {
-    const venda = naVenda(s), donos = jogadoresDoAparelho().filter(j => temSkin(j, s.k)).length, mexeu = !!(G.admLim || {})[s.k];
+  if (ADM.aba === "limitadas") corpo = todasLimitadas().map(s => {
+    const venda = naVenda(s), donos = jogadoresDoAparelho().filter(j => temLim(j, s)).length, mexeu = !!(G.admLim || {})[s.k];
     return `<div class="adm-lim">
-      <h3>${esc(s.nome)} <span class="${venda ? "am-on" : "am-off"}">● ${venda ? "à venda" : "encerrada"}</span></h3>
+      <h3>${s.tipo === "fundo" ? "Fundo" : "Skin"} ${esc(s.nome)} <span class="${venda ? "am-on" : "am-off"}">● ${venda ? "à venda" : "encerrada"}</span></h3>
       <p>Até <b>${brDataHora(Date.parse(s.ate))}</b> · <b>${s.preco}</b> moedas · ${donos} ${donos === 1 ? "jogador tem" : "jogadores têm"} neste celular</p>
       <div class="adm-grade">
         <button type="button" class="btn ghost small" data-a="admLimPrazo" data-k="${s.k}" data-h="24">+1 dia</button>
@@ -3550,7 +3576,7 @@ TELAS.adm = () => {
       </div>
       <form class="row" data-a="admLimPreco" data-k="${s.k}" autocomplete="off"><input id="adm-preco-${s.k}" type="number" min="1" max="5000" value="${s.preco}" aria-label="Preço da ${esc(s.nome)}"><button class="btn small" type="submit" style="flex:0 0 auto;width:auto">Mudar preço</button></form>
       ${mexeu ? `<button type="button" class="lb-pill" data-a="admLimVoltar" data-k="${s.k}">Voltar ao combinado (${brDataHora(Date.parse(s.ateOriginal))}, ${s.precoOriginal})</button>` : ""}
-    </div>`; }).join("") + `<p class="dim" style="font-size:14px">Muda só neste celular. Para valer no celular de todo mundo, ou para criar uma skin limitada nova, peça ao Claude.</p>`;
+    </div>`; }).join("") + `<p class="dim" style="font-size:14px">Muda só neste celular. Para valer no celular de todo mundo, ou para criar uma edição limitada nova, peça ao Claude.</p>`;
   if (ADM.aba === "numeros") {
     const hist = G.historico || [], vit = Object.entries(G.vitorias || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
     const ricos = Object.entries(G.banco || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
@@ -3596,13 +3622,13 @@ Object.assign(acoes, {
     admMudouInv();
   },
   admLimPrazo(el) {
-    const s = skinInfo(el.dataset.k); G.admLim = G.admLim || {};
+    const s = limInfo(el.dataset.k); G.admLim = G.admLim || {};
     const base = Math.max(Date.now(), Date.parse(s.ate));
     G.admLim[s.k] = { ...(G.admLim[s.k] || {}), ate: new Date(base + el.dataset.h * 3600000).toISOString() };
     aplicarLimitadas(); salvar(); render(); toast(`${s.nome} vai até ${brDataHora(Date.parse(s.ate))}`);
   },
-  admLimEncerrar(el) { const s = skinInfo(el.dataset.k); G.admLim = G.admLim || {}; G.admLim[s.k] = { ...(G.admLim[s.k] || {}), ate: new Date(Date.now() - 1000).toISOString() }; aplicarLimitadas(); salvar(); render(); toast(`${s.nome} saiu da loja`); },
-  admLimPreco(el) { const s = skinInfo(el.dataset.k), v = Math.round(Number($("adm-preco-" + s.k).value)); if (!(v >= 1 && v <= 5000)) { toast("Preço de 1 a 5000"); return; } G.admLim = G.admLim || {}; G.admLim[s.k] = { ...(G.admLim[s.k] || {}), preco: v }; aplicarLimitadas(); salvar(); render(); toast(`${s.nome} agora custa ${v}`); },
+  admLimEncerrar(el) { const s = limInfo(el.dataset.k); G.admLim = G.admLim || {}; G.admLim[s.k] = { ...(G.admLim[s.k] || {}), ate: new Date(Date.now() - 1000).toISOString() }; aplicarLimitadas(); salvar(); render(); toast(`${s.nome} saiu da loja`); },
+  admLimPreco(el) { const s = limInfo(el.dataset.k), v = Math.round(Number($("adm-preco-" + s.k).value)); if (!(v >= 1 && v <= 5000)) { toast("Preço de 1 a 5000"); return; } G.admLim = G.admLim || {}; G.admLim[s.k] = { ...(G.admLim[s.k] || {}), preco: v }; aplicarLimitadas(); salvar(); render(); toast(`${s.nome} agora custa ${v}`); },
   admLimVoltar(el) { if (G.admLim) delete G.admLim[el.dataset.k]; aplicarLimitadas(); salvar(); render(); },
 });
 if (typeof TELAS_COM_MUSICA !== "undefined") TELAS_COM_MUSICA.push("adm");
