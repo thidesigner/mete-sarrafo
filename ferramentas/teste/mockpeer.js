@@ -18,20 +18,22 @@
   window.Peer = class extends Emissor {
     constructor(id) {
       super(); this.id = typeof id === "string" ? id : "anon-" + Math.random().toString(36).slice(2);
-      if (typeof id !== "string") { peers[this.id] = this; setTimeout(() => this._emit("open", this.id), 20); return; }
+      if (typeof id !== "string") { peers[this.id] = this; setTimeout(() => { this.open = true; this._emit("open", this.id); }, 20); return; }
       // como no servidor de verdade: um id que já está em uso devolve "unavailable-id"
       const eu = "chk-" + Math.random().toString(36).slice(2); let ocupado = false;
       peers[eu] = { _waiting: who => { if (who === id) ocupado = true; } };
       bc.postMessage({ type: "exists?", id, asker: eu });
-      setTimeout(() => { delete peers[eu]; if (ocupado || (peers[id] && peers[id] !== this)) this._emit("error", { type: "unavailable-id" }); else { peers[this.id] = this; this._emit("open", this.id); } }, 80);
+      setTimeout(() => { delete peers[eu]; if (ocupado || (peers[id] && peers[id] !== this)) this._emit("error", { type: "unavailable-id" }); else { peers[this.id] = this; this.open = true; this._emit("open", this.id); } }, 80);
     }
     connect(to) {
       const id = Math.random().toString(36).slice(2), c = new Conn(id, this.id, to); conns[id + this.id] = c;
-      let achou = false; this._waiting = who => { if (who === to) achou = true; };
+      let achou = false; const w = who => { if (who === to) achou = true; };
+      this._ws = this._ws || []; this._ws.push(w); this._waiting = who => this._ws.forEach(f => f(who));
       bc.postMessage({ type: "exists?", id: to, asker: this.id });
-      setTimeout(() => { if (!achou) this._emit("error", { type: "peer-unavailable" }); else bc.postMessage({ type: "connect", to, from: this.id, connId: id }); }, 120);
+      setTimeout(() => { this._ws = this._ws.filter(f => f !== w); if (!achou) this._emit("error", { type: "peer-unavailable", message: "Could not connect to peer " + to }); else bc.postMessage({ type: "connect", to, from: this.id, connId: id }); }, 120);
       return c;
     }
-    destroy() { delete peers[this.id]; }
+    off(e, f) { this._h[e] = (this._h[e] || []).filter(x => x !== f); }
+    destroy() { delete peers[this.id]; this.open = false; }
   };
 })();

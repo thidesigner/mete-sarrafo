@@ -324,6 +324,17 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .lb-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #0b1b33; }
 .lb-tag { position: absolute; top: -8px; right: -10px; background: #ff4d6d; color: #fff; font-style: normal; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 6px; border: 2px solid #0b1b33; transform: rotate(8deg); white-space: nowrap; }
 .lb-badge { position: absolute; top: -6px; right: -6px; background: #ff4d6d; color: #fff; font-style: normal; font-size: 12px; font-weight: 800; min-width: 22px; height: 22px; border-radius: 11px; border: 2px solid #0b1b33; display: grid; place-items: center; padding: 0 4px; }
+.am-linha { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid rgba(244,247,251,.12); flex-wrap: wrap; }
+.am-linha:first-of-type { border-top: 0; }
+.am-nome { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.am-on { color: #37d99a; font-size: 13px; font-weight: 800; }
+.am-off { color: rgba(244,247,251,.55); font-size: 13px; }
+.am-tirar { padding: 6px 10px; }
+.am-codigo { font-family: var(--display); font-size: 40px; letter-spacing: .12em; color: #ffd23f; }
+.chip.am-mais { background: #37d99a; color: #03281a; font-weight: 800; border: 0; cursor: pointer; }
+.convite-amigo { position: fixed; left: 12px; right: 12px; top: calc(12px + env(safe-area-inset-top, 0px)); z-index: 60; background: #0f3057; color: #fff; border: 3px solid #37d99a; border-radius: 16px; padding: 14px; display: grid; gap: 10px; box-shadow: 0 8px 30px rgba(0,0,0,.45); font-size: 18px; max-width: 480px; margin: 0 auto; }
+.convite-amigo .row { display: flex; gap: 10px; }
+.convite-amigo .lb-jogar { flex: 1; min-height: 52px; font-size: 22px; }
 .lb-cont { align-self: center; background: #37d99a; color: #03281a; border: 2px solid #0b1b33; border-radius: 10px; padding: 8px 14px; font-weight: 800; box-shadow: 0 3px 0 #0b1b33; }
 .lb-bottom { display: flex; gap: 10px; align-items: stretch; }
 .lb-modo { flex: 1; min-width: 0; border-radius: 14px; border: 3px solid #0b1b33; background: #2a6fd6; color: #fff; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: 8px 12px; box-shadow: 0 5px 0 #0b1b33; text-align: left; }
@@ -3485,7 +3496,8 @@ function criarSala(fixa = usarSalaFixa(), auto = null) {
 }
 function enviarSala() {
   const nomes = [perfil(), ...ON.sala.map(s => s.nome)];
-  ON.sala.forEach(s => enviar(s.conn, { t: "sala", nomes, robos: ON.robos, code: ON.code }));
+  const codigos = { [perfil()]: meuCodigoAmigo() }; ON.sala.forEach(s => { if (s.codigo) codigos[s.nome] = s.codigo; });
+  ON.sala.forEach(s => enviar(s.conn, { t: "sala", nomes, robos: ON.robos, code: ON.code, codigos }));
 }
 TELAS.criandoSala = () => `
   <section data-fundo="${fundoAtual()}" class="bgf lobby"><h1 class="lb-title" style="font-size:40px">Criando sala…</h1><p class="lb-sub">Conectando ao servidor.</p>
@@ -3539,7 +3551,7 @@ function hostRecebe(conn, d) {
     const base = String(d.nome || "Amigo").replace(/\s+/g, " ").trim().slice(0, 20) || "Amigo";
     const usados = [perfil(), ...ON.sala.map(s => s.nome)];
     let nome = base, k = 2; while (usados.some(u => u.toLowerCase() === nome.toLowerCase())) nome = base + " " + (k++);
-    ON.sala.push({ conn, nome, moedas: Math.max(0, +d.moedas || 0), vidasInv: Math.max(0, Math.floor(+d.vidas || 0)), skin: skinInfo(d.skin).k, ficha: limparFicha(d.ficha) });
+    ON.sala.push({ conn, nome, moedas: Math.max(0, +d.moedas || 0), vidasInv: Math.max(0, Math.floor(+d.vidas || 0)), skin: skinInfo(d.skin).k, ficha: limparFicha(d.ficha), codigo: limparCodigoAmigo(d.amigo) });
     enviar(conn, { t: "bemvindo", nome, code: ON.code });
     enviarSala(); toast(`${nome} entrou na sala`); bip(880, .08);
     if (G.tela === "salaHost") render();
@@ -3990,7 +4002,7 @@ function entrarSala(code, nome, naoAbrir = false) {
   peer.on("open", () => {
     const conn = peer.connect(PREFIXO + code, { reliable: true, serialization: "json" });
     ON.hostConn = conn;
-    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome), ficha: personagemDe(nome) }); });
+    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome), ficha: personagemDe(nome), amigo: meuCodigoAmigo() }); });
     conn.on("data", cliRecebe);
     conn.on("close", () => { if (ON.peer === peer) { toast("A conexão com a sala caiu."); sairOnline(); } });
   });
@@ -4006,7 +4018,7 @@ function cliRecebe(d) {
   if (!d || typeof d !== "object") return;
   switch (d.t) {
     case "bemvindo": ON.meuNome = d.nome; ir("esperando"); break;
-    case "sala": ON.salaNomes = Array.isArray(d.nomes) ? d.nomes.map(String) : []; ON.robos = +d.robos || 0; if (G.tela === "esperando") render(); break;
+    case "sala": ON.salaNomes = Array.isArray(d.nomes) ? d.nomes.map(String) : []; ON.robos = +d.robos || 0; ON.salaCodigos = d.codigos && typeof d.codigos === "object" ? d.codigos : {}; if (G.tela === "esperando") render(); break;
     case "fora": toast(d.msg || "Não deu para entrar."); sairOnline(); break;
     case "start": iniciarCliente(d); break;
     case "st": if (ON.on) aplicarEstado(d); break;
@@ -4116,6 +4128,222 @@ TELAS.lobby = () => {
 };
 acoes.irEntrar = () => { ON.codeEntrar = ""; ir("entrar"); };
 ON.fp = G.visaoOnline !== false;
+
+/* ================= Amigos =================
+   Cada aparelho tem um código de amigo (G.amigoCodigo). Enquanto o jogo está aberto no site,
+   o aparelho fica "ligado" no servidor do PeerJS como PREFIXO + "amigo-" + código, e assim
+   os amigos conseguem ver quem está online, mandar pedido de amizade e chamar para a sala.
+   Só guardamos o nome (apelido) e o código; nada de foto, telefone ou escola. */
+const AMG = { peer: null, online: {}, ultimaVez: {}, buscando: false, convite: null, chamarDepois: [] };
+const AMG_ID = c => PREFIXO + "amigo-" + c;
+const limparCodigoAmigo = s => String(s || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+const limparNomeAmigo = s => String(s || "").replace(/\s+/g, " ").trim().slice(0, 20);
+function meuCodigoAmigo() {
+  if (!/^[A-Z0-9]{6}$/.test(G.amigoCodigo || "")) {
+    const L = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; let c = ""; for (let i = 0; i < 6; i++) c += L[Math.floor(Math.random() * L.length)];
+    G.amigoCodigo = c; salvar();
+  }
+  return G.amigoCodigo;
+}
+const amigos = () => (G.amigos = G.amigos || []);
+const pedidos = () => (G.amigoPedidos = G.amigoPedidos || []);
+const ehAmigo = c => amigos().some(a => a.codigo === c);
+function linkAmigo() { return location.origin + location.pathname + "?amigo=" + meuCodigoAmigo(); }
+function guardarAmigo(codigo, nome) {
+  codigo = limparCodigoAmigo(codigo); if (codigo.length !== 6 || codigo === meuCodigoAmigo()) return false;
+  const a = amigos().find(x => x.codigo === codigo);
+  if (a) { if (nome) a.nome = limparNomeAmigo(nome) || a.nome; }
+  else { if (amigos().length >= 50) return false; amigos().push({ codigo, nome: limparNomeAmigo(nome) || "Amigo " + codigo }); }
+  G.amigoPedidos = pedidos().filter(p => p.codigo !== codigo);
+  salvar(); return true;
+}
+function telaAmigosAberta() { return ["amigos", "lobby", "salaHost"].includes(G.tela); }
+function reRender() { if (telaAmigosAberta() && !$("app").hidden) { const y = window.scrollY; render(); window.scrollTo(0, y); } }
+
+/* ---------- ligar o "telefone" de amigos ---------- */
+function ligarAmigos() {
+  if (typeof Peer === "undefined" || AMG.peer) return;
+  const peer = new Peer(AMG_ID(meuCodigoAmigo()), { debug: 0 }); AMG.peer = peer;
+  peer.on("open", () => verQuemEstaOnline());
+  peer.on("connection", conn => conn.on("data", d => amigoRecebe(conn, d)));
+  peer.on("error", e => {
+    if (e.type === "peer-unavailable") { const m = /amigo-([A-Z0-9]{6})/.exec(e.message || ""); if (m) { AMG.online[m[1]] = false; reRender(); } return; }
+    if (e.type === "unavailable-id") { AMG.peer = null; try { peer.destroy(); } catch {} }   // o jogo já está aberto em outra aba
+  });
+  peer.on("disconnected", () => { try { peer.reconnect(); } catch {} });
+}
+/* manda uma mensagem para um amigo; responde false se ele não estiver com o jogo aberto */
+function falarComAmigo(codigo, msg) {
+  return new Promise(ok => {
+    if (!AMG.peer || !AMG.peer.open) { ok(false); return; }
+    let feito = false; const fim = v => { if (!feito) { feito = true; clearTimeout(t); if (AMG.peer && AMG.peer.off) AMG.peer.off("error", verErro); ok(v); } };
+    const t = setTimeout(() => { AMG.online[codigo] = false; fim(false); }, 8000);
+    const conn = AMG.peer.connect(AMG_ID(codigo), { reliable: true, serialization: "json" });
+    conn.on("open", () => {
+      AMG.online[codigo] = true; AMG.ultimaVez[codigo] = Date.now();
+      enviar(conn, { ...msg, de: meuCodigoAmigo(), nome: perfil() });
+      conn.on("data", d => amigoRecebe(conn, d));
+      setTimeout(() => { try { conn.close(); } catch {} }, 1500);
+      fim(true);
+    });
+    conn.on("error", () => fim(false));
+    function verErro(e) { if (e.type === "peer-unavailable" && (e.message || "").includes(codigo)) fim(false); }
+    AMG.peer.on("error", verErro);
+  });
+}
+async function verQuemEstaOnline() {
+  if (AMG.buscando || !AMG.peer || !AMG.peer.open) return;
+  AMG.buscando = true;
+  await Promise.all(amigos().map(a => falarComAmigo(a.codigo, { t: "oi" })));
+  AMG.buscando = false; reRender();
+}
+setInterval(() => { if (!document.hidden && telaAmigosAberta()) verQuemEstaOnline(); }, 25000);
+
+function amigoRecebe(conn, d) {
+  if (!d || typeof d !== "object") return;
+  const de = limparCodigoAmigo(d.de), nome = limparNomeAmigo(d.nome);
+  if (de.length !== 6 || de === meuCodigoAmigo()) return;
+  AMG.online[de] = true; AMG.ultimaVez[de] = Date.now();
+  const amigo = amigos().find(a => a.codigo === de);
+  if (amigo && nome && amigo.nome !== nome) { amigo.nome = nome; salvar(); }
+  if (d.t === "oi") { if (amigo) reRender(); return; }
+  if (d.t === "pedido") {
+    if (amigo) { enviar(conn, { t: "aceito", de: meuCodigoAmigo(), nome: perfil() }); return; }   // já somos amigos
+    if (!pedidos().some(p => p.codigo === de)) { pedidos().unshift({ codigo: de, nome: nome || "Alguém", em: Date.now() }); G.amigoPedidos = pedidos().slice(0, 10); salvar(); }
+    toast(`${nome || "Alguém"} quer ser seu amigo`, "Ver", () => ir("amigos")); bip(880, .08); reRender(); return;
+  }
+  if (d.t === "aceito") {
+    if (amigo || AMG.esperandoAceite === de) { guardarAmigo(de, nome); toast(`${nome} agora é seu amigo!`); reRender(); }
+    return;
+  }
+  if (d.t === "convite") {
+    const sala = String(d.sala || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8);
+    if (!amigo || sala.length < 4 || ON.on || ON.peer) return;   // só aceita convite de amigo, e se não estiver jogando
+    mostrarConvite(amigo.nome, sala);
+  }
+}
+function mostrarConvite(nome, sala) {
+  let el = $("convite-amigo");
+  if (!el) { el = document.createElement("div"); el.id = "convite-amigo"; el.className = "convite-amigo"; el.setAttribute("role", "alertdialog"); document.body.append(el); }
+  el.innerHTML = `<b>${esc(nome)} te chamou para jogar!</b><div class="row"><button type="button" class="lb-jogar" id="cv-sim">Entrar</button><button type="button" class="lb-pill" id="cv-nao">Agora não</button></div>`;
+  el.hidden = false; bip(660, .1); setTimeout(() => bip(990, .12), 140); vibrar([80, 60, 80]);
+  $("cv-sim").onclick = () => { el.hidden = true; ON.codeEntrar = sala; entrarSala(sala, perfil(), true); };
+  $("cv-nao").onclick = () => { el.hidden = true; };
+  clearTimeout(AMG.cvT); AMG.cvT = setTimeout(() => { el.hidden = true; }, 60000);
+}
+async function chamarAmigo(codigo) {
+  const a = amigos().find(x => x.codigo === codigo); if (!a) return;
+  if (!ON.host || !ON.code || !ON.peer || ON.on) { AMG.chamarDepois = [codigo]; criarSala(); return; }   // abre a sala e chama em seguida
+  const ok = await falarComAmigo(codigo, { t: "convite", sala: ON.code });
+  toast(ok ? `Chamado! Esperando ${a.nome} entrar…` : `${a.nome} não está com o jogo aberto agora`);
+  reRender();
+}
+
+/* ---------- tela de amigos ---------- */
+TELAS.amigos = () => {
+  const lista = [...amigos()].sort((a, b) => (AMG.online[b.codigo] ? 1 : 0) - (AMG.online[a.codigo] ? 1 : 0) || a.nome.localeCompare(b.nome));
+  depoisFn = () => {
+    const box = $("qr-amigo"); if (!box) return; box.innerHTML = "";
+    try { new QRCode(box, { text: linkAmigo(), width: 300, height: 300, colorDark: "#0f3057", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.M }); } catch {}
+  };
+  const status = c => AMG.online[c] ? `<span class="am-on">● online</span>` : AMG.online[c] === false ? `<span class="am-off">● fora</span>` : `<span class="am-off">…</span>`;
+  return `
+  <section data-fundo="${fundoAtual()}" class="bgf lobby" aria-label="Amigos">
+    <div class="lb-top"><button class="lb-pill" data-a="voltarLobby">← Voltar</button><button class="lb-pill" data-a="atualizarAmigos">Atualizar</button></div>
+    <h1 class="lb-title" style="font-size:40px">Amigos</h1>
+    ${pedidos().length ? `<div class="card" style="background:rgba(55,217,154,.18);border-color:#37d99a">
+      <h3>Pedidos de amizade</h3>
+      ${pedidos().map(p => `<div class="am-linha"><b>${esc(p.nome)}</b><span class="dim">${esc(p.codigo)}</span>
+        <button class="lb-cont" data-a="aceitarAmigo" data-c="${esc(p.codigo)}">Aceitar</button><button class="lb-pill" data-a="recusarAmigo" data-c="${esc(p.codigo)}">Recusar</button></div>`).join("")}
+    </div>` : ""}
+    <div class="card" style="background:rgba(11,27,51,.6)">
+      <h3>Meus amigos (${lista.length})</h3>
+      ${lista.length ? lista.map(a => `<div class="am-linha"><span class="lb-avatar">${esc(a.nome[0] || "?")}</span><span class="am-nome"><b>${esc(a.nome)}</b>${status(a.codigo)}</span>
+        ${AMG.online[a.codigo] ? `<button class="lb-cont" data-a="chamarAmigo" data-c="${esc(a.codigo)}">Chamar</button>` : ""}
+        <button class="lb-pill am-tirar" data-a="tirarAmigo" data-c="${esc(a.codigo)}" aria-label="Remover ${esc(a.nome)}">${AMG.tirar === a.codigo ? "Remover?" : "✕"}</button></div>`).join("")
+        : `<p class="dim">Você ainda não tem amigos aqui. Mostre o seu código para um amigo ou digite o código dele embaixo.</p>`}
+      <p class="dim" style="font-size:14px">Online = está com o jogo aberto agora. Toque em Chamar e ele recebe um convite para a sua sala.</p>
+    </div>
+    <form class="card" data-a="addAmigo" autocomplete="off" style="background:rgba(11,27,51,.6)">
+      <h3>Adicionar amigo</h3>
+      <div class="row"><input id="am-cod" maxlength="6" autocapitalize="characters" spellcheck="false" placeholder="Código do amigo" aria-label="Código do amigo" value="${esc(AMG.codigoUrl || "")}"><button class="btn small" type="submit" style="flex:0 0 auto;width:auto">Adicionar</button></div>
+      <p class="dim" style="font-size:14px">Só adicione quem você conhece de verdade.</p>
+    </form>
+    <div class="card" style="background:rgba(11,27,51,.6);align-items:center;text-align:center">
+      <h3>Meu código de amigo</h3>
+      <b class="am-codigo">${esc(meuCodigoAmigo())}</b>
+      <div class="qr" id="qr-amigo" role="img" aria-label="QR code para me adicionar" style="max-width:200px"></div>
+      <p class="dim" style="font-size:14px">O amigo escaneia o QR ou digita esse código no jogo dele.</p>
+    </div>
+  </section>`;
+};
+Object.assign(acoes, {
+  amigos() { ligarAmigos(); ir("amigos"); verQuemEstaOnline(); },
+  atualizarAmigos() { ligarAmigos(); verQuemEstaOnline(); toast("Procurando quem está online…"); },
+  async addAmigo() {
+    const c = limparCodigoAmigo($("am-cod").value);
+    if (c.length !== 6) { toast("O código tem 6 letras e números"); return; }
+    if (c === meuCodigoAmigo()) { toast("Esse é o seu próprio código"); return; }
+    if (ehAmigo(c)) { toast("Vocês já são amigos"); return; }
+    AMG.codigoUrl = ""; AMG.esperandoAceite = c;
+    guardarAmigo(c, "");
+    const ok = await falarComAmigo(c, { t: "pedido" });
+    toast(ok ? "Pedido enviado! Quando ele aceitar, aparece o nome." : "Adicionado! Ele ainda precisa adicionar você também.");
+    reRender();
+  },
+  aceitarAmigo(el) {
+    const c = el.dataset.c, p = pedidos().find(x => x.codigo === c); if (!p) return;
+    guardarAmigo(c, p.nome); falarComAmigo(c, { t: "aceito" }); toast(`${p.nome} agora é seu amigo!`); reRender();
+  },
+  recusarAmigo(el) { G.amigoPedidos = pedidos().filter(x => x.codigo !== el.dataset.c); salvar(); reRender(); },
+  tirarAmigo(el) {
+    const c = el.dataset.c;
+    if (AMG.tirar !== c) { AMG.tirar = c; reRender(); setTimeout(() => { if (AMG.tirar === c) { AMG.tirar = null; reRender(); } }, 3000); return; }
+    AMG.tirar = null; G.amigos = amigos().filter(a => a.codigo !== c); salvar(); reRender();
+  },
+  chamarAmigo(el) { chamarAmigo(el.dataset.c); },
+  addAmigoSala(el) {
+    const c = limparCodigoAmigo(el.dataset.c); if (ehAmigo(c)) return;
+    AMG.esperandoAceite = c; guardarAmigo(c, el.dataset.n);
+    falarComAmigo(c, { t: "pedido" }); toast(`Pedido de amizade enviado para ${limparNomeAmigo(el.dataset.n)}`); reRender();
+  },
+});
+TELAS_COM_MUSICA.push("amigos");
+
+/* botão Amigos na tela inicial, com aviso de pedido novo */
+const _telaLobbyAmigos = TELAS.lobby;
+TELAS.lobby = () => _telaLobbyAmigos().replace('<button class="lb-btn" data-a="fundos">',
+  `<button class="lb-btn" data-a="amigos"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.4" fill="#ffd23f" stroke="#0b1b33" stroke-width="1.4"/><circle cx="16.5" cy="9" r="2.8" fill="#37d99a" stroke="#0b1b33" stroke-width="1.4"/><path d="M3 20v-1.5a6 6 0 0 1 12 0V20z" fill="#ffd23f" stroke="#0b1b33" stroke-width="1.4" stroke-linejoin="round"/><path d="M14.5 20v-1.2a5 5 0 0 1 7-4.5V20z" fill="#37d99a" stroke="#0b1b33" stroke-width="1.4" stroke-linejoin="round"/></svg><span>Amigos</span>${pedidos().length ? `<i class="lb-badge">${pedidos().length}</i>` : Object.values(AMG.online).some(Boolean) ? `<i class="lb-tag" style="background:#37d99a;color:#03281a">online</i>` : ""}</button>
+        <button class="lb-btn" data-a="fundos">`);
+
+/* sala: mostra amigos online para chamar, e "+ amigo" para quem entrou e ainda não é amigo */
+const _telaSalaHost = TELAS.salaHost;
+TELAS.salaHost = () => {
+  if (AMG.chamarDepois.length && ON.peer && ON.peer.open && ON.code) {
+    const lista = AMG.chamarDepois; AMG.chamarDepois = [];
+    setTimeout(() => lista.forEach(c => chamarAmigo(c)), 50);
+  }
+  const on = amigos().filter(a => AMG.online[a.codigo] && !ON.sala.some(s => s.codigo === a.codigo));
+  let h = _telaSalaHost();
+  h = h.replace(/<span class="chip">([^<]*)<\/span>/g, (m, nome) => {
+    const s = ON.sala.find(x => esc(x.nome) === nome);
+    return s && s.codigo && !ehAmigo(s.codigo) ? `${m}<button class="chip am-mais" data-a="addAmigoSala" data-c="${esc(s.codigo)}" data-n="${esc(s.nome)}">+ amigo</button>` : m;
+  });
+  if (on.length) h = h.replace('<div class="qr" id="qr-sala"', `<div class="card" style="background:rgba(55,217,154,.15);border-color:#37d99a"><h3>Amigos online</h3>${on.map(a => `<div class="am-linha"><b>${esc(a.nome)}</b><button class="lb-cont" data-a="chamarAmigo" data-c="${esc(a.codigo)}">Chamar</button></div>`).join("")}</div>
+    <div class="qr" id="qr-sala"`);
+  return h;
+};
+/* quem está esperando também pode adicionar os outros da sala */
+const _telaEsperando = TELAS.esperando;
+TELAS.esperando = () => _telaEsperando().replace(/<span class="chip">([^<]*?)(?: \(você\))?<\/span>/g, (m, nome) => {
+  const c = (ON.salaCodigos || {})[nome];
+  return c && c !== meuCodigoAmigo() && !ehAmigo(c) && !m.includes("robô") ? `${m}<button class="chip am-mais" data-a="addAmigoSala" data-c="${esc(c)}" data-n="${nome}">+ amigo</button>` : m;
+});
+
+/* ao abrir o site: liga os amigos e trata o link ?amigo=CODIGO */
+AMG.codigoUrl = limparCodigoAmigo(new URLSearchParams(location.search).get("amigo"));
+if (AMG.codigoUrl && !codigoUrl) G.tela = "amigos";
+if (typeof Peer !== "undefined") setTimeout(ligarAmigos, 300);
 
 render();
 </script>

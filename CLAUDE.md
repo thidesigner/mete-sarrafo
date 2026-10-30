@@ -55,6 +55,15 @@ Sites (GitHub Pages, branch `main`, pasta raiz):
 O modo online tem uma sala de código fixo, `ANDREK7Q` (`SALA_DO_ANDRE` em `fonte/online.js`). O QR do convite impresso (`materiais/convite-sala-do-andre.pdf`) aponta para `teste/?sala=ANDREK7Q`. Não troque esse código sem refazer o convite. No celular com o perfil "Andre", criar sala usa esse código automaticamente.
 O Andre não precisa estar: quem entra pelo QR e acha a sala fechada abre a sala no próprio celular e comanda a partida; quem chega depois (inclusive o Andre) entra nela.
 
+## Amigos (só no site)
+
+Botão "Amigos" na tela inicial (código em `fonte/online.js`, bloco "Amigos").
+- Cada aparelho tem um código de amigo de 6 letras e números (`G.amigoCodigo`). Enquanto o site está aberto, o aparelho fica ligado no PeerJS como `metesarrafo-v1-amigo-<código>`: é assim que se vê quem está online.
+- Adicionar: digitar o código do amigo, abrir o link/QR `?amigo=<código>` ou tocar em "+ amigo" na sala. Se o amigo estiver online, ele recebe um pedido para aceitar.
+- "Chamar": abre a sala (se ainda não estiver aberta) e manda um convite; o amigo vê "Fulano te chamou para jogar!" e entra com um toque. Convite só vale de quem já é amigo.
+- Guarda só apelido e código (`G.amigos`, `G.amigoPedidos`). Não há servidor nem lista pública: ninguém acha ninguém sem ter o código.
+- Teste: `ferramentas/teste/teste-amigos.js`.
+
 ## Personagens e impressão 3D
 
 Botão "Criar" na tela inicial: editor de personagens (arrastar peças). Cada personagem é uma "ficha" JSON (`tipo: "personagem-jogos-do-andre"`, `versao: 1`) guardada em `G.personagens`. Ela viaja no modo online e é limpa por `limparFicha`.
@@ -75,6 +84,7 @@ Os Ajustes do jogo (engrenagem na tela inicial) pedem um código de 5 números q
 
 - Sintaxe: extraia os `<script>` de `teste/index.html` e rode `node --check`.
 - Partida online de ponta a ponta: `ferramentas/teste/teste-online.js` (Playwright). Ele serve a raiz do repositório em `localhost:8765`, troca o PeerJS pela imitação `mockpeer.js` e precisa do three.js em `ferramentas/teste/vendor/three.min.js` (fora do git; baixe com `npm pack three@0.128.0` e copie `package/build/three.min.js`).
+- Amigos (pedido, aceitar, online, convite e entrar na sala): `ferramentas/teste/teste-amigos.js`.
 - Em nuvens com rede restrita, `cdnjs` pode estar bloqueado: o teste já substitui o que precisa.
 
 ## Artefatos no Claude (só abrem em sessões do claude.ai com a conta do pai)

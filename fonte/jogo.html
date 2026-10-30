@@ -317,6 +317,17 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .lb-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #0b1b33; }
 .lb-tag { position: absolute; top: -8px; right: -10px; background: #ff4d6d; color: #fff; font-style: normal; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 6px; border: 2px solid #0b1b33; transform: rotate(8deg); white-space: nowrap; }
 .lb-badge { position: absolute; top: -6px; right: -6px; background: #ff4d6d; color: #fff; font-style: normal; font-size: 12px; font-weight: 800; min-width: 22px; height: 22px; border-radius: 11px; border: 2px solid #0b1b33; display: grid; place-items: center; padding: 0 4px; }
+.am-linha { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid rgba(244,247,251,.12); flex-wrap: wrap; }
+.am-linha:first-of-type { border-top: 0; }
+.am-nome { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.am-on { color: #37d99a; font-size: 13px; font-weight: 800; }
+.am-off { color: rgba(244,247,251,.55); font-size: 13px; }
+.am-tirar { padding: 6px 10px; }
+.am-codigo { font-family: var(--display); font-size: 40px; letter-spacing: .12em; color: #ffd23f; }
+.chip.am-mais { background: #37d99a; color: #03281a; font-weight: 800; border: 0; cursor: pointer; }
+.convite-amigo { position: fixed; left: 12px; right: 12px; top: calc(12px + env(safe-area-inset-top, 0px)); z-index: 60; background: #0f3057; color: #fff; border: 3px solid #37d99a; border-radius: 16px; padding: 14px; display: grid; gap: 10px; box-shadow: 0 8px 30px rgba(0,0,0,.45); font-size: 18px; max-width: 480px; margin: 0 auto; }
+.convite-amigo .row { display: flex; gap: 10px; }
+.convite-amigo .lb-jogar { flex: 1; min-height: 52px; font-size: 22px; }
 .lb-cont { align-self: center; background: #37d99a; color: #03281a; border: 2px solid #0b1b33; border-radius: 10px; padding: 8px 14px; font-weight: 800; box-shadow: 0 3px 0 #0b1b33; }
 .lb-bottom { display: flex; gap: 10px; align-items: stretch; }
 .lb-modo { flex: 1; min-width: 0; border-radius: 14px; border: 3px solid #0b1b33; background: #2a6fd6; color: #fff; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: 8px 12px; box-shadow: 0 5px 0 #0b1b33; text-align: left; }
