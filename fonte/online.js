@@ -734,7 +734,7 @@ function falarComAmigo(codigo, msg) {
     const conn = AMG.peer.connect(AMG_ID(codigo), { reliable: true, serialization: "json" });
     conn.on("open", () => {
       AMG.online[codigo] = true; AMG.ultimaVez[codigo] = Date.now();
-      enviar(conn, { ...msg, de: meuCodigoAmigo(), nome: perfil() });
+      enviar(conn, { ...msg, de: meuCodigoAmigo(), nome: perfil(), av: avatarDe(perfil()) });
       conn.on("data", d => amigoRecebe(conn, d));
       setTimeout(() => { try { conn.close(); } catch {} }, 1500);
       fim(true);
@@ -759,10 +759,13 @@ function amigoRecebe(conn, d) {
   AMG.online[de] = true; AMG.ultimaVez[de] = Date.now();
   const amigo = amigos().find(a => a.codigo === de);
   if (amigo && nome && amigo.nome !== nome) { amigo.nome = nome; salvar(); }
+  // foto de perfil do amigo: só ícone e cor da lista do jogo
+  const av = d.av && typeof d.av === "object" && AV_ICONES.concat("").includes(d.av.i) && AV_CORES.includes(d.av.cor) ? { i: d.av.i, cor: d.av.cor } : null;
+  if (amigo && av && JSON.stringify(amigo.av) !== JSON.stringify(av)) { amigo.av = av; salvar(); }
   if (d.t === "oi") { if (amigo) reRender(); return; }
   if (d.t === "pedido") {
-    if (amigo) { enviar(conn, { t: "aceito", de: meuCodigoAmigo(), nome: perfil() }); return; }   // já somos amigos
-    if (!pedidos().some(p => p.codigo === de)) { pedidos().unshift({ codigo: de, nome: nome || "Alguém", em: Date.now() }); G.amigoPedidos = pedidos().slice(0, 10); salvar(); }
+    if (amigo) { enviar(conn, { t: "aceito", de: meuCodigoAmigo(), nome: perfil(), av: avatarDe(perfil()) }); return; }   // já somos amigos
+    if (!pedidos().some(p => p.codigo === de)) { pedidos().unshift({ codigo: de, nome: nome || "Alguém", em: Date.now(), av }); G.amigoPedidos = pedidos().slice(0, 10); salvar(); }
     toast(`${nome || "Alguém"} quer ser seu amigo`, "Ver", () => ir("amigos")); bip(880, .08); reRender(); return;
   }
   if (d.t === "aceito") {
@@ -806,12 +809,12 @@ TELAS.amigos = () => {
     <h1 class="lb-title" style="font-size:40px">Amigos</h1>
     ${pedidos().length ? `<div class="card" style="background:rgba(55,217,154,.18);border-color:#37d99a">
       <h3>Pedidos de amizade</h3>
-      ${pedidos().map(p => `<div class="am-linha"><b>${esc(p.nome)}</b><span class="dim">${esc(p.codigo)}</span>
+      ${pedidos().map(p => `<div class="am-linha">${avatarHTML(p.av, p.nome)}<b>${esc(p.nome)}</b><span class="dim">${esc(p.codigo)}</span>
         <button class="lb-cont" data-a="aceitarAmigo" data-c="${esc(p.codigo)}">Aceitar</button><button class="lb-pill" data-a="recusarAmigo" data-c="${esc(p.codigo)}">Recusar</button></div>`).join("")}
     </div>` : ""}
     <div class="card" style="background:rgba(11,27,51,.6)">
       <h3>Meus amigos (${lista.length})</h3>
-      ${lista.length ? lista.map(a => `<div class="am-linha"><span class="lb-avatar">${esc(a.nome[0] || "?")}</span><button type="button" class="am-nome am-abrir" data-a="abrirConversa" data-c="${esc(a.codigo)}" aria-label="Conversar com ${esc(a.nome)}"><b>${esc(a.nome)} 💬${naoLidas(a.codigo) ? ` <i class="lb-badge am-badge">${naoLidas(a.codigo)}</i>` : ""}</b>${status(a.codigo)}</button>
+      ${lista.length ? lista.map(a => `<div class="am-linha">${avatarHTML(a.av, a.nome)}<button type="button" class="am-nome am-abrir" data-a="abrirConversa" data-c="${esc(a.codigo)}" aria-label="Conversar com ${esc(a.nome)}"><b>${esc(a.nome)} 💬${naoLidas(a.codigo) ? ` <i class="lb-badge am-badge">${naoLidas(a.codigo)}</i>` : ""}</b>${status(a.codigo)}</button>
         ${AMG.online[a.codigo] ? `<button class="lb-cont" data-a="chamarAmigo" data-c="${esc(a.codigo)}">Chamar</button>` : ""}
         <button class="lb-pill am-tirar" data-a="tirarAmigo" data-c="${esc(a.codigo)}" aria-label="Remover ${esc(a.nome)}">${AMG.tirar === a.codigo ? "Remover?" : "✕"}</button></div>`).join("")
         : `<p class="dim">Você ainda não tem amigos aqui. Mostre o seu código para um amigo ou digite o código dele embaixo.</p>`}
@@ -846,7 +849,7 @@ Object.assign(acoes, {
   },
   aceitarAmigo(el) {
     const c = el.dataset.c, p = pedidos().find(x => x.codigo === c); if (!p) return;
-    guardarAmigo(c, p.nome); falarComAmigo(c, { t: "aceito" }); toast(`${p.nome} agora é seu amigo!`); reRender();
+    guardarAmigo(c, p.nome); const am = amigos().find(x => x.codigo === c); if (am && p.av) { am.av = p.av; salvar(); } falarComAmigo(c, { t: "aceito" }); toast(`${p.nome} agora é seu amigo!`); reRender();
   },
   recusarAmigo(el) { G.amigoPedidos = pedidos().filter(x => x.codigo !== el.dataset.c); salvar(); reRender(); },
   tirarAmigo(el) {
@@ -953,7 +956,7 @@ TELAS.conversa = () => {
   return `
   <section data-fundo="${fundoAtual()}" class="bgf lobby" aria-label="Conversa com ${esc(a.nome)}">
     <div class="lb-top"><button class="lb-pill" data-a="amigos">← Amigos</button>${on ? `<button class="lb-cont" data-a="chamarAmigo" data-c="${esc(a.codigo)}">Chamar para jogar</button>` : ""}</div>
-    <div class="cv-cab"><span class="lb-avatar">${esc(a.nome[0] || "?")}</span><span class="am-nome"><b>${esc(a.nome)}</b>${on ? `<span class="am-on">● online</span>` : `<span class="am-off">● fora (a mensagem chega quando os dois estiverem online)</span>`}</span></div>
+    <div class="cv-cab">${avatarHTML(a.av, a.nome)}<span class="am-nome"><b>${esc(a.nome)}</b>${on ? `<span class="am-on">● online</span>` : `<span class="am-off">● fora (a mensagem chega quando os dois estiverem online)</span>`}</span></div>
     <div class="cv-msgs" id="cv-msgs" aria-live="polite">${l.length ? l.map(m => `<div class="cv-msg${m.ele ? "" : " eu"}${m.e ? " emo" : ""}">${esc(textoMsg(m))}${m.pendente ? `<i class="cv-esp">esperando</i>` : ""}</div>`).join("")
       : `<p class="dim" style="text-align:center">Nenhuma mensagem ainda. Escolha uma frase embaixo.</p>`}</div>
     <div class="cv-frases" role="group" aria-label="Frases para mandar">${FRASES.map((t, i) => `<button type="button" class="chip" data-a="mandarFrase" data-f="${i}">${esc(t)}</button>`).join("")}</div>

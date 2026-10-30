@@ -63,6 +63,7 @@ Botão "Amigos" na tela inicial (código em `fonte/online.js`, bloco "Amigos").
 - "Chamar": abre a sala (se ainda não estiver aberta) e manda um convite; o amigo vê "Fulano te chamou para jogar!" e entra com um toque. Convite só vale de quem já é amigo.
 - Guarda só apelido e código (`G.amigos`, `G.amigoPedidos`). Não há servidor nem lista pública: ninguém acha ninguém sem ter o código.
 - Chat dos amigos: **só frases prontas e emojis** (escolha do pai, porque não há moderador). Pela rede vai só o número da frase (`FRASES`) ou a chave do emoji; frases novas entram **só no fim** da lista. Mensagens ficam em `G.chat` nos dois aparelhos; se o amigo está fora, ficam "esperando" e são entregues quando os dois estiverem online. Não troque por texto livre sem o pai pedir.
+- Foto de perfil: só ícone (`AV_ICONES`) e cor (`AV_CORES`), guardados em `G.inv[nome].avatar` e enviados aos amigos como `av`. **Não aceite foto de verdade** (câmera ou galeria): é jogo de crianças e a foto iria para outros aparelhos.
 - Teste: `ferramentas/teste/teste-amigos.js`.
 
 ## Personagens e impressão 3D
