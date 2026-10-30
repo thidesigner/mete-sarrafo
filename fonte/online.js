@@ -706,7 +706,7 @@ function guardarAmigo(codigo, nome) {
   G.amigoPedidos = pedidos().filter(p => p.codigo !== codigo);
   salvar(); return true;
 }
-function telaAmigosAberta() { return ["amigos", "lobby", "salaHost"].includes(G.tela); }
+function telaAmigosAberta() { return ["amigos", "lobby", "salaHost", "conversa"].includes(G.tela); }
 function reRender() { if (telaAmigosAberta() && !$("app").hidden) { const y = window.scrollY; render(); window.scrollTo(0, y); } }
 
 /* ---------- ligar o "telefone" de amigos ---------- */
@@ -807,11 +807,11 @@ TELAS.amigos = () => {
     </div>` : ""}
     <div class="card" style="background:rgba(11,27,51,.6)">
       <h3>Meus amigos (${lista.length})</h3>
-      ${lista.length ? lista.map(a => `<div class="am-linha"><span class="lb-avatar">${esc(a.nome[0] || "?")}</span><span class="am-nome"><b>${esc(a.nome)}</b>${status(a.codigo)}</span>
+      ${lista.length ? lista.map(a => `<div class="am-linha"><span class="lb-avatar">${esc(a.nome[0] || "?")}</span><button type="button" class="am-nome am-abrir" data-a="abrirConversa" data-c="${esc(a.codigo)}" aria-label="Conversar com ${esc(a.nome)}"><b>${esc(a.nome)} 💬${naoLidas(a.codigo) ? ` <i class="lb-badge am-badge">${naoLidas(a.codigo)}</i>` : ""}</b>${status(a.codigo)}</button>
         ${AMG.online[a.codigo] ? `<button class="lb-cont" data-a="chamarAmigo" data-c="${esc(a.codigo)}">Chamar</button>` : ""}
         <button class="lb-pill am-tirar" data-a="tirarAmigo" data-c="${esc(a.codigo)}" aria-label="Remover ${esc(a.nome)}">${AMG.tirar === a.codigo ? "Remover?" : "✕"}</button></div>`).join("")
         : `<p class="dim">Você ainda não tem amigos aqui. Mostre o seu código para um amigo ou digite o código dele embaixo.</p>`}
-      <p class="dim" style="font-size:14px">Online = está com o jogo aberto agora. Toque em Chamar e ele recebe um convite para a sua sala.</p>
+      <p class="dim" style="font-size:14px">Toque no nome para conversar. Online = está com o jogo aberto agora. Toque em Chamar e ele recebe um convite para a sua sala.</p>
     </div>
     <form class="card" data-a="addAmigo" autocomplete="off" style="background:rgba(11,27,51,.6)">
       <h3>Adicionar amigo</h3>
@@ -862,7 +862,7 @@ TELAS_COM_MUSICA.push("amigos");
 /* botão Amigos na tela inicial, com aviso de pedido novo */
 const _telaLobbyAmigos = TELAS.lobby;
 TELAS.lobby = () => _telaLobbyAmigos().replace('<button class="lb-btn" data-a="fundos">',
-  `<button class="lb-btn" data-a="amigos"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.4" fill="#ffd23f" stroke="#0b1b33" stroke-width="1.4"/><circle cx="16.5" cy="9" r="2.8" fill="#37d99a" stroke="#0b1b33" stroke-width="1.4"/><path d="M3 20v-1.5a6 6 0 0 1 12 0V20z" fill="#ffd23f" stroke="#0b1b33" stroke-width="1.4" stroke-linejoin="round"/><path d="M14.5 20v-1.2a5 5 0 0 1 7-4.5V20z" fill="#37d99a" stroke="#0b1b33" stroke-width="1.4" stroke-linejoin="round"/></svg><span>Amigos</span>${pedidos().length ? `<i class="lb-badge">${pedidos().length}</i>` : Object.values(AMG.online).some(Boolean) ? `<i class="lb-tag" style="background:#37d99a;color:#03281a">online</i>` : ""}</button>
+  `<button class="lb-btn" data-a="amigos"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.4" fill="#ffd23f" stroke="#0b1b33" stroke-width="1.4"/><circle cx="16.5" cy="9" r="2.8" fill="#37d99a" stroke="#0b1b33" stroke-width="1.4"/><path d="M3 20v-1.5a6 6 0 0 1 12 0V20z" fill="#ffd23f" stroke="#0b1b33" stroke-width="1.4" stroke-linejoin="round"/><path d="M14.5 20v-1.2a5 5 0 0 1 7-4.5V20z" fill="#37d99a" stroke="#0b1b33" stroke-width="1.4" stroke-linejoin="round"/></svg><span>Amigos</span>${pedidos().length + totalNaoLidas() ? `<i class="lb-badge">${pedidos().length + totalNaoLidas()}</i>` : Object.values(AMG.online).some(Boolean) ? `<i class="lb-tag" style="background:#37d99a;color:#03281a">online</i>` : ""}</button>
         <button class="lb-btn" data-a="fundos">`);
 
 /* sala: mostra amigos online para chamar, e "+ amigo" para quem entrou e ainda não é amigo */
@@ -893,3 +893,86 @@ TELAS.esperando = () => _telaEsperando().replace(/<span class="chip">([^<]*?)(?:
 AMG.codigoUrl = limparCodigoAmigo(new URLSearchParams(location.search).get("amigo"));
 if (AMG.codigoUrl && !codigoUrl) G.tela = "amigos";
 if (typeof Peer !== "undefined") setTimeout(ligarAmigos, 300);
+
+/* ================= Chat dos amigos: só frases prontas e emojis =================
+   Escolha do pai: nada de texto livre (sem moderador). Pela rede vai só o número da frase
+   ou a chave do emoji, então ninguém consegue mandar outra coisa.
+   IMPORTANTE: só acrescente frases no FIM da lista. Mudar a ordem troca o que os outros leem. */
+const FRASES = [
+  "Oi! 👋", "Bora jogar?", "Me chama na sala!", "Já vou!", "Agora não posso", "GG! 🏆",
+  "Boa jogada!", "Kkkkk 😂", "Revanche?", "Você é muito bom!", "Quase!", "Valeu!",
+  "Tô online", "Partiu!", "Daqui a pouco", "Tchau! 👋",
+];
+const chats = () => (G.chat = G.chat || {});
+const conversa = c => (chats()[c] = chats()[c] || []);
+const naoLidas = c => conversa(c).filter(m => m.ele && !m.lida).length;
+const totalNaoLidas = () => amigos().reduce((n, a) => n + naoLidas(a.codigo), 0);
+function textoMsg(m) { return m.e ? (emojiInfo(m.e) || {}).e || "" : FRASES[m.f] || ""; }
+function guardarMsg(c, m) { const l = conversa(c); l.push(m); if (l.length > 60) l.splice(0, l.length - 60); salvar(); }
+
+/* entrega o que está esperando, quando o amigo está online */
+async function entregarPendentes(c) {
+  const pend = conversa(c).filter(m => !m.ele && m.pendente); if (!pend.length || AMG.entregando === c) return;
+  AMG.entregando = c;
+  const ok = await falarComAmigo(c, { t: "msg", itens: pend.map(m => (m.e ? { e: m.e } : { f: m.f })) });
+  AMG.entregando = null;
+  if (ok) { pend.forEach(m => delete m.pendente); salvar(); reRender(); }
+}
+async function mandarMsg(c, m) {
+  const agora = Date.now();
+  if (agora - (AMG.ultimaMsg || 0) < 900) return;   // sem enxurrada
+  AMG.ultimaMsg = agora;
+  guardarMsg(c, { ...m, em: agora, pendente: true }); reRender();
+  await entregarPendentes(c);
+}
+function recebeMsgs(de, d) {
+  if (!ehAmigo(de) || !Array.isArray(d.itens)) return;
+  const a = amigos().find(x => x.codigo === de);
+  let ultima = "";
+  for (const it of d.itens.slice(0, 10)) {
+    const m = it && typeof it === "object" ? it : {};
+    if (Number.isInteger(m.f) && FRASES[m.f]) { guardarMsg(de, { ele: true, f: m.f, em: Date.now() }); ultima = FRASES[m.f]; }
+    else if (typeof m.e === "string" && emojiInfo(m.e)) { guardarMsg(de, { ele: true, e: m.e, em: Date.now() }); ultima = emojiInfo(m.e).e; }
+  }
+  if (!ultima) return;
+  if (G.tela === "conversa" && AMG.com === de && !$("app").hidden) { conversa(de).forEach(x => (x.lida = true)); salvar(); }
+  else if (!ON.on) toast(`${a.nome}: ${ultima}`, "Responder", () => abrirConversa(de));
+  bip(1046, .06); reRender();
+}
+function abrirConversa(c) { AMG.com = c; conversa(c).forEach(m => (m.lida = true)); salvar(); ir("conversa"); entregarPendentes(c); }
+
+TELAS.conversa = () => {
+  const a = amigos().find(x => x.codigo === AMG.com);
+  if (!a) { setTimeout(() => ir("amigos"), 0); return ""; }
+  const l = conversa(a.codigo), on = AMG.online[a.codigo];
+  const meusEmojis = EMOJIS.filter(e => temEmoji(perfil(), e.k));
+  depoisFn = () => { const box = $("cv-msgs"); if (box) box.scrollTop = box.scrollHeight; };
+  return `
+  <section data-fundo="${fundoAtual()}" class="bgf lobby" aria-label="Conversa com ${esc(a.nome)}">
+    <div class="lb-top"><button class="lb-pill" data-a="amigos">← Amigos</button>${on ? `<button class="lb-cont" data-a="chamarAmigo" data-c="${esc(a.codigo)}">Chamar para jogar</button>` : ""}</div>
+    <div class="cv-cab"><span class="lb-avatar">${esc(a.nome[0] || "?")}</span><span class="am-nome"><b>${esc(a.nome)}</b>${on ? `<span class="am-on">● online</span>` : `<span class="am-off">● fora (a mensagem chega quando os dois estiverem online)</span>`}</span></div>
+    <div class="cv-msgs" id="cv-msgs" aria-live="polite">${l.length ? l.map(m => `<div class="cv-msg${m.ele ? "" : " eu"}${m.e ? " emo" : ""}">${esc(textoMsg(m))}${m.pendente ? `<i class="cv-esp">esperando</i>` : ""}</div>`).join("")
+      : `<p class="dim" style="text-align:center">Nenhuma mensagem ainda. Escolha uma frase embaixo.</p>`}</div>
+    <div class="cv-frases" role="group" aria-label="Frases para mandar">${FRASES.map((t, i) => `<button type="button" class="chip" data-a="mandarFrase" data-f="${i}">${esc(t)}</button>`).join("")}</div>
+    <div class="a-emo" role="group" aria-label="Emojis para mandar">${meusEmojis.map(e => `<button type="button" data-a="mandarEmojiChat" data-e="${e.k}" aria-label="Mandar ${esc(e.nome)}">${e.e}</button>`).join("")}</div>
+    <p class="dim" style="font-size:13px;text-align:center">Mais emojis na Loja. As mensagens ficam só neste celular e no do seu amigo.</p>
+  </section>`;
+};
+Object.assign(acoes, {
+  abrirConversa(el) { abrirConversa(el.dataset.c); },
+  mandarFrase(el) { const f = +el.dataset.f; if (FRASES[f] && AMG.com) mandarMsg(AMG.com, { f }); },
+  mandarEmojiChat(el) { const k = el.dataset.e; if (temEmoji(perfil(), k) && AMG.com) mandarMsg(AMG.com, { e: k }); },
+});
+TELAS_COM_MUSICA.push("conversa");
+
+/* recebe "msg" e entrega pendentes quando o amigo aparece */
+const _amigoRecebe = amigoRecebe;
+amigoRecebe = (conn, d) => {
+  _amigoRecebe(conn, d);
+  const de = limparCodigoAmigo(d && d.de);
+  if (!ehAmigo(de)) return;
+  if (d.t === "msg") recebeMsgs(de, d);
+  if (conversa(de).some(m => m.pendente)) setTimeout(() => entregarPendentes(de), 300);
+};
+const _verOnline = verQuemEstaOnline;
+verQuemEstaOnline = async () => { await _verOnline(); amigos().forEach(a => { if (AMG.online[a.codigo] && conversa(a.codigo).some(m => m.pendente)) entregarPendentes(a.codigo); }); };

@@ -26,6 +26,7 @@ Ideia do Andre: um jogo de celular e PC que mistura forca com queimada. Quem adi
 - Cada um tem um código de amigo. Adiciona digitando o código, pelo QR ou pelo "+ amigo" na sala de quem jogou junto.
 - A lista mostra quem está com o jogo aberto agora (online). "Chamar" manda um convite para a sua sala.
 - Só funciona no site (não dentro do Claude). Só aparece o apelido.
+- Chat dos amigos: tocar no nome do amigo abre a conversa. Só frases prontas (16) e os emojis que a pessoa tem. Se o amigo está com o jogo fechado, a mensagem espera e chega quando os dois estiverem online.
 
 ## Dúvidas em aberto
 
