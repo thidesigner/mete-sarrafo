@@ -790,6 +790,7 @@ Object.assign(acoes, {
   continuar() { ir(G.telaAntes || "pergunta"); },
   descartar() { G.p = null; G.j = []; salvar(); render(); },
   cfgPadrao() { G.cfg = { ...PADRAO }; salvar(); render(); },
+  alternarImprimir(el) { if (!ajustesAbertos) return; G.imprimir3d = el.checked; salvar(); toast(el.checked ? "Imprimir 3D ligado neste aparelho" : "Imprimir 3D escondido"); },
   sortear() { definirPerguntador(Math.floor(Math.random() * G.j.length)); },
   escolherPerg(el) {
     const i = +el.dataset.i;
@@ -2521,6 +2522,10 @@ TELAS.ajustes = () => {
       <div class="knobs">${AJUSTES.map(([k, t, mn, mx, st]) => `<div class="field"><label for="cfg-${k}">${esc(t)}</label><input type="number" inputmode="decimal" id="cfg-${k}" data-k="${k}" min="${mn}" max="${mx}" step="${st}" value="${G.cfg[k]}"></div>`).join("")}</div>
       <button class="btn ghost small" data-a="cfgPadrao" type="button">Voltar às regras combinadas</button>
     </div>
+    <div class="card" style="background:rgba(11,27,51,.6)">
+      <label style="display:flex;gap:12px;align-items:center;cursor:pointer"><input type="checkbox" id="cfg-imprimir" data-a="alternarImprimir" ${G.imprimir3d ? "checked" : ""} style="width:24px;height:24px;flex:none">
+      <span>Mostrar a aba "Imprimir 3D" no editor de personagens (teste interno, só neste aparelho)</span></label>
+    </div>
     <button class="btn ghost small" data-a="trocarPin" type="button">Trocar o código</button>
   </section>`;
 };
@@ -2908,7 +2913,7 @@ TELAS.personagens = () => {
   <section data-fundo="${fundoAtual()}" class="bgf lobby" aria-label="Meus personagens">
     <div class="lb-top"><button class="lb-pill" data-a="voltarLobby">← Voltar</button></div>
     <h1 class="lb-title" style="font-size:34px">Meus personagens</h1>
-    <p class="lb-sub">Crie seus próprios bonecos para jogar. Depois dá para levar ao Blender e imprimir em 3D.</p>
+    <p class="lb-sub">Crie seus próprios bonecos para jogar.</p>
     ${lista.length ? `<div class="fd-grid">${lista.map(f => `
       <div class="fd-tile"${ativo && ativo.id === f.id ? ' aria-current="true"' : ""}>
         <canvas class="pp-thumb" data-id="${esc(f.id)}" aria-label="${esc(f.nome || "Personagem")}"></canvas>
@@ -2933,7 +2938,9 @@ function edCores(cores, valor, alvo, rotulo) {
 TELAS.editor = () => {
   const f = ED.f; if (!f) { setTimeout(() => ir("personagens"), 0); return ""; }
   depoisFn = edMontarPalco;
-  const abas = { corpo: "Corpo", cabeca: "Cabeça", pecas: "Peças", imprimir: "Imprimir 3D" };
+  /* A impressão 3D é teste interno: a aba só aparece se o pai ligar nos Ajustes (com o código) */
+  const abas = { corpo: "Corpo", cabeca: "Cabeça", pecas: "Peças", ...(G.imprimir3d ? { imprimir: "Imprimir 3D" } : {}) };
+  if (!abas[ED.aba]) ED.aba = "corpo";
   let conteudo = "";
   if (ED.aba === "corpo") conteudo = `
     <h3>Formato do corpo</h3>${edChips(FORMAS_CORPO, f.corpo.forma, "corpo.forma")}
@@ -3079,9 +3086,9 @@ Object.assign(acoes, {
     Object.values(G.inv || {}).forEach(x => { if (x && x.personagem === ED.f.id) x.personagem = null; });
     salvar(); ED.f = null; ED.apagar = false; ir("personagens");
   },
-  async edSTL() { const f = edGuardar(); try { await baixarArquivo(fichaParaSTL(f, ED.altura), nomeArquivo(f) + ".stl"); toast("Arquivo da impressora baixado"); } catch (e) { if (!e || e.code !== "declined") toast("Não deu para baixar o arquivo"); } },
-  async edGLB() { const f = edGuardar(); try { await baixarArquivo(await fichaParaGLB(f), nomeArquivo(f) + ".glb"); toast("Modelo colorido baixado"); } catch (e) { if (!e || e.code !== "declined") toast("Não deu para baixar o modelo colorido"); } },
-  async edJSON() { const f = edGuardar(); try { await baixarArquivo(new Blob([JSON.stringify(f, null, 2)], { type: "application/json" }), nomeArquivo(f) + ".json"); toast("Ficha baixada"); } catch (e) { if (!e || e.code !== "declined") toast("Não deu para baixar a ficha"); } },
+  async edSTL() { if (!G.imprimir3d) return; const f = edGuardar(); try { await baixarArquivo(fichaParaSTL(f, ED.altura), nomeArquivo(f) + ".stl"); toast("Arquivo da impressora baixado"); } catch (e) { if (!e || e.code !== "declined") toast("Não deu para baixar o arquivo"); } },
+  async edGLB() { if (!G.imprimir3d) return; const f = edGuardar(); try { await baixarArquivo(await fichaParaGLB(f), nomeArquivo(f) + ".glb"); toast("Modelo colorido baixado"); } catch (e) { if (!e || e.code !== "declined") toast("Não deu para baixar o modelo colorido"); } },
+  async edJSON() { if (!G.imprimir3d) return; const f = edGuardar(); try { await baixarArquivo(new Blob([JSON.stringify(f, null, 2)], { type: "application/json" }), nomeArquivo(f) + ".json"); toast("Ficha baixada"); } catch (e) { if (!e || e.code !== "declined") toast("Não deu para baixar a ficha"); } },
 });
 document.addEventListener("input", e => {
   if (e.target.id === "ed-nome" && ED.f) ED.f.nome = e.target.value.slice(0, 24);

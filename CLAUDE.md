@@ -60,6 +60,7 @@ O Andre não precisa estar: quem entra pelo QR e acha a sala fechada abre a sala
 Botão "Criar" na tela inicial: editor de personagens (arrastar peças). Cada personagem é uma "ficha" JSON (`tipo: "personagem-jogos-do-andre"`, `versao: 1`) guardada em `G.personagens`. Ela viaja no modo online e é limpa por `limparFicha`.
 - Desenho: `desenharPersonagem2D` e `construirPersonagem3D` em `fonte/jogo.html`. Peça nova: entra em `PECAS` com um encaixe e ganha desenho nas duas funções.
 - Dentro do Claude (Modo Festa) os personagens ficam no banco `personagens` (doc = id da ficha, com `em`; apagado vira `{apagado:true}`) e sincronizam entre aparelhos. No site ficam só no aparelho.
+- A aba "Imprimir 3D" fica **escondida** para as crianças (teste interno do pai). Só aparece se ligar nos Ajustes trancados ("Mostrar a aba Imprimir 3D", `G.imprimir3d`, vale só naquele aparelho). O trabalho de impressão vai seguir num repositório separado; aqui o jogo só cria e guarda os personagens.
 - Downloads (no site direto; no Claude pela capacidade `downloads`, com STL e GLB dentro de um .zip): STL para a impressora (`fichaParaSTL`), GLB colorido para o Blender (`fichaParaGLB`) e a ficha JSON.
 - `ferramentas/blender/personagem_para_stl.py`: GLB → peça única fechada, em pé, na altura em mm.
 - Plano, cuidados (venda, Inmetro, segurança, LGPD) e dúvidas: `ideias/personagens-e-impressao-3d.md`. Venda de bonecos é sempre fora do jogo, entre adultos.

@@ -4,6 +4,8 @@ Ideia (30/out): no jogo, o Andre e os amigos montam personagens exclusivos arras
 
 ## O que já funciona (versão de teste)
 
+- **31/out:** a aba Imprimir 3D foi escondida das crianças. Ela só aparece se o pai ligar nos Ajustes (com o código). A impressão 3D vai continuar num repositório separado, como teste interno.
+
 - Artefato **Oficina 3D do Andre** no Claude: o fluxo, checklist de preparo, diário de impressões e lista de correções.
 - No Modo Festa (Claude) os personagens ficam guardados na conta e aparecem em qualquer aparelho. Dá para baixar o STL lá também (vem num .zip).
 
