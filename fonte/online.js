@@ -99,7 +99,7 @@ function hostRecebe(conn, d) {
     const base = String(d.nome || "Amigo").replace(/\s+/g, " ").trim().slice(0, 20) || "Amigo";
     const usados = [perfil(), ...ON.sala.map(s => s.nome)];
     let nome = base, k = 2; while (usados.some(u => u.toLowerCase() === nome.toLowerCase())) nome = base + " " + (k++);
-    ON.sala.push({ conn, nome, moedas: Math.max(0, +d.moedas || 0), vidasInv: Math.max(0, Math.floor(+d.vidas || 0)) });
+    ON.sala.push({ conn, nome, moedas: Math.max(0, +d.moedas || 0), vidasInv: Math.max(0, Math.floor(+d.vidas || 0)), skin: skinInfo(d.skin).k });
     enviar(conn, { t: "bemvindo", nome, code: ON.code });
     enviarSala(); toast(`${nome} entrou na sala`); bip(880, .08);
     if (G.tela === "salaHost") render();
@@ -131,7 +131,7 @@ function hostSaiu(conn) {
 
 /* ---------- Anfitrião: começar ---------- */
 function comecarOnline() {
-  const lista = [{ nome: perfil(), local: true }].concat(ON.sala.filter(s => s.conn.open).map(s => ({ nome: s.nome, conn: s.conn, moedas: s.moedas, vidasInv: s.vidasInv })));
+  const lista = [{ nome: perfil(), local: true }].concat(ON.sala.filter(s => s.conn.open).map(s => ({ nome: s.nome, conn: s.conn, moedas: s.moedas, vidasInv: s.vidasInv, skin: s.skin })));
   for (let k = 1; k <= ON.robos; k++) lista.push({ nome: "Robô " + k, robo: true });
   if (lista.length < 3) { toast("Precisa de pelo menos 3 jogadores"); return; }
   const n = lista.length;
@@ -145,12 +145,13 @@ function comecarOnline() {
       home, x: home.x, y: home.y, alvo: null, modo: "casa", vel: A_VEL * aRnd(.88, 1.12), habil: aRnd(-.08, .08),
       flash: 0, passo: 0, ctrl: false, tocou: false, saiuEm: null };
   });
+  A.P.forEach((p, i) => { if (p.humano) vestir(p, lista[i].local ? skinDe(p.nome) : lista[i].skin); });
   A.cel = 0; ON.myIdx = 0; A.balls = []; A.fx = []; A.t = 0; A.fim = null; A.ptr = null; A.inicio = Date.now();
   A.st = { palavras: 0, acertos: 0, erros: 0, timeouts: 0, votos: 0, votosOk: 0, arremessos: 0, acertosBola: 0, rodadas: 0, compras: 0, moedas: {}, eventos: [] };
   ON.on = true; ON.pedido = null; ON.esperaTxt = ""; ON.fimVisto = false;
   $("app").hidden = true; $("arena").hidden = false; $("a-setup").hidden = true; $("a-game").hidden = false;
   window.scrollTo(0, 0);
-  const estatico = A.P.map(p => ({ nome: p.nome, cor: p.cor, pele: p.pele, humano: p.humano, hx: Math.round(p.home.x), hy: Math.round(p.home.y) }));
+  const estatico = A.P.map(p => ({ nome: p.nome, cor: p.cor, pele: p.pele, skin: p.skin || "classico", humano: p.humano, hx: Math.round(p.home.x), hy: Math.round(p.home.y) }));
   A.P.forEach(p => { if (p.conn) enviar(p.conn, { t: "start", P: estatico, eu: p.i, cfg: A.cfg }); });
   A.fp = false;
   novaPalavraA(aPick(A.P));
@@ -467,7 +468,7 @@ function mostrarFimOnline() {
 }
 function novaRodadaSala() {
   clearInterval(ON.timer); fecharOv(); pararLoop();
-  ON.sala = A.P.filter(p => p.remoto && p.conn && p.conn.open).map(p => ({ conn: p.conn, nome: p.nome, moedas: Math.round(p.moedas * 10) / 10, vidasInv: p.vidasInv || 0 }));
+  ON.sala = A.P.filter(p => p.remoto && p.conn && p.conn.open).map(p => ({ conn: p.conn, nome: p.nome, moedas: Math.round(p.moedas * 10) / 10, vidasInv: p.vidasInv || 0, skin: p.skin || "classico" }));
   ON.sala.forEach(s => enviar(s.conn, { t: "voltaSala" }));
   ON.on = false; A.P = []; A.fim = null;
   $("arena").hidden = true; $("app").hidden = false;
@@ -541,7 +542,7 @@ function entrarSala(code, nome, naoAbrir = false) {
   peer.on("open", () => {
     const conn = peer.connect(PREFIXO + code, { reliable: true, serialization: "json" });
     ON.hostConn = conn;
-    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome) }); });
+    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome) }); });
     conn.on("data", cliRecebe);
     conn.on("close", () => { if (ON.peer === peer) { toast("A conexão com a sala caiu."); sairOnline(); } });
   });
@@ -567,7 +568,7 @@ function cliRecebe(d) {
 }
 function iniciarCliente(d) {
   A.cfg = { ...PADRAO, ...(d.cfg || {}) };
-  A.P = d.P.map((o, i) => ({ i, nome: String(o.nome), cor: o.cor, pele: o.pele, humano: !!o.humano, home: { x: o.hx, y: o.hy },
+  A.P = d.P.map((o, i) => ({ i, nome: String(o.nome), cor: o.cor, pele: o.pele, skin: skinInfo(o.skin).k, humano: !!o.humano, home: { x: o.hx, y: o.hy },
     x: o.hx, y: o.hy, tx: o.hx, ty: o.hy, vidas: A.cfg.vidas, vivo: true, moedas: 0, ganho: 0, compradas: 0,
     alvo: null, modo: "casa", vel: A_VEL, habil: 0, flash: 0, passo: 0, ctrl: false, tocou: false }));
   A.cel = d.eu; ON.myIdx = d.eu; ON.on = true; ON.host = false; ON.fimVisto = false; ON.actKey = "";

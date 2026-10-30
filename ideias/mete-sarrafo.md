@@ -17,7 +17,7 @@ Ideia do Andre: um jogo de celular e PC que mistura forca com queimada. Quem adi
 
 - Moedas do jogo (nunca dinheiro de verdade), guardadas entre partidas.
 - Ganha: 1 por acertar a palavra, 4,5 por sobreviver a uma rodada de bola. Quem pergunta ganha 1,5 a cada erro dos outros. Ficar parado não dá moeda.
-- Loja: vida extra (250 moedas, até 3 por partida, também dá pra comprar na hora), fundos da tela inicial (Céu 50, Quadra 50, Floresta 75, Pôr do sol 100, Doce 100, Noite estrelada 150, Vulcão 200). Skins, gestos e emojis: em breve.
+- Loja: vida extra (250 moedas, até 3 por partida, também dá pra comprar na hora), fundos da tela inicial (Céu 50, Quadra 50, Floresta 75, Pôr do sol 100, Doce 100, Noite estrelada 150, Vulcão 200). Skins (mudam a roupa e põem um acessório no bonequinho): Clássico (grátis), Boné 60, Óculos escuros 80, Ninja 120, Zumbi 150, Astronauta 150, Rei 200. São exemplos para o Andre trocar como quiser. Gestos e emojis: em breve.
 
 ## Dúvidas em aberto
 
