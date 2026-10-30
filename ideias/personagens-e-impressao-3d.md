@@ -36,6 +36,37 @@ O STL baixado direto do jogo já imprime. O caminho pelo Blender serve para capr
 
 Testado: o "Capitão Raio" saiu com 40 x 44 x 80 mm, peça fechada (0 arestas abertas).
 
+## Passo a passo com a impressora do pai (Elegoo Neptune 4 Pro)
+
+A impressora imprime uma cor por vez, com fio de plástico (filamento). A área de impressão é de 22,5 x 22,5 x 26,5 cm, então cabe qualquer tamanho do jogo (até 15 cm).
+
+**Comprar uma vez:**
+- filamento **PLA 1,75 mm** (1 kg, para começar; branco ou cinza é bom para pintar depois);
+- alicate de corte pequeno para tirar os suportes (a espátula costuma vir com a impressora);
+- tintas acrílicas e pincéis finos, se quiser pintar.
+
+**Preparar uma vez:**
+1. Montar a impressora seguindo o manual e o vídeo da Elegoo.
+2. Rodar o nivelamento automático da mesa (menu da tela da impressora).
+3. Imprimir um arquivo de teste que vem no pendrive da impressora, para saber que está tudo certo.
+4. Instalar no computador o programa que "fatia" o boneco em camadas. Pode ser o **OrcaSlicer** (gratuito, já tem a Neptune 4 Pro na lista) ou o **Elegoo Cura** (vem no pendrive). Ao abrir, escolher a impressora "Elegoo Neptune 4 Pro", bico 0.4, e o filamento "PLA".
+
+**Para cada boneco:**
+1. O Andre cria o personagem no jogo, no site.
+2. Na aba **Imprimir 3D**, escolher a altura (8 cm é um bom começo) e tocar em **Baixar arquivo da impressora (STL)**.
+3. Abrir o STL no OrcaSlicer.
+4. Ligar os **suportes** (tipo "árvore"), porque braços, espada e capa ficam no ar.
+5. Clicar em **Fatiar**. O programa mostra o tempo e quantos gramas vai gastar.
+6. Salvar o arquivo que ele gera (G-code) no pendrive.
+7. Pôr o pendrive na impressora, escolher o arquivo na tela e imprimir.
+8. Esperar esfriar, tirar da mesa, cortar os suportes e pintar se quiser.
+
+Para começar não precisa do Blender. Ele serve depois, para caprichar (mais liso, pose, separar cores).
+
+Um boneco de 8 cm gasta mais ou menos 15 a 25 g de PLA (poucos reais) e leva umas 1 a 3 horas. O número certo aparece no fatiador.
+
+**Segurança:** o bico chega a 200 °C e a mesa a 60 °C. O Andre acompanha junto com um adulto, sem pôr a mão dentro enquanto imprime. Deixar num lugar ventilado. Nas primeiras vezes, não deixar a impressora sozinha.
+
 ## A ficha do personagem
 
 Cada personagem é um texto pequeno (JSON) com `tipo: "personagem-jogos-do-andre"` e `versao: 1`:
@@ -74,7 +105,7 @@ Isto não é conselho jurídico. Antes de vender, vale conversar com um contador
 
 ## Dúvidas em aberto
 
-1. Qual é a impressora e o fatiador? Uma cor ou várias (AMS / troca de filamento)?
+1. ~~Qual é a impressora?~~ Elegoo Neptune 4 Pro (uma cor). Falta escolher o fatiador (sugestão: OrcaSlicer).
 2. Tamanho preferido do boneco (o padrão é 80 mm)?
 3. Quais peças e formas novas o Andre quer primeiro?
 4. A lojinha vende peças, personagens prontos ou os dois? Quanto custam (em moedas do jogo)?
