@@ -242,6 +242,38 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .pin-t { min-height: 64px; border-radius: 14px; border: 3px solid #0b1b33; background: rgba(11,27,51,.6); color: #fff; font-family: var(--display); font-size: 28px; box-shadow: 0 4px 0 #0b1b33; }
 .pin-t:active { transform: translateY(2px); box-shadow: 0 2px 0 #0b1b33; }
 .pin-t2 { font-size: 22px; }
+/* Criador de personagens */
+.lb-side { max-height: 100%; }
+.pp-thumb { display: block; width: 100%; aspect-ratio: 1; max-width: 100%; border-radius: 9px; border: 2px solid #0b1b33; background: radial-gradient(circle at 50% 75%, #2a6fd6, #133a68 75%); }
+.pp-cri { font-size: 12px; color: #b8c6da; font-weight: 700; }
+.ed-nome { font-family: var(--display); font-size: 22px; text-align: center; background: rgba(11,27,51,.6); border: 3px solid #0b1b33; color: #fff; }
+.ed-palco { position: relative; height: min(360px, 52vh); border-radius: 16px; border: 3px solid #0b1b33; background: radial-gradient(circle at 50% 70%, rgba(255,255,255,.25), rgba(11,27,51,.35) 70%); overflow: hidden; transition: box-shadow .15s; }
+.ed-palco canvas { display: block; width: 100% !important; height: 100% !important; }
+.ed-palco.baixo { height: min(250px, 34vh); }
+.ed-usada small { font-weight: 600; color: #b8c6da; }
+.ed-usada { border-top: 1px solid rgba(255,255,255,.15); padding-top: 8px; }
+.ed-palco.alvo { box-shadow: 0 0 0 4px #ffd23f; }
+.ed-palco.sobre { box-shadow: 0 0 0 6px #37d99a; }
+.ed-dica { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); background: rgba(11,27,51,.75); color: #fff; font-size: 12px; font-weight: 800; padding: 3px 10px; border-radius: 999px; pointer-events: none; }
+.ed-abas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.ed-aba { min-height: 44px; border-radius: 10px; border: 2px solid #0b1b33; background: rgba(11,27,51,.6); color: #fff; font-weight: 800; font-size: 14px; padding: 4px; }
+.ed-aba[aria-selected="true"] { background: #ffd23f; color: #0b1b33; }
+.ed-painel { background: rgba(11,27,51,.7) !important; color: #fff; }
+.ed-painel h3 { margin-top: 4px; }
+.ed-cores { display: flex; flex-wrap: wrap; gap: 8px; }
+.ed-cor { width: 36px; height: 36px; border-radius: 50%; border: 3px solid #0b1b33; padding: 0; position: relative; display: grid; place-items: center; cursor: pointer; }
+.ed-cor[aria-pressed="true"] { box-shadow: 0 0 0 3px #fff; }
+.ed-cor-livre { background: conic-gradient(#ff4d6d, #ffd23f, #37d99a, #2bb5c9, #7b2cbf, #ff4d6d); color: #0b1b33; font-weight: 800; font-family: var(--body); font-size: 18px; text-transform: none; letter-spacing: 0; }
+.ed-cor-livre input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; padding: 0; }
+.ed-enc { display: flex; flex-direction: column; gap: 6px; border-top: 1px solid rgba(255,255,255,.15); padding-top: 8px; }
+.ed-pecas { display: flex; flex-wrap: wrap; gap: 6px; }
+.ed-peca { touch-action: none; user-select: none; -webkit-user-select: none; display: inline-flex; align-items: center; gap: 5px; padding: 7px 9px; font-size: 14px; border-radius: 12px; border: 2px solid #0b1b33; background: #2a6fd6; color: #fff; font-weight: 800; cursor: grab; box-shadow: 0 3px 0 #0b1b33; }
+.ed-peca i { width: 14px; height: 14px; border-radius: 4px; border: 2px solid #0b1b33; }
+.ed-peca.on { background: #ffd23f; color: #0b1b33; }
+.ed-fantasma { position: fixed; z-index: 60; pointer-events: none; transform: translate(-50%, -120%) scale(1.15); opacity: .92; }
+.ed-usada { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.ed-usada > span { font-weight: 800; }
+.ed-2d { display: block; width: 100%; height: 100%; }
 .sk-heroi { font-style: normal; font-size: 10px; background: #ff4d6d; color: #fff; border-radius: 6px; padding: 1px 6px; }
 .sk-prev { display: block; width: 100%; aspect-ratio: 1.3; max-width: 100%; border-radius: 9px; border: 2px solid #0b1b33; background: radial-gradient(circle at 50% 75%, #2a6fd6, #133a68 75%); }
 .fd-travado .sk-prev { filter: saturate(.6) brightness(.85); }
@@ -1075,7 +1107,7 @@ function comecarArena() {
       home, x: home.x, y: home.y, alvo: null, modo: "casa", vel: A_VEL * aRnd(.88, 1.12), habil: aRnd(-.08, .08),
       flash: 0, passo: 0, ctrl: false, tocou: false, saiuEm: null };
   });
-  A.P.forEach(p => { if (p.humano) vestir(p, skinDe(p.nome)); });
+  A.P.forEach(p => { if (p.humano) { vestir(p, skinDe(p.nome)); const f = personagemDe(p.nome); if (f) p.ficha = f; } });
   A.cel = Math.max(0, A.P.findIndex(p => p.nome === s.dono));
   A.balls = []; A.fx = []; A.t = 0; A.fim = null; A.ptr = null; A.inicio = Date.now();
   A.st = { palavras: 0, acertos: 0, erros: 0, timeouts: 0, votos: 0, votosOk: 0, arremessos: 0, acertosBola: 0, rodadas: 0, compras: 0, moedas: {}, eventos: [] };
@@ -1371,6 +1403,8 @@ function desenharBoneco2(c, p, ph) {
   if (isVez) { c.strokeStyle = "#ffd23f"; c.lineWidth = 5; c.beginPath(); c.arc(x, y - 6, 44, 0, Math.PI * 2); c.stroke(); }
   if (p.humano && p.i === A.cel) { c.fillStyle = "rgba(255,210,63,.18)"; c.beginPath(); c.ellipse(x, y + 26, 34, 12, 0, 0, Math.PI * 2); c.fill(); }
   c.fillStyle = "rgba(0,0,0,.28)"; c.beginPath(); c.ellipse(x, y + 26, 22, 7, 0, 0, Math.PI * 2); c.fill();
+  if (p.ficha) desenharPersonagem2D(c, p.ficha, x, y, anda);
+  else {
   c.strokeStyle = "#1b1b2b"; c.lineWidth = 6; c.lineCap = "round";
   c.beginPath(); c.moveTo(x - 7, y + 6); c.lineTo(x - 7 + anda * .6, y + 24); c.moveTo(x + 7, y + 6); c.lineTo(x + 7 - anda * .6, y + 24); c.stroke();
   c.strokeStyle = p.cor; c.lineWidth = 6;
@@ -1386,6 +1420,7 @@ function desenharBoneco2(c, p, ph) {
     c.fillStyle = "#2bb5c9"; c.fillRect(x - 9, y - 40, 6, 6); c.fillRect(x + 3, y - 40, 6, 6);
     c.strokeStyle = "#c8d3e0"; c.lineWidth = 3; c.beginPath(); c.moveTo(x, y - 48); c.lineTo(x, y - 58); c.stroke();
     c.fillStyle = "#ff4d6d"; c.beginPath(); c.arc(x, y - 60, 4, 0, Math.PI * 2); c.fill();
+  }
   }
   c.fillStyle = "#f4f7fb"; c.font = "700 22px Nunito, sans-serif"; c.textAlign = "center"; c.textBaseline = "middle";
   c.fillText(p.nome, x, y + 44);
@@ -1765,6 +1800,11 @@ function montarBonecos3D() {
   for (const s of F.seats) F.scene.remove(s);
   F.bonecos = []; F.seats = [];
   for (const p of A.P) {
+    if (p.ficha) {
+      const { g, pernaE, pernaD, bracoE, bracoD, corpoMat } = construirPersonagem3D(p.ficha, false);
+      montarExtras3D(p, g, pernaE, pernaD, bracoE, bracoD, corpoMat);
+      continue;
+    }
     const g = new THREE.Group();
     const corpoMat = new THREE.MeshLambertMaterial({ color: p.cor, emissive: "#000000" });
     const escuro = new THREE.MeshLambertMaterial({ color: "#1b1b2b" });
@@ -1789,6 +1829,11 @@ function montarBonecos3D() {
     }
     cabeca.position.y = 1.28;
     g.add(pernaE, pernaD, corpo, bracoE, bracoD, cabeca);
+    montarExtras3D(p, g, pernaE, pernaD, bracoE, bracoD, corpoMat);
+  }
+}
+function montarExtras3D(p, g, pernaE, pernaD, bracoE, bracoD, corpoMat) {
+  {
     const tag = etiqueta({ nome: p.nome, vidas: "" }); tag.position.y = 1.95; g.add(tag);
     const perg = etiqueta({ nome: "?", vidas: "" }, "#ffd23f"); perg.scale.set(.9, .34, 1); perg.position.y = 2.35; perg.visible = false; g.add(perg);
     F.scene.add(g);
@@ -2022,6 +2067,7 @@ TELAS.lobby = () => {
         <button class="lb-btn" data-a="loja">${ICONES.loja}<span>Loja</span><i class="lb-tag">novo!</i></button>
         <button class="lb-btn" data-a="mais">${ICONES.sug}<span>Ideias</span>${sugestoes.length ? `<i class="lb-badge">${sugestoes.length}</i>` : ""}</button>
         <button class="lb-btn" data-a="mais">${ICONES.regras}<span>Regras</span></button>
+        <button class="lb-btn" data-a="personagens"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4" fill="#f1c27d" stroke="#0b1b33" stroke-width="1.5"/><path d="M5 21v-3a7 7 0 0 1 14 0v3z" fill="#2f80ed" stroke="#0b1b33" stroke-width="1.5" stroke-linejoin="round"/><path d="M18 3l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" fill="#ffd23f" stroke="#0b1b33" stroke-width="1"/></svg><span>Criar</span></button>
         <button class="lb-btn" data-a="fundos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.3 0 1.9-.8 1.9-1.7 0-1.2-1-1.5-1-2.6 0-1 .8-1.7 1.9-1.7h2.1a3.6 3.6 0 0 0 3.6-3.6C20.5 6.6 16.7 3.5 12 3.5z" fill="#f4f7fb" stroke="#0b1b33" stroke-width="1.6"/><circle cx="7.8" cy="11" r="1.5" fill="#ff4d6d"/><circle cx="10.2" cy="7.4" r="1.5" fill="#ffd23f"/><circle cx="14.6" cy="7.4" r="1.5" fill="#37d99a"/><circle cx="17" cy="11" r="1.5" fill="#2f80ed"/></svg><span>Fundo</span></button>
       </div>
       <canvas id="lb-canvas" aria-label="Bonequinho de ${esc(nome)}"></canvas>
@@ -2115,6 +2161,7 @@ function animarLobby() {
   if (lbRaf) cancelAnimationFrame(lbRaf);
   const nome = perfil();
   const boneco = vestir({ i: -1, nome: "", humano: true, cor: A_CORES[0], pele: A_PELE[0], vidas: 0, x: 0, y: 0, passo: 0, flash: 0 }, skinDe(nome));
+  boneco.ficha = typeof personagemDe === "function" ? personagemDe(nome) : null;
   const quadro = ts => {
     const cv = $("lb-canvas");
     if (!cv || G.tela !== "lobby" || $("app").hidden) { lbRaf = null; return; }
@@ -2558,8 +2605,463 @@ acoes.comprarLoja = () => {
 if (G.tela === "lobby") render();
 </script>
 
+<script>
+/* ================= Criador de personagens =================
+   Cada personagem é uma "ficha" (JSON pequeno). A mesma ficha desenha o boneco no jogo (2D e 3D),
+   gera o arquivo da impressora 3D (STL) e é lida pelo script do Blender (ferramentas/blender/). */
+const ED_CORES = ["#e4572e", "#f2994a", "#ffd23f", "#27ae60", "#2bb5c9", "#2f80ed", "#7b2cbf", "#d64570", "#f4f7fb", "#8a96aa", "#2d2d3a", "#5a3412"];
+const ED_PELES = ["#ffdbac", "#f1c27d", "#e0ac69", "#c68642", "#8d5524", "#8fbf6a", "#9fd3ff", "#c8d3e0"];
+const FORMAS_CORPO = { normal: "Normal", largo: "Forte", fino: "Fino", redondo: "Redondo" };
+const FORMAS_CABECA = { redonda: "Redonda", quadrada: "Quadrada", oval: "Oval", alien: "Alien" };
+const CABELOS = { nenhum: "Careca", curto: "Curto", espetado: "Espetado", moicano: "Moicano", longo: "Longo" };
+const OLHOS = { normal: "Normal", bravo: "Bravo", feliz: "Feliz", sono: "Sono" };
+const BOCAS = { sorriso: "Sorriso", aberta: "Uau", seria: "Séria" };
+const ENCAIXES = { cabeca: "Cabeça", rosto: "Rosto", maoD: "Mão direita", maoE: "Mão esquerda", costas: "Costas" };
+const PECAS = {
+  bone: { nome: "Boné", encaixe: "cabeca", cor: "#2f80ed" },
+  coroa: { nome: "Coroa", encaixe: "cabeca", cor: "#ffd23f" },
+  chifres: { nome: "Chifres", encaixe: "cabeca", cor: "#f4f7fb" },
+  orelhas: { nome: "Orelhas", encaixe: "cabeca", cor: "#f4a261" },
+  capacete: { nome: "Capacete", encaixe: "cabeca", cor: "#c0c7d1" },
+  oculos: { nome: "Óculos", encaixe: "rosto", cor: "#111318" },
+  mascara: { nome: "Máscara", encaixe: "rosto", cor: "#2d2d3a" },
+  espada: { nome: "Espada", encaixe: "maoD", cor: "#c0c7d1" },
+  martelo: { nome: "Martelo", encaixe: "maoD", cor: "#8a96aa" },
+  varinha: { nome: "Varinha", encaixe: "maoD", cor: "#7b2cbf" },
+  escudo: { nome: "Escudo", encaixe: "maoE", cor: "#d64570" },
+  capa: { nome: "Capa", encaixe: "costas", cor: "#d64570" },
+  asas: { nome: "Asas", encaixe: "costas", cor: "#f4f7fb" },
+  mochila: { nome: "Mochila", encaixe: "costas", cor: "#27ae60" },
+};
+function fichaNova(criador) {
+  return { tipo: "personagem-jogos-do-andre", v: 1, id: "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    nome: "", criador: String(criador || "").slice(0, 20), criadoEm: new Date().toISOString().slice(0, 10),
+    corpo: { forma: "normal", cor: "#2f80ed" }, pernas: { cor: "#2d2d3a" }, cabeca: { forma: "redonda", pele: "#f1c27d" },
+    rosto: { olhos: "normal", boca: "sorriso" }, cabelo: { estilo: "curto", cor: "#5a3412" }, pecas: [] };
+}
+const corOk = c => (/^#[0-9a-f]{6}$/i.test(c || "") ? c : null);
+/* Confere uma ficha vinda de fora (outro celular, arquivo): só aceita valores conhecidos */
+function limparFicha(f) {
+  if (!f || typeof f !== "object") return null;
+  const base = fichaNova(f.criador);
+  const um = (obj, k, lista, pad) => (obj && Object.prototype.hasOwnProperty.call(lista, obj[k]) ? obj[k] : pad);
+  const r = { tipo: base.tipo, v: 1, id: /^[a-z0-9]{4,24}$/i.test(f.id || "") ? f.id : base.id,
+    nome: String(f.nome || "").slice(0, 24), criador: String(f.criador || "").slice(0, 20),
+    criadoEm: /^\d{4}-\d\d-\d\d$/.test(f.criadoEm || "") ? f.criadoEm : base.criadoEm,
+    corpo: { forma: um(f.corpo, "forma", FORMAS_CORPO, "normal"), cor: corOk(f.corpo && f.corpo.cor) || base.corpo.cor },
+    pernas: { cor: corOk(f.pernas && f.pernas.cor) || base.pernas.cor },
+    cabeca: { forma: um(f.cabeca, "forma", FORMAS_CABECA, "redonda"), pele: corOk(f.cabeca && f.cabeca.pele) || base.cabeca.pele },
+    rosto: { olhos: um(f.rosto, "olhos", OLHOS, "normal"), boca: um(f.rosto, "boca", BOCAS, "sorriso") },
+    cabelo: { estilo: um(f.cabelo, "estilo", CABELOS, "curto"), cor: corOk(f.cabelo && f.cabelo.cor) || base.cabelo.cor },
+    pecas: [] };
+  const usados = new Set();
+  for (const pc of (Array.isArray(f.pecas) ? f.pecas : []).slice(0, 8)) {
+    const d = PECAS[pc && pc.tipo]; if (!d || usados.has(d.encaixe)) continue;
+    usados.add(d.encaixe); r.pecas.push({ tipo: pc.tipo, encaixe: d.encaixe, cor: corOk(pc.cor) || d.cor });
+  }
+  return r;
+}
+const peca = (f, encaixe) => f.pecas.find(p => p.encaixe === encaixe);
+function equipar(f, tipo) { const d = PECAS[tipo]; f.pecas = f.pecas.filter(p => p.encaixe !== d.encaixe); f.pecas.push({ tipo, encaixe: d.encaixe, cor: d.cor }); }
+function personagemDe(n) {
+  const id = ((G.inv || {})[n] || {}).personagem;
+  return id ? (G.personagens || []).find(f => f.id === id) || null : null;
+}
+function usarPersonagem(n, id) { G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 }; G.inv[n].personagem = id || null; }
 
+/* ---------- Desenho 2D (mesmas medidas do bonequinho do jogo: cabeça em y-34, corpo de y-20 a y+10) ---------- */
+function desenharPersonagem2D(c, f, x, y, anda) {
+  const ret = (a, b, w, h, r) => { c.beginPath(); c.roundRect ? c.roundRect(a, b, w, h, r) : c.rect(a, b, w, h); c.fill(); };
+  const [bw, bh, br] = { normal: [30, 30, 8], largo: [38, 30, 9], fino: [22, 32, 7], redondo: [34, 32, 16] }[f.corpo.forma];
+  const by = y + 10 - bh, hx = x, hy = by - 14;
+  const costas = peca(f, "costas");
+  if (costas) {
+    c.fillStyle = costas.cor;
+    if (costas.tipo === "capa") { c.beginPath(); c.moveTo(x - bw / 2, by + 3); c.lineTo(x + bw / 2, by + 3); c.lineTo(x + bw / 2 + 8, y + 22); c.lineTo(x - bw / 2 - 8, y + 22); c.closePath(); c.fill(); }
+    else if (costas.tipo === "asas") { for (const s of [-1, 1]) { c.beginPath(); c.ellipse(x + s * (bw / 2 + 11), by + 8, 14, 7, s * -.5, 0, Math.PI * 2); c.fill(); } }
+    else if (costas.tipo === "mochila") ret(x - bw / 2 - 7, by + 4, 9, 20, 3);
+  }
+  c.lineCap = "round"; c.lineWidth = 6;
+  c.strokeStyle = f.pernas.cor; c.beginPath(); c.moveTo(x - 7, y + 6); c.lineTo(x - 7 + anda * .6, y + 24); c.moveTo(x + 7, y + 6); c.lineTo(x + 7 - anda * .6, y + 24); c.stroke();
+  const ax = bw / 2 - 1, maoE = { x: x - ax - 6, y: y + 4 - anda * .5 }, maoD = { x: x + ax + 6, y: y + 4 + anda * .5 };
+  c.strokeStyle = f.corpo.cor; c.beginPath(); c.moveTo(x - ax, by + 10); c.lineTo(maoE.x, maoE.y); c.moveTo(x + ax, by + 10); c.lineTo(maoD.x, maoD.y); c.stroke();
+  c.fillStyle = f.corpo.cor; ret(x - bw / 2, by, bw, bh, br);
+  c.fillStyle = f.cabeca.pele; c.beginPath();
+  if (f.cabeca.forma === "quadrada") { c.roundRect ? c.roundRect(hx - 15, hy - 15, 30, 30, 6) : c.rect(hx - 15, hy - 15, 30, 30); }
+  else if (f.cabeca.forma === "oval") c.ellipse(hx, hy - 2, 13, 18, 0, 0, Math.PI * 2);
+  else if (f.cabeca.forma === "alien") c.ellipse(hx, hy - 3, 16, 19, 0, 0, Math.PI * 2);
+  else c.arc(hx, hy, 15, 0, Math.PI * 2);
+  c.fill();
+  const topo = { redonda: 15, quadrada: 15, oval: 20, alien: 22 }[f.cabeca.forma];
+  c.fillStyle = f.cabelo.cor;
+  switch (f.cabelo.estilo) {
+    case "curto": c.beginPath(); c.ellipse(hx, hy - topo + 9, 15.5, 10, 0, Math.PI, 0); c.fill(); break;
+    case "longo": c.beginPath(); c.ellipse(hx, hy - topo + 9, 16, 10, 0, Math.PI, 0); c.fill(); ret(hx - 16, hy - topo + 7, 5, 22, 2); ret(hx + 11, hy - topo + 7, 5, 22, 2); break;
+    case "espetado": c.beginPath(); c.moveTo(hx - 15, hy - topo + 11);
+      [[-15, -6], [-9, 2], [-5, -12], [0, 0], [5, -13], [9, 1], [15, -7], [15, 11]].forEach(([a, b]) => c.lineTo(hx + a, hy - topo + 11 + b - 11)); c.closePath(); c.fill(); break;
+    case "moicano": c.beginPath(); c.moveTo(hx - 4, hy - topo + 4);
+      [[-4, -6], [-2, -3], [0, -10], [2, -3], [4, -6], [4, 4]].forEach(([a, b]) => c.lineTo(hx + a, hy - topo + 4 + b)); c.closePath(); c.fill(); break;
+  }
+  const oy = hy - 2, alien = f.cabeca.forma === "alien";
+  c.fillStyle = "#1b1b2b"; c.strokeStyle = "#1b1b2b"; c.lineWidth = 2;
+  switch (f.rosto.olhos) {
+    case "feliz": c.beginPath(); c.arc(hx - 5, oy + 1, 3, Math.PI * 1.1, Math.PI * 1.9); c.moveTo(hx + 8, oy); c.arc(hx + 5, oy + 1, 3, Math.PI * 1.1, Math.PI * 1.9); c.stroke(); break;
+    case "sono": c.beginPath(); c.moveTo(hx - 8, oy); c.lineTo(hx - 2, oy); c.moveTo(hx + 2, oy); c.lineTo(hx + 8, oy); c.stroke(); break;
+    default:
+      c.beginPath();
+      if (alien) { c.ellipse(hx - 6, oy, 4, 6, -.4, 0, Math.PI * 2); c.ellipse(hx + 6, oy, 4, 6, .4, 0, Math.PI * 2); }
+      else { c.arc(hx - 5, oy, 2.4, 0, Math.PI * 2); c.arc(hx + 5, oy, 2.4, 0, Math.PI * 2); }
+      c.fill();
+      if (f.rosto.olhos === "bravo") { c.beginPath(); c.moveTo(hx - 9, oy - 6); c.lineTo(hx - 2, oy - 3); c.moveTo(hx + 9, oy - 6); c.lineTo(hx + 2, oy - 3); c.stroke(); }
+  }
+  const my = hy + 4;
+  if (f.rosto.boca === "aberta") { c.beginPath(); c.arc(hx, my, 2.8, 0, Math.PI * 2); c.fill(); }
+  else if (f.rosto.boca === "seria") { c.beginPath(); c.moveTo(hx - 4, my); c.lineTo(hx + 4, my); c.stroke(); }
+  else { c.beginPath(); c.arc(hx, my - 2, 5, .2, Math.PI - .2); c.stroke(); }
+  const rosto = peca(f, "rosto");
+  if (rosto) {
+    c.fillStyle = rosto.cor;
+    if (rosto.tipo === "oculos") { ret(hx - 12, oy - 3, 10, 6, 2); ret(hx + 2, oy - 3, 10, 6, 2); c.fillRect(hx - 2, oy - 2, 4, 2); }
+    else { c.beginPath(); c.moveTo(hx - 14, oy + 3); c.lineTo(hx + 14, oy + 3); c.lineTo(hx + 10, hy + 12); c.lineTo(hx - 10, hy + 12); c.closePath(); c.fill(); }
+  }
+  const cabeca = peca(f, "cabeca"), ty = hy - topo;
+  if (cabeca) {
+    c.fillStyle = cabeca.cor; c.strokeStyle = "rgba(0,0,0,.35)"; c.lineWidth = 1.2;
+    switch (cabeca.tipo) {
+      case "bone": c.beginPath(); c.ellipse(hx, ty + 9, 15.5, 10, 0, Math.PI, 0); c.fill(); ret(hx - 2, ty + 6, 24, 5, 2); break;
+      case "coroa": c.beginPath(); c.moveTo(hx - 12, ty + 4); c.lineTo(hx - 13, ty - 8); c.lineTo(hx - 6, ty - 1); c.lineTo(hx, ty - 10); c.lineTo(hx + 6, ty - 1); c.lineTo(hx + 13, ty - 8); c.lineTo(hx + 12, ty + 4); c.closePath(); c.fill(); c.stroke(); break;
+      case "chifres": for (const s of [-1, 1]) { c.beginPath(); c.moveTo(hx + s * 8, ty + 6); c.quadraticCurveTo(hx + s * 20, ty - 2, hx + s * 16, ty - 12); c.lineTo(hx + s * 12, ty + 4); c.closePath(); c.fill(); c.stroke(); } break;
+      case "orelhas": for (const s of [-1, 1]) { c.beginPath(); c.moveTo(hx + s * 5, ty + 4); c.lineTo(hx + s * 13, ty - 9); c.lineTo(hx + s * 15, ty + 7); c.closePath(); c.fill(); c.stroke(); } break;
+      case "capacete": c.beginPath(); c.arc(hx, hy - 2, 19, Math.PI * 1.05, Math.PI * 1.95); c.lineTo(hx + 19, hy - 1); c.lineTo(hx - 19, hy - 1); c.closePath(); c.fill(); c.stroke(); break;
+    }
+  }
+  const md = peca(f, "maoD"), me = peca(f, "maoE");
+  if (md) {
+    c.strokeStyle = md.cor; c.fillStyle = md.cor; c.lineWidth = 4;
+    if (md.tipo === "espada") { c.beginPath(); c.moveTo(maoD.x, maoD.y); c.lineTo(maoD.x + 6, maoD.y - 28); c.stroke(); c.strokeStyle = "#5a3412"; c.lineWidth = 3; c.beginPath(); c.moveTo(maoD.x - 5, maoD.y - 3); c.lineTo(maoD.x + 6, maoD.y - 5); c.stroke(); }
+    else if (md.tipo === "martelo") { c.lineWidth = 3; c.strokeStyle = "#5a3412"; c.beginPath(); c.moveTo(maoD.x, maoD.y + 4); c.lineTo(maoD.x + 3, maoD.y - 20); c.stroke(); ret(maoD.x - 5, maoD.y - 28, 16, 10, 2); }
+    else { c.lineWidth = 2.5; c.beginPath(); c.moveTo(maoD.x, maoD.y); c.lineTo(maoD.x + 5, maoD.y - 20); c.stroke(); c.fillStyle = "#ffd23f"; c.beginPath(); c.arc(maoD.x + 5, maoD.y - 22, 4, 0, Math.PI * 2); c.fill(); }
+  }
+  if (me) { c.fillStyle = me.cor; c.strokeStyle = "#ffd23f"; c.lineWidth = 2; c.beginPath(); c.arc(maoE.x - 2, maoE.y - 2, 10, 0, Math.PI * 2); c.fill(); c.stroke(); }
+}
 
+/* ---------- Modelo 3D (three.js). paraImprimir: põe uma base e deixa tudo sólido ---------- */
+function construirPersonagem3D(f, paraImprimir) {
+  const g = new THREE.Group();
+  const M = cor => new THREE.MeshLambertMaterial({ color: cor });
+  const add = (pai, geo, cor, x, y, z) => { const m = new THREE.Mesh(geo, typeof cor === "string" ? M(cor) : cor); m.position.set(x, y, z); pai.add(m); return m; };
+  const [dw, dh, dd] = { normal: [.42, .5, .26], largo: [.56, .5, .32], fino: [.32, .55, .22], redondo: [.5, .52, .4] }[f.corpo.forma];
+  const corpoMat = new THREE.MeshLambertMaterial({ color: f.corpo.cor, emissive: "#000000" });
+  const pernaMat = M(f.pernas.cor), escuro = M("#1b1b2b");
+  const pernaE = new THREE.Mesh(new THREE.BoxGeometry(.13, .55, .13), pernaMat); pernaE.geometry.translate(0, -.27, 0); pernaE.position.set(-.1, .55, 0);
+  const pernaD = new THREE.Mesh(new THREE.BoxGeometry(.13, .55, .13), pernaMat); pernaD.geometry.translate(0, -.27, 0); pernaD.position.set(.1, .55, 0);
+  const topo = .55 + dh;
+  const corpo = f.corpo.forma === "redondo" ? new THREE.Mesh(new THREE.SphereGeometry(.5, 20, 14), corpoMat) : new THREE.Mesh(new THREE.BoxGeometry(dw, dh, dd), corpoMat);
+  if (f.corpo.forma === "redondo") corpo.scale.set(dw, dh, dd);
+  corpo.position.y = .55 + dh / 2;
+  const ax = dw / 2 + .06;
+  const bracoE = new THREE.Mesh(new THREE.BoxGeometry(.1, .45, .1), corpoMat); bracoE.geometry.translate(0, -.2, 0); bracoE.position.set(-ax, topo - .04, 0);
+  const bracoD = new THREE.Mesh(new THREE.BoxGeometry(.1, .45, .1), corpoMat); bracoD.geometry.translate(0, -.2, 0); bracoD.position.set(ax, topo - .04, 0);
+  g.add(pernaE, pernaD, corpo, bracoE, bracoD);
+  const cab = new THREE.Group(); cab.position.y = topo + .21; g.add(cab);
+  const pele = M(f.cabeca.pele);
+  let alturaCab = .2;
+  if (f.cabeca.forma === "quadrada") add(cab, new THREE.BoxGeometry(.36, .34, .34), pele, 0, 0, 0);
+  else { const s = add(cab, new THREE.SphereGeometry(.2, 18, 14), pele, 0, 0, 0); if (f.cabeca.forma === "oval") { s.scale.set(.9, 1.2, .9); alturaCab = .24; } if (f.cabeca.forma === "alien") { s.scale.set(1.05, 1.25, .95); alturaCab = .25; } }
+  const alien = f.cabeca.forma === "alien";
+  const olhoGeo = alien ? new THREE.SphereGeometry(.05, 10, 8) : new THREE.SphereGeometry(.03, 8, 6);
+  for (const s of [-1, 1]) {
+    if (f.rosto.olhos === "sono" || f.rosto.olhos === "feliz") add(cab, new THREE.BoxGeometry(.07, .015, .02), escuro, s * .07, .03, -.19);
+    else { const o = add(cab, olhoGeo, escuro, s * (alien ? .08 : .07), .03, -.18); if (alien) o.scale.set(.8, 1.2, .5); }
+    if (f.rosto.olhos === "bravo") { const b = add(cab, new THREE.BoxGeometry(.07, .015, .02), escuro, s * .07, .085, -.185); b.rotation.z = s * .4; }
+  }
+  if (f.rosto.boca === "aberta") add(cab, new THREE.SphereGeometry(.028, 8, 6), escuro, 0, -.07, -.18);
+  else if (f.rosto.boca === "seria") add(cab, new THREE.BoxGeometry(.08, .014, .02), escuro, 0, -.07, -.19);
+  else { const b = add(cab, new THREE.TorusGeometry(.045, .012, 6, 12, Math.PI), escuro, 0, -.05, -.18); b.rotation.z = Math.PI; }
+  const corCab = f.cabelo.cor;
+  switch (f.cabelo.estilo) {
+    case "curto": add(cab, new THREE.SphereGeometry(.21, 18, 8, 0, Math.PI * 2, 0, Math.PI / 2), corCab, 0, .02, 0).scale.y = alturaCab / .2; break;
+    case "longo": add(cab, new THREE.SphereGeometry(.215, 18, 8, 0, Math.PI * 2, 0, Math.PI / 2), corCab, 0, .02, 0).scale.y = alturaCab / .2; add(cab, new THREE.BoxGeometry(.38, .32, .08), corCab, 0, -.1, .14); break;
+    case "espetado": for (let k = 0; k < 9; k++) { const a = k / 9 * Math.PI * 2, m = add(cab, new THREE.ConeGeometry(.06, .2, 6), corCab, Math.cos(a) * .12, alturaCab - .01, Math.sin(a) * .12); m.rotation.z = -Math.cos(a) * .6; m.rotation.x = Math.sin(a) * .6; } add(cab, new THREE.ConeGeometry(.07, .24, 6), corCab, 0, alturaCab + .1, 0); break;
+    case "moicano": for (let k = 0; k < 5; k++) add(cab, new THREE.ConeGeometry(.05, .16, 6), corCab, 0, alturaCab + .04, -.14 + k * .07); break;
+  }
+  const rosto = peca(f, "rosto");
+  if (rosto) {
+    if (rosto.tipo === "oculos") add(cab, new THREE.BoxGeometry(.3, .07, .04), rosto.cor, 0, .03, -.19);
+    else add(cab, new THREE.BoxGeometry(.32, .11, .06), rosto.cor, 0, -.07, -.16);
+  }
+  const pc = peca(f, "cabeca");
+  if (pc) {
+    const y0 = alturaCab - .02;
+    switch (pc.tipo) {
+      case "bone": add(cab, new THREE.SphereGeometry(.212, 18, 8, 0, Math.PI * 2, 0, Math.PI / 2), pc.cor, 0, .02, 0).scale.y = alturaCab / .2; add(cab, new THREE.BoxGeometry(.2, .025, .18), pc.cor, 0, .03, -.22); break;
+      case "coroa": add(cab, new THREE.CylinderGeometry(.15, .15, .1, 10), pc.cor, 0, y0 + .02, 0); for (let k = 0; k < 5; k++) { const a = k / 5 * Math.PI * 2; add(cab, new THREE.ConeGeometry(.04, .09, 6), pc.cor, Math.cos(a) * .12, y0 + .11, Math.sin(a) * .12); } break;
+      case "chifres": for (const s of [-1, 1]) { const m = add(cab, new THREE.ConeGeometry(.045, .2, 8), pc.cor, s * .13, y0 + .02, 0); m.rotation.z = -s * .6; } break;
+      case "orelhas": for (const s of [-1, 1]) add(cab, new THREE.ConeGeometry(.06, .14, 4), pc.cor, s * .12, y0, 0); break;
+      case "capacete": add(cab, new THREE.SphereGeometry(.24, 18, 10, 0, Math.PI * 2, 0, Math.PI / 2), pc.cor, 0, 0, 0).scale.y = (alturaCab + .04) / .24; break;
+    }
+  }
+  const md = peca(f, "maoD"), me = peca(f, "maoE");
+  if (md) {
+    if (md.tipo === "espada") { add(bracoD, new THREE.BoxGeometry(.04, .09, .5), md.cor, 0, -.42, -.3); add(bracoD, new THREE.BoxGeometry(.18, .04, .05), "#5a3412", 0, -.42, -.06); }
+    else if (md.tipo === "martelo") { add(bracoD, new THREE.BoxGeometry(.04, .04, .4), "#5a3412", 0, -.42, -.2); add(bracoD, new THREE.BoxGeometry(.16, .13, .11), md.cor, 0, -.42, -.42); }
+    else { const v = add(bracoD, new THREE.CylinderGeometry(.015, .015, .3, 8), md.cor, 0, -.42, -.17); v.rotation.x = Math.PI / 2; add(bracoD, new THREE.SphereGeometry(.04, 10, 8), "#ffd23f", 0, -.42, -.34); }
+  }
+  if (me) { const e = add(bracoE, new THREE.CylinderGeometry(.17, .17, .04, 20), me.cor, -.08, -.32, 0); e.rotation.z = Math.PI / 2; }
+  const ct = peca(f, "costas");
+  if (ct) {
+    if (ct.tipo === "capa") { const m = add(g, new THREE.BoxGeometry(dw + .04, .62, .03), ct.cor, 0, topo - .33, dd / 2 + .03); m.rotation.x = .12; }
+    else if (ct.tipo === "asas") { for (const s of [-1, 1]) { const m = add(g, new THREE.SphereGeometry(.5, 14, 10), ct.cor, s * .24, topo - .12, dd / 2 + .05); m.scale.set(.3, .15, .04); m.rotation.z = s * .5; } }
+    else add(g, new THREE.BoxGeometry(.3, .32, .14), ct.cor, 0, topo - .25, dd / 2 + .07);
+  }
+  if (paraImprimir) add(g, new THREE.CylinderGeometry(.4, .42, .06, 32), "#f4f7fb", 0, -.03, 0);
+  return { g, pernaE, pernaD, bracoE, bracoD, corpoMat };
+}
 
+/* ---------- Arquivo para a impressora 3D (STL binário, em milímetros, com Z para cima) ---------- */
+function fichaParaSTL(f, alturaMM) {
+  const { g } = construirPersonagem3D(f, true);
+  g.updateMatrixWorld(true);
+  const caixa = new THREE.Box3().setFromObject(g), esc = alturaMM / (caixa.max.y - caixa.min.y);
+  const tris = [];
+  g.traverse(o => {
+    if (!o.isMesh) return;
+    const geo = (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone()).applyMatrix4(o.matrixWorld);
+    const p = geo.attributes.position;
+    for (let i = 0; i + 2 < p.count; i += 3) tris.push([0, 1, 2].map(k => [p.getX(i + k) * esc, -p.getZ(i + k) * esc, (p.getY(i + k) - caixa.min.y) * esc]));
+  });
+  const buf = new ArrayBuffer(84 + tris.length * 50), dv = new DataView(buf);
+  const titulo = "Jogos do Andre - " + (f.nome || "personagem");
+  for (let i = 0; i < Math.min(80, titulo.length); i++) dv.setUint8(i, titulo.charCodeAt(i) & 127);
+  dv.setUint32(80, tris.length, true);
+  let o = 84;
+  for (const [a, b, c] of tris) {
+    const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], v = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+    let n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+    const m = Math.hypot(...n) || 1; n = n.map(x => x / m);
+    for (const val of [...n, ...a, ...b, ...c]) { dv.setFloat32(o, val, true); o += 4; }
+    dv.setUint16(o, 0, true); o += 2;
+  }
+  return new Blob([buf], { type: "model/stl" });
+}
+const NO_SITE = /github\.io$|^localhost$|^127\./.test(location.hostname);
+function carregarScript(url) {
+  return new Promise((ok, erro) => {
+    if (document.querySelector(`script[src="${url}"]`)) { ok(); return; }
+    const s = document.createElement("script"); s.src = url; s.onload = ok; s.onerror = erro; document.head.append(s);
+  });
+}
+/* Modelo colorido (GLB) para abrir no Blender com as peças e cores separadas */
+async function fichaParaGLB(f) {
+  if (!THREE.GLTFExporter) await carregarScript("https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/GLTFExporter.js");
+  const { g } = construirPersonagem3D(f, true);
+  return new Promise(ok => new THREE.GLTFExporter().parse(g, r => ok(new Blob([r], { type: "model/gltf-binary" })), { binary: true }));
+}
+function baixarArquivo(blob, nome) {
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = nome;
+  document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+const nomeArquivo = f => (norm(f.nome || "personagem").toLowerCase().replace(/ +/g, "-") || "personagem");
 
-
+/* ---------- Telas: meus personagens e editor ---------- */
+const ED = { f: null, aba: "corpo", r: null, cena: null, cam: null, modelo: null, giro: 0, girando: null, raf: null, altura: 80, novo: false };
+TELAS.personagens = () => {
+  const lista = G.personagens || [], ativo = personagemDe(perfil());
+  depoisFn = () => document.querySelectorAll("canvas.pp-thumb").forEach(cv => {
+    const f = lista.find(x => x.id === cv.dataset.id); if (!f) return;
+    const w = cv.clientWidth, dpr = window.devicePixelRatio || 1; cv.width = Math.round(w * dpr); cv.height = Math.round(w * dpr);
+    const c = cv.getContext("2d"), k = cv.width / 120; c.setTransform(k, 0, 0, k, 0, 0);
+    c.save(); c.translate(60, 70); c.scale(1.35, 1.35); c.translate(-60, -70); desenharPersonagem2D(c, f, 60, 70, 0); c.restore();
+  });
+  return `
+  <section data-fundo="${fundoAtual()}" class="bgf lobby" aria-label="Meus personagens">
+    <div class="lb-top"><button class="lb-pill" data-a="voltarLobby">← Voltar</button></div>
+    <h1 class="lb-title" style="font-size:34px">Meus personagens</h1>
+    <p class="lb-sub">Crie seus próprios bonecos para jogar. Depois dá para levar ao Blender e imprimir em 3D.</p>
+    ${lista.length ? `<div class="fd-grid">${lista.map(f => `
+      <div class="fd-tile"${ativo && ativo.id === f.id ? ' aria-current="true"' : ""}>
+        <canvas class="pp-thumb" data-id="${esc(f.id)}" aria-label="${esc(f.nome || "Personagem")}"></canvas>
+        <b>${esc(f.nome || "Sem nome")}</b>
+        <span class="pp-cri">por ${esc(f.criador || "alguém")}</span>
+        <div class="grid2">
+          <button class="lb-comprar lb-comprar-p lb-tenho-btn" data-a="usarPers" data-id="${esc(f.id)}" ${ativo && ativo.id === f.id ? "disabled" : ""}>${ativo && ativo.id === f.id ? "Usando" : "Usar"}</button>
+          <button class="lb-comprar lb-comprar-p" data-a="editarPers" data-id="${esc(f.id)}">Editar</button>
+        </div>
+      </div>`).join("")}</div>` : `<div class="card" style="background:rgba(11,27,51,.6);text-align:center"><p>Ainda não tem nenhum. Que tal criar o primeiro?</p></div>`}
+    ${ativo ? `<button class="lb-cont" data-a="usarSkinDeNovo">Voltar a usar a skin da loja</button>` : ""}
+    <button class="lb-jogar" data-a="novoPers" style="flex:none;min-height:66px;font-size:26px">Criar personagem</button>
+  </section>`;
+};
+function edChips(lista, valor, alvo) {
+  return `<div class="chips">${Object.entries(lista).map(([k, t]) => `<button type="button" class="chip pick" data-a="edEscolha" data-alvo="${alvo}" data-v="${k}" aria-pressed="${valor === k}">${esc(t)}</button>`).join("")}</div>`;
+}
+function edCores(cores, valor, alvo, rotulo) {
+  return `<div class="ed-cores" role="group" aria-label="${esc(rotulo)}">${cores.map(c => `<button type="button" class="ed-cor" data-a="edEscolha" data-alvo="${alvo}" data-v="${c}" style="background:${c}" aria-label="Cor ${c}" aria-pressed="${valor === c}"></button>`).join("")}
+    <label class="ed-cor ed-cor-livre" title="Outra cor"><input type="color" value="${valor}" data-alvo="${alvo}" aria-label="Escolher outra cor">+</label></div>`;
+}
+TELAS.editor = () => {
+  const f = ED.f; if (!f) { setTimeout(() => ir("personagens"), 0); return ""; }
+  depoisFn = edMontarPalco;
+  const abas = { corpo: "Corpo", cabeca: "Cabeça", pecas: "Peças", imprimir: "Imprimir 3D" };
+  let conteudo = "";
+  if (ED.aba === "corpo") conteudo = `
+    <h3>Formato do corpo</h3>${edChips(FORMAS_CORPO, f.corpo.forma, "corpo.forma")}
+    <h3>Cor da roupa</h3>${edCores(ED_CORES, f.corpo.cor, "corpo.cor", "Cor da roupa")}
+    <h3>Cor das pernas</h3>${edCores(ED_CORES, f.pernas.cor, "pernas.cor", "Cor das pernas")}`;
+  else if (ED.aba === "cabeca") conteudo = `
+    <h3>Formato da cabeça</h3>${edChips(FORMAS_CABECA, f.cabeca.forma, "cabeca.forma")}
+    <h3>Pele</h3>${edCores(ED_PELES, f.cabeca.pele, "cabeca.pele", "Cor da pele")}
+    <h3>Cabelo</h3>${edChips(CABELOS, f.cabelo.estilo, "cabelo.estilo")}
+    ${f.cabelo.estilo !== "nenhum" ? edCores(ED_CORES, f.cabelo.cor, "cabelo.cor", "Cor do cabelo") : ""}
+    <h3>Olhos</h3>${edChips(OLHOS, f.rosto.olhos, "rosto.olhos")}
+    <h3>Boca</h3>${edChips(BOCAS, f.rosto.boca, "rosto.boca")}`;
+  else if (ED.aba === "pecas") conteudo = `
+    <p class="dim">Arraste uma peça até o personagem, ou só toque nela.</p>
+    <div class="ed-pecas">${Object.entries(PECAS).map(([k, d]) => `<button type="button" class="ed-peca${peca(f, d.encaixe) && peca(f, d.encaixe).tipo === k ? " on" : ""}" data-peca="${k}"><i style="background:${d.cor}"></i>${esc(d.nome)}</button>`).join("")}</div>
+    <h3>No personagem</h3>
+    ${f.pecas.length ? Object.keys(ENCAIXES).filter(enc => peca(f, enc)).map(enc => `
+      <div class="ed-usada"><span>${esc(PECAS[peca(f, enc).tipo].nome)} <small>(${esc(ENCAIXES[enc].toLowerCase())})</small></span>
+        <button type="button" class="btn ghost small" data-a="edTirar" data-enc="${enc}" style="width:auto;min-height:36px">Tirar</button>
+        ${edCores(ED_CORES, peca(f, enc).cor, "peca." + enc, "Cor da peça")}</div>`).join("") : `<p class="dim">Nenhuma peça ainda.</p>`}`;
+  else conteudo = `
+    <h3>Tamanho do boneco impresso</h3>
+    <div class="row" style="align-items:center"><input type="range" id="ed-altura" min="40" max="150" step="5" value="${ED.altura}" aria-label="Altura em milímetros"><b id="ed-altura-v" style="flex:0 0 auto">${ED.altura} mm</b></div>
+    <p class="dim">O arquivo já vem com uma base para o boneco ficar em pé.</p>
+    ${NO_SITE ? `<button class="btn" data-a="edSTL" type="button">Baixar para a impressora (STL)</button>
+    <button class="btn ghost small" data-a="edGLB" type="button">Baixar modelo colorido (para o Blender)</button>
+    <button class="btn ghost small" data-a="edJSON" type="button">Baixar a ficha do personagem</button>` : `<div class="card" style="background:rgba(11,27,51,.6)"><p>Para baixar o arquivo da impressora, abra o jogo pelo site (thidesigner.github.io/mete-sarrafo).</p></div>`}
+    <div class="card" style="background:rgba(11,27,51,.6)">
+      <h3>Como vira um boneco de verdade</h3>
+      <ol class="rules"><li>Peça para um adulto baixar o arquivo.</li><li>O adulto abre o arquivo da impressora (STL) direto no programa da impressora, ou o modelo colorido no Blender para caprichar.</li><li>A impressora imprime, e o boneco ganha vida!</li></ol>
+      <p class="dim" style="font-size:14px">Peças pequenas podem soltar: não é brinquedo para crianças bem pequenas.</p>
+    </div>`;
+  return `
+  <section data-fundo="${fundoAtual()}" class="bgf lobby ed" aria-label="Criar personagem">
+    <div class="lb-top"><button class="lb-pill" data-a="edVoltar">← Voltar</button><button class="lb-pill" data-a="edSalvar">Salvar</button></div>
+    <input id="ed-nome" class="ed-nome" maxlength="24" value="${esc(f.nome)}" placeholder="Nome do personagem" aria-label="Nome do personagem">
+    <div class="ed-palco${ED.aba === "pecas" ? " baixo" : ""}" id="ed-palco"><span class="ed-dica" id="ed-dica">Arraste para girar</span></div>
+    <div class="ed-abas" role="tablist">${Object.entries(abas).map(([k, t]) => `<button type="button" role="tab" class="ed-aba" data-a="edAba" data-aba="${k}" aria-selected="${ED.aba === k}">${t}</button>`).join("")}</div>
+    <div class="card ed-painel">${conteudo}</div>
+    <button class="lb-jogar" data-a="edUsar" style="flex:none;min-height:64px;font-size:24px">Salvar e jogar com ele</button>
+    ${G.personagens && G.personagens.some(x => x.id === f.id) ? `<button class="link" data-a="edApagar" style="align-self:center;color:#fff">${ED.apagar ? "Toque de novo para apagar" : "Apagar este personagem"}</button>` : ""}
+  </section>`;
+};
+function edMontarPalco() {
+  const palco = $("ed-palco"); if (!palco) return;
+  if (typeof THREE === "undefined") { palco.innerHTML = ""; const cv = document.createElement("canvas"); cv.className = "ed-2d"; palco.append(cv); edDesenhar2D(cv); return; }
+  if (!ED.r) {
+    ED.r = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    ED.r.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    ED.cena = new THREE.Scene();
+    ED.cena.add(new THREE.HemisphereLight("#ffffff", "#334466", .95));
+    const luz = new THREE.DirectionalLight("#ffffff", .6); luz.position.set(2, 4, -3); ED.cena.add(luz);
+    const chao = new THREE.Mesh(new THREE.CylinderGeometry(.55, .6, .06, 40), new THREE.MeshLambertMaterial({ color: "#2a6fd6" })); chao.position.y = -.03; ED.cena.add(chao);
+    ED.cam = new THREE.PerspectiveCamera(35, 1, .1, 50); ED.cam.position.set(0, 1.25, -4.4); ED.cam.lookAt(0, 1.05, 0);
+    ligarGiroPalco();
+  }
+  palco.prepend(ED.r.domElement);
+  edRemontar3D();
+  if (!ED.raf) ED.raf = requestAnimationFrame(edQuadro);
+}
+function edRemontar3D() {
+  if (!ED.cena) return;
+  if (ED.modelo) ED.cena.remove(ED.modelo);
+  ED.modelo = construirPersonagem3D(ED.f, false).g; ED.cena.add(ED.modelo);
+}
+function edQuadro(ts) {
+  const palco = $("ed-palco");
+  if (!palco || G.tela !== "editor") { ED.raf = null; return; }
+  const w = palco.clientWidth, h = palco.clientHeight;
+  if (ED.r.domElement.width !== Math.round(w * ED.r.getPixelRatio()) || ED.r.domElement.height !== Math.round(h * ED.r.getPixelRatio())) { ED.r.setSize(w, h, true); ED.cam.aspect = w / h; ED.cam.updateProjectionMatrix(); }
+  if (!ED.girando) ED.giro += .006;
+  if (ED.modelo) { ED.modelo.rotation.y = ED.giro; ED.modelo.position.y = Math.sin(ts / 600) * .015; }
+  ED.r.render(ED.cena, ED.cam);
+  ED.raf = requestAnimationFrame(edQuadro);
+}
+function ligarGiroPalco() {
+  const cv = ED.r.domElement; cv.style.touchAction = "none";
+  cv.addEventListener("pointerdown", e => { ED.girando = { x: e.clientX, g: ED.giro }; try { cv.setPointerCapture(e.pointerId); } catch {} const d = $("ed-dica"); if (d) d.hidden = true; });
+  cv.addEventListener("pointermove", e => { if (ED.girando) ED.giro = ED.girando.g + (e.clientX - ED.girando.x) * .012; });
+  ["pointerup", "pointercancel"].forEach(t => cv.addEventListener(t, () => { ED.girando = null; }));
+}
+function edDesenhar2D(cv) {
+  const w = cv.clientWidth || 300, dpr = window.devicePixelRatio || 1; cv.width = Math.round(w * dpr); cv.height = Math.round(w * .8 * dpr);
+  const c = cv.getContext("2d"), k = cv.height / 120; c.setTransform(k, 0, 0, k, (cv.width - 150 * k) / 2, 0);
+  c.save(); c.translate(75, 72); c.scale(1.4, 1.4); c.translate(-75, -72); desenharPersonagem2D(c, ED.f, 75, 72, 0); c.restore();
+}
+function edMudou() { const y = window.scrollY; render(); window.scrollTo(0, y); }
+function edDefinir(alvo, v) {
+  const f = ED.f;
+  if (alvo.startsWith("peca.")) { const p = peca(f, alvo.slice(5)); if (p) p.cor = v; return; }
+  const [a, b] = alvo.split("."); if (f[a]) f[a][b] = v;
+}
+function edGuardar() {
+  ED.f.nome = (($("ed-nome") || {}).value || ED.f.nome || "").trim().slice(0, 24) || "Sem nome";
+  const lista = G.personagens = G.personagens || [];
+  const i = lista.findIndex(x => x.id === ED.f.id);
+  const copia = limparFicha(ED.f);
+  if (i >= 0) lista[i] = copia; else lista.push(copia);
+  if (lista.length > 30) lista.splice(0, lista.length - 30);
+  salvar();
+  return copia;
+}
+Object.assign(acoes, {
+  personagens() { ir("personagens"); },
+  novoPers() { ED.f = fichaNova(perfil()); ED.aba = "corpo"; ED.apagar = false; ir("editor"); },
+  editarPers(el) { const f = (G.personagens || []).find(x => x.id === el.dataset.id); if (!f) return; ED.f = limparFicha(f); ED.aba = "corpo"; ED.apagar = false; ir("editor"); },
+  usarPers(el) { usarPersonagem(perfil(), el.dataset.id); salvarPlacar(); edMudou(); toast("Pronto! Você vai jogar com esse personagem"); },
+  usarSkinDeNovo() { usarPersonagem(perfil(), null); salvarPlacar(); edMudou(); toast("Voltou a usar a skin da loja"); },
+  edAba(el) { ED.aba = el.dataset.aba; edMudou(); },
+  edEscolha(el) { edDefinir(el.dataset.alvo, el.dataset.v); edMudou(); },
+  edTirar(el) { ED.f.pecas = ED.f.pecas.filter(p => p.encaixe !== el.dataset.enc); edMudou(); },
+  edSalvar() { edGuardar(); toast("Personagem salvo"); },
+  edUsar() { const f = edGuardar(); usarPersonagem(perfil(), f.id); salvarPlacar(); toast(`${f.nome} está pronto para jogar!`); ir("lobby"); },
+  edVoltar() { if (ED.f && (ED.f.nome || ED.f.pecas.length || (G.personagens || []).some(x => x.id === ED.f.id))) edGuardar(); ir("personagens"); },
+  edApagar() {
+    if (!ED.apagar) { ED.apagar = true; edMudou(); setTimeout(() => { ED.apagar = false; if (G.tela === "editor") edMudou(); }, 3000); return; }
+    G.personagens = (G.personagens || []).filter(x => x.id !== ED.f.id);
+    Object.values(G.inv || {}).forEach(x => { if (x && x.personagem === ED.f.id) x.personagem = null; });
+    salvar(); ED.f = null; ED.apagar = false; ir("personagens");
+  },
+  edSTL() { const f = edGuardar(); try { baixarArquivo(fichaParaSTL(f, ED.altura), nomeArquivo(f) + ".stl"); toast("Arquivo da impressora baixado"); } catch (e) { toast("Não deu para gerar o arquivo"); } },
+  async edGLB() { const f = edGuardar(); try { baixarArquivo(await fichaParaGLB(f), nomeArquivo(f) + ".glb"); toast("Modelo colorido baixado"); } catch (e) { toast("Não deu para gerar o modelo colorido"); } },
+  edJSON() { const f = edGuardar(); baixarArquivo(new Blob([JSON.stringify(f, null, 2)], { type: "application/json" }), nomeArquivo(f) + ".json"); toast("Ficha baixada"); },
+});
+document.addEventListener("input", e => {
+  if (e.target.id === "ed-nome" && ED.f) ED.f.nome = e.target.value.slice(0, 24);
+  if (e.target.id === "ed-altura") { ED.altura = +e.target.value; const v = $("ed-altura-v"); if (v) v.textContent = ED.altura + " mm"; }
+});
+document.addEventListener("change", e => {
+  const t = e.target;
+  if (t.type === "color" && t.dataset.alvo && ED.f && G.tela === "editor") { edDefinir(t.dataset.alvo, t.value); edMudou(); }
+});
+/* arrastar e soltar as peças no personagem (toque simples também equipa) */
+document.addEventListener("pointerdown", e => {
+  const b = e.target.closest && e.target.closest(".ed-peca"); if (!b || G.tela !== "editor" || !ED.f) return;
+  e.preventDefault();
+  const tipo = b.dataset.peca, x0 = e.clientX, y0 = e.clientY;
+  let fantasma = null, moveu = false;
+  const sobrePalco = ev => { const p = $("ed-palco"); if (!p) return false; const r = p.getBoundingClientRect(); return ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom; };
+  const mover = ev => {
+    if (!moveu && Math.hypot(ev.clientX - x0, ev.clientY - y0) > 8) {
+      moveu = true; fantasma = b.cloneNode(true); fantasma.classList.add("ed-fantasma"); document.body.append(fantasma);
+      const p = $("ed-palco"); if (p) p.classList.add("alvo");
+    }
+    if (fantasma) { fantasma.style.left = ev.clientX + "px"; fantasma.style.top = ev.clientY + "px"; const p = $("ed-palco"); if (p) p.classList.toggle("sobre", sobrePalco(ev)); }
+  };
+  const soltar = ev => {
+    window.removeEventListener("pointermove", mover); window.removeEventListener("pointerup", soltar); window.removeEventListener("pointercancel", soltar);
+    const p = $("ed-palco"); if (p) p.classList.remove("alvo", "sobre");
+    if (fantasma) fantasma.remove();
+    if (ev.type === "pointercancel") return;
+    if (!moveu || sobrePalco(ev)) {
+      equipar(ED.f, tipo); bip(880, .06);
+      toast(`${PECAS[tipo].nome}: ${ENCAIXES[PECAS[tipo].encaixe].toLowerCase()}`);
+      edMudou();
+    }
+  };
+  window.addEventListener("pointermove", mover); window.addEventListener("pointerup", soltar); window.addEventListener("pointercancel", soltar);
+});
+if (typeof TELAS_COM_MUSICA !== "undefined") TELAS_COM_MUSICA.push("personagens", "editor");
+if (G.tela === "lobby" || G.tela === "personagens") render();
+</script>

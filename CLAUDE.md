@@ -31,6 +31,7 @@ Qualquer pessoa pode ler tudo o que estiver aqui, inclusive o histórico. Por is
 | `fonte/caderno-de-ideias.html` | Código do artefato "Ideias do Jogo do Andre" (caderno + simulação) |
 | `ferramentas/montar.py` | Gera a versão de teste e promove para a oficial |
 | `ferramentas/teste/` | Teste automático do modo online (dois navegadores com conexão imitada) |
+| `ferramentas/blender/` | Script que prepara o personagem baixado do jogo para a impressora 3D |
 | `ideias/` | Regras combinadas e dúvidas em aberto de cada jogo |
 | `sugestoes/` | Sugestões dos amigos (coladas ou lidas do formulário) |
 | `materiais/` | Coisas para imprimir, como o convite com o QR code da Sala do Andre |
@@ -52,6 +53,14 @@ Sites (GitHub Pages, branch `main`, pasta raiz):
 
 O modo online tem uma sala de código fixo, `ANDREK7Q` (`SALA_DO_ANDRE` em `fonte/online.js`). O QR do convite impresso (`materiais/convite-sala-do-andre.pdf`) aponta para `teste/?sala=ANDREK7Q`. Não troque esse código sem refazer o convite. No celular com o perfil "Andre", criar sala usa esse código automaticamente.
 O Andre não precisa estar: quem entra pelo QR e acha a sala fechada abre a sala no próprio celular e comanda a partida; quem chega depois (inclusive o Andre) entra nela.
+
+## Personagens e impressão 3D
+
+Botão "Criar" na tela inicial: editor de personagens (arrastar peças). Cada personagem é uma "ficha" JSON (`tipo: "personagem-jogos-do-andre"`, `versao: 1`) guardada em `G.personagens`. Ela viaja no modo online e é limpa por `limparFicha`.
+- Desenho: `desenharPersonagem2D` e `construirPersonagem3D` em `fonte/jogo.html`. Peça nova: entra em `PECAS` com um encaixe e ganha desenho nas duas funções.
+- Downloads (só no site): STL para a impressora (`fichaParaSTL`), GLB colorido para o Blender (`fichaParaGLB`) e a ficha JSON.
+- `ferramentas/blender/personagem_para_stl.py`: GLB → peça única fechada, em pé, na altura em mm.
+- Plano, cuidados (venda, Inmetro, segurança, LGPD) e dúvidas: `ideias/personagens-e-impressao-3d.md`. Venda de bonecos é sempre fora do jogo, entre adultos.
 
 ## Ajustes trancados
 

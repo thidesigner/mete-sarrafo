@@ -15,6 +15,8 @@ Modos:
 - **Bonequinhos (1ª pessoa ou de cima):** um celular só, passando de mão em mão, com pessoas e robôs.
 - **Bola de verdade:** o celular vira o juiz; a bola e a corrida são de verdade.
 
+Também dá para **criar personagens próprios** (botão "Criar"), arrastando peças, e baixar o boneco para imprimir em 3D. Veja [`ideias/personagens-e-impressao-3d.md`](ideias/personagens-e-impressao-3d.md).
+
 A conexão entre celulares usa o servidor público gratuito do PeerJS. Em algumas redes (escola, alguns 4G) ela pode falhar; no mesmo Wi-Fi costuma funcionar melhor.
 
 As regras combinadas estão em [`ideias/mete-sarrafo.md`](ideias/mete-sarrafo.md).
