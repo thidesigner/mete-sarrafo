@@ -4,6 +4,9 @@ Ideia (30/out): no jogo, o Andre e os amigos montam personagens exclusivos arras
 
 ## O que já funciona (versão de teste)
 
+- Artefato **Oficina 3D do Andre** no Claude: o fluxo, checklist de preparo, diário de impressões e lista de correções.
+- No Modo Festa (Claude) os personagens ficam guardados na conta e aparecem em qualquer aparelho. Dá para baixar o STL lá também (vem num .zip).
+
 - Botão **Criar** na tela inicial, depois **Criar personagem**.
 - Abas:
   - **Corpo:** forma e cor.

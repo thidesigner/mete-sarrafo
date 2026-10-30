@@ -28,6 +28,7 @@ Qualquer pessoa pode ler tudo o que estiver aqui, inclusive o histórico. Por is
 | `teste/index.html` | **Versão de teste**, com a faixa "VERSÃO DE TESTE" (gerada) |
 | `fonte/jogo.html` | Código do jogo (mesma página do artefato "Mete Sarrafo: Modo Festa" no Claude) |
 | `fonte/online.js` | Modo online: cada um no seu celular, via PeerJS (só no site, não funciona dentro do Claude) |
+| `fonte/oficina-3d.html` | Código do artefato "Oficina 3D do Andre" (fluxo da impressão, checklist, diário e correções) |
 | `fonte/caderno-de-ideias.html` | Código do artefato "Ideias do Jogo do Andre" (caderno + simulação) |
 | `ferramentas/montar.py` | Gera a versão de teste e promove para a oficial |
 | `ferramentas/teste/` | Teste automático do modo online (dois navegadores com conexão imitada) |
@@ -58,7 +59,8 @@ O Andre não precisa estar: quem entra pelo QR e acha a sala fechada abre a sala
 
 Botão "Criar" na tela inicial: editor de personagens (arrastar peças). Cada personagem é uma "ficha" JSON (`tipo: "personagem-jogos-do-andre"`, `versao: 1`) guardada em `G.personagens`. Ela viaja no modo online e é limpa por `limparFicha`.
 - Desenho: `desenharPersonagem2D` e `construirPersonagem3D` em `fonte/jogo.html`. Peça nova: entra em `PECAS` com um encaixe e ganha desenho nas duas funções.
-- Downloads (só no site): STL para a impressora (`fichaParaSTL`), GLB colorido para o Blender (`fichaParaGLB`) e a ficha JSON.
+- Dentro do Claude (Modo Festa) os personagens ficam no banco `personagens` (doc = id da ficha, com `em`; apagado vira `{apagado:true}`) e sincronizam entre aparelhos. No site ficam só no aparelho.
+- Downloads (no site direto; no Claude pela capacidade `downloads`, com STL e GLB dentro de um .zip): STL para a impressora (`fichaParaSTL`), GLB colorido para o Blender (`fichaParaGLB`) e a ficha JSON.
 - `ferramentas/blender/personagem_para_stl.py`: GLB → peça única fechada, em pé, na altura em mm.
 - Plano, cuidados (venda, Inmetro, segurança, LGPD) e dúvidas: `ideias/personagens-e-impressao-3d.md`. Venda de bonecos é sempre fora do jogo, entre adultos.
 
@@ -79,7 +81,8 @@ Os Ajustes do jogo (engrenagem na tela inicial) pedem um código de 5 números q
 Os endereços não ficam no repositório. Ache cada um pelo nome na lista de artefatos da conta.
 
 - **Ideias do Jogo do Andre** (caderno de ideias): banco `ideias` (fichas com etapas, chat com o Claude e diário) e `simulacoes/mete-sarrafo` (ajustes da simulação). Código em `fonte/caderno-de-ideias.html`.
-- **Mete Sarrafo: Modo Festa** (jogo dentro do Claude, sem modo online): banco `sugestoes`, `partidas` e `placar/moedas`. Publicado a partir de `fonte/jogo.html`.
+- **Mete Sarrafo: Modo Festa** (jogo dentro do Claude, sem modo online): banco `sugestoes`, `partidas`, `placar/moedas` e `personagens`. Capacidades: db, user, sample, downloads. Publicado a partir de `fonte/jogo.html`.
+- **Oficina 3D do Andre**: banco `preparo/checklist`, `impressoes` (diário) e `pendencias` (correções e dúvidas). Capacidades: db, user. Publicado a partir de `fonte/oficina-3d.html`.
 
 Nos arquivos de `fonte/`, o endereço do Modo Festa aparece como `https://claude.ai/artifact/PENDENTE`. Ao publicar um desses artefatos, troque só na cópia publicada, sem gravar o endereço aqui.
 

@@ -977,6 +977,7 @@ render();
     }, () => {});
     db.collection("partidas").get().then(s => { partidasSalvas = s.size; if (G.tela === "inicio") { const y = window.scrollY; render(); window.scrollTo(0, y); } }).catch(() => {});
     enviarPendentes();
+    if (typeof sincronizarPersonagens === "function") sincronizarPersonagens();
   }
   render();
 })();
@@ -2857,7 +2858,27 @@ async function fichaParaGLB(f) {
   const { g } = construirPersonagem3D(f, true);
   return new Promise(ok => new THREE.GLTFExporter().parse(g, r => ok(new Blob([r], { type: "model/gltf-binary" })), { binary: true }));
 }
-function baixarArquivo(blob, nome) {
+/* Dentro do Claude: só alguns tipos de arquivo podem ser baixados, então STL e GLB vão dentro de um .zip */
+let baixador = null;
+if (!NO_SITE && window.claude && window.claude.use) claude.use("downloads").then(d => { baixador = d; if (G.tela === "editor") edMudou(); }).catch(() => {});
+const PODE_BAIXAR = () => NO_SITE || !!baixador;
+const CRC = (() => { const t = []; for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+async function zipDeUm(nome, blob) {
+  const dados = new Uint8Array(await blob.arrayBuffer()), nm = new TextEncoder().encode(nome);
+  let crc = 0xffffffff; for (const b of dados) crc = CRC[(crc ^ b) & 255] ^ (crc >>> 8); crc = (crc ^ 0xffffffff) >>> 0;
+  const cab = (assin, extra) => { const v = new DataView(new ArrayBuffer(extra)); v.setUint32(0, assin, true); return v; };
+  const l = cab(0x04034b50, 30); l.setUint16(4, 20, true); l.setUint32(14, crc, true); l.setUint32(18, dados.length, true); l.setUint32(22, dados.length, true); l.setUint16(26, nm.length, true);
+  const c = cab(0x02014b50, 46); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint32(16, crc, true); c.setUint32(20, dados.length, true); c.setUint32(24, dados.length, true); c.setUint16(28, nm.length, true);
+  const fim = cab(0x06054b50, 22); fim.setUint16(8, 1, true); fim.setUint16(10, 1, true); fim.setUint32(12, 46 + nm.length, true); fim.setUint32(16, 30 + nm.length + dados.length, true);
+  return new Blob([l, nm, dados, c, nm, fim], { type: "application/zip" });
+}
+async function baixarArquivo(blob, nome) {
+  if (!NO_SITE) {
+    if (!baixador) throw new Error("sem download");
+    if (!/\.(json|zip)$/.test(nome)) { blob = await zipDeUm(nome, blob); nome = nome.replace(/\.[^.]+$/, "") + ".zip"; }
+    await baixador.save({ filename: nome, data: blob });
+    return;
+  }
   const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = nome;
   document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
 }
@@ -2927,9 +2948,9 @@ TELAS.editor = () => {
     <h3>Tamanho do boneco impresso</h3>
     <div class="row" style="align-items:center"><input type="range" id="ed-altura" min="40" max="150" step="5" value="${ED.altura}" aria-label="Altura em milímetros"><b id="ed-altura-v" style="flex:0 0 auto">${ED.altura} mm</b></div>
     <p class="dim">O arquivo já vem com uma base para o boneco ficar em pé.</p>
-    ${NO_SITE ? `<button class="btn" data-a="edSTL" type="button">Baixar para a impressora (STL)</button>
+    ${PODE_BAIXAR() ? `${NO_SITE ? "" : `<p class="dim">Os arquivos da impressora e do Blender vêm dentro de um .zip. É só abrir o .zip no computador.</p>`}<button class="btn" data-a="edSTL" type="button">Baixar para a impressora (STL)</button>
     <button class="btn ghost small" data-a="edGLB" type="button">Baixar modelo colorido (para o Blender)</button>
-    <button class="btn ghost small" data-a="edJSON" type="button">Baixar a ficha do personagem</button>` : `<div class="card" style="background:rgba(11,27,51,.6)"><p>Para baixar o arquivo da impressora, abra o jogo pelo site (thidesigner.github.io/mete-sarrafo).</p></div>`}
+    <button class="btn ghost small" data-a="edJSON" type="button">Baixar a ficha do personagem</button>` : `<div class="card" style="background:rgba(11,27,51,.6)"><p>Para baixar o arquivo da impressora, abra o jogo pelo site (thidesigner.github.io/mete-sarrafo) ou pelo Claude.</p></div>`}
     <div class="card" style="background:rgba(11,27,51,.6)">
       <h3>Como vira um boneco de verdade</h3>
       <ol class="rules"><li>Peça para um adulto baixar o arquivo.</li><li>O adulto abre o arquivo da impressora (STL) direto no programa da impressora, ou o modelo colorido no Blender para caprichar.</li><li>A impressora imprime, e o boneco ganha vida!</li></ol>
@@ -3003,7 +3024,31 @@ function edGuardar() {
   if (i >= 0) lista[i] = copia; else lista.push(copia);
   if (lista.length > 30) lista.splice(0, lista.length - 30);
   salvar();
+  persNaNuvem(copia);
   return copia;
+}
+/* Dentro do Claude, os personagens ficam guardados na conta (banco "personagens"):
+   aparecem no celular e no computador, e o Claude consegue ler para preparar a impressão 3D. */
+function persNaNuvem(f, apagado) {
+  G.persEm = G.persEm || {}; const em = G.persEm[f.id] = Date.now(); salvar();
+  if (typeof db === "undefined" || !db || !podeGravar) return;
+  db.doc("personagens/" + f.id).set(apagado ? { id: f.id, apagado: true, em } : { ...limparFicha(f), em }).catch(() => {});
+}
+async function sincronizarPersonagens() {
+  if (typeof db === "undefined" || !db) return;
+  let docs; try { docs = (await db.collection("personagens").get()).docs.map(d => d.data() || {}); } catch { return; }
+  const lista = G.personagens = G.personagens || [], ems = G.persEm = G.persEm || {}, naNuvem = new Set();
+  for (const d of docs) {
+    if (!d.id) continue; naNuvem.add(d.id);
+    if ((d.em || 0) <= (ems[d.id] || 0)) continue;
+    const i = lista.findIndex(x => x.id === d.id);
+    if (d.apagado) { if (i >= 0) lista.splice(i, 1); }
+    else { const f = limparFicha(d); if (i >= 0) lista[i] = f; else lista.push(f); }
+    ems[d.id] = d.em;
+  }
+  if (podeGravar) for (const f of lista) if (!naNuvem.has(f.id) || (ems[f.id] || 0) > ((docs.find(d => d.id === f.id) || {}).em || 0)) db.doc("personagens/" + f.id).set({ ...limparFicha(f), em: ems[f.id] || Date.now() }).catch(() => {});
+  salvar();
+  if (G.tela === "personagens" || G.tela === "lobby") render();
 }
 Object.assign(acoes, {
   personagens() { ir("personagens"); },
@@ -3020,12 +3065,13 @@ Object.assign(acoes, {
   edApagar() {
     if (!ED.apagar) { ED.apagar = true; edMudou(); setTimeout(() => { ED.apagar = false; if (G.tela === "editor") edMudou(); }, 3000); return; }
     G.personagens = (G.personagens || []).filter(x => x.id !== ED.f.id);
+    persNaNuvem(ED.f, true);
     Object.values(G.inv || {}).forEach(x => { if (x && x.personagem === ED.f.id) x.personagem = null; });
     salvar(); ED.f = null; ED.apagar = false; ir("personagens");
   },
-  edSTL() { const f = edGuardar(); try { baixarArquivo(fichaParaSTL(f, ED.altura), nomeArquivo(f) + ".stl"); toast("Arquivo da impressora baixado"); } catch (e) { toast("Não deu para gerar o arquivo"); } },
-  async edGLB() { const f = edGuardar(); try { baixarArquivo(await fichaParaGLB(f), nomeArquivo(f) + ".glb"); toast("Modelo colorido baixado"); } catch (e) { toast("Não deu para gerar o modelo colorido"); } },
-  edJSON() { const f = edGuardar(); baixarArquivo(new Blob([JSON.stringify(f, null, 2)], { type: "application/json" }), nomeArquivo(f) + ".json"); toast("Ficha baixada"); },
+  async edSTL() { const f = edGuardar(); try { await baixarArquivo(fichaParaSTL(f, ED.altura), nomeArquivo(f) + ".stl"); toast("Arquivo da impressora baixado"); } catch (e) { if (!e || e.code !== "declined") toast("Não deu para baixar o arquivo"); } },
+  async edGLB() { const f = edGuardar(); try { await baixarArquivo(await fichaParaGLB(f), nomeArquivo(f) + ".glb"); toast("Modelo colorido baixado"); } catch (e) { if (!e || e.code !== "declined") toast("Não deu para baixar o modelo colorido"); } },
+  async edJSON() { const f = edGuardar(); try { await baixarArquivo(new Blob([JSON.stringify(f, null, 2)], { type: "application/json" }), nomeArquivo(f) + ".json"); toast("Ficha baixada"); } catch (e) { if (!e || e.code !== "declined") toast("Não deu para baixar a ficha"); } },
 });
 document.addEventListener("input", e => {
   if (e.target.id === "ed-nome" && ED.f) ED.f.nome = e.target.value.slice(0, 24);
@@ -3064,4 +3110,5 @@ document.addEventListener("pointerdown", e => {
 });
 if (typeof TELAS_COM_MUSICA !== "undefined") TELAS_COM_MUSICA.push("personagens", "editor");
 if (G.tela === "lobby" || G.tela === "personagens") render();
+if (db) sincronizarPersonagens();  /* se a nuvem respondeu antes deste trecho carregar */
 </script>
