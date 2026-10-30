@@ -167,6 +167,7 @@ function estadoAtual() {
     fim: A.fim ? { v: A.fim.vencedor.i } : null,
     P: A.P.map(p => [Math.round(p.x), Math.round(p.y), p.vidas, p.vivo ? 1 : 0, Math.round(p.moedas * 10) / 10, +p.flash.toFixed(2), p.modo, p.ctrl ? 1 : 0, p.tocou ? 1 : 0, p.humano ? 1 : 0, Math.round(p.ganho * 10) / 10]),
     B: A.balls.map(b => [Math.round(b.from.x), Math.round(b.from.y), Math.round(b.to.x), Math.round(b.to.y), +b.t.toFixed(3), +b.T.toFixed(3)]),
+    Gs: (A.ges || []).filter(e => e.ate > performance.now()).map(e => [e.i, e.k, Math.round(performance.now() - e.ini)]),
     E: (A.emo || []).filter(e => e.ate > performance.now()).map(e => [e.i, e.k, Math.round(e.ate - performance.now())]),
     fx: A.fx.filter(f => !f.env).map(f => { f.env = true; return [Math.round(f.x), Math.round(f.y), f.txt, f.cor]; }),
     ph: { k: ph.k || "", perg: idx(ph.perg), atir: idx(ph.atir), ordem: (ph.ordem || []).map(p => p.i), idx: ph.idx || 0, voltas: ph.voltas || 0,
@@ -206,6 +207,9 @@ function entrada(p, d) {
       break;
     case "mov":
       if (p.ctrl && p.remoto) { const x = +d.x || 0, y = +d.y || 0, m = Math.hypot(x, y); p.mov = m > 1 ? { x: x / m, y: y / m } : { x, y }; }
+      break;
+    case "gesto":
+      if (p.vivo) fazerGesto(p, String(d.k || ""));
       break;
     case "emoji":
       if (p.vivo) mostrarEmoji(p, String(d.k || ""));
@@ -593,6 +597,11 @@ function aplicarEstado(s) {
     if (!p.vivo) { p.x = p.tx; p.y = p.ty; }
     if (p.vidas < vidasAntes && i === ON.myIdx) vibrar([60, 40, 60]);
   });
+  if (Array.isArray(s.Gs)) {
+    const antes = A.ges || [], agora = performance.now();
+    A.ges = s.Gs.filter(e => gestoInfo(e[1])).map(e => { const g = gestoInfo(e[1]), ini = agora - Math.max(0, +e[2] || 0); return { i: +e[0], k: e[1], ini, ate: ini + g.dura * 1000 }; });
+    for (const e of A.ges) if (!antes.some(x => x.i === e.i && x.k === e.k && Math.abs(x.ini - e.ini) < 600)) tocarNotas(gestoInfo(e.k).som);
+  }
   if (Array.isArray(s.E)) {
     const antes = A.emo || [];
     A.emo = s.E.filter(e => emojiInfo(e[1])).map(e => ({ i: +e[0], k: e[1], ate: performance.now() + Math.min(EMO_DURA, +e[2] || 0) }));
