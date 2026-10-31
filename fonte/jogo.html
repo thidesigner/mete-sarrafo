@@ -311,7 +311,8 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .bgf[data-fundo="doce"] { background: linear-gradient(180deg, #ff8cc2 0%, #ffc4e1 50%, #9fe3ff 100%); }
 .bgf[data-fundo="doce"]::before { background: radial-gradient(circle, rgba(255,255,255,.4) 0 6px, transparent 7px) 0 0 / 38px 38px, radial-gradient(circle, rgba(255,255,255,.25) 0 4px, transparent 5px) 19px 19px / 38px 38px; }
 .lobby .lb-sub { text-shadow: 0 2px 0 rgba(11,27,51,.8); }
-.fd-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.fd-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.fd-tile b { overflow-wrap: anywhere; }
 .fd-tile { background: rgba(11,27,51,.6); border: 3px solid #0b1b33; border-radius: 14px; padding: 8px; display: flex; flex-direction: column; gap: 6px; color: #fff; font-weight: 800; box-shadow: 0 4px 0 #0b1b33; }
 .fd-tile[aria-pressed="true"] { border-color: #ffd23f; box-shadow: 0 4px 0 #0b1b33, 0 0 0 3px #ffd23f inset; }
 .fd-prev { display: block; width: 100%; aspect-ratio: 1.3; border-radius: 9px; overflow: hidden; border: 2px solid #0b1b33; }
@@ -1154,6 +1155,7 @@ const SKINS = [
   { k: "guepardo", nome: "Guepardo Veloz", preco: 300, camisa: "#f4a261", pele: "#f4a261", heroi: true },
   // edição limitada: só dá para comprar até a data "ate" (horário de Brasília). Quem comprou fica com ela para sempre.
   { k: "galactica", nome: "Galáctica", preco: 500, camisa: "#2b1a6b", limitada: true, ate: "2026-11-06T23:59:59-03:00" },
+  { k: "buraconegro", nome: "Buraco Negro", preco: 600, camisa: "#0b0a16", limitada: true, ate: "2026-11-07T23:59:59-03:00" },
 ];
 /* Skin limitada ainda à venda? Depois do prazo some da loja para quem não tem. */
 const naVenda = s => !s.ate || Date.now() <= Date.parse(s.ate);
@@ -1743,6 +1745,34 @@ function desenharAcessorio2D(c, skin, x, y) {
       for (const lado of [-1, 1]) { c.moveTo(hx + lado * 4, hy + 1); c.lineTo(hx + lado * 13, hy - 1); c.moveTo(hx + lado * 4, hy + 2.5); c.lineTo(hx + lado * 13, hy + 3.5); }
       c.stroke();
       break;
+    case "buraconegro": {
+      const t = performance.now() / 1000, cx = hx, cy = hy - 6;
+      // poeira sendo puxada em espiral
+      for (let i = 0; i < 10; i++) {
+        const f = ((t * .5 + i / 10) % 1), a = i * 2.4 + f * 7, r = 38 * (1 - f);
+        c.fillStyle = `rgba(${i % 2 ? "255,170,90" : "200,150,255"},${.9 * (1 - f)})`; c.beginPath(); c.arc(cx + Math.cos(a) * r, cy + Math.sin(a) * r * .55, 1.8 * (1 - f) + .6, 0, Math.PI * 2); c.fill();
+      }
+      // disco de luz girando (metade de trás, cabeça, metade da frente)
+      const disco = frente => {
+        for (let k = 0; k < 3; k++) {
+          const g = c.createLinearGradient(cx - 30, cy, cx + 30, cy);
+          const fase = (t * 1.2 + k * .33) % 1;
+          g.addColorStop(0, "rgba(255,120,40,.0)"); g.addColorStop(Math.max(.01, fase * .8), `rgba(255,${150 + k * 30},60,.95)`); g.addColorStop(Math.min(.99, fase * .8 + .2), "rgba(190,110,255,.9)"); g.addColorStop(1, "rgba(255,120,40,.0)");
+          c.strokeStyle = g; c.lineWidth = 3 - k * .7;
+          c.beginPath(); c.ellipse(cx, cy, 27 - k * 3, 7 - k, -.18, frente ? 0 : Math.PI, frente ? Math.PI : Math.PI * 2); c.stroke();
+        }
+      };
+      disco(false);
+      // brilho escuro em volta
+      const sombra = c.createRadialGradient(cx, cy, 10, cx, cy, 24); sombra.addColorStop(0, "rgba(0,0,0,0)"); sombra.addColorStop(.6, "rgba(120,60,200,.25)"); sombra.addColorStop(1, "rgba(0,0,0,0)");
+      c.fillStyle = sombra; c.beginPath(); c.arc(cx, cy, 24, 0, Math.PI * 2); c.fill();
+      // espiral na roupa
+      c.strokeStyle = "rgba(190,110,255,.65)"; c.lineWidth = 1.4; c.beginPath();
+      for (let a = 0; a < Math.PI * 4; a += .25) { const r = 1 + a * 1.2; c.lineTo(x + Math.cos(a + t * 2) * r, y - 4 + Math.sin(a + t * 2) * r * .8); }
+      c.stroke();
+      disco(true);
+      break;
+    }
     case "galactica": {
       const t = performance.now() / 1000;
       // estrelas na roupa
@@ -2245,6 +2275,13 @@ function acessorio3D(cabeca, skin) {
       for (const lado of [-1, 1]) add(new THREE.ConeGeometry(.06, .14, 4), "#f4a261", lado * .12, .2, 0);
       for (const [a, b, z] of [[-.1, .06, -.16], [.09, .1, -.17], [.12, -.04, -.14], [-.13, -.03, -.13]]) add(new THREE.SphereGeometry(.022, 6, 4), "#5a3412", a, b, z);
       break;
+    case "buraconegro": {
+      const anel = (r, tubo, cor, inc) => { const m = new THREE.Mesh(new THREE.TorusGeometry(r, tubo, 8, 40), new THREE.MeshBasicMaterial({ color: cor })); m.rotation.x = Math.PI / 2 + inc; m.position.y = .02; cabeca.add(m); return m; };
+      anel(.34, .025, "#ff9a3c", .2); anel(.29, .015, "#c08bff", .2); anel(.39, .01, "#ffd27a", .2);
+      const aura = new THREE.Mesh(new THREE.SphereGeometry(.27, 20, 14), new THREE.MeshBasicMaterial({ color: "#5a2ea6", transparent: true, opacity: .22 })); cabeca.add(aura);
+      for (const [a, b] of [[-.1, -.4], [.12, -.5], [0, -.62]]) { const m = new THREE.Mesh(new THREE.SphereGeometry(.02, 6, 4), new THREE.MeshBasicMaterial({ color: "#c08bff" })); m.position.set(a, b, -.14); cabeca.add(m); }
+      break;
+    }
     case "galactica": {
       const brilho = (cor, x, y, z, r) => { const m = new THREE.Mesh(new THREE.SphereGeometry(r, 8, 6), new THREE.MeshBasicMaterial({ color: cor })); m.position.set(x, y, z); cabeca.add(m); return m; };
       // coroa de estrelas
