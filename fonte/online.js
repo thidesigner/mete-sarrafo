@@ -100,7 +100,7 @@ function hostRecebe(conn, d) {
     const base = String(d.nome || "Amigo").replace(/\s+/g, " ").trim().slice(0, 20) || "Amigo";
     const usados = [perfil(), ...ON.sala.map(s => s.nome)];
     let nome = base, k = 2; while (usados.some(u => u.toLowerCase() === nome.toLowerCase())) nome = base + " " + (k++);
-    ON.sala.push({ conn, nome, moedas: Math.max(0, +d.moedas || 0), vidasInv: Math.max(0, Math.floor(+d.vidas || 0)), skin: skinInfo(d.skin).k, ficha: limparFicha(d.ficha), codigo: limparCodigoAmigo(d.amigo) });
+    ON.sala.push({ conn, nome, moedas: Math.max(0, +d.moedas || 0), vidasInv: Math.max(0, Math.floor(+d.vidas || 0)), skin: skinInfo(d.skin).k, ficha: limparFicha(d.ficha), codigo: limparCodigoAmigo(d.amigo), arremesso: arremessoInfo(String(d.arremesso || "")).k });
     enviar(conn, { t: "bemvindo", nome, code: ON.code });
     enviarSala(); toast(`${nome} entrou na sala`); bip(880, .08);
     if (G.tela === "salaHost") render();
@@ -132,7 +132,7 @@ function hostSaiu(conn) {
 
 /* ---------- Anfitrião: começar ---------- */
 function comecarOnline() {
-  const lista = [{ nome: perfil(), local: true }].concat(ON.sala.filter(s => s.conn.open).map(s => ({ nome: s.nome, conn: s.conn, moedas: s.moedas, vidasInv: s.vidasInv, skin: s.skin, ficha: s.ficha })));
+  const lista = [{ nome: perfil(), local: true }].concat(ON.sala.filter(s => s.conn.open).map(s => ({ nome: s.nome, conn: s.conn, moedas: s.moedas, vidasInv: s.vidasInv, skin: s.skin, ficha: s.ficha, arremesso: s.arremesso })));
   for (let k = 1; k <= ON.robos; k++) lista.push({ nome: "Robô " + k, robo: true });
   if (lista.length < 3) { toast("Precisa de pelo menos 3 jogadores"); return; }
   const n = lista.length;
@@ -144,7 +144,7 @@ function comecarOnline() {
       cor: A_CORES[i % A_CORES.length], pele: A_PELE[i % A_PELE.length],
       vidas: A.cfg.vidas, vivo: true, moedas: 0, guardado: o.robo ? 0 : o.local ? (G.banco[o.nome] || 0) : (o.moedas || 0), ganho: 0, compradas: 0,
       home, x: home.x, y: home.y, alvo: null, modo: "casa", vel: A_VEL * aRnd(.88, 1.12), habil: aRnd(-.08, .08),
-      flash: 0, passo: 0, ctrl: false, tocou: false, saiuEm: null };
+      flash: 0, passo: 0, ctrl: false, tocou: false, saiuEm: null, arremesso: o.robo ? "bola" : o.local ? arremessoDe(o.nome) : (o.arremesso || "bola") };
   });
   A.P.forEach((p, i) => { if (!p.humano) return; vestir(p, lista[i].local ? skinDe(p.nome) : lista[i].skin); const f = lista[i].local ? personagemDe(p.nome) : lista[i].ficha; if (f) p.ficha = f; });
   A.cel = 0; ON.myIdx = 0; A.balls = []; A.fx = []; A.t = 0; A.fim = null; A.ptr = null; A.inicio = Date.now();
@@ -152,7 +152,7 @@ function comecarOnline() {
   ON.on = true; ON.pedido = null; ON.esperaTxt = ""; ON.fimVisto = false;
   $("app").hidden = true; $("arena").hidden = false; $("a-setup").hidden = true; $("a-game").hidden = false;
   window.scrollTo(0, 0);
-  const estatico = A.P.map(p => ({ nome: p.nome, cor: p.cor, pele: p.pele, skin: p.skin || "classico", ficha: p.ficha || null, humano: p.humano, hx: Math.round(p.home.x), hy: Math.round(p.home.y) }));
+  const estatico = A.P.map(p => ({ nome: p.nome, cor: p.cor, pele: p.pele, skin: p.skin || "classico", ficha: p.ficha || null, arremesso: p.arremesso || "bola", humano: p.humano, hx: Math.round(p.home.x), hy: Math.round(p.home.y) }));
   A.P.forEach(p => { if (p.conn) enviar(p.conn, { t: "start", P: estatico, eu: p.i, cfg: A.cfg }); });
   A.fp = false;
   novaPalavraA(aPick(A.P));
@@ -167,7 +167,7 @@ function estadoAtual() {
     t: "st", tt: +A.t.toFixed(2), msg: $("a-sub").textContent, espera: ON.esperaTxt || "",
     fim: A.fim ? { v: A.fim.vencedor.i } : null,
     P: A.P.map(p => [Math.round(p.x), Math.round(p.y), p.vidas, p.vivo ? 1 : 0, Math.round(p.moedas * 10) / 10, +p.flash.toFixed(2), p.modo, p.ctrl ? 1 : 0, p.tocou ? 1 : 0, p.humano ? 1 : 0, Math.round(p.ganho * 10) / 10]),
-    B: A.balls.map(b => [Math.round(b.from.x), Math.round(b.from.y), Math.round(b.to.x), Math.round(b.to.y), +b.t.toFixed(3), +b.T.toFixed(3)]),
+    B: A.balls.map(b => [Math.round(b.from.x), Math.round(b.from.y), Math.round(b.to.x), Math.round(b.to.y), +b.t.toFixed(3), +b.T.toFixed(3), b.k || "bola"]),
     Gs: (A.ges || []).filter(e => e.ate > performance.now()).map(e => [e.i, e.k, Math.round(performance.now() - e.ini)]),
     E: (A.emo || []).filter(e => e.ate > performance.now()).map(e => [e.i, e.k, Math.round(e.ate - performance.now())]),
     fx: A.fx.filter(f => !f.env).map(f => { f.env = true; return [Math.round(f.x), Math.round(f.y), f.txt, f.cor]; }),
@@ -481,7 +481,7 @@ function mostrarFimOnline() {
 }
 function novaRodadaSala() {
   clearInterval(ON.timer); fecharOv(); pararLoop();
-  ON.sala = A.P.filter(p => p.remoto && p.conn && p.conn.open).map(p => ({ conn: p.conn, nome: p.nome, moedas: Math.round(((p.guardado || 0) + Math.max(0, p.moedas)) * 10) / 10, vidasInv: p.vidasInv || 0, skin: p.skin || "classico", ficha: p.ficha || null }));
+  ON.sala = A.P.filter(p => p.remoto && p.conn && p.conn.open).map(p => ({ conn: p.conn, nome: p.nome, moedas: Math.round(((p.guardado || 0) + Math.max(0, p.moedas)) * 10) / 10, vidasInv: p.vidasInv || 0, skin: p.skin || "classico", ficha: p.ficha || null, arremesso: p.arremesso || "bola" }));
   ON.sala.forEach(s => enviar(s.conn, { t: "voltaSala" }));
   ON.on = false; A.P = []; A.fim = null;
   $("arena").hidden = true; $("app").hidden = false;
@@ -555,7 +555,7 @@ function entrarSala(code, nome, naoAbrir = false) {
   peer.on("open", () => {
     const conn = peer.connect(PREFIXO + code, { reliable: true, serialization: "json" });
     ON.hostConn = conn;
-    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome), ficha: personagemDe(nome), amigo: meuCodigoAmigo() }); });
+    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome), ficha: personagemDe(nome), amigo: meuCodigoAmigo(), arremesso: arremessoDe(nome) }); });
     conn.on("data", cliRecebe);
     conn.on("close", () => { if (ON.peer === peer) { toast("A conexão com a sala caiu."); sairOnline(); } });
   });
@@ -581,7 +581,7 @@ function cliRecebe(d) {
 }
 function iniciarCliente(d) {
   A.cfg = { ...PADRAO, ...(d.cfg || {}) };
-  A.P = d.P.map((o, i) => ({ i, nome: String(o.nome), cor: o.cor, pele: o.pele, skin: skinInfo(o.skin).k, ficha: o.ficha ? limparFicha(o.ficha) : null, humano: !!o.humano, home: { x: o.hx, y: o.hy },
+  A.P = d.P.map((o, i) => ({ i, nome: String(o.nome), cor: o.cor, pele: o.pele, skin: skinInfo(o.skin).k, ficha: o.ficha ? limparFicha(o.ficha) : null, arremesso: arremessoInfo(String(o.arremesso || "")).k, humano: !!o.humano, home: { x: o.hx, y: o.hy },
     x: o.hx, y: o.hy, tx: o.hx, ty: o.hy, vidas: A.cfg.vidas, vivo: true, moedas: 0, ganho: 0, compradas: 0,
     alvo: null, modo: "casa", vel: A_VEL, habil: 0, flash: 0, passo: 0, ctrl: false, tocou: false }));
   A.cel = d.eu; ON.myIdx = d.eu; ON.on = true; ON.host = false; ON.fimVisto = false; ON.actKey = "";
@@ -613,7 +613,7 @@ function aplicarEstado(s) {
     // emoji novo (não estava na tela antes): toca o barulhinho dele
     for (const e of A.emo) if (!antes.some(x => x.i === e.i && x.k === e.k && Math.abs(x.ate - e.ate) < 600)) somEmoji(e.k);
   }
-  A.balls = s.B.map(b => ({ from: { x: b[0], y: b[1] }, to: { x: b[2], y: b[3] }, t: b[4], T: b[5] }));
+  A.balls = s.B.map(b => ({ from: { x: b[0], y: b[1] }, to: { x: b[2], y: b[3] }, t: b[4], T: b[5], k: arremessoInfo(String(b[6] || "")).k }));
   for (const f of s.fx) {
     A.fx.push({ x: f[0], y: f[1], txt: f[2], cor: f[3], t: 0 });
     if (f[2] === "-1") bip(300, .2); else if (f[2] === "ACERTOU!") bip(1100, .15);

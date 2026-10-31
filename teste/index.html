@@ -152,6 +152,7 @@ details summary { cursor: pointer; font-family: var(--display); font-size: 16px;
 .ge-prev { width: 100%; aspect-ratio: 1.3; display: block; }
 .a-emo button.ge { border-color: #9b51e0; background: rgba(155,81,224,.25); }
 .a-emo .sep { flex: 0 0 2px; background: var(--lines); margin: 6px 2px; border-radius: 2px; }
+.arr-bola { display: inline-block; width: 42px; height: 42px; border-radius: 50%; background: #ff8a1f; border: 3px solid #2a1300; vertical-align: middle; }
 .em-art { font-size: 46px; line-height: 1.3; text-align: center; }
 .stage-wrap { position: relative; border-radius: 14px; overflow: hidden; border: 2px solid var(--lines); touch-action: none; }
 #a-canvas { display: block; width: 100%; aspect-ratio: 1; max-width: 100%; touch-action: none; user-select: none; -webkit-user-select: none; }
@@ -1269,7 +1270,7 @@ function comecarArena() {
       home, x: home.x, y: home.y, alvo: null, modo: "casa", vel: A_VEL * aRnd(.88, 1.12), habil: aRnd(-.08, .08),
       flash: 0, passo: 0, ctrl: false, tocou: false, saiuEm: null };
   });
-  A.P.forEach(p => { if (p.humano) { vestir(p, skinDe(p.nome)); const f = personagemDe(p.nome); if (f) p.ficha = f; } });
+  A.P.forEach(p => { if (p.humano) { vestir(p, skinDe(p.nome)); const f = personagemDe(p.nome); if (f) p.ficha = f; p.arremesso = arremessoDe(p.nome); } });
   A.cel = Math.max(0, A.P.findIndex(p => p.nome === s.dono));
   A.balls = []; A.fx = []; A.t = 0; A.fim = null; A.ptr = null; A.inicio = Date.now();
   A.st = { palavras: 0, acertos: 0, erros: 0, timeouts: 0, votos: 0, votosOk: 0, arremessos: 0, acertosBola: 0, rodadas: 0, compras: 0, moedas: {}, eventos: [] };
@@ -1365,9 +1366,35 @@ function iniciarBolaA(atir) {
   renderAct();
 }
 function aCorrendo() { const ph = A.ph; return aVivos().filter(p => p !== ph.atir && (p.modo === "fugindo" || p.modo === "voltando")); }
+/* ---------- Coisas de arremessar (só a aparência; todas funcionam igual à bola) ---------- */
+const ARREMESSOS = [
+  { k: "bola", nome: "Bola", icone: "🟠", preco: 0, cor: "#ffb347" },
+  { k: "basquete", nome: "Basquete", icone: "🏀", preco: 40, cor: "#ff9a3c" },
+  { k: "futebol", nome: "Futebol", icone: "⚽", preco: 40, cor: "#e9eef5" },
+  { k: "tenis", nome: "Bolinha de tênis", icone: "🎾", preco: 60, cor: "#d8f05a" },
+  { k: "meia", nome: "Meia fedida", icone: "🧦", preco: 60, cor: "#9be15d" },
+  { k: "tomate", nome: "Tomate", icone: "🍅", preco: 80, cor: "#ff4d4d" },
+  { k: "ovo", nome: "Ovo", icone: "🥚", preco: 80, cor: "#fff3c4" },
+  { k: "banana", nome: "Banana", icone: "🍌", preco: 90, cor: "#ffe066" },
+  { k: "balao", nome: "Balão d'água", icone: "🎈", preco: 100, cor: "#7fd3ff" },
+  { k: "torta", nome: "Torta na cara", icone: "🥧", preco: 120, cor: "#ffe2b8" },
+  { k: "pizza", nome: "Pizza", icone: "🍕", preco: 120, cor: "#ffcf5c" },
+  { k: "abobora", nome: "Abóbora", icone: "🎃", preco: 150, cor: "#ff8a1f" },
+  { k: "estrela", nome: "Estrela", icone: "⭐", preco: 150, cor: "#ffe9a8" },
+];
+const arremessoInfo = k => ARREMESSOS.find(a => a.k === k) || ARREMESSOS[0];
+function temArremesso(n, k) { const a = ARREMESSOS.find(x => x.k === k); return !!a && (a.preco === 0 || (((G.inv || {})[n] || {}).arremessos || []).includes(k)); }
+function arremessoDe(n) { const k = ((G.inv || {})[n] || {}).arremesso; return temArremesso(n, k) ? k : "bola"; }
+function desenharArremesso2D(c, k, x, y, giro) {
+  if (k === "bola" || !ARREMESSOS.some(a => a.k === k)) {
+    c.fillStyle = "#ff8a1f"; c.strokeStyle = "#2a1300"; c.lineWidth = 3; c.beginPath(); c.arc(x, y, 14, 0, Math.PI * 2); c.fill(); c.stroke();
+    c.strokeStyle = "rgba(42,19,0,.6)"; c.lineWidth = 2; c.beginPath(); c.arc(x, y, 14, giro, giro + Math.PI * .9); c.stroke(); return;
+  }
+  c.save(); c.translate(x, y); c.rotate(giro); c.font = "34px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(arremessoInfo(k).icone, 0, 2); c.restore();
+}
 function arremessarA(to) {
   const ph = A.ph, atir = ph.atir;
-  A.balls.push({ from: { x: atir.x, y: atir.y }, to, t: 0, T: Math.max(.15, aDist(atir, to) / A_BOLA) });
+  A.balls.push({ from: { x: atir.x, y: atir.y }, to, t: 0, T: Math.max(.15, aDist(atir, to) / A_BOLA), k: atir.arremesso || "bola" });
   A.st.arremessos++; ph.cd = A.cfg.recarga; aEvento("arremesso", { por: atir.nome });
 }
 function atingirA(p) {
@@ -1548,9 +1575,9 @@ function desenharA() {
     c.fillStyle = "rgba(0,0,0,.3)"; c.beginPath(); c.ellipse(x, y + 10, 12, 6, 0, 0, Math.PI * 2); c.fill();
     // rastro
     b.hist = b.hist || []; b.hist.unshift([x, y - h]); if (b.hist.length > 10) b.hist.length = 10;
-    b.hist.forEach(([hx, hy], i) => { if (!i) return; c.fillStyle = `rgba(255,179,71,${.45 - i * .045})`; c.beginPath(); c.arc(hx, hy, 13 - i * 1.1, 0, Math.PI * 2); c.fill(); });
-    c.fillStyle = "#ff8a1f"; c.strokeStyle = "#2a1300"; c.lineWidth = 3; c.beginPath(); c.arc(x, y - h, 14, 0, Math.PI * 2); c.fill(); c.stroke();
-    c.strokeStyle = "rgba(42,19,0,.6)"; c.lineWidth = 2; c.beginPath(); c.arc(x, y - h, 14, f * 12, f * 12 + Math.PI * .9); c.stroke();
+    const item = arremessoInfo(b.k);
+    c.fillStyle = item.cor; b.hist.forEach(([hx, hy], i) => { if (!i) return; c.globalAlpha = Math.max(0, .45 - i * .045); c.beginPath(); c.arc(hx, hy, 13 - i * 1.1, 0, Math.PI * 2); c.fill(); }); c.globalAlpha = 1;
+    desenharArremesso2D(c, b.k, x, y - h, f * 12);
   }
   faiscasCima(c);
   for (const f of A.fx) {
@@ -2127,6 +2154,11 @@ function deixarDesenho(g, corpoMat) {
   }
   return trocas.get(corpoMat) || corpoMat;
 }
+const TEX_ARR = {};
+function texturaArremesso(k) {
+  if (!TEX_ARR[k]) TEX_ARR[k] = texturaCanvas(128, 128, (c) => { c.font = "100px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(arremessoInfo(k).icone, 64, 70); });
+  return TEX_ARR[k];
+}
 function soltarFaiscas(x, z, cor) {
   for (let i = 0; i < 14; i++) {
     const m = new THREE.Mesh(new THREE.SphereGeometry(.05, 6, 4), new THREE.MeshBasicMaterial({ color: i % 2 ? cor : "#ffd23f" }));
@@ -2357,20 +2389,26 @@ function desenhar3D() {
   }
   // bola na mão
   const atir = ph.k === "bola" || ph.k === "troca" ? ph.atir : null;
-  F.held.visible = !!atir && atir.vivo && !A.balls.length;
+  const naMao = !!atir && atir.vivo && !A.balls.length, kMao = atir ? atir.arremesso || "bola" : "bola";
+  F.held.visible = naMao && kMao === "bola";
+  if (!F.heldSprite) { F.heldSprite = new THREE.Sprite(new THREE.SpriteMaterial({ transparent: true })); F.heldSprite.scale.set(.42, .42, 1); F.scene.add(F.heldSprite); }
+  F.heldSprite.visible = naMao && kMao !== "bola";
+  if (F.heldSprite.visible) { F.heldSprite.material.map = texturaArremesso(kMao); F.heldSprite.material.needsUpdate = true; F.heldSprite.position.set(W3(atir.x) + .3, 1, W3(atir.y)); }
   if (F.held.visible) F.held.position.set(W3(atir.x) + .3, 1, W3(atir.y));
   // bolas voando, com rastro
   while (F.balls.length < A.balls.length) {
     const m = new THREE.Mesh(new THREE.SphereGeometry(.13, 16, 12), new THREE.MeshToonMaterial({ color: "#ff8a1f", emissive: "#5a2400" }));
     m.add(new THREE.Mesh(m.geometry, new THREE.MeshBasicMaterial({ color: "#2a1300", side: THREE.BackSide })).translateX(0)); m.children[0].scale.setScalar(1.1);
     m.rastro = [0, 1, 2, 3, 4].map(k => { const r = new THREE.Mesh(new THREE.SphereGeometry(.11 - k * .018, 8, 6), new THREE.MeshBasicMaterial({ color: "#ffb347", transparent: true, opacity: .45 - k * .08, depthWrite: false })); F.scene.add(r); return r; });
+    m.sp = new THREE.Sprite(new THREE.SpriteMaterial({ transparent: true })); m.sp.scale.set(.46, .46, 1); F.scene.add(m.sp);
     m.hist = []; F.scene.add(m); F.balls.push(m);
   }
   F.balls.forEach((m, i) => {
-    const b = A.balls[i]; m.visible = !!b; m.rastro.forEach(r => (r.visible = !!b)); if (!b) { m.hist = []; return; }
+    const b = A.balls[i]; m.visible = !!b && (b.k || "bola") === "bola"; m.sp.visible = !!b && (b.k || "bola") !== "bola"; m.rastro.forEach(r => (r.visible = !!b)); if (!b) { m.hist = []; return; }
+    if (m.sp.visible && m.sp.k !== b.k) { m.sp.k = b.k; m.sp.material.map = texturaArremesso(b.k); m.sp.material.needsUpdate = true; m.rastro.forEach(r => r.material.color.set(arremessoInfo(b.k).cor)); }
     const f = Math.min(1, b.t / b.T);
     m.position.set(W3(b.from.x + (b.to.x - b.from.x) * f), .9 + Math.sin(Math.PI * f) * 1.2 - f * .8, W3(b.from.y + (b.to.y - b.from.y) * f));
-    m.rotation.x += .3; m.hist.unshift(m.position.clone()); m.hist.length = Math.min(m.hist.length, 12);
+    m.rotation.x += .3; m.sp.position.copy(m.position); m.sp.material.rotation += .25; m.hist.unshift(m.position.clone()); m.hist.length = Math.min(m.hist.length, 12);
     m.rastro.forEach((r, k) => { const h = m.hist[(k + 1) * 2]; r.visible = !!h; if (h) r.position.copy(h); });
   });
   // faíscas quando alguém leva bolada
@@ -2533,6 +2571,17 @@ TELAS.loja = () => {
         <b>${esc(x.nome)}</b>
         ${x.limitada && !tem && naVenda(x) ? `<span class="sk-prazo">⏳ ${faltaParaAcabar(x)}</span>` : ""}
         <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarAvatar" data-k="${x.k}" ${usando || (!tem && !podeA) ? "disabled" : ""}>${rotulo}</button>
+      </div>`; }).join("")}
+    </div>
+    <h2 class="lb-secao">Arremessos</h2>
+    <p class="lb-sub" style="margin-top:-6px">O que você joga quando acerta a palavra. Funciona igual à bola, só muda o jeito.</p>
+    <div class="fd-grid">${ARREMESSOS.map(a => {
+      const tem = temArremesso(nome, a.k), usando = arremessoDe(nome) === a.k, podeA = moedas >= a.preco;
+      const rotulo = usando ? "Usando" : tem ? "Usar" : G.lojaConf === "arr:" + a.k ? "Confirmar?" : podeA ? `<span class="lb-coin" aria-hidden="true">$</span>${a.preco}` : `$ ${a.preco}`;
+      return `<div class="fd-tile${tem ? "" : " fd-travado"}"${usando ? ' aria-current="true"' : ""}>
+        <span class="em-art" aria-hidden="true">${a.k === "bola" ? `<span class="arr-bola"></span>` : a.icone}</span>
+        <b>${esc(a.nome)}</b>
+        <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarArremesso" data-k="${a.k}" ${usando || (!tem && !podeA) ? "disabled" : ""}>${rotulo}</button>
       </div>`; }).join("")}
     </div>
     <h2 class="lb-secao">Gestos</h2>
@@ -3104,6 +3153,19 @@ acoes.comprarPacote = () => {
   salvarPlacar();
   if (typeof sfxJogar === "function") sfxJogar();
   toast(`${nome} comprou o Pacote Galáctico! 🚀`);
+  const y = window.scrollY; render(); window.scrollTo(0, y);
+};
+acoes.comprarArremesso = el => {
+  const k = el.dataset.k, nome = perfil(), a = arremessoInfo(k);
+  const usar = () => { G.inv = G.inv || {}; G.inv[nome] = G.inv[nome] || { vidas: 0 }; G.inv[nome].arremesso = k; salvarPlacar(); };
+  if (temArremesso(nome, k)) { usar(); const y = window.scrollY; render(); window.scrollTo(0, y); toast(`Agora você joga ${a.nome} ${a.icone}`); return; }
+  if ((G.banco[nome] || 0) < a.preco) return;
+  if (G.lojaConf !== "arr:" + k) { pedirConfirmacao("arr:" + k); return; }
+  clearTimeout(lojaConfT); G.lojaConf = false;
+  G.banco[nome] = Math.round(((G.banco[nome] || 0) - a.preco) * 10) / 10;
+  G.inv = G.inv || {}; G.inv[nome] = G.inv[nome] || { vidas: 0 }; G.inv[nome].arremessos = [...(G.inv[nome].arremessos || []), k]; usar();
+  if (typeof sfxJogar === "function") sfxJogar();
+  toast(`${nome} comprou ${a.nome} ${a.icone}!`);
   const y = window.scrollY; render(); window.scrollTo(0, y);
 };
 acoes.comprarAvatar = el => {
@@ -3986,6 +4048,7 @@ TELAS.adm = () => {
     <h3>Fundos</h3><div class="chips">${FUNDOS.map(([k, t]) => chipItem(temFundo(n, k), k === "basico", "fundo", k, esc(t))).join("")}</div>
     <h3>Emojis</h3><div class="chips">${EMOJIS.map(e => chipItem(temEmoji(n, e.k), e.preco === 0, "emoji", e.k, e.e)).join("")}</div>
     <h3>Gestos</h3><div class="chips">${GESTOS.map(g => chipItem(temGesto(n, g.k), g.preco === 0, "gesto", g.k, g.icone + " " + esc(g.nome))).join("")}</div>
+    <h3>Arremessos</h3><div class="chips">${ARREMESSOS.map(a => chipItem(temArremesso(n, a.k), a.preco === 0, "arremesso", a.k, a.icone + " " + esc(a.nome))).join("")}</div>
     <h3>Fotos de perfil</h3><div class="chips">${AV_ESPECIAIS.map(x => chipItem(temAvatar(n, x.k), false, "avatar", x.k, x.icone + " " + esc(x.nome))).join("")}</div>
     <p class="dim" style="font-size:14px">Toque para dar ou tirar. Verde = tem.</p>`;
   if (ADM.aba === "limitadas") corpo = todasLimitadas().map(s => {
@@ -4074,7 +4137,7 @@ Object.assign(acoes, {
   admItem(el) {
     const n = ADM.jog, k = el.dataset.k, t = el.dataset.t;
     G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 };
-    const lista = { skin: "skins", fundo: "fundos", emoji: "emojis", gesto: "gestos", avatar: "avatares" }[t];
+    const lista = { skin: "skins", fundo: "fundos", emoji: "emojis", gesto: "gestos", avatar: "avatares", arremesso: "arremessos" }[t];
     const atual = G.inv[n][lista] || [];
     if (el.getAttribute("aria-pressed") === "true") {
       G.inv[n][lista] = atual.filter(x => x !== k);
@@ -4376,7 +4439,7 @@ function hostRecebe(conn, d) {
     const base = String(d.nome || "Amigo").replace(/\s+/g, " ").trim().slice(0, 20) || "Amigo";
     const usados = [perfil(), ...ON.sala.map(s => s.nome)];
     let nome = base, k = 2; while (usados.some(u => u.toLowerCase() === nome.toLowerCase())) nome = base + " " + (k++);
-    ON.sala.push({ conn, nome, moedas: Math.max(0, +d.moedas || 0), vidasInv: Math.max(0, Math.floor(+d.vidas || 0)), skin: skinInfo(d.skin).k, ficha: limparFicha(d.ficha), codigo: limparCodigoAmigo(d.amigo) });
+    ON.sala.push({ conn, nome, moedas: Math.max(0, +d.moedas || 0), vidasInv: Math.max(0, Math.floor(+d.vidas || 0)), skin: skinInfo(d.skin).k, ficha: limparFicha(d.ficha), codigo: limparCodigoAmigo(d.amigo), arremesso: arremessoInfo(String(d.arremesso || "")).k });
     enviar(conn, { t: "bemvindo", nome, code: ON.code });
     enviarSala(); toast(`${nome} entrou na sala`); bip(880, .08);
     if (G.tela === "salaHost") render();
@@ -4408,7 +4471,7 @@ function hostSaiu(conn) {
 
 /* ---------- Anfitrião: começar ---------- */
 function comecarOnline() {
-  const lista = [{ nome: perfil(), local: true }].concat(ON.sala.filter(s => s.conn.open).map(s => ({ nome: s.nome, conn: s.conn, moedas: s.moedas, vidasInv: s.vidasInv, skin: s.skin, ficha: s.ficha })));
+  const lista = [{ nome: perfil(), local: true }].concat(ON.sala.filter(s => s.conn.open).map(s => ({ nome: s.nome, conn: s.conn, moedas: s.moedas, vidasInv: s.vidasInv, skin: s.skin, ficha: s.ficha, arremesso: s.arremesso })));
   for (let k = 1; k <= ON.robos; k++) lista.push({ nome: "Robô " + k, robo: true });
   if (lista.length < 3) { toast("Precisa de pelo menos 3 jogadores"); return; }
   const n = lista.length;
@@ -4420,7 +4483,7 @@ function comecarOnline() {
       cor: A_CORES[i % A_CORES.length], pele: A_PELE[i % A_PELE.length],
       vidas: A.cfg.vidas, vivo: true, moedas: 0, guardado: o.robo ? 0 : o.local ? (G.banco[o.nome] || 0) : (o.moedas || 0), ganho: 0, compradas: 0,
       home, x: home.x, y: home.y, alvo: null, modo: "casa", vel: A_VEL * aRnd(.88, 1.12), habil: aRnd(-.08, .08),
-      flash: 0, passo: 0, ctrl: false, tocou: false, saiuEm: null };
+      flash: 0, passo: 0, ctrl: false, tocou: false, saiuEm: null, arremesso: o.robo ? "bola" : o.local ? arremessoDe(o.nome) : (o.arremesso || "bola") };
   });
   A.P.forEach((p, i) => { if (!p.humano) return; vestir(p, lista[i].local ? skinDe(p.nome) : lista[i].skin); const f = lista[i].local ? personagemDe(p.nome) : lista[i].ficha; if (f) p.ficha = f; });
   A.cel = 0; ON.myIdx = 0; A.balls = []; A.fx = []; A.t = 0; A.fim = null; A.ptr = null; A.inicio = Date.now();
@@ -4428,7 +4491,7 @@ function comecarOnline() {
   ON.on = true; ON.pedido = null; ON.esperaTxt = ""; ON.fimVisto = false;
   $("app").hidden = true; $("arena").hidden = false; $("a-setup").hidden = true; $("a-game").hidden = false;
   window.scrollTo(0, 0);
-  const estatico = A.P.map(p => ({ nome: p.nome, cor: p.cor, pele: p.pele, skin: p.skin || "classico", ficha: p.ficha || null, humano: p.humano, hx: Math.round(p.home.x), hy: Math.round(p.home.y) }));
+  const estatico = A.P.map(p => ({ nome: p.nome, cor: p.cor, pele: p.pele, skin: p.skin || "classico", ficha: p.ficha || null, arremesso: p.arremesso || "bola", humano: p.humano, hx: Math.round(p.home.x), hy: Math.round(p.home.y) }));
   A.P.forEach(p => { if (p.conn) enviar(p.conn, { t: "start", P: estatico, eu: p.i, cfg: A.cfg }); });
   A.fp = false;
   novaPalavraA(aPick(A.P));
@@ -4443,7 +4506,7 @@ function estadoAtual() {
     t: "st", tt: +A.t.toFixed(2), msg: $("a-sub").textContent, espera: ON.esperaTxt || "",
     fim: A.fim ? { v: A.fim.vencedor.i } : null,
     P: A.P.map(p => [Math.round(p.x), Math.round(p.y), p.vidas, p.vivo ? 1 : 0, Math.round(p.moedas * 10) / 10, +p.flash.toFixed(2), p.modo, p.ctrl ? 1 : 0, p.tocou ? 1 : 0, p.humano ? 1 : 0, Math.round(p.ganho * 10) / 10]),
-    B: A.balls.map(b => [Math.round(b.from.x), Math.round(b.from.y), Math.round(b.to.x), Math.round(b.to.y), +b.t.toFixed(3), +b.T.toFixed(3)]),
+    B: A.balls.map(b => [Math.round(b.from.x), Math.round(b.from.y), Math.round(b.to.x), Math.round(b.to.y), +b.t.toFixed(3), +b.T.toFixed(3), b.k || "bola"]),
     Gs: (A.ges || []).filter(e => e.ate > performance.now()).map(e => [e.i, e.k, Math.round(performance.now() - e.ini)]),
     E: (A.emo || []).filter(e => e.ate > performance.now()).map(e => [e.i, e.k, Math.round(e.ate - performance.now())]),
     fx: A.fx.filter(f => !f.env).map(f => { f.env = true; return [Math.round(f.x), Math.round(f.y), f.txt, f.cor]; }),
@@ -4757,7 +4820,7 @@ function mostrarFimOnline() {
 }
 function novaRodadaSala() {
   clearInterval(ON.timer); fecharOv(); pararLoop();
-  ON.sala = A.P.filter(p => p.remoto && p.conn && p.conn.open).map(p => ({ conn: p.conn, nome: p.nome, moedas: Math.round(((p.guardado || 0) + Math.max(0, p.moedas)) * 10) / 10, vidasInv: p.vidasInv || 0, skin: p.skin || "classico", ficha: p.ficha || null }));
+  ON.sala = A.P.filter(p => p.remoto && p.conn && p.conn.open).map(p => ({ conn: p.conn, nome: p.nome, moedas: Math.round(((p.guardado || 0) + Math.max(0, p.moedas)) * 10) / 10, vidasInv: p.vidasInv || 0, skin: p.skin || "classico", ficha: p.ficha || null, arremesso: p.arremesso || "bola" }));
   ON.sala.forEach(s => enviar(s.conn, { t: "voltaSala" }));
   ON.on = false; A.P = []; A.fim = null;
   $("arena").hidden = true; $("app").hidden = false;
@@ -4831,7 +4894,7 @@ function entrarSala(code, nome, naoAbrir = false) {
   peer.on("open", () => {
     const conn = peer.connect(PREFIXO + code, { reliable: true, serialization: "json" });
     ON.hostConn = conn;
-    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome), ficha: personagemDe(nome), amigo: meuCodigoAmigo() }); });
+    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome), ficha: personagemDe(nome), amigo: meuCodigoAmigo(), arremesso: arremessoDe(nome) }); });
     conn.on("data", cliRecebe);
     conn.on("close", () => { if (ON.peer === peer) { toast("A conexão com a sala caiu."); sairOnline(); } });
   });
@@ -4857,7 +4920,7 @@ function cliRecebe(d) {
 }
 function iniciarCliente(d) {
   A.cfg = { ...PADRAO, ...(d.cfg || {}) };
-  A.P = d.P.map((o, i) => ({ i, nome: String(o.nome), cor: o.cor, pele: o.pele, skin: skinInfo(o.skin).k, ficha: o.ficha ? limparFicha(o.ficha) : null, humano: !!o.humano, home: { x: o.hx, y: o.hy },
+  A.P = d.P.map((o, i) => ({ i, nome: String(o.nome), cor: o.cor, pele: o.pele, skin: skinInfo(o.skin).k, ficha: o.ficha ? limparFicha(o.ficha) : null, arremesso: arremessoInfo(String(o.arremesso || "")).k, humano: !!o.humano, home: { x: o.hx, y: o.hy },
     x: o.hx, y: o.hy, tx: o.hx, ty: o.hy, vidas: A.cfg.vidas, vivo: true, moedas: 0, ganho: 0, compradas: 0,
     alvo: null, modo: "casa", vel: A_VEL, habil: 0, flash: 0, passo: 0, ctrl: false, tocou: false }));
   A.cel = d.eu; ON.myIdx = d.eu; ON.on = true; ON.host = false; ON.fimVisto = false; ON.actKey = "";
@@ -4889,7 +4952,7 @@ function aplicarEstado(s) {
     // emoji novo (não estava na tela antes): toca o barulhinho dele
     for (const e of A.emo) if (!antes.some(x => x.i === e.i && x.k === e.k && Math.abs(x.ate - e.ate) < 600)) somEmoji(e.k);
   }
-  A.balls = s.B.map(b => ({ from: { x: b[0], y: b[1] }, to: { x: b[2], y: b[3] }, t: b[4], T: b[5] }));
+  A.balls = s.B.map(b => ({ from: { x: b[0], y: b[1] }, to: { x: b[2], y: b[3] }, t: b[4], T: b[5], k: arremessoInfo(String(b[6] || "")).k }));
   for (const f of s.fx) {
     A.fx.push({ x: f[0], y: f[1], txt: f[2], cor: f[3], t: 0 });
     if (f[2] === "-1") bip(300, .2); else if (f[2] === "ACERTOU!") bip(1100, .15);
