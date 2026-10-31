@@ -152,6 +152,8 @@ details summary { cursor: pointer; font-family: var(--display); font-size: 16px;
 .ge-prev { width: 100%; aspect-ratio: 1.3; display: block; }
 .a-emo button.ge { border-color: #9b51e0; background: rgba(155,81,224,.25); }
 .a-emo .sep { flex: 0 0 2px; background: var(--lines); margin: 6px 2px; border-radius: 2px; }
+.arr-bn { display: inline-block; width: 64px; height: 30px; border-radius: 50%; vertical-align: middle; transform: rotate(-12deg);
+  background: radial-gradient(circle at 50% 50%, #000 0 22%, #ffe0b0 25%, #ff9a3c 32%, #ff6a2a 40%, #b07bff 55%, transparent 72%); box-shadow: 0 0 14px rgba(190,120,255,.7); }
 .arr-bola { display: inline-block; width: 42px; height: 42px; border-radius: 50%; background: #ff8a1f; border: 3px solid #2a1300; vertical-align: middle; }
 .em-art { font-size: 46px; line-height: 1.3; text-align: center; }
 .stage-wrap { position: relative; border-radius: 14px; overflow: hidden; border: 2px solid var(--lines); touch-action: none; }
@@ -205,6 +207,11 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
   background: radial-gradient(1px 1px at 20% 25%, #fff 50%, transparent 52%), radial-gradient(1.2px 1.2px at 75% 20%, #ffe9a8 50%, transparent 52%), radial-gradient(1px 1px at 30% 80%, #fff 50%, transparent 52%), radial-gradient(1px 1px at 82% 72%, #cfe0ff 50%, transparent 52%),
     radial-gradient(circle at 30% 30%, #6c3fd1 0%, #2b1a6b 55%, #0b0b2a 100%) !important; }
 .lb-avatar.av-galactico { animation: avBrilha 2.4s ease-in-out infinite; }
+.av-buraconegro { position: relative; overflow: hidden; border-color: #ff9a3c !important; box-shadow: 0 0 12px rgba(190,120,255,.8);
+  background: radial-gradient(circle at 50% 50%, #000 0 30%, #ffb35c 33%, #ff7a2a 38%, #b07bff 46%, #2a1050 58%, #07050f 100%) !important; }
+.lb-avatar.av-buraconegro { animation: avBrilhaBn 2s ease-in-out infinite; }
+@keyframes avBrilhaBn { 50% { box-shadow: 0 0 18px rgba(255,150,60,.85); } }
+@media (prefers-reduced-motion: reduce) { .lb-avatar.av-buraconegro { animation: none; } }
 @keyframes avBrilha { 50% { box-shadow: 0 0 16px rgba(255,210,63,.7); } }
 @media (prefers-reduced-motion: reduce) { .lb-avatar.av-galactico { animation: none; } }
 .av-loja { display: grid; place-items: center; padding: 8px 0; }
@@ -295,6 +302,16 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .bgf[data-fundo="floresta"]::before { background:
   repeating-linear-gradient(112deg, rgba(255,255,200,.09) 0 26px, transparent 26px 92px),
   radial-gradient(ellipse 60% 18% at 20% 100%, #0c3326 0 98%, transparent 100%), radial-gradient(ellipse 60% 22% at 85% 100%, #0f3d2e 0 98%, transparent 100%); }
+.bgf[data-fundo="buraconegro"] { background:
+  radial-gradient(circle at 74% 64%, #000 0 6.5%, rgba(255,236,200,.95) 7%, transparent 7.8%),
+  radial-gradient(ellipse 30% 7% at 74% 64%, transparent 0 40%, rgba(255,170,80,.95) 48%, rgba(255,110,40,.9) 60%, rgba(176,123,255,.7) 75%, transparent 90%),
+  radial-gradient(circle at 74% 64%, rgba(176,123,255,.35) 0, rgba(90,40,170,.25) 22%, transparent 45%),
+  linear-gradient(180deg, #030208 0%, #0d0620 55%, #050310 100%); }
+.bgf[data-fundo="buraconegro"]::before { background-image:
+  radial-gradient(1.4px 1.4px at 12% 14%, #fff 50%, transparent 52%), radial-gradient(1px 1px at 30% 52%, #fff 50%, transparent 52%),
+  radial-gradient(1.8px 1.8px at 50% 22%, #ffd9a8 50%, transparent 52%), radial-gradient(1.1px 1.1px at 64% 86%, #fff 50%, transparent 52%),
+  radial-gradient(1.6px 1.6px at 88% 30%, #d6b8ff 50%, transparent 52%), radial-gradient(1px 1px at 22% 88%, #fff 50%, transparent 52%);
+  background-size: 160px 160px; animation: galaxia 40s linear infinite; }
 .bgf[data-fundo="galactico"] { background:
   radial-gradient(ellipse 15% 3% at 84% 63%, transparent 0 52%, rgba(205,185,255,.95) 56% 80%, transparent 84%),
   radial-gradient(circle at 84% 63%, #ffd98f 0, #f0a03c 3%, #c4561c 5.2%, transparent 5.5%),
@@ -1383,11 +1400,17 @@ const ARREMESSOS = [
   { k: "pizza", nome: "Pizza", icone: "🍕", preco: 120, cor: "#ffcf5c" },
   { k: "abobora", nome: "Abóbora", icone: "🎃", preco: 150, cor: "#ff8a1f" },
   { k: "estrela", nome: "Estrela", icone: "⭐", preco: 150, cor: "#ffe9a8" },
+  { k: "buraconegro", nome: "Mini Buraco Negro", icone: "🌑", preco: 200, cor: "#b07bff", tipo: "arremesso", limitada: true, ate: "2026-11-07T23:59:59-03:00" },
 ];
 const arremessoInfo = k => ARREMESSOS.find(a => a.k === k) || ARREMESSOS[0];
 function temArremesso(n, k) { const a = ARREMESSOS.find(x => x.k === k); return !!a && (a.preco === 0 || (((G.inv || {})[n] || {}).arremessos || []).includes(k)); }
 function arremessoDe(n) { const k = ((G.inv || {})[n] || {}).arremesso; return temArremesso(n, k) ? k : "bola"; }
 function desenharArremesso2D(c, k, x, y, giro) {
+  if (k === "buraconegro") {
+    const t = performance.now() / 1000; c.save(); c.globalCompositeOperation = "lighter";
+    for (let i = 0; i < 2; i++) { c.strokeStyle = i ? "rgba(190,120,255,.9)" : "rgba(255,150,60,.95)"; c.lineWidth = 3 - i; c.beginPath(); c.ellipse(x, y, 22 - i * 4, 7 - i * 2, giro * .3 + t * 3, 0, Math.PI * 2); c.stroke(); }
+    c.restore(); c.fillStyle = "#000"; c.beginPath(); c.arc(x, y, 9, 0, Math.PI * 2); c.fill(); return;
+  }
   if (k === "bola" || !ARREMESSOS.some(a => a.k === k)) {
     c.fillStyle = "#ff8a1f"; c.strokeStyle = "#2a1300"; c.lineWidth = 3; c.beginPath(); c.arc(x, y, 14, 0, Math.PI * 2); c.fill(); c.stroke();
     c.strokeStyle = "rgba(42,19,0,.6)"; c.lineWidth = 2; c.beginPath(); c.arc(x, y, 14, giro, giro + Math.PI * .9); c.stroke(); return;
@@ -2431,9 +2454,9 @@ function desenhar3D() {
     b.ry = b.ry ?? b.g.rotation.y;
     b.ry += ((b.dir - b.ry + Math.PI * 3) % (Math.PI * 2) - Math.PI) * .25;
     const ges = gestoAtivo(p), pose = ges ? poseGesto(ges.g.k, ges.f) : null;
-    const giros = ges ? { giro: 2, piao: 5, galactico: 1 }[ges.g.k] || 0 : 0;
+    const giros = ges ? { giro: 2, piao: 5, galactico: 1, buraconegro: 3 }[ges.g.k] || 0 : 0;
     b.g.rotation.set(pose ? pose.volta : 0, b.ry + (ges ? giros * ges.f * Math.PI * 2 : 0), pose ? -pose.incl : 0);
-    if (pose) { b.g.position.y = pose.pulo * U * 1.6 + (pose.volta ? .5 * Math.sin(Math.PI * ges.f) : 0); b.g.translateX(pose.desl * U); b.g.scale.set(1 + pose.achata, 1 - pose.achata, 1 + pose.achata); }
+    if (pose) { b.g.position.y = pose.pulo * U * 1.6 + (pose.volta ? .5 * Math.sin(Math.PI * ges.f) : 0); b.g.translateX(pose.desl * U); b.g.scale.set((1 + pose.achata) * pose.tam, (1 - pose.achata) * pose.tam, (1 + pose.achata) * pose.tam); }
     else b.g.scale.set(1, 1, 1);
     const s = Math.sin((p.passo + (pose ? pose.passo : 0)) / 14) * .7;
     b.pernaE.rotation.x = s; b.pernaD.rotation.x = -s; b.bracoE.rotation.x = -s * .8; b.bracoD.rotation.x = s * .8;
@@ -2574,7 +2597,7 @@ TELAS.lobby = () => {
     <h1 class="lb-title">Jogo de<br>Pergunta</h1>
     <div class="lb-stage">
       <div class="lb-side">
-        <button class="lb-btn" data-a="loja">${ICONES.loja}<span>Loja</span><i class="lb-tag">${SKINS.some(s => s.limitada && naVenda(s) && !temSkin(nome, s.k)) || FUNDOS_LIM.some(f => naVenda(f) && !temFundo(nome, f.k)) || EMOJIS.some(e => e.limitada && naVenda(e) && !temEmoji(nome, e.k)) || GESTOS.some(g => g.limitada && naVenda(g) && !temGesto(nome, g.k)) || AV_ESPECIAIS.some(x => x.limitada && naVenda(x) && !temAvatar(nome, x.k)) ? "limitada!" : "novo!"}</i></button>
+        <button class="lb-btn" data-a="loja">${ICONES.loja}<span>Loja</span><i class="lb-tag">${SKINS.some(s => s.limitada && naVenda(s) && !temSkin(nome, s.k)) || FUNDOS_LIM.some(f => naVenda(f) && !temFundo(nome, f.k)) || EMOJIS.some(e => e.limitada && naVenda(e) && !temEmoji(nome, e.k)) || GESTOS.some(g => g.limitada && naVenda(g) && !temGesto(nome, g.k)) || AV_ESPECIAIS.some(x => x.limitada && naVenda(x) && !temAvatar(nome, x.k)) || ARREMESSOS.some(a => a.limitada && naVenda(a) && !temArremesso(nome, a.k)) ? "limitada!" : "novo!"}</i></button>
         <button class="lb-btn" data-a="personagens"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4" fill="#f1c27d" stroke="#0b1b33" stroke-width="1.5"/><path d="M5 21v-3a7 7 0 0 1 14 0v3z" fill="#2f80ed" stroke="#0b1b33" stroke-width="1.5" stroke-linejoin="round"/><path d="M18 3l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" fill="#ffd23f" stroke="#0b1b33" stroke-width="1"/></svg><span>Criar</span></button>
         <button class="lb-btn" data-a="fundos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.3 0 1.9-.8 1.9-1.7 0-1.2-1-1.5-1-2.6 0-1 .8-1.7 1.9-1.7h2.1a3.6 3.6 0 0 0 3.6-3.6C20.5 6.6 16.7 3.5 12 3.5z" fill="#f4f7fb" stroke="#0b1b33" stroke-width="1.6"/><circle cx="7.8" cy="11" r="1.5" fill="#ff4d6d"/><circle cx="10.2" cy="7.4" r="1.5" fill="#ffd23f"/><circle cx="14.6" cy="7.4" r="1.5" fill="#37d99a"/><circle cx="17" cy="11" r="1.5" fill="#2f80ed"/></svg><span>Fundo</span></button>
       </div>
@@ -2640,12 +2663,14 @@ TELAS.loja = () => {
     </div>
     <h2 class="lb-secao">Arremessos</h2>
     <p class="lb-sub" style="margin-top:-6px">O que você joga quando acerta a palavra. Funciona igual à bola, só muda o jeito.</p>
-    <div class="fd-grid">${ARREMESSOS.map(a => {
+    <div class="fd-grid">${ARREMESSOS.filter(a => naVenda(a) || temArremesso(nome, a.k)).sort((a, b) => !!b.limitada - !!a.limitada).map(a => {
       const tem = temArremesso(nome, a.k), usando = arremessoDe(nome) === a.k, podeA = moedas >= a.preco;
       const rotulo = usando ? "Usando" : tem ? "Usar" : G.lojaConf === "arr:" + a.k ? "Confirmar?" : podeA ? `<span class="lb-coin" aria-hidden="true">$</span>${a.preco}` : `$ ${a.preco}`;
-      return `<div class="fd-tile${tem ? "" : " fd-travado"}"${usando ? ' aria-current="true"' : ""}>
-        <span class="em-art" aria-hidden="true">${a.k === "bola" ? `<span class="arr-bola"></span>` : a.icone}</span>
+      return `<div class="fd-tile${tem ? "" : " fd-travado"}${a.limitada ? " sk-limitada" : ""}"${usando ? ' aria-current="true"' : ""}>
+        ${a.limitada ? `<i class="sk-selo">Edição limitada</i>` : ""}
+        <span class="em-art" aria-hidden="true">${a.k === "bola" ? `<span class="arr-bola"></span>` : a.k === "buraconegro" ? `<span class="arr-bn"></span>` : a.icone}</span>
         <b>${esc(a.nome)}</b>
+        ${a.limitada && !tem && naVenda(a) ? `<span class="sk-prazo">⏳ ${faltaParaAcabar(a)}</span>` : ""}
         <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarArremesso" data-k="${a.k}" ${usando || (!tem && !podeA) ? "disabled" : ""}>${rotulo}</button>
       </div>`; }).join("")}
     </div>
@@ -2694,7 +2719,8 @@ const AV_ICONES = ["🐶", "🐱", "🦊", "🐼", "🐸", "🦁", "🐯", "🐵
   "⚽", "🏀", "🎮", "🚀", "⭐", "🔥", "⚡", "👑", "🤖", "👽", "🍕", "🌈"];
 const AV_CORES = ["#e4572e", "#2f80ed", "#37d99a", "#ffd23f", "#9b51e0", "#ff4d6d", "#0b1b33", "#f4a261"];
 /* fotos de perfil especiais (compradas na loja); a de edição limitada só vende até "ate" */
-const AV_ESPECIAIS = [{ k: "galactico", icone: "🪐", nome: "Galáctico", tipo: "avatar", limitada: true, preco: 200, ate: "2026-11-06T23:59:59-03:00" }];
+const AV_ESPECIAIS = [{ k: "galactico", icone: "🪐", nome: "Galáctico", tipo: "avatar", limitada: true, preco: 200, ate: "2026-11-06T23:59:59-03:00" },
+  { k: "buraconegro", icone: "🕳️", nome: "Buraco Negro", tipo: "avatar", limitada: true, preco: 200, ate: "2026-11-07T23:59:59-03:00" }];
 const avEspecial = k => AV_ESPECIAIS.find(x => x.k === k) || null;
 const avValido = i => i === "" || AV_ICONES.includes(i) || !!avEspecial(i);
 function temAvatar(n, k) { return (((G.inv || {})[n] || {}).avatares || []).includes(k); }
@@ -2702,7 +2728,7 @@ function avatarDe(n) { const a = ((G.inv || {})[n] || {}).avatar || {}; const ok
 /* desenho do avatar: ícone escolhido, ou a primeira letra do nome */
 function avatarHTML(av, nome, extra = "") {
   const a = av && typeof av === "object" ? av : {}, esp = avEspecial(a.i), i = AV_ICONES.includes(a.i) ? a.i : "", cor = AV_CORES.includes(a.cor) ? a.cor : AV_CORES[0];
-  if (esp) return `<span class="lb-avatar av-emoji av-${esp.k}${extra}" aria-hidden="true">${esp.icone}</span>`;
+  if (esp) return `<span class="lb-avatar av-emoji av-${esp.k}${extra}" aria-hidden="true">${esp.k === "buraconegro" ? "" : esp.icone}</span>`;
   return `<span class="lb-avatar${i ? " av-emoji" : ""}${extra}" style="background:${cor}" aria-hidden="true">${i || esc((nome || "?")[0])}</span>`;
 }
 TELAS.perfil = () => `
@@ -3037,10 +3063,11 @@ acoes.som = el => { _acaoSom(el); atualizarSomArena(); if (G.som !== false) { mu
 
 <script>
 /* ================= Fundos ================= */
-const FUNDOS = [["basico", "Básico"], ["ceu", "Céu"], ["quadra", "Quadra"], ["floresta", "Floresta"], ["por", "Pôr do sol"], ["doce", "Doce"], ["noite", "Noite estrelada"], ["vulcao", "Vulcão"], ["galactico", "Galáctico"]];
-const PRECO_FUNDO = { basico: 0, ceu: 50, quadra: 50, floresta: 75, por: 100, doce: 100, noite: 150, vulcao: 200, galactico: 300 };
+const FUNDOS = [["basico", "Básico"], ["ceu", "Céu"], ["quadra", "Quadra"], ["floresta", "Floresta"], ["por", "Pôr do sol"], ["doce", "Doce"], ["noite", "Noite estrelada"], ["vulcao", "Vulcão"], ["galactico", "Galáctico"], ["buraconegro", "Buraco Negro"]];
+const PRECO_FUNDO = { basico: 0, ceu: 50, quadra: 50, floresta: 75, por: 100, doce: 100, noite: 150, vulcao: 200, galactico: 300, buraconegro: 300 };
 /* fundos de edição limitada: só dá para comprar até "ate" (horário de Brasília); quem comprou fica com ele */
-const FUNDOS_LIM = [{ k: "galactico", nome: "Galáctico", tipo: "fundo", limitada: true, preco: 300, ate: "2026-11-06T23:59:59-03:00" }];
+const FUNDOS_LIM = [{ k: "galactico", nome: "Galáctico", tipo: "fundo", limitada: true, preco: 300, ate: "2026-11-06T23:59:59-03:00" },
+  { k: "buraconegro", nome: "Buraco Negro", tipo: "fundo", limitada: true, preco: 300, ate: "2026-11-07T23:59:59-03:00" }];
 const fundoLim = k => FUNDOS_LIM.find(f => f.k === k) || null;
 const fundoNaVenda = k => { const f = fundoLim(k); return !f || naVenda(f); };
 function temFundo(n, k) { return k === "basico" || (((G.inv || {})[n] || {}).fundos || []).includes(k); }
@@ -3171,6 +3198,7 @@ const EMOJIS = [
   { k: "trofeu", e: "🏆", nome: "Troféu", preco: 120 },
   // edição limitada: só dá para comprar até "ate" (horário de Brasília); quem comprou fica com ele
   { k: "galactico", e: "🌌", nome: "Galáctico", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-06T23:59:59-03:00" },
+  { k: "buraconegro", e: "🕳️", nome: "Buraco Negro", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-07T23:59:59-03:00" },
 ];
 const emojiInfo = k => EMOJIS.find(e => e.k === k) || null;
 function temEmoji(n, k) { const e = emojiInfo(k); return !!e && (e.preco === 0 || (((G.inv || {})[n] || {}).emojis || []).includes(k)); }
@@ -3224,6 +3252,7 @@ acoes.comprarArremesso = el => {
   const k = el.dataset.k, nome = perfil(), a = arremessoInfo(k);
   const usar = () => { G.inv = G.inv || {}; G.inv[nome] = G.inv[nome] || { vidas: 0 }; G.inv[nome].arremesso = k; salvarPlacar(); };
   if (temArremesso(nome, k)) { usar(); const y = window.scrollY; render(); window.scrollTo(0, y); toast(`Agora você joga ${a.nome} ${a.icone}`); return; }
+  if (!naVenda(a)) { toast("Esse arremesso de edição limitada já acabou"); return; }
   if ((G.banco[nome] || 0) < a.preco) return;
   if (G.lojaConf !== "arr:" + k) { pedirConfirmacao("arr:" + k); return; }
   clearTimeout(lojaConfT); G.lojaConf = false;
@@ -3287,6 +3316,7 @@ const SONS_EMOJI = {
   caveira: [[55, 52, 0, .35, "triangle"], [52, 49, .35, .45, "triangle"]],
   fogo: [[40, 76, 0, .35, "sawtooth"]],
   coroa: [[67, 67, 0, .12, "square"], [72, 72, .12, .12, "square"], [76, 76, .24, .3, "square"]],
+  buraconegro: [[84, 40, 0, .7, "sawtooth"], [36, 30, .55, .5, "sine"]],
   galactico: [[60, 84, 0, .5, "sine"], [91, 91, .45, .12, "sine"], [96, 96, .58, .12, "sine"], [91, 91, .71, .3, "sine"]],
   trofeu: [[72, 72, 0, .1, "square"], [76, 76, .1, .1, "square"], [79, 79, .2, .1, "square"], [84, 84, .3, .35, "square"]],
 };
@@ -3350,6 +3380,8 @@ const GESTOS = [
   { k: "piao", icone: "🌪️", nome: "Pião", preco: 150, dura: 1.6, som: [[60, 96, 0, .8, "square"]] },
   { k: "mortal", icone: "🤸", nome: "Mortal", preco: 200, dura: 1.3, som: [[60, 84, 0, .35, "sine"], [84, 84, .45, .1, "square"], [88, 88, .55, .3, "square"]] },
   // edição limitada: só dá para comprar até "ate" (horário de Brasília); quem comprou fica com ele
+  { k: "buraconegro", icone: "🌑", nome: "Sugado", preco: 250, dura: 2.2, tipo: "gesto", limitada: true, ate: "2026-11-07T23:59:59-03:00",
+    som: [[84, 36, 0, 1, "sawtooth"], [36, 36, 1, .15, "sine"], [40, 90, 1.2, .5, "sine"], [96, 96, 1.7, .25, "triangle"]] },
   { k: "galactico", icone: "🚀", nome: "Galáctico", preco: 250, dura: 2.4, tipo: "gesto", limitada: true, ate: "2026-11-06T23:59:59-03:00",
     som: [[48, 72, 0, .9, "sine"], [84, 84, .8, .1, "triangle"], [88, 88, .95, .1, "triangle"], [91, 91, 1.1, .1, "triangle"], [96, 96, 1.25, .35, "triangle"], [72, 55, 1.7, .6, "sine"]] },
 ];
@@ -3387,7 +3419,7 @@ function gestoAtivo(p) {
 }
 /* Movimento do gesto: pulo (px), giro (0 a 1 = largura), inclinação (rad), achatar, deslizar (px), cambalhota (rad) */
 function poseGesto(k, f) {
-  const r = { pulo: 0, larg: 1, incl: 0, achata: 0, desl: 0, volta: 0, passo: 0 }, T = Math.PI * 2, fim = Math.sin(Math.PI * Math.min(1, f) );
+  const r = { pulo: 0, larg: 1, incl: 0, achata: 0, desl: 0, volta: 0, passo: 0, tam: 1 }, T = Math.PI * 2, fim = Math.sin(Math.PI * Math.min(1, f) );
   if (k === "pulinho") r.pulo = Math.abs(Math.sin(f * Math.PI * 3)) * 26;
   if (k === "giro") r.larg = Math.cos(f * T * 2);
   if (k === "requebrado") { r.incl = Math.sin(f * T * 4) * .35 * fim; r.desl = Math.sin(f * T * 4) * 6 * fim; r.passo = f * 120; }
@@ -3396,11 +3428,20 @@ function poseGesto(k, f) {
   if (k === "deslizada") { r.desl = Math.sin(f * T * 1.5) * 28; r.passo = f * 260; }
   if (k === "piao") { r.larg = Math.cos(f * T * 5); r.pulo = Math.sin(Math.PI * f) * 18; }
   if (k === "mortal") { r.pulo = Math.sin(Math.PI * f) * 46; r.volta = -f * T; }
+  if (k === "buraconegro") { const ida = f < .5 ? f * 2 : (1 - f) * 2; r.tam = Math.max(.05, 1 - ida * ida * .95); r.larg = Math.cos(f * T * 3); }   // gira e é sugado, depois volta
   if (k === "galactico") { r.pulo = Math.sin(Math.PI * f) * 42; r.incl = Math.sin(f * T * 1.5) * .18 * fim; }   // flutua sem gravidade
   return r;
 }
 /* brilho extra do gesto Galáctico: aura de nebulosa e estrelas girando em volta */
 function efeitoGesto2D(c, x, y, k, f) {
+  if (k === "buraconegro") {
+    const forca = Math.sin(Math.PI * Math.min(1, f)), cy = y - 6, t = performance.now() / 1000;
+    c.save(); c.globalCompositeOperation = "lighter";
+    for (let k2 = 0; k2 < 3; k2++) { c.strokeStyle = `rgba(${k2 === 1 ? "190,120,255" : "255,150,60"},${.8 * forca})`; c.lineWidth = 3 - k2 * .7; c.beginPath(); c.ellipse(x, cy, (40 - k2 * 6) * forca + 4, (11 - k2 * 2) * forca + 1, t * 2 + k2, 0, Math.PI * 2); c.stroke(); }
+    c.restore();
+    c.fillStyle = `rgba(0,0,0,${.85 * forca})`; c.beginPath(); c.arc(x, cy, 12 * forca, 0, Math.PI * 2); c.fill();
+    return;
+  }
   if (k !== "galactico") return;
   const forca = Math.sin(Math.PI * Math.min(1, f));
   const aura = c.createRadialGradient(x, y - 4, 4, x, y - 4, 46);
@@ -3419,6 +3460,7 @@ function transformarGesto2D(c, x, y, k, f) {
   c.translate(r.desl, -r.pulo);
   if (r.volta) { c.translate(x, y); c.rotate(r.volta); c.translate(-x, -y); }
   c.translate(x, pe); c.rotate(r.incl); c.scale(r.larg * (1 + r.achata), 1 - r.achata); c.translate(-x, -pe);
+  if (r.tam !== 1) { c.translate(x, y - 6); c.scale(r.tam, r.tam); c.translate(-x, -(y - 6)); }
   return r;
 }
 document.addEventListener("click", ev => {
@@ -4078,12 +4120,14 @@ document.addEventListener("click", e => {
 /* skins limitadas: o ADM pode mudar prazo e preço neste aparelho (G.admLim) */
 SKINS.forEach(s => { if (s.limitada) { s.ateOriginal = s.ate; s.precoOriginal = s.preco; } });
 FUNDOS_LIM.forEach(f => { f.ateOriginal = f.ate; f.precoOriginal = f.preco; });
-[...EMOJIS, ...GESTOS, ...AV_ESPECIAIS].forEach(e => { if (e.limitada) { e.ateOriginal = e.ate; e.precoOriginal = e.preco; } });
-const todasLimitadas = () => [...SKINS.filter(s => s.limitada), ...FUNDOS_LIM, ...EMOJIS.filter(e => e.limitada), ...GESTOS.filter(g => g.limitada), ...AV_ESPECIAIS.filter(x => x.limitada)];
-const limInfo = k => todasLimitadas().find(x => x.k === k);
-const temLim = (j, x) => (x.tipo === "fundo" ? temFundo(j, x.k) : x.tipo === "emoji" ? temEmoji(j, x.k) : x.tipo === "gesto" ? temGesto(j, x.k) : x.tipo === "avatar" ? temAvatar(j, x.k) : temSkin(j, x.k));
+[...EMOJIS, ...GESTOS, ...AV_ESPECIAIS, ...ARREMESSOS].forEach(e => { if (e.limitada) { e.ateOriginal = e.ate; e.precoOriginal = e.preco; } });
+const todasLimitadas = () => [...SKINS.filter(s => s.limitada), ...FUNDOS_LIM, ...EMOJIS.filter(e => e.limitada), ...GESTOS.filter(g => g.limitada), ...AV_ESPECIAIS.filter(x => x.limitada), ...ARREMESSOS.filter(a => a.limitada)];
+/* cada item limitado tem sua chave (tipo + nome), porque "galactico" existe como fundo, emoji, gesto... */
+const chaveLim = x => (x.tipo || "skin") + "-" + x.k;
+const limInfo = k => todasLimitadas().find(x => chaveLim(x) === k);
+const temLim = (j, x) => (x.tipo === "fundo" ? temFundo(j, x.k) : x.tipo === "emoji" ? temEmoji(j, x.k) : x.tipo === "gesto" ? temGesto(j, x.k) : x.tipo === "avatar" ? temAvatar(j, x.k) : x.tipo === "arremesso" ? temArremesso(j, x.k) : temSkin(j, x.k));
 function aplicarLimitadas() {
-  todasLimitadas().forEach(s => { const o = (G.admLim || {})[s.k] || {}; s.ate = o.ate || s.ateOriginal; s.preco = o.preco || s.precoOriginal; if (s.tipo === "fundo") PRECO_FUNDO[s.k] = s.preco; });
+  todasLimitadas().forEach(s => { const o = (G.admLim || {})[chaveLim(s)] || {}; s.ate = o.ate || s.ateOriginal; s.preco = o.preco || s.precoOriginal; if (s.tipo === "fundo") PRECO_FUNDO[s.k] = s.preco; });
 }
 aplicarLimitadas();
 function jogadoresDoAparelho() {
@@ -4117,17 +4161,17 @@ TELAS.adm = () => {
     <h3>Fotos de perfil</h3><div class="chips">${AV_ESPECIAIS.map(x => chipItem(temAvatar(n, x.k), false, "avatar", x.k, x.icone + " " + esc(x.nome))).join("")}</div>
     <p class="dim" style="font-size:14px">Toque para dar ou tirar. Verde = tem.</p>`;
   if (ADM.aba === "limitadas") corpo = todasLimitadas().map(s => {
-    const venda = naVenda(s), donos = jogadoresDoAparelho().filter(j => temLim(j, s)).length, mexeu = !!(G.admLim || {})[s.k];
+    const venda = naVenda(s), donos = jogadoresDoAparelho().filter(j => temLim(j, s)).length, mexeu = !!(G.admLim || {})[chaveLim(s)], ck = chaveLim(s);
     return `<div class="adm-lim">
-      <h3>${s.tipo === "fundo" ? "Fundo" : s.tipo === "emoji" ? "Emoji " + s.e : s.tipo === "gesto" ? "Gesto " + s.icone : s.tipo === "avatar" ? "Foto " + s.icone : "Skin"} ${esc(s.nome)} <span class="${venda ? "am-on" : "am-off"}">● ${venda ? "à venda" : "encerrada"}</span></h3>
+      <h3>${s.tipo === "fundo" ? "Fundo" : s.tipo === "emoji" ? "Emoji " + s.e : s.tipo === "gesto" ? "Gesto " + s.icone : s.tipo === "avatar" ? "Foto " + s.icone : s.tipo === "arremesso" ? "Arremesso " + s.icone : "Skin"} ${esc(s.nome)} <span class="${venda ? "am-on" : "am-off"}">● ${venda ? "à venda" : "encerrada"}</span></h3>
       <p>Até <b>${brDataHora(Date.parse(s.ate))}</b> · <b>${s.preco}</b> moedas · ${donos} ${donos === 1 ? "jogador tem" : "jogadores têm"} neste celular</p>
       <div class="adm-grade">
-        <button type="button" class="btn ghost small" data-a="admLimPrazo" data-k="${s.k}" data-h="24">+1 dia</button>
-        <button type="button" class="btn ghost small" data-a="admLimPrazo" data-k="${s.k}" data-h="168">+7 dias</button>
-        <button type="button" class="btn ghost small" data-a="admLimEncerrar" data-k="${s.k}">Encerrar agora</button>
+        <button type="button" class="btn ghost small" data-a="admLimPrazo" data-k="${ck}" data-h="24">+1 dia</button>
+        <button type="button" class="btn ghost small" data-a="admLimPrazo" data-k="${ck}" data-h="168">+7 dias</button>
+        <button type="button" class="btn ghost small" data-a="admLimEncerrar" data-k="${ck}">Encerrar agora</button>
       </div>
-      <form class="row" data-a="admLimPreco" data-k="${s.k}" autocomplete="off"><input id="adm-preco-${s.k}" type="number" min="1" max="5000" value="${s.preco}" aria-label="Preço da ${esc(s.nome)}"><button class="btn small" type="submit" style="flex:0 0 auto;width:auto">Mudar preço</button></form>
-      ${mexeu ? `<button type="button" class="lb-pill" data-a="admLimVoltar" data-k="${s.k}">Voltar ao combinado (${brDataHora(Date.parse(s.ateOriginal))}, ${s.precoOriginal})</button>` : ""}
+      <form class="row" data-a="admLimPreco" data-k="${ck}" autocomplete="off"><input id="adm-preco-${ck}" type="number" min="1" max="5000" value="${s.preco}" aria-label="Preço da ${esc(s.nome)}"><button class="btn small" type="submit" style="flex:0 0 auto;width:auto">Mudar preço</button></form>
+      ${mexeu ? `<button type="button" class="lb-pill" data-a="admLimVoltar" data-k="${ck}">Voltar ao combinado (${brDataHora(Date.parse(s.ateOriginal))}, ${s.precoOriginal})</button>` : ""}
     </div>`; }).join("") + `<p class="dim" style="font-size:14px">Muda só neste celular. Para valer no celular de todo mundo, ou para criar uma edição limitada nova, peça ao Claude.</p>`;
   if (ADM.aba === "aviso") {
     const chave = chaveGitHub(), noSite = PODE_PUBLICAR_DIRETO;
@@ -4214,11 +4258,11 @@ Object.assign(acoes, {
   admLimPrazo(el) {
     const s = limInfo(el.dataset.k); G.admLim = G.admLim || {};
     const base = Math.max(Date.now(), Date.parse(s.ate));
-    G.admLim[s.k] = { ...(G.admLim[s.k] || {}), ate: new Date(base + el.dataset.h * 3600000).toISOString() };
+    G.admLim[chaveLim(s)] = { ...(G.admLim[chaveLim(s)] || {}), ate: new Date(base + el.dataset.h * 3600000).toISOString() };
     aplicarLimitadas(); salvar(); render(); toast(`${s.nome} vai até ${brDataHora(Date.parse(s.ate))}`);
   },
-  admLimEncerrar(el) { const s = limInfo(el.dataset.k); G.admLim = G.admLim || {}; G.admLim[s.k] = { ...(G.admLim[s.k] || {}), ate: new Date(Date.now() - 1000).toISOString() }; aplicarLimitadas(); salvar(); render(); toast(`${s.nome} saiu da loja`); },
-  admLimPreco(el) { const s = limInfo(el.dataset.k), v = Math.round(Number($("adm-preco-" + s.k).value)); if (!(v >= 1 && v <= 5000)) { toast("Preço de 1 a 5000"); return; } G.admLim = G.admLim || {}; G.admLim[s.k] = { ...(G.admLim[s.k] || {}), preco: v }; aplicarLimitadas(); salvar(); render(); toast(`${s.nome} agora custa ${v}`); },
+  admLimEncerrar(el) { const s = limInfo(el.dataset.k); G.admLim = G.admLim || {}; G.admLim[chaveLim(s)] = { ...(G.admLim[chaveLim(s)] || {}), ate: new Date(Date.now() - 1000).toISOString() }; aplicarLimitadas(); salvar(); render(); toast(`${s.nome} saiu da loja`); },
+  admLimPreco(el) { const s = limInfo(el.dataset.k), v = Math.round(Number($("adm-preco-" + chaveLim(s)).value)); if (!(v >= 1 && v <= 5000)) { toast("Preço de 1 a 5000"); return; } G.admLim = G.admLim || {}; G.admLim[chaveLim(s)] = { ...(G.admLim[chaveLim(s)] || {}), preco: v }; aplicarLimitadas(); salvar(); render(); toast(`${s.nome} agora custa ${v}`); },
   admLimVoltar(el) { if (G.admLim) delete G.admLim[el.dataset.k]; aplicarLimitadas(); salvar(); render(); },
 });
 if (typeof TELAS_COM_MUSICA !== "undefined") TELAS_COM_MUSICA.push("adm");
