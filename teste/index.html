@@ -253,6 +253,7 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .aviso-caixa p { font-size: 20px; font-weight: 800; margin: 0; overflow-wrap: anywhere; }
 .aviso-tag { justify-self: center; background: #ffd23f; color: #0b1b33; border-radius: 8px; padding: 3px 10px; font-weight: 800; }
 .aviso-caixa .lb-jogar { min-height: 56px; font-size: 24px; }
+.adm-status { background: rgba(55,217,154,.15); border: 2px solid #37d99a; border-radius: 10px; padding: 8px 10px; font-weight: 700; }
 .adm-json { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; background: rgba(0,0,0,.35); border-radius: 8px; padding: 8px; max-height: 200px; overflow-y: auto; }
 .lb-oferta { display: grid; grid-template-columns: 96px 1fr; gap: 10px 12px; align-items: center; background: rgba(11,27,51,.65); border: 3px solid #ffd23f; border-radius: 16px; padding: 12px; color: #fff; }
 .lb-oferta .lb-item-art { aspect-ratio: 1; filter: none; }
@@ -3817,22 +3818,44 @@ TELAS.adm = () => {
       <form class="row" data-a="admLimPreco" data-k="${s.k}" autocomplete="off"><input id="adm-preco-${s.k}" type="number" min="1" max="5000" value="${s.preco}" aria-label="Preço da ${esc(s.nome)}"><button class="btn small" type="submit" style="flex:0 0 auto;width:auto">Mudar preço</button></form>
       ${mexeu ? `<button type="button" class="lb-pill" data-a="admLimVoltar" data-k="${s.k}">Voltar ao combinado (${brDataHora(Date.parse(s.ateOriginal))}, ${s.precoOriginal})</button>` : ""}
     </div>`; }).join("") + `<p class="dim" style="font-size:14px">Muda só neste celular. Para valer no celular de todo mundo, ou para criar uma edição limitada nova, peça ao Claude.</p>`;
-  if (ADM.aba === "aviso") corpo = `
+  if (ADM.aba === "aviso") {
+    const chave = chaveGitHub(), noSite = PODE_PUBLICAR_DIRETO;
+    corpo = `
     <h3>Aviso para todo mundo</h3>
     <p class="dim" style="font-size:14px">Aparece numa janela e numa faixa na tela inicial de quem estiver com o jogo aberto no site (oficial ou teste), em até 1 minuto depois de publicado.</p>
     <textarea id="adm-aviso" maxlength="200" placeholder="Ex.: Hoje às 19h tem campeonato na Sala do Andre!" aria-label="Texto do aviso">${esc(ADM.avisoTexto || "")}</textarea>
     <label for="adm-aviso-h">Vale por</label>
-    <select id="adm-aviso-h"><option value="1">1 hora</option><option value="24" selected>1 dia</option><option value="72">3 dias</option><option value="168">7 dias</option></select>
-    <button type="button" class="btn" data-a="admPrepararAviso">Preparar aviso</button>
-    ${ADM.avisoJSON ? `<div class="card" style="background:rgba(255,255,255,.06)">
+    <select id="adm-aviso-h">${[[1, "1 hora"], [24, "1 dia"], [72, "3 dias"], [168, "7 dias"]].map(([h, t]) => `<option value="${h}" ${(ADM.avisoH || 24) === h ? "selected" : ""}>${t}</option>`).join("")}</select>
+    ${chave && noSite ? `<button type="button" class="btn" data-a="admPublicarAviso" ${ADM.publicando ? "disabled" : ""}>${ADM.publicando ? "Publicando…" : "📢 Publicar para todo mundo"}</button>
+      ${ADM.avisoStatus ? `<p class="adm-status">${esc(ADM.avisoStatus)}</p>` : ""}`
+      : `<button type="button" class="btn" data-a="admPrepararAviso">Preparar aviso (pelo GitHub)</button>`}
+    ${ADM.avisoJSON && !(chave && noSite) ? `<div class="card" style="background:rgba(255,255,255,.06)">
       <b>Para publicar:</b>
       <ol class="rules"><li>Toque em <b>Copiar</b>.</li><li>Toque em <b>Abrir no GitHub</b> (entre com a sua conta).</li><li>Apague tudo que estiver lá, cole e toque em <b>Commit changes</b>.</li></ol>
       <pre class="adm-json" id="adm-aviso-json">${esc(ADM.avisoJSON)}</pre>
       <div class="adm-grade"><button type="button" class="btn small" data-a="admCopiarAviso">Copiar</button><a class="btn ghost small" href="${LINK_EDITAR_AVISOS}" target="_blank" rel="noopener">Abrir no GitHub</a></div>
     </div>` : ""}
-    <p class="dim" style="font-size:14px">Ou fale para o Claude: "manda o aviso: …" que ele publica.</p>
     ${avisosAtivos().length ? `<h3>Valendo agora</h3>${avisosAtivos().map(a => `<p>📢 ${esc(a.texto)} <span class="dim">(até ${brDataHora(Date.parse(a.ate))})</span></p>`).join("")}
-      <button type="button" class="lb-pill" data-a="admLimparAvisos">Preparar para apagar todos</button>` : ""}`;
+      ${chave && noSite ? `<button type="button" class="lb-pill" data-a="admApagarAvisos">${ADM.apagarAvisos ? "Toque de novo para apagar todos" : "Apagar todos os avisos"}</button>` : `<button type="button" class="lb-pill" data-a="admLimparAvisos">Preparar para apagar todos</button>`}` : ""}
+    <div class="card" style="background:rgba(255,255,255,.06)">
+      <h3>${chave ? "🔑 Chave guardada neste celular" : "Publicar sem abrir o GitHub"}</h3>
+      ${!noSite ? `<p class="dim" style="font-size:14px">Dentro do Claude não dá para publicar direto. Abra o jogo pelo site no seu celular, ou peça ao Claude: "manda o aviso: …".</p>`
+      : chave ? `<p class="dim" style="font-size:14px">Fica só neste celular, atrás do código de 5 números. Se emprestar ou trocar de celular, apague.</p>
+        <button type="button" class="lb-pill" data-a="admEsquecerChave">${ADM.esquecer ? "Toque de novo para apagar a chave" : "Apagar a chave deste celular"}</button>`
+      : `<p style="font-size:14px">Faça uma vez só, pelo celular ou computador:</p>
+        <ol class="rules" style="font-size:14px">
+          <li>Abra <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a> (entre com a sua conta).</li>
+          <li>Nome: <b>Avisos do jogo</b>. Validade: <b>1 ano</b>.</li>
+          <li>Em <b>Repository access</b>, escolha <b>Only select repositories</b> e marque <b>mete-sarrafo</b>.</li>
+          <li>Em <b>Permissions → Contents</b>, escolha <b>Read and write</b>. Não marque mais nada.</li>
+          <li>Toque em <b>Generate token</b>, copie a chave (começa com <b>github_pat_</b>) e cole aqui embaixo.</li>
+        </ol>
+        <form class="row" data-a="admGuardarChave" autocomplete="off"><input id="adm-chave" type="password" placeholder="github_pat_…" aria-label="Chave do GitHub" autocomplete="off"><button class="btn small" type="submit" style="flex:0 0 auto;width:auto">Guardar</button></form>
+        ${ADM.chaveStatus ? `<p class="adm-status">${esc(ADM.chaveStatus)}</p>` : ""}
+        <p class="dim" style="font-size:13px">A chave nunca vai para o projeto nem para outro celular. Não mande a chave por mensagem para ninguém, nem para o Claude.</p>`}
+    </div>
+    <p class="dim" style="font-size:14px">Também dá para falar para o Claude: "manda o aviso: …".</p>`;
+  }
   if (ADM.aba === "numeros") {
     const hist = G.historico || [], vit = Object.entries(G.vitorias || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
     const ricos = Object.entries(G.banco || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
@@ -4009,6 +4032,61 @@ acoes.admCopiarAviso = () => {
   navigator.clipboard.writeText(ADM.avisoJSON || "").then(() => toast("Copiado! Agora abra o GitHub e cole."))
     .catch(() => { const p = $("adm-aviso-json"); const r = document.createRange(); r.selectNodeContents(p); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); toast("Texto selecionado: copie"); });
 };
+/* publicar direto pelo GitHub com a chave do pai (fica só no aparelho dele, numa chave separada do jogo) */
+const PODE_PUBLICAR_DIRETO = /github\.io$|^localhost$|^127\./.test(location.hostname);
+const REPO_API = "https://api.github.com/repos/thidesigner/mete-sarrafo/contents/avisos.json";
+function chaveGitHub() { try { return localStorage.getItem("ms-adm-chave") || ""; } catch { return ""; } }
+const cabecalhos = () => ({ Authorization: "Bearer " + chaveGitHub(), Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" });
+const paraBase64 = t => { const b = new TextEncoder().encode(t); let s = ""; b.forEach(x => (s += String.fromCharCode(x))); return btoa(s); };
+const deBase64 = t => new TextDecoder().decode(Uint8Array.from(atob(t.replace(/\n/g, "")), c => c.charCodeAt(0)));
+async function gravarAvisos(montar, msg) {
+  const r = await fetch(REPO_API + "?ref=main&t=" + Date.now(), { headers: cabecalhos(), cache: "no-store" });
+  if (r.status === 401 || r.status === 403) throw new Error("A chave não vale mais ou não tem permissão. Crie outra.");
+  if (!r.ok) throw new Error("Não consegui ler os avisos (" + r.status + ").");
+  const atual = await r.json(); let dados = { avisos: [] };
+  try { dados = JSON.parse(deBase64(atual.content)); } catch {}
+  const novo = montar(Array.isArray(dados.avisos) ? dados.avisos : []);
+  const w = await fetch(REPO_API, { method: "PUT", headers: { ...cabecalhos(), "Content-Type": "application/json" },
+    body: JSON.stringify({ message: msg, content: paraBase64(JSON.stringify({ avisos: novo }, null, 2) + "\n"), sha: atual.sha, branch: "main" }) });
+  if (!w.ok) throw new Error("O GitHub não aceitou (" + w.status + "). Tente de novo.");
+  AVISOS.lista = novo;
+}
+const reRenderAdm = () => { if (G.tela === "adm") { const y = window.scrollY; render(); window.scrollTo(0, y); } };
+Object.assign(acoes, {
+  async admGuardarChave() {
+    const v = ($("adm-chave") || {}).value.trim();
+    if (!/^(github_pat_|ghp_)[A-Za-z0-9_]{20,}$/.test(v)) { ADM.chaveStatus = "Isso não parece uma chave do GitHub (começa com github_pat_)."; reRenderAdm(); return; }
+    ADM.chaveStatus = "Conferindo a chave…"; reRenderAdm();
+    try {
+      const r = await fetch(REPO_API + "?ref=main", { headers: { Authorization: "Bearer " + v, Accept: "application/vnd.github+json" }, cache: "no-store" });
+      if (!r.ok) { ADM.chaveStatus = r.status === 404 ? "A chave não enxerga o mete-sarrafo. Confira o passo 3." : "A chave não funcionou (" + r.status + ")."; reRenderAdm(); return; }
+      try { localStorage.setItem("ms-adm-chave", v); } catch { ADM.chaveStatus = "Este navegador não deixou guardar."; reRenderAdm(); return; }
+      ADM.chaveStatus = ""; toast("Chave guardada! Agora é só escrever e publicar."); reRenderAdm();
+    } catch { ADM.chaveStatus = "Sem internet para conferir a chave."; reRenderAdm(); }
+  },
+  admEsquecerChave() {
+    if (!ADM.esquecer) { ADM.esquecer = true; reRenderAdm(); setTimeout(() => { ADM.esquecer = false; reRenderAdm(); }, 3000); return; }
+    try { localStorage.removeItem("ms-adm-chave"); } catch {} ADM.esquecer = false; toast("Chave apagada deste celular"); reRenderAdm();
+  },
+  async admPublicarAviso() {
+    const t = (($("adm-aviso") || {}).value || "").trim().replace(/\s+/g, " "), h = +($("adm-aviso-h") || {}).value || 24;
+    if (!t) { toast("Escreva o aviso"); return; }
+    ADM.avisoTexto = t; ADM.avisoH = h; ADM.publicando = true; ADM.avisoStatus = ""; reRenderAdm();
+    const agora = Date.now();
+    try {
+      await gravarAvisos(lista => [...lista.filter(avisoValido).slice(-4), { id: "a" + agora.toString(36), texto: t.slice(0, 200), de: new Date(agora).toISOString(), ate: new Date(agora + h * 3600000).toISOString() }], "Aviso do ADM");
+      ADM.avisoTexto = ""; ADM.avisoStatus = "Publicado! Chega em todo mundo em até 1 minuto. 📢";
+    } catch (e) { ADM.avisoStatus = e.message || "Não deu certo. Tente de novo."; }
+    ADM.publicando = false; reRenderAdm();
+  },
+  async admApagarAvisos() {
+    if (!ADM.apagarAvisos) { ADM.apagarAvisos = true; reRenderAdm(); setTimeout(() => { ADM.apagarAvisos = false; reRenderAdm(); }, 3000); return; }
+    ADM.apagarAvisos = false; ADM.avisoStatus = "Apagando…"; reRenderAdm();
+    try { await gravarAvisos(() => [], "Apaga os avisos"); ADM.avisoStatus = "Avisos apagados. A faixa some em até 1 minuto."; }
+    catch (e) { ADM.avisoStatus = e.message; }
+    reRenderAdm();
+  },
+});
 acoes.admLimparAvisos = () => { ADM.avisoJSON = JSON.stringify({ avisos: [] }, null, 2); ADM.avisoTexto = ""; const y = window.scrollY; render(); window.scrollTo(0, y); };
 </script>
 

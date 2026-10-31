@@ -94,7 +94,7 @@ Abre com **5 toques rápidos no título "Jogo de Pergunta"** da tela inicial e d
 
 `avisos.json` na raiz do site: `{"avisos": [{"id", "texto" (até 200 letras), "de", "ate"}]}` (datas ISO). Todo jogo aberto no site (oficial e teste) lê o arquivo ao abrir e a cada minuto; aviso novo aparece uma vez numa janela "📢 Aviso do ADM" e, enquanto vale, numa faixa que corre na tela inicial. Dentro do Claude não chega.
 - Quando o pai pedir "manda o aviso: …": acrescente um aviso com `id` novo (ex.: `a` + data), `de` agora e `ate` (padrão 1 dia), apague os vencidos, commit e push direto na `main`. Em ~1 minuto chega em todos.
-- O pai também pode publicar sozinho pela aba "Aviso" do Painel de ADM (monta o arquivo; ele cola no editor do GitHub).
+- O pai também publica sozinho pela aba "Aviso" do Painel de ADM. Com a **chave do GitHub** guardada no celular dele (token fino, só o repositório `mete-sarrafo`, só Contents leitura e escrita), o botão "Publicar para todo mundo" grava `avisos.json` direto pela API do GitHub. A chave fica só em `localStorage["ms-adm-chave"]` daquele aparelho, fora do estado do jogo (`ms-festa`). **Nunca peça, guarde, escreva ou faça commit dessa chave.** Sem chave, a aba monta o arquivo para colar no editor do GitHub.
 - Só o pai pede aviso. Texto curto, para crianças, sem dados pessoais, sem links.
 
 ## Testes

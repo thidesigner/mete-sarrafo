@@ -25,7 +25,7 @@ Ideia do Andre: um jogo de celular e PC que mistura forca com queimada. Quem adi
 ## Avisos do ADM (31/out)
 
 - O ADM (o pai) consegue mandar um aviso para todo mundo que estiver com o jogo aberto no site, como nos jogos com servidor. Aparece numa janela "📢 Aviso do ADM" e numa faixa amarela que corre na tela inicial enquanto o aviso vale.
-- Para mandar: pedir ao Claude ("manda o aviso: …") ou pela aba Aviso do Painel de ADM. Chega em até 1 minuto.
+- Para mandar: pedir ao Claude ("manda o aviso: …") ou pela aba Aviso do Painel de ADM. Depois de guardar a chave do GitHub uma vez no celular do pai, é só escrever e tocar em "Publicar para todo mundo", sem abrir o GitHub. Chega em até 1 minuto.
 
 ## Foto de perfil (31/out)
 
