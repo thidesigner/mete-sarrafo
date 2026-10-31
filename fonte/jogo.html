@@ -237,6 +237,9 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .lb-vidas { padding: 6px 10px; gap: 5px; } .lb-vidas span { color: #ff4d6d; font-size: 18px; } .lb-vidas b { font-family: var(--display); font-size: 18px; }
 .pacote { position: relative; display: grid; gap: 8px; justify-items: center; text-align: center; border: 3px solid #ffd23f; border-radius: 18px; padding: 14px 12px; color: #fff; }
 .pacote > * { position: relative; }
+.pacote + .pacote { margin-top: 4px; }
+.pacote.sk-limitada.pacote-buraconegro::before { opacity: .6; }
+.pacote.sk-limitada.pacote-buraconegro { background: radial-gradient(circle at 80% 30%, #000 0 8%, rgba(255,160,70,.9) 9%, rgba(176,123,255,.6) 14%, transparent 24%), radial-gradient(circle at 20% 80%, #3a1a6e 0%, #0b0716 70%) !important; border-color: #ff9a3c !important; box-shadow: 0 0 0 2px rgba(255,154,60,.35), 0 0 24px rgba(176,123,255,.55); }
 .pacote-titulo { font-family: var(--display); font-size: 24px; color: #ffd23f; text-shadow: 0 3px 0 #0b1b33; }
 .pacote-itens { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 100%; }
 .pacote-itens span { display: grid; justify-items: center; gap: 2px; background: rgba(11,27,51,.55); border-radius: 10px; padding: 6px 2px; font-size: 11px; font-weight: 800; }
@@ -3193,49 +3196,54 @@ const EMOJIS = [
 const emojiInfo = k => EMOJIS.find(e => e.k === k) || null;
 function temEmoji(n, k) { const e = emojiInfo(k); return !!e && (e.preco === 0 || (((G.inv || {})[n] || {}).emojis || []).includes(k)); }
 function darEmoji(n, k) { G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 }; G.inv[n].emojis = G.inv[n].emojis || []; if (!G.inv[n].emojis.includes(k)) G.inv[n].emojis.push(k); }
-/* ---------- Pacote Galáctico: os 5 itens da coleção juntos, 25% mais barato ---------- */
-const PACOTE_GAL = { nome: "Pacote Galáctico", desconto: .25, ate: "2026-11-06T23:59:59-03:00" };
-function itensDoPacote() {
-  return [
-    { tipo: "skin", k: "galactica", icone: "👕", nome: "Skin", preco: () => skinInfo("galactica").preco, tem: n => temSkin(n, "galactica"), dar: n => darSkin(n, "galactica") },
-    { tipo: "fundo", k: "galactico", icone: "🌠", nome: "Fundo", preco: () => PRECO_FUNDO.galactico, tem: n => temFundo(n, "galactico"), dar: n => darFundo(n, "galactico") },
-    { tipo: "emoji", k: "galactico", icone: "🌌", nome: "Emoji", preco: () => emojiInfo("galactico").preco, tem: n => temEmoji(n, "galactico"), dar: n => darEmoji(n, "galactico") },
-    { tipo: "gesto", k: "galactico", icone: "🚀", nome: "Gesto", preco: () => gestoInfo("galactico").preco, tem: n => temGesto(n, "galactico"), dar: n => darGesto(n, "galactico") },
-    { tipo: "avatar", k: "galactico", icone: "🪐", nome: "Foto", preco: () => avEspecial("galactico").preco,
-      tem: n => temAvatar(n, "galactico"), dar: n => { G.inv[n].avatares = [...(G.inv[n].avatares || []), "galactico"]; } },
-  ];
-}
+/* ---------- Pacotes das coleções limitadas: tudo junto, 25% mais barato ---------- */
+const ITEM_PACOTE = {
+  skin: k => ({ icone: "👕", nome: "Skin", preco: () => skinInfo(k).preco, tem: n => temSkin(n, k), dar: n => darSkin(n, k), usar: n => { usarSkin(n, k); usarPersonagem(n, null); } }),
+  fundo: k => ({ icone: "🌠", nome: "Fundo", preco: () => PRECO_FUNDO[k], tem: n => temFundo(n, k), dar: n => darFundo(n, k), usar: () => { G.fundo = k; } }),
+  emoji: (k, ic) => ({ icone: ic, nome: "Emoji", preco: () => emojiInfo(k).preco, tem: n => temEmoji(n, k), dar: n => darEmoji(n, k) }),
+  gesto: (k, ic) => ({ icone: ic, nome: "Gesto", preco: () => gestoInfo(k).preco, tem: n => temGesto(n, k), dar: n => darGesto(n, k) }),
+  foto: (k, ic) => ({ icone: ic, nome: "Foto", preco: () => avEspecial(k).preco, tem: n => temAvatar(n, k), dar: n => { G.inv[n].avatares = [...(G.inv[n].avatares || []), k]; }, usar: n => { G.inv[n].avatar = { ...avatarDe(n), i: k }; } }),
+  arremesso: (k, ic) => ({ icone: ic, nome: "Arremesso", preco: () => arremessoInfo(k).preco, tem: n => temArremesso(n, k), dar: n => { G.inv[n].arremessos = [...(G.inv[n].arremessos || []), k]; }, usar: n => { G.inv[n].arremesso = k; } }),
+};
+const PACOTES = [
+  { id: "buraconegro", nome: "Pacote Buraco Negro", emoji: "🕳️", desconto: .25, ate: "2026-11-07T23:59:59-03:00",
+    itens: () => [ITEM_PACOTE.skin("buraconegro"), ITEM_PACOTE.fundo("buraconegro"), ITEM_PACOTE.emoji("buraconegro", "🕳️"), ITEM_PACOTE.gesto("buraconegro", "🌑"), ITEM_PACOTE.foto("buraconegro", "⚫"), ITEM_PACOTE.arremesso("buraconegro", "🌀")] },
+  { id: "galactico", nome: "Pacote Galáctico", emoji: "🚀", desconto: .25, ate: "2026-11-06T23:59:59-03:00",
+    itens: () => [ITEM_PACOTE.skin("galactica"), ITEM_PACOTE.fundo("galactico"), ITEM_PACOTE.emoji("galactico", "🌌"), ITEM_PACOTE.gesto("galactico", "🚀"), ITEM_PACOTE.foto("galactico", "🪐")] },
+];
+const pacoteDe = id => PACOTES.find(x => x.id === id) || PACOTES[0];
 /* o preço é só do que ainda falta, com desconto; some quando acaba o prazo ou quando já tem tudo */
-function pacoteInfo(n) {
-  const falta = itensDoPacote().filter(x => !x.tem(n)), cheio = falta.reduce((t, x) => t + x.preco(), 0);
-  return { falta, cheio, preco: Math.round(cheio * (1 - PACOTE_GAL.desconto)), aVenda: Date.now() <= Date.parse(PACOTE_GAL.ate) && falta.length > 0 };
+function pacoteInfo(n, id = "galactico") {
+  const pc = pacoteDe(id), todos = pc.itens(), falta = todos.filter(x => !x.tem(n)), cheio = falta.reduce((t, x) => t + x.preco(), 0);
+  return { pc, todos, falta, cheio, preco: Math.round(cheio * (1 - pc.desconto)), aVenda: Date.now() <= Date.parse(pc.ate) && falta.length > 0 };
 }
 function pacoteHTML(nome, moedas) {
-  const p = pacoteInfo(nome); if (!p.aVenda) return "";
-  const pode = moedas >= p.preco;
-  return `<div class="pacote sk-limitada">
-    <i class="sk-selo">Edição limitada · ${Math.round(PACOTE_GAL.desconto * 100)}% off</i>
-    <b class="pacote-titulo">${PACOTE_GAL.nome}</b>
-    <div class="pacote-itens">${itensDoPacote().map(x => `<span class="${x.tem(nome) ? "ja-tem" : ""}"><i aria-hidden="true">${x.icone}</i>${x.nome}${x.tem(nome) ? " ✔" : ""}</span>`).join("")}</div>
-    <span class="sk-prazo">⏳ ${faltaParaAcabar(PACOTE_GAL)}</span>
+  return PACOTES.map(pc => {
+    const p = pacoteInfo(nome, pc.id); if (!p.aVenda) return "";
+    const pode = moedas >= p.preco, conf = G.lojaConf === "pacote:" + pc.id;
+    return `<div class="pacote sk-limitada pacote-${pc.id}">
+    <i class="sk-selo">Edição limitada · ${Math.round(pc.desconto * 100)}% off</i>
+    <b class="pacote-titulo">${pc.nome}</b>
+    <div class="pacote-itens" style="grid-template-columns: repeat(${p.todos.length > 5 ? 3 : p.todos.length}, minmax(0, 1fr))">${p.todos.map(x => `<span class="${x.tem(nome) ? "ja-tem" : ""}"><i aria-hidden="true">${x.icone}</i>${x.nome}${x.tem(nome) ? " ✔" : ""}</span>`).join("")}</div>
+    <span class="sk-prazo">⏳ ${faltaParaAcabar(pc)}</span>
     <div class="pacote-preco"><s>$ ${p.cheio}</s>
-      <button class="lb-comprar" data-a="comprarPacote" ${pode ? "" : "disabled"}>${pode ? (G.lojaConf === "pacote" ? "Confirmar?" : `<span class="lb-coin" aria-hidden="true">$</span>${p.preco}`) : `Faltam ${fmtM(p.preco - moedas)}`}</button></div>
-    ${p.falta.length < 5 ? `<span class="pacote-obs">Você já tem ${5 - p.falta.length}: paga só o que falta.</span>` : ""}
-  </div>`;
+      <button class="lb-comprar" data-a="comprarPacote" data-p="${pc.id}" ${pode ? "" : "disabled"}>${pode ? (conf ? "Confirmar?" : `<span class="lb-coin" aria-hidden="true">$</span>${p.preco}`) : `Faltam ${fmtM(p.preco - moedas)}`}</button></div>
+    ${p.falta.length < p.todos.length ? `<span class="pacote-obs">Você já tem ${p.todos.length - p.falta.length}: paga só o que falta.</span>` : ""}
+  </div>`; }).join("");
 }
-acoes.comprarPacote = () => {
-  const nome = perfil(), p = pacoteInfo(nome);
-  if (!p.aVenda) { toast("O Pacote Galáctico já acabou"); return; }
+acoes.comprarPacote = el => {
+  const nome = perfil(), id = (el && el.dataset && el.dataset.p) || "galactico", p = pacoteInfo(nome, id);
+  if (!p.aVenda) { toast(`O ${p.pc.nome} já acabou`); return; }
   if ((G.banco[nome] || 0) < p.preco) return;
-  if (G.lojaConf !== "pacote") { pedirConfirmacao("pacote"); return; }
+  if (G.lojaConf !== "pacote:" + id) { pedirConfirmacao("pacote:" + id); return; }
   clearTimeout(lojaConfT); G.lojaConf = false;
   G.banco[nome] = Math.round(((G.banco[nome] || 0) - p.preco) * 10) / 10;
   G.inv = G.inv || {}; G.inv[nome] = G.inv[nome] || { vidas: 0 };
   p.falta.forEach(x => x.dar(nome));
-  usarSkin(nome, "galactica"); usarPersonagem(nome, null); G.fundo = "galactico"; G.inv[nome].avatar = { ...avatarDe(nome), i: "galactico" };
+  p.todos.forEach(x => x.usar && x.usar(nome));   // já veste e coloca tudo
   salvarPlacar();
   if (typeof sfxJogar === "function") sfxJogar();
-  toast(`${nome} comprou o Pacote Galáctico! 🚀`);
+  toast(`${nome} comprou o ${p.pc.nome}! ${p.pc.emoji}`);
   const y = window.scrollY; render(); window.scrollTo(0, y);
 };
 acoes.comprarArremesso = el => {
