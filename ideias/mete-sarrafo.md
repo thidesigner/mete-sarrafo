@@ -30,6 +30,7 @@ Ideia do Andre: um jogo de celular e PC que mistura forca com queimada. Quem adi
 
 - Estádio novo: céu de noite com estrelas, quadra pintada com o nome do jogo no meio, mureta com letreiro, arquibancada com torcida colorida (pula mais na hora da bola) e refletores brilhando.
 - Bonequinhos com cara de desenho animado (sombreado em faixas e contorno preto) e sombra no chão. Bola com rastro e faíscas quando alguém leva bolada.
+- A visão de cima ganhou o mesmo visual: quadra pintada com o nome no meio, arquibancada com torcida (pula na hora da bola), letreiro na mureta, luz dos refletores nos cantos, sombras, rastro da bola e faíscas.
 
 ## Avisos do ADM (31/out)
 
