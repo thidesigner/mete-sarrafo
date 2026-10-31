@@ -152,6 +152,7 @@ details summary { cursor: pointer; font-family: var(--display); font-size: 16px;
 .ge-prev { width: 100%; aspect-ratio: 1.3; display: block; }
 .a-emo button.ge { border-color: #9b51e0; background: rgba(155,81,224,.25); }
 .a-emo .sep { flex: 0 0 2px; background: var(--lines); margin: 6px 2px; border-radius: 2px; }
+.arr-bola { display: inline-block; width: 42px; height: 42px; border-radius: 50%; background: #ff8a1f; border: 3px solid #2a1300; vertical-align: middle; }
 .em-art { font-size: 46px; line-height: 1.3; text-align: center; }
 .stage-wrap { position: relative; border-radius: 14px; overflow: hidden; border: 2px solid var(--lines); touch-action: none; }
 #a-canvas { display: block; width: 100%; aspect-ratio: 1; max-width: 100%; touch-action: none; user-select: none; -webkit-user-select: none; }
@@ -1220,10 +1221,10 @@ function renderSetup() {
       <div class="card">
         <h3>Visão do jogo</h3>
         <span class="seg2" role="group" aria-label="Visão do jogo" style="align-self:flex-start">
-          <button type="button" id="as-fp1" aria-pressed="${s.fp !== false}">Primeira pessoa</button>
+          <button type="button" id="as-fp1" aria-pressed="${s.fp !== false}">3D</button>
           <button type="button" id="as-fp0" aria-pressed="${s.fp === false}">De cima</button>
         </span>
-        <p class="dim" style="font-size:14px">Em primeira pessoa você vê pelos olhos de quem está com o celular.</p>
+        <p class="dim" style="font-size:14px">Em 3D a câmera fica atrás do bonequinho de quem está com o celular. Arraste para girar.</p>
       </div>
       <div class="card">
         <h3>Robôs extras</h3>
@@ -1268,7 +1269,7 @@ function comecarArena() {
       home, x: home.x, y: home.y, alvo: null, modo: "casa", vel: A_VEL * aRnd(.88, 1.12), habil: aRnd(-.08, .08),
       flash: 0, passo: 0, ctrl: false, tocou: false, saiuEm: null };
   });
-  A.P.forEach(p => { if (p.humano) { vestir(p, skinDe(p.nome)); const f = personagemDe(p.nome); if (f) p.ficha = f; } });
+  A.P.forEach(p => { if (p.humano) { vestir(p, skinDe(p.nome)); const f = personagemDe(p.nome); if (f) p.ficha = f; p.arremesso = arremessoDe(p.nome); } });
   A.cel = Math.max(0, A.P.findIndex(p => p.nome === s.dono));
   A.balls = []; A.fx = []; A.t = 0; A.fim = null; A.ptr = null; A.inicio = Date.now();
   A.st = { palavras: 0, acertos: 0, erros: 0, timeouts: 0, votos: 0, votosOk: 0, arremessos: 0, acertosBola: 0, rodadas: 0, compras: 0, moedas: {}, eventos: [] };
@@ -1364,9 +1365,35 @@ function iniciarBolaA(atir) {
   renderAct();
 }
 function aCorrendo() { const ph = A.ph; return aVivos().filter(p => p !== ph.atir && (p.modo === "fugindo" || p.modo === "voltando")); }
+/* ---------- Coisas de arremessar (só a aparência; todas funcionam igual à bola) ---------- */
+const ARREMESSOS = [
+  { k: "bola", nome: "Bola", icone: "🟠", preco: 0, cor: "#ffb347" },
+  { k: "basquete", nome: "Basquete", icone: "🏀", preco: 40, cor: "#ff9a3c" },
+  { k: "futebol", nome: "Futebol", icone: "⚽", preco: 40, cor: "#e9eef5" },
+  { k: "tenis", nome: "Bolinha de tênis", icone: "🎾", preco: 60, cor: "#d8f05a" },
+  { k: "meia", nome: "Meia fedida", icone: "🧦", preco: 60, cor: "#9be15d" },
+  { k: "tomate", nome: "Tomate", icone: "🍅", preco: 80, cor: "#ff4d4d" },
+  { k: "ovo", nome: "Ovo", icone: "🥚", preco: 80, cor: "#fff3c4" },
+  { k: "banana", nome: "Banana", icone: "🍌", preco: 90, cor: "#ffe066" },
+  { k: "balao", nome: "Balão d'água", icone: "🎈", preco: 100, cor: "#7fd3ff" },
+  { k: "torta", nome: "Torta na cara", icone: "🥧", preco: 120, cor: "#ffe2b8" },
+  { k: "pizza", nome: "Pizza", icone: "🍕", preco: 120, cor: "#ffcf5c" },
+  { k: "abobora", nome: "Abóbora", icone: "🎃", preco: 150, cor: "#ff8a1f" },
+  { k: "estrela", nome: "Estrela", icone: "⭐", preco: 150, cor: "#ffe9a8" },
+];
+const arremessoInfo = k => ARREMESSOS.find(a => a.k === k) || ARREMESSOS[0];
+function temArremesso(n, k) { const a = ARREMESSOS.find(x => x.k === k); return !!a && (a.preco === 0 || (((G.inv || {})[n] || {}).arremessos || []).includes(k)); }
+function arremessoDe(n) { const k = ((G.inv || {})[n] || {}).arremesso; return temArremesso(n, k) ? k : "bola"; }
+function desenharArremesso2D(c, k, x, y, giro) {
+  if (k === "bola" || !ARREMESSOS.some(a => a.k === k)) {
+    c.fillStyle = "#ff8a1f"; c.strokeStyle = "#2a1300"; c.lineWidth = 3; c.beginPath(); c.arc(x, y, 14, 0, Math.PI * 2); c.fill(); c.stroke();
+    c.strokeStyle = "rgba(42,19,0,.6)"; c.lineWidth = 2; c.beginPath(); c.arc(x, y, 14, giro, giro + Math.PI * .9); c.stroke(); return;
+  }
+  c.save(); c.translate(x, y); c.rotate(giro); c.font = "34px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(arremessoInfo(k).icone, 0, 2); c.restore();
+}
 function arremessarA(to) {
   const ph = A.ph, atir = ph.atir;
-  A.balls.push({ from: { x: atir.x, y: atir.y }, to, t: 0, T: Math.max(.15, aDist(atir, to) / A_BOLA) });
+  A.balls.push({ from: { x: atir.x, y: atir.y }, to, t: 0, T: Math.max(.15, aDist(atir, to) / A_BOLA), k: atir.arremesso || "bola" });
   A.st.arremessos++; ph.cd = A.cfg.recarga; aEvento("arremesso", { por: atir.nome });
 }
 function atingirA(p) {
@@ -1514,15 +1541,16 @@ function desenharA() {
   const dpr = window.devicePixelRatio || 1, px = Math.round(w * dpr);
   if (aCv.width !== px || aCv.height !== px) { aCv.width = px; aCv.height = px; }
   const c = aCtx, k = px / AW;
+  c.setTransform(1, 0, 0, 1, 0, 0);
+  c.drawImage(estadioCima(px), 0, 0);
   c.setTransform(k, 0, 0, k, 0, 0);
-  c.fillStyle = "#0f3057"; c.fillRect(0, 0, AW, AW);
-  c.fillStyle = "#133a68"; c.beginPath(); c.arc(AC, AC, AH + 70, 0, Math.PI * 2); c.fill();
-  c.strokeStyle = "rgba(244,247,251,.35)"; c.lineWidth = 4;
-  c.beginPath(); c.arc(AC, AC, AH + 70, 0, Math.PI * 2); c.stroke();
-  c.beginPath(); c.arc(AC, AC, 70, 0, Math.PI * 2); c.stroke();
-  c.beginPath(); c.moveTo(AC - AH - 70, AC); c.lineTo(AC + AH + 70, AC); c.stroke();
   const ph = A.ph || {};
-  for (const p of A.P) { c.strokeStyle = "rgba(244,247,251,.3)"; c.lineWidth = 3; c.beginPath(); c.arc(p.home.x, p.home.y, 34, 0, Math.PI * 2); c.stroke(); }
+  torcidaCima(c, ph.k === "bola");
+  for (const p of A.P) { c.strokeStyle = "rgba(244,247,251,.45)"; c.lineWidth = 4; c.beginPath(); c.arc(p.home.x, p.home.y, 34, 0, Math.PI * 2); c.stroke(); }
+  // sombras no chão
+  c.fillStyle = "rgba(5,15,35,.35)";
+  for (const p of A.P) if (p.vivo) { const ges = typeof gestoAtivo === "function" && gestoAtivo(p), sobe = ges ? poseGesto(ges.g.k, ges.f).pulo : 0;
+    c.beginPath(); c.ellipse(p.x, p.y + 40, Math.max(14, 30 - sobe * .2), Math.max(6, 11 - sobe * .08), 0, 0, Math.PI * 2); c.fill(); }
   const ctrl = A.P.find(p => p.ctrl);
   if (ctrl) {
     const alvo = ctrl.tocou ? ctrl.home : { x: 2 * AC - ctrl.home.x, y: 2 * AC - ctrl.home.y };
@@ -1544,8 +1572,13 @@ function desenharA() {
   for (const b of A.balls) {
     const f = Math.min(1, b.t / b.T), x = b.from.x + (b.to.x - b.from.x) * f, y = b.from.y + (b.to.y - b.from.y) * f, h = Math.sin(Math.PI * f) * 70;
     c.fillStyle = "rgba(0,0,0,.3)"; c.beginPath(); c.ellipse(x, y + 10, 12, 6, 0, 0, Math.PI * 2); c.fill();
-    c.fillStyle = "#ff8a1f"; c.strokeStyle = "#2a1300"; c.lineWidth = 3; c.beginPath(); c.arc(x, y - h, 14, 0, Math.PI * 2); c.fill(); c.stroke();
+    // rastro
+    b.hist = b.hist || []; b.hist.unshift([x, y - h]); if (b.hist.length > 10) b.hist.length = 10;
+    const item = arremessoInfo(b.k);
+    c.fillStyle = item.cor; b.hist.forEach(([hx, hy], i) => { if (!i) return; c.globalAlpha = Math.max(0, .45 - i * .045); c.beginPath(); c.arc(hx, hy, 13 - i * 1.1, 0, Math.PI * 2); c.fill(); }); c.globalAlpha = 1;
+    desenharArremesso2D(c, b.k, x, y - h, f * 12);
   }
+  faiscasCima(c);
   for (const f of A.fx) {
     c.globalAlpha = Math.max(0, 1 - f.t / 1.4);
     c.fillStyle = f.cor; c.font = "30px Bungee, sans-serif"; c.textAlign = "center"; c.textBaseline = "middle";
@@ -1553,6 +1586,66 @@ function desenharA() {
     c.globalAlpha = 1;
   }
   desenharEmojis2D(c);
+}
+/* ---------- Visual da visão de cima: estádio guardado numa imagem (desenhado uma vez), torcida e faíscas ---------- */
+const CIMA = { cv: null, px: 0, torcida: null, faiscas: [] };
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { CIMA.px = 0; });   // redesenha quando a fonte do título carregar
+function estadioCima(px) {
+  if (CIMA.cv && CIMA.px === px) return CIMA.cv;
+  const cv = CIMA.cv || document.createElement("canvas"); cv.width = cv.height = px; CIMA.cv = cv; CIMA.px = px;
+  const c = cv.getContext("2d"), k = px / AW; c.setTransform(k, 0, 0, k, 0, 0);
+  const R = AH + 70;
+  // chão de fora com piso quadriculado
+  c.fillStyle = "#0e2a4f"; c.fillRect(0, 0, AW, AW);
+  c.strokeStyle = "rgba(255,255,255,.04)"; c.lineWidth = 2; for (let x = 0; x <= AW; x += 50) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, AW); c.moveTo(0, x); c.lineTo(AW, x); c.stroke(); }
+  // arquibancada em degraus (aparece nos cantos)
+  for (let i = 6; i >= 0; i--) { c.fillStyle = i % 2 ? "#1d4171" : "#22497c"; c.beginPath(); c.arc(AC, AC, R + 40 + i * 32, 0, Math.PI * 2); c.fill(); }
+  // mureta com letreiro
+  c.fillStyle = "#0f3057"; c.beginPath(); c.arc(AC, AC, R + 40, 0, Math.PI * 2); c.fill();
+  c.save(); c.translate(AC, AC); c.fillStyle = "#ffd23f"; c.font = "900 15px Bungee, 'Arial Black', sans-serif"; c.textAlign = "center"; c.textBaseline = "middle";
+  for (let i = 0; i < 12; i++) { c.save(); c.rotate(i / 12 * Math.PI * 2); c.translate(0, -(R + 20)); c.fillStyle = i % 2 ? "#37d99a" : "#ffd23f"; c.fillText(i % 2 ? "★" : "JOGO DE PERGUNTA", 0, 0); c.restore(); }
+  c.restore();
+  // quadra pintada
+  const g = c.createRadialGradient(AC, AC, 30, AC, AC, R); g.addColorStop(0, "#2f78c8"); g.addColorStop(.75, "#1f5ea8"); g.addColorStop(1, "#174b8a");
+  c.fillStyle = g; c.beginPath(); c.arc(AC, AC, R, 0, Math.PI * 2); c.fill();
+  c.strokeStyle = "rgba(255,255,255,.07)"; c.lineWidth = 3; for (let r = 60; r < R; r += 60) { c.beginPath(); c.arc(AC, AC, r, 0, Math.PI * 2); c.stroke(); }
+  c.strokeStyle = "#e9f1fb"; c.lineWidth = 10; c.beginPath(); c.arc(AC, AC, R - 6, 0, Math.PI * 2); c.stroke();
+  c.lineWidth = 6; c.beginPath(); c.moveTo(AC - R + 6, AC); c.lineTo(AC + R - 6, AC); c.stroke();
+  c.strokeStyle = "rgba(255,255,255,.35)"; c.lineWidth = 4; c.setLineDash([16, 12]); c.beginPath(); c.arc(AC, AC, AH, 0, Math.PI * 2); c.stroke(); c.setLineDash([]);
+  // círculo do meio com o nome do jogo
+  c.fillStyle = "#ffd23f"; c.beginPath(); c.arc(AC, AC, 72, 0, Math.PI * 2); c.fill(); c.strokeStyle = "#e9f1fb"; c.lineWidth = 6; c.stroke();
+  c.fillStyle = "#0b1b33"; c.font = "900 22px Bungee, 'Arial Black', sans-serif"; c.textAlign = "center"; c.textBaseline = "middle";
+  c.fillText("JOGO DE", AC, AC - 13); c.fillText("PERGUNTA", AC, AC + 15);
+  // luz dos refletores nos cantos
+  for (const [x, y] of [[0, 0], [AW, 0], [0, AW], [AW, AW]]) { const l = c.createRadialGradient(x, y, 0, x, y, 260); l.addColorStop(0, "rgba(255,244,200,.55)"); l.addColorStop(1, "rgba(255,244,200,0)"); c.fillStyle = l; c.fillRect(0, 0, AW, AW); }
+  return cv;
+}
+function torcidaCima(c, animada) {
+  if (!CIMA.torcida) {
+    CIMA.torcida = []; const R = AH + 70, cores = ["#ff4d6d", "#ffd23f", "#37d99a", "#2f80ed", "#9b51e0", "#f4a261", "#e9eef5", "#e4572e"];
+    for (let i = 0; i < 900 && CIMA.torcida.length < 170; i++) {
+      const a = Math.random() * Math.PI * 2, r = R + 62 + Math.floor(Math.random() * 6) * 32 + Math.random() * 10, x = AC + Math.cos(a) * r, y = AC + Math.sin(a) * r;
+      if (x > 8 && x < AW - 8 && y > 8 && y < AW - 8) CIMA.torcida.push({ x, y, cor: cores[i % cores.length], fase: Math.random() * 6 });
+    }
+  }
+  const t = performance.now() / 1000;
+  for (const q of CIMA.torcida) {
+    const pulo = Math.max(0, Math.sin(t * (animada ? 7 : 3) + q.fase)) * (animada ? 5 : 2);
+    c.fillStyle = q.cor; c.beginPath(); c.arc(q.x, q.y - pulo, 8, 0, Math.PI * 2); c.fill();
+    c.fillStyle = "rgba(255,226,190,.9)"; c.beginPath(); c.arc(q.x, q.y - pulo - 9, 5, 0, Math.PI * 2); c.fill();
+  }
+}
+function faiscasCima(c) {
+  for (const f of A.fx) if (f.txt === "-1" && !f.faiscaCima) {
+    f.faiscaCima = true;
+    for (let i = 0; i < 16; i++) { const a = Math.random() * Math.PI * 2, v = 120 + Math.random() * 220; CIMA.faiscas.push({ x: f.x, y: f.y - 30, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 120, t: 0, cor: i % 2 ? "#ff4d6d" : "#ffd23f" }); }
+  }
+  const dt = 1 / 60;
+  CIMA.faiscas = CIMA.faiscas.filter(p => {
+    p.t += dt; p.vy += 400 * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+    c.globalAlpha = Math.max(0, 1 - p.t / .8); c.fillStyle = p.cor; c.beginPath(); c.arc(p.x, p.y, 6 * (1 - p.t), 0, Math.PI * 2); c.fill(); c.globalAlpha = 1;
+    return p.t < .8;
+  });
 }
 function desenharBoneco(c, p, ph) {
   c.save(); c.translate(p.x, p.y); c.scale(1.4, 1.4); c.translate(-p.x, -p.y);
@@ -1943,31 +2036,12 @@ function init3D() {
     const r = new THREE.WebGLRenderer({ antialias: true });
     r.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
     r.domElement.id = "a-3d";
-    r.domElement.setAttribute("aria-label", "Quadra em primeira pessoa");
+    r.domElement.setAttribute("aria-label", "Quadra em 3D");
     $("a-canvas").after(r.domElement);
     F.r = r; F.el = r.domElement;
   } catch { return false; }
   const s = new THREE.Scene();
-  s.background = new THREE.Color("#0b2547");
-  s.fog = new THREE.Fog("#0b2547", 9, 22);
-  s.add(new THREE.HemisphereLight("#cfe3ff", "#0f3057", .85));
-  const sol = new THREE.DirectionalLight("#ffffff", .7); sol.position.set(3, 8, 2); s.add(sol);
-  const chao = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.MeshLambertMaterial({ color: "#0f3057" }));
-  chao.rotation.x = -Math.PI / 2; s.add(chao);
-  const quadra = new THREE.Mesh(new THREE.CircleGeometry((AH + 70) * U, 64), new THREE.MeshLambertMaterial({ color: "#1a4a80" }));
-  quadra.rotation.x = -Math.PI / 2; quadra.position.y = .005; s.add(quadra);
-  const linha = (r1, r2) => { const m = new THREE.Mesh(new THREE.RingGeometry(r1, r2, 64), new THREE.MeshBasicMaterial({ color: "#dfe9f7" })); m.rotation.x = -Math.PI / 2; m.position.y = .01; s.add(m); };
-  linha((AH + 66) * U, (AH + 72) * U); linha(.66, .72);
-  const meio = new THREE.Mesh(new THREE.PlaneGeometry((AH + 70) * 2 * U, .05), new THREE.MeshBasicMaterial({ color: "#dfe9f7" }));
-  meio.rotation.x = -Math.PI / 2; meio.position.y = .011; s.add(meio);
-  const cerca = new THREE.Mesh(new THREE.CylinderGeometry(7.2, 7.2, .6, 48, 1, true), new THREE.MeshLambertMaterial({ color: "#133a68", side: THREE.BackSide }));
-  cerca.position.y = .3; s.add(cerca);
-  for (let i = 0; i < 14; i++) {
-    const a = i / 14 * Math.PI * 2, poste = new THREE.Mesh(new THREE.CylinderGeometry(.06, .06, 4), new THREE.MeshLambertMaterial({ color: "#2b4f7d" }));
-    poste.position.set(Math.cos(a) * 7.4, 2, Math.sin(a) * 7.4); s.add(poste);
-    const luz = new THREE.Mesh(new THREE.SphereGeometry(.18, 8, 8), new THREE.MeshBasicMaterial({ color: "#fff3c4" }));
-    luz.position.set(Math.cos(a) * 7.4, 4.05, Math.sin(a) * 7.4); s.add(luz);
-  }
+  montarEstadio3D(s);
   F.reticle = new THREE.Mesh(new THREE.RingGeometry(.25, .36, 32), new THREE.MeshBasicMaterial({ color: "#ff8a1f", transparent: true, opacity: .9 }));
   F.reticle.rotation.x = -Math.PI / 2; F.reticle.position.y = .03; F.reticle.visible = false; s.add(F.reticle);
   F.alvo = new THREE.Mesh(new THREE.RingGeometry(1.3, 1.45, 48), new THREE.MeshBasicMaterial({ color: "#ffd23f" }));
@@ -1981,6 +2055,116 @@ function init3D() {
   return true;
 }
 
+/* ---------- Visual do estádio (céu, quadra pintada, arquibancada com torcida, refletores) ---------- */
+function texturaCanvas(w, h, desenhar) {
+  const cv = document.createElement("canvas"); cv.width = w; cv.height = h; desenhar(cv.getContext("2d"), w, h);
+  const t = new THREE.CanvasTexture(cv); t.anisotropy = 4; return t;
+}
+function brilhoTextura(cor) {
+  return texturaCanvas(64, 64, (c, w) => { const g = c.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, cor); g.addColorStop(.25, cor); g.addColorStop(1, "rgba(0,0,0,0)"); c.fillStyle = g; c.fillRect(0, 0, w, w); });
+}
+function montarEstadio3D(s) {
+  // céu: degradê da noite com estrelas
+  const ceu = texturaCanvas(512, 512, (c, w, h) => {
+    const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, "#050b24"); g.addColorStop(.45, "#0d2550"); g.addColorStop(.5, "#1b3f78"); g.addColorStop(1, "#0b1b33");
+    c.fillStyle = g; c.fillRect(0, 0, w, h);
+    for (let i = 0; i < 160; i++) { c.fillStyle = `rgba(255,255,255,${.3 + Math.random() * .7})`; c.fillRect(Math.random() * w, Math.random() * h * .42, Math.random() < .15 ? 2 : 1, 1); }
+  });
+  const domo = new THREE.Mesh(new THREE.SphereGeometry(40, 32, 16), new THREE.MeshBasicMaterial({ map: ceu, side: THREE.BackSide, fog: false }));
+  s.add(domo);
+  s.background = new THREE.Color("#0b1b33");
+  s.fog = new THREE.Fog("#10284d", 14, 34);
+  s.add(new THREE.HemisphereLight("#dcebff", "#1a2f55", .95));
+  const sol = new THREE.DirectionalLight("#fff4dd", .75); sol.position.set(4, 9, 3); s.add(sol);
+  const contra = new THREE.DirectionalLight("#8fb7ff", .35); contra.position.set(-5, 6, -4); s.add(contra);
+  // chão de fora
+  const fora = texturaCanvas(256, 256, (c, w) => { c.fillStyle = "#16365f"; c.fillRect(0, 0, w, w); c.strokeStyle = "rgba(255,255,255,.05)"; c.lineWidth = 2; for (let k = 0; k <= w; k += 32) { c.beginPath(); c.moveTo(k, 0); c.lineTo(k, w); c.moveTo(0, k); c.lineTo(w, k); c.stroke(); } });
+  fora.wrapS = fora.wrapT = THREE.RepeatWrapping; fora.repeat.set(12, 12);
+  const chao = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.MeshLambertMaterial({ map: fora })); chao.rotation.x = -Math.PI / 2; s.add(chao);
+  // quadra pintada (linhas, círculo do meio e o nome do jogo)
+  const R = (AH + 70) * U;
+  const quadraTex = texturaCanvas(1024, 1024, (c, w) => {
+    const m = w / 2;
+    const g = c.createRadialGradient(m, m, 40, m, m, m); g.addColorStop(0, "#2f78c8"); g.addColorStop(.75, "#1f5ea8"); g.addColorStop(1, "#174b8a");
+    c.fillStyle = g; c.beginPath(); c.arc(m, m, m, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = "rgba(255,255,255,.06)"; c.lineWidth = 3; for (let k = 60; k < m; k += 60) { c.beginPath(); c.arc(m, m, k, 0, Math.PI * 2); c.stroke(); }
+    c.strokeStyle = "#e9f1fb"; c.lineWidth = 14; c.beginPath(); c.arc(m, m, m - 14, 0, Math.PI * 2); c.stroke();
+    c.beginPath(); c.moveTo(14, m); c.lineTo(w - 14, m); c.stroke();
+    const rc = .72 / R * m;
+    c.fillStyle = "#ffd23f"; c.beginPath(); c.arc(m, m, rc, 0, Math.PI * 2); c.fill(); c.lineWidth = 10; c.strokeStyle = "#e9f1fb"; c.stroke();
+    c.fillStyle = "#0b1b33"; c.textAlign = "center"; c.textBaseline = "middle"; c.font = `900 ${Math.round(rc * .36)}px Bungee, "Arial Black", sans-serif`;
+    c.fillText("JOGO DE", m, m - rc * .22); c.fillText("PERGUNTA", m, m + rc * .24);
+    // marcas onde cada um fica
+    c.strokeStyle = "rgba(255,255,255,.35)"; c.lineWidth = 6; c.setLineDash([18, 14]); c.beginPath(); c.arc(m, m, AH / (AH + 70) * m, 0, Math.PI * 2); c.stroke(); c.setLineDash([]);
+  });
+  const quadra = new THREE.Mesh(new THREE.CircleGeometry(R, 72), new THREE.MeshLambertMaterial({ map: quadraTex }));
+  quadra.rotation.x = -Math.PI / 2; quadra.position.y = .005; s.add(quadra);
+  // mureta com faixa de propaganda do jogo
+  const faixa = texturaCanvas(1024, 64, (c, w, h) => {
+    c.fillStyle = "#0f3057"; c.fillRect(0, 0, w, h); c.font = "900 26px Bungee, 'Arial Black', sans-serif"; c.textBaseline = "middle"; c.textAlign = "center";
+    for (let k = 0; k < 4; k++) { c.fillStyle = k % 2 ? "#37d99a" : "#ffd23f"; c.fillText(k % 2 ? "★" : "JOGO DE PERGUNTA", w / 4 * k + w / 8, h / 2 + 2); }
+  });
+  faixa.wrapS = THREE.RepeatWrapping; faixa.repeat.set(-4, 1);   // negativo: lido do lado de dentro sem ficar espelhado
+  const mureta = new THREE.Mesh(new THREE.CylinderGeometry(7.2, 7.2, .6, 64, 1, true), new THREE.MeshLambertMaterial({ map: faixa, side: THREE.BackSide }));
+  mureta.position.y = .3; s.add(mureta);
+  // arquibancada em degraus com torcida colorida
+  const degrauMat = new THREE.MeshLambertMaterial({ color: "#1b3b66" });
+  for (let k = 0; k < 4; k++) {
+    const r = 7.6 + k * .7, deg = new THREE.Mesh(new THREE.CylinderGeometry(r + .7, r + .7, .5, 64, 1, true), degrauMat);
+    deg.position.y = .55 + k * .55; s.add(deg);
+    const topo = new THREE.Mesh(new THREE.RingGeometry(r, r + .7, 64), new THREE.MeshLambertMaterial({ color: k % 2 ? "#22497c" : "#1d4171", side: THREE.DoubleSide }));
+    topo.rotation.x = -Math.PI / 2; topo.position.y = .8 + k * .55; s.add(topo);
+  }
+  const N = 260, torcida = new THREE.InstancedMesh(new THREE.BoxGeometry(.22, .34, .18), new THREE.MeshLambertMaterial({ color: "#ffffff" }), N);
+  const cores = ["#ff4d6d", "#ffd23f", "#37d99a", "#2f80ed", "#9b51e0", "#f4a261", "#e9eef5", "#e4572e"], mtx = new THREE.Matrix4(), cor = new THREE.Color();
+  F.torcida = [];
+  for (let i = 0; i < N; i++) {
+    const k = i % 4, a = Math.random() * Math.PI * 2, r = 7.95 + k * .7 + Math.random() * .3, y = .8 + k * .55 + .17;
+    mtx.makeRotationY(-a + Math.PI / 2); mtx.setPosition(Math.cos(a) * r, y, Math.sin(a) * r);
+    torcida.setMatrixAt(i, mtx); torcida.setColorAt(i, cor.set(cores[i % cores.length]));
+    F.torcida.push({ a, r, y, fase: Math.random() * 6 });
+  }
+  F.torcidaMesh = torcida; s.add(torcida);
+  // refletores com brilho
+  const brilho = new THREE.SpriteMaterial({ map: brilhoTextura("rgba(255,244,200,1)"), color: "#fff3c4", transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+  for (let i = 0; i < 8; i++) {
+    const a = i / 8 * Math.PI * 2 + .2, x = Math.cos(a) * 10.8, z = Math.sin(a) * 10.8;
+    const poste = new THREE.Mesh(new THREE.CylinderGeometry(.08, .12, 6.5), new THREE.MeshLambertMaterial({ color: "#2b4f7d" })); poste.position.set(x, 3.25, z); s.add(poste);
+    const painel = new THREE.Mesh(new THREE.BoxGeometry(1, .5, .15), new THREE.MeshBasicMaterial({ color: "#fff8dc" })); painel.position.set(x, 6.6, z); painel.lookAt(0, 0, 0); s.add(painel);
+    const sp = new THREE.Sprite(brilho); sp.scale.set(3.2, 3.2, 1); sp.position.set(x * .97, 6.6, z * .97); s.add(sp);
+  }
+  F.sombraTex = brilhoTextura("rgba(0,0,0,.55)");
+  F.faiscas = [];
+}
+/* cara de desenho animado: sombreado em faixas e contorno preto (só nas peças maiores) */
+let GRADIENTE_TOON = null;
+function deixarDesenho(g, corpoMat) {
+  if (!GRADIENTE_TOON) { const d = new Uint8Array([90, 170, 255]); GRADIENTE_TOON = new THREE.DataTexture(d, 3, 1, THREE.LuminanceFormat); GRADIENTE_TOON.minFilter = GRADIENTE_TOON.magFilter = THREE.NearestFilter; GRADIENTE_TOON.needsUpdate = true; }
+  const trocas = new Map(), contorno = new THREE.MeshBasicMaterial({ color: "#0b1b33", side: THREE.BackSide });
+  const malhas = []; g.traverse(o => { if (o.isMesh) malhas.push(o); });
+  for (const o of malhas) {
+    const m = o.material;
+    if (m && m.isMeshLambertMaterial) {
+      if (!trocas.has(m)) trocas.set(m, new THREE.MeshToonMaterial({ color: m.color, emissive: m.emissive, transparent: m.transparent, opacity: m.opacity, side: m.side, gradientMap: GRADIENTE_TOON }));
+      o.material = trocas.get(m);
+    }
+    if (!o.geometry.boundingSphere) o.geometry.computeBoundingSphere();
+    if (o.geometry.boundingSphere.radius > .09 && !(o.material.transparent && o.material.opacity < 1)) { const c = new THREE.Mesh(o.geometry, contorno); c.scale.setScalar(1.07); o.add(c); }
+  }
+  return trocas.get(corpoMat) || corpoMat;
+}
+const TEX_ARR = {};
+function texturaArremesso(k) {
+  if (!TEX_ARR[k]) TEX_ARR[k] = texturaCanvas(128, 128, (c) => { c.font = "100px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(arremessoInfo(k).icone, 64, 70); });
+  return TEX_ARR[k];
+}
+function soltarFaiscas(x, z, cor) {
+  for (let i = 0; i < 14; i++) {
+    const m = new THREE.Mesh(new THREE.SphereGeometry(.05, 6, 4), new THREE.MeshBasicMaterial({ color: i % 2 ? cor : "#ffd23f" }));
+    m.position.set(x, 1, z); F.scene.add(m);
+    F.faiscas.push({ m, v: new THREE.Vector3((Math.random() - .5) * 4, 2 + Math.random() * 2.5, (Math.random() - .5) * 4), t: 0 });
+  }
+}
 function etiqueta(texto, cor) {
   const cv = document.createElement("canvas"); cv.width = 256; cv.height = 96;
   const c = cv.getContext("2d");
@@ -2014,7 +2198,7 @@ function montarBonecos3D() {
     const bracoD = bracoE.clone(); bracoD.position.x = .27;
     let cabeca;
     if (p.humano) {
-      cabeca = new THREE.Mesh(new THREE.SphereGeometry(.2, 16, 12), new THREE.MeshLambertMaterial({ color: p.pele }));
+      cabeca = new THREE.Mesh(new THREE.SphereGeometry(.2, 28, 20), new THREE.MeshLambertMaterial({ color: p.pele }));
       const olho = new THREE.Mesh(new THREE.SphereGeometry(.03, 8, 6), escuro);
       const o1 = olho.clone(); o1.position.set(-.07, .03, -.18); const o2 = olho.clone(); o2.position.set(.07, .03, -.18);
       cabeca.add(o1, o2);
@@ -2035,8 +2219,11 @@ function montarExtras3D(p, g, pernaE, pernaD, bracoE, bracoD, corpoMat) {
   {
     const tag = etiqueta({ nome: p.nome, vidas: "" }); tag.position.y = 1.95; g.add(tag);
     const perg = etiqueta({ nome: "?", vidas: "" }, "#ffd23f"); perg.scale.set(.9, .34, 1); perg.position.y = 2.35; perg.visible = false; g.add(perg);
+    corpoMat = deixarDesenho(g, corpoMat);
     F.scene.add(g);
-    F.bonecos.push({ p, g, pernaE, pernaD, bracoE, bracoD, corpoMat, tag, perg, rotulo: "", lx: p.x, ly: p.y, dir: 0 });
+    const sombra = new THREE.Mesh(new THREE.PlaneGeometry(.9, .9), new THREE.MeshBasicMaterial({ map: F.sombraTex, transparent: true, depthWrite: false }));
+    sombra.rotation.x = -Math.PI / 2; sombra.position.y = .015; F.scene.add(sombra); F.seats.push(sombra);
+    F.bonecos.push({ p, g, pernaE, pernaD, bracoE, bracoD, corpoMat, tag, perg, sombra, rotulo: "", lx: p.x, ly: p.y, dir: 0 });
     const seat = new THREE.Mesh(new THREE.RingGeometry(.3, .36, 32), new THREE.MeshBasicMaterial({ color: "#8fb0d8" }));
     seat.rotation.x = -Math.PI / 2; seat.position.set(p.home.x * U - AC * U, .02, p.home.y * U - AC * U);
     F.scene.add(seat); F.seats.push(seat);
@@ -2133,11 +2320,11 @@ function ligarToque3D() {
 }
 function mira3D() {
   const dir = new THREE.Vector3(); F.cam.getWorldDirection(dir);
-  let dist = 9;
-  if (dir.y < -.02) dist = Math.min(9, F.cam.position.y / -dir.y);
+  let dist = 13;
+  if (dir.y < -.02) dist = Math.min(13, F.cam.position.y / -dir.y);
   const flat = Math.hypot(dir.x, dir.z) || 1;
   const fx = dir.x / flat, fz = dir.z / flat;
-  const horiz = dir.y < -.02 ? dist * flat : 9;
+  const horiz = dir.y < -.02 ? dist * flat : 13;
   return { x: F.cam.position.x + fx * horiz, z: F.cam.position.z + fz * horiz };
 }
 function atirar3D() {
@@ -2165,13 +2352,16 @@ function desenhar3D() {
   // bonecos
   for (const b of F.bonecos) {
     const p = b.p;
-    b.g.visible = p.vivo && !(dono && p === dono && dono.vivo);
+    b.g.visible = p.vivo;   // 3D vendo o bonequinho: o seu também aparece
+    b.sombra.visible = p.vivo;
     if (!p.vivo) continue;
     const mx = p.x - b.lx, my = p.y - b.ly;
     if (Math.hypot(mx, my) > .5) b.dir = Math.atan2(-mx, -my);
+    else if (dono && p === dono) b.dir = F.yaw;   // parado, o seu bonequinho olha para onde a câmera olha
     else if (p.modo === "casa" || p.modo === "mira") b.dir = Math.atan2(-(AC - p.x), -(AC - p.y));
     b.lx = p.x; b.ly = p.y;
     b.g.position.set(W3(p.x), 0, W3(p.y));
+    b.sombra.position.x = W3(p.x); b.sombra.position.z = W3(p.y);
     b.ry = b.ry ?? b.g.rotation.y;
     b.ry += ((b.dir - b.ry + Math.PI * 3) % (Math.PI * 2) - Math.PI) * .25;
     const ges = gestoAtivo(p), pose = ges ? poseGesto(ges.g.k, ges.f) : null;
@@ -2188,6 +2378,7 @@ function desenhar3D() {
       b.tag = etiqueta({ nome: p.nome + (p.humano ? "" : " 🤖"), vidas: "●".repeat(Math.min(10, p.vidas)) }); b.tag.position.y = 1.95; b.g.add(b.tag);
     }
     b.perg.visible = (ph.k === "pergunta" || ph.k === "segredo") && ph.perg === p;
+    b.tag.visible = !(dono && p === dono);   // o seu nome ficaria grande na frente da câmera
     const emo = emojiAtivo(p), emoK = emo ? emo.e : "";
     if (emoK !== (b.emoK || "")) {
       if (b.emo) { b.g.remove(b.emo); b.emo.material.map.dispose(); b.emo = null; }
@@ -2197,21 +2388,51 @@ function desenhar3D() {
   }
   // bola na mão
   const atir = ph.k === "bola" || ph.k === "troca" ? ph.atir : null;
-  F.held.visible = !!atir && atir.vivo && !A.balls.length && !(dono && atir === dono);
+  const naMao = !!atir && atir.vivo && !A.balls.length, kMao = atir ? atir.arremesso || "bola" : "bola";
+  F.held.visible = naMao && kMao === "bola";
+  if (!F.heldSprite) { F.heldSprite = new THREE.Sprite(new THREE.SpriteMaterial({ transparent: true })); F.heldSprite.scale.set(.42, .42, 1); F.scene.add(F.heldSprite); }
+  F.heldSprite.visible = naMao && kMao !== "bola";
+  if (F.heldSprite.visible) { F.heldSprite.material.map = texturaArremesso(kMao); F.heldSprite.material.needsUpdate = true; F.heldSprite.position.set(W3(atir.x) + .3, 1, W3(atir.y)); }
   if (F.held.visible) F.held.position.set(W3(atir.x) + .3, 1, W3(atir.y));
-  // bolas voando
-  while (F.balls.length < A.balls.length) { const m = new THREE.Mesh(new THREE.SphereGeometry(.13, 16, 12), new THREE.MeshLambertMaterial({ color: "#ff8a1f" })); F.scene.add(m); F.balls.push(m); }
+  // bolas voando, com rastro
+  while (F.balls.length < A.balls.length) {
+    const m = new THREE.Mesh(new THREE.SphereGeometry(.13, 16, 12), new THREE.MeshToonMaterial({ color: "#ff8a1f", emissive: "#5a2400" }));
+    m.add(new THREE.Mesh(m.geometry, new THREE.MeshBasicMaterial({ color: "#2a1300", side: THREE.BackSide })).translateX(0)); m.children[0].scale.setScalar(1.1);
+    m.rastro = [0, 1, 2, 3, 4].map(k => { const r = new THREE.Mesh(new THREE.SphereGeometry(.11 - k * .018, 8, 6), new THREE.MeshBasicMaterial({ color: "#ffb347", transparent: true, opacity: .45 - k * .08, depthWrite: false })); F.scene.add(r); return r; });
+    m.sp = new THREE.Sprite(new THREE.SpriteMaterial({ transparent: true })); m.sp.scale.set(.46, .46, 1); F.scene.add(m.sp);
+    m.hist = []; F.scene.add(m); F.balls.push(m);
+  }
   F.balls.forEach((m, i) => {
-    const b = A.balls[i]; m.visible = !!b; if (!b) return;
+    const b = A.balls[i]; m.visible = !!b && (b.k || "bola") === "bola"; m.sp.visible = !!b && (b.k || "bola") !== "bola"; m.rastro.forEach(r => (r.visible = !!b)); if (!b) { m.hist = []; return; }
+    if (m.sp.visible && m.sp.k !== b.k) { m.sp.k = b.k; m.sp.material.map = texturaArremesso(b.k); m.sp.material.needsUpdate = true; m.rastro.forEach(r => r.material.color.set(arremessoInfo(b.k).cor)); }
     const f = Math.min(1, b.t / b.T);
     m.position.set(W3(b.from.x + (b.to.x - b.from.x) * f), .9 + Math.sin(Math.PI * f) * 1.2 - f * .8, W3(b.from.y + (b.to.y - b.from.y) * f));
+    m.rotation.x += .3; m.sp.position.copy(m.position); m.sp.material.rotation += .25; m.hist.unshift(m.position.clone()); m.hist.length = Math.min(m.hist.length, 12);
+    m.rastro.forEach((r, k) => { const h = m.hist[(k + 1) * 2]; r.visible = !!h; if (h) r.position.copy(h); });
   });
+  // faíscas quando alguém leva bolada
+  for (const fx of A.fx) if (fx.txt === "-1" && !fx.faisca3D) { fx.faisca3D = true; soltarFaiscas(W3(fx.x), W3(fx.y), "#ff4d6d"); }
+  const dt3 = 1 / 60;
+  F.faiscas = F.faiscas.filter(p => {
+    p.t += dt3; p.v.y -= 9 * dt3; p.m.position.addScaledVector(p.v, dt3); p.m.scale.setScalar(Math.max(.1, 1 - p.t));
+    if (p.t > .9 || p.m.position.y < 0) { F.scene.remove(p.m); p.m.geometry.dispose(); p.m.material.dispose(); return false; }
+    return true;
+  });
+  // torcida pulando de leve (mais animada na hora da bola)
+  if (F.torcidaMesh) {
+    const forca = ph.k === "bola" ? .12 : .04, t = performance.now() / 1000, mtx = new THREE.Matrix4();
+    F.torcida.forEach((q, i) => { if (i % 2 && ph.k !== "bola") return; mtx.makeRotationY(-q.a + Math.PI / 2); mtx.setPosition(Math.cos(q.a) * q.r, q.y + Math.max(0, Math.sin(t * 6 + q.fase)) * forca, Math.sin(q.a) * q.r); F.torcidaMesh.setMatrixAt(i, mtx); });
+    F.torcidaMesh.instanceMatrix.needsUpdate = true;
+  }
   // câmera
+  // câmera atrás e um pouco acima do seu bonequinho (como nos jogos de celular); arrastar gira em volta dele
   if (dono && dono.vivo) {
-    F.cam.position.set(W3(dono.x), 1.45, W3(dono.y));
-    if (dono.ctrl) F.cam.position.y += Math.abs(Math.sin(dono.passo / 14)) * .05;
-  } else { F.cam.position.set(0, 9, 7.5); F.yaw = 0; F.pitch = -.85; }
-  F.cam.rotation.set(F.pitch, F.yaw, 0);
+    const atras = 3.1, alto = 1.9, fx = -Math.sin(F.yaw), fz = -Math.cos(F.yaw);
+    const alvo = { x: F.camX ?? W3(dono.x), z: F.camZ ?? W3(dono.y) };
+    alvo.x += (W3(dono.x) - alvo.x) * .25; alvo.z += (W3(dono.y) - alvo.z) * .25; F.camX = alvo.x; F.camZ = alvo.z;   // segue suave
+    F.cam.position.set(alvo.x - fx * atras, alto + Math.max(0, -F.pitch) * 1.6, alvo.z - fz * atras);
+    F.cam.rotation.set(F.pitch - .3, F.yaw, 0);
+  } else { F.camX = F.camZ = null; F.cam.position.set(0, 9, 7.5); F.yaw = 0; F.pitch = -.85; F.cam.rotation.set(F.pitch, F.yaw, 0); }
   // controles e marcas
   const correndo = dono && dono.ctrl;
   const atirando = ph.k === "bola" && ph.pronto && ph.atir === dono && dono.humano && !A.fim;
@@ -2241,13 +2462,13 @@ function desenhar3D() {
   F.r.render(F.scene, F.cam);
 }
 function ligarVisao(fp) {
-  if (fp && !init3D()) { toast("A visão em primeira pessoa não carregou. Usando a visão de cima."); fp = false; }
+  if (fp && !init3D()) { toast("A visão em 3D não carregou. Usando a visão de cima."); fp = false; }
   A.fp = fp;
   $("a-canvas").hidden = fp;
   if (F.el) F.el.hidden = !fp;
   if (F.ui) F.ui.hidden = !fp;
   if (fp) { montarBonecos3D(); F.faseKey = ""; }
-  const b = $("a-visao"); if (b) b.textContent = fp ? "Ver de cima" : "Primeira pessoa";
+  const b = $("a-visao"); if (b) b.textContent = fp ? "Ver de cima" : "Ver em 3D";
   renderAct();
 }
 
@@ -2256,7 +2477,7 @@ $("a-visao").addEventListener("click", () => ligarVisao(!A.fp));
 
 <script>
 /* ================= Tela inicial (lobby) ================= */
-const MODOS = { fp: "Bonequinhos · 1ª pessoa", cima: "Bonequinhos · de cima", juiz: "Bola de verdade" };
+const MODOS = { fp: "Bonequinhos · 3D", cima: "Bonequinhos · de cima", juiz: "Bola de verdade" };
 const ICONES = {
   loja: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1.2 11.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8z" fill="#ffd23f" stroke="#0b1b33" stroke-width="1.6"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8" fill="none" stroke="#0b1b33" stroke-width="1.8"/></svg>`,
   sug: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v10H10l-5 4v-4H4z" fill="#37d99a" stroke="#0b1b33" stroke-width="1.6" stroke-linejoin="round"/><circle cx="9" cy="10" r="1.2" fill="#0b1b33"/><circle cx="12" cy="10" r="1.2" fill="#0b1b33"/><circle cx="15" cy="10" r="1.2" fill="#0b1b33"/></svg>`,
@@ -2349,6 +2570,17 @@ TELAS.loja = () => {
         <b>${esc(x.nome)}</b>
         ${x.limitada && !tem && naVenda(x) ? `<span class="sk-prazo">⏳ ${faltaParaAcabar(x)}</span>` : ""}
         <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarAvatar" data-k="${x.k}" ${usando || (!tem && !podeA) ? "disabled" : ""}>${rotulo}</button>
+      </div>`; }).join("")}
+    </div>
+    <h2 class="lb-secao">Arremessos</h2>
+    <p class="lb-sub" style="margin-top:-6px">O que você joga quando acerta a palavra. Funciona igual à bola, só muda o jeito.</p>
+    <div class="fd-grid">${ARREMESSOS.map(a => {
+      const tem = temArremesso(nome, a.k), usando = arremessoDe(nome) === a.k, podeA = moedas >= a.preco;
+      const rotulo = usando ? "Usando" : tem ? "Usar" : G.lojaConf === "arr:" + a.k ? "Confirmar?" : podeA ? `<span class="lb-coin" aria-hidden="true">$</span>${a.preco}` : `$ ${a.preco}`;
+      return `<div class="fd-tile${tem ? "" : " fd-travado"}"${usando ? ' aria-current="true"' : ""}>
+        <span class="em-art" aria-hidden="true">${a.k === "bola" ? `<span class="arr-bola"></span>` : a.icone}</span>
+        <b>${esc(a.nome)}</b>
+        <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarArremesso" data-k="${a.k}" ${usando || (!tem && !podeA) ? "disabled" : ""}>${rotulo}</button>
       </div>`; }).join("")}
     </div>
     <h2 class="lb-secao">Gestos</h2>
@@ -2920,6 +3152,19 @@ acoes.comprarPacote = () => {
   salvarPlacar();
   if (typeof sfxJogar === "function") sfxJogar();
   toast(`${nome} comprou o Pacote Galáctico! 🚀`);
+  const y = window.scrollY; render(); window.scrollTo(0, y);
+};
+acoes.comprarArremesso = el => {
+  const k = el.dataset.k, nome = perfil(), a = arremessoInfo(k);
+  const usar = () => { G.inv = G.inv || {}; G.inv[nome] = G.inv[nome] || { vidas: 0 }; G.inv[nome].arremesso = k; salvarPlacar(); };
+  if (temArremesso(nome, k)) { usar(); const y = window.scrollY; render(); window.scrollTo(0, y); toast(`Agora você joga ${a.nome} ${a.icone}`); return; }
+  if ((G.banco[nome] || 0) < a.preco) return;
+  if (G.lojaConf !== "arr:" + k) { pedirConfirmacao("arr:" + k); return; }
+  clearTimeout(lojaConfT); G.lojaConf = false;
+  G.banco[nome] = Math.round(((G.banco[nome] || 0) - a.preco) * 10) / 10;
+  G.inv = G.inv || {}; G.inv[nome] = G.inv[nome] || { vidas: 0 }; G.inv[nome].arremessos = [...(G.inv[nome].arremessos || []), k]; usar();
+  if (typeof sfxJogar === "function") sfxJogar();
+  toast(`${nome} comprou ${a.nome} ${a.icone}!`);
   const y = window.scrollY; render(); window.scrollTo(0, y);
 };
 acoes.comprarAvatar = el => {
@@ -3802,6 +4047,7 @@ TELAS.adm = () => {
     <h3>Fundos</h3><div class="chips">${FUNDOS.map(([k, t]) => chipItem(temFundo(n, k), k === "basico", "fundo", k, esc(t))).join("")}</div>
     <h3>Emojis</h3><div class="chips">${EMOJIS.map(e => chipItem(temEmoji(n, e.k), e.preco === 0, "emoji", e.k, e.e)).join("")}</div>
     <h3>Gestos</h3><div class="chips">${GESTOS.map(g => chipItem(temGesto(n, g.k), g.preco === 0, "gesto", g.k, g.icone + " " + esc(g.nome))).join("")}</div>
+    <h3>Arremessos</h3><div class="chips">${ARREMESSOS.map(a => chipItem(temArremesso(n, a.k), a.preco === 0, "arremesso", a.k, a.icone + " " + esc(a.nome))).join("")}</div>
     <h3>Fotos de perfil</h3><div class="chips">${AV_ESPECIAIS.map(x => chipItem(temAvatar(n, x.k), false, "avatar", x.k, x.icone + " " + esc(x.nome))).join("")}</div>
     <p class="dim" style="font-size:14px">Toque para dar ou tirar. Verde = tem.</p>`;
   if (ADM.aba === "limitadas") corpo = todasLimitadas().map(s => {
@@ -3890,7 +4136,7 @@ Object.assign(acoes, {
   admItem(el) {
     const n = ADM.jog, k = el.dataset.k, t = el.dataset.t;
     G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 };
-    const lista = { skin: "skins", fundo: "fundos", emoji: "emojis", gesto: "gestos", avatar: "avatares" }[t];
+    const lista = { skin: "skins", fundo: "fundos", emoji: "emojis", gesto: "gestos", avatar: "avatares", arremesso: "arremessos" }[t];
     const atual = G.inv[n][lista] || [];
     if (el.getAttribute("aria-pressed") === "true") {
       G.inv[n][lista] = atual.filter(x => x !== k);
@@ -4166,7 +4412,7 @@ TELAS.salaHost = () => {
       <div class="stepper"><button class="btn ghost" type="button" data-a="robosMenos" aria-label="Menos um robô">−</button><b>${ON.robos}</b><button class="btn ghost" type="button" data-a="robosMais" aria-label="Mais um robô">+</button></div>
       <h3>Sua visão</h3>
       <span class="seg2" role="group" aria-label="Visão do jogo" style="align-self:flex-start">
-        <button type="button" data-a="visaoFp" aria-pressed="${ON.fp !== false}">1ª pessoa</button><button type="button" data-a="visaoCima" aria-pressed="${ON.fp === false}">De cima</button>
+        <button type="button" data-a="visaoFp" aria-pressed="${ON.fp !== false}">3D</button><button type="button" data-a="visaoCima" aria-pressed="${ON.fp === false}">De cima</button>
       </span>
       <p class="dim" style="font-size:14px">Total: ${total} jogadores (de 3 a 20). Cada amigo escolhe a visão no celular dele.</p>
     </div>
@@ -4192,7 +4438,7 @@ function hostRecebe(conn, d) {
     const base = String(d.nome || "Amigo").replace(/\s+/g, " ").trim().slice(0, 20) || "Amigo";
     const usados = [perfil(), ...ON.sala.map(s => s.nome)];
     let nome = base, k = 2; while (usados.some(u => u.toLowerCase() === nome.toLowerCase())) nome = base + " " + (k++);
-    ON.sala.push({ conn, nome, moedas: Math.max(0, +d.moedas || 0), vidasInv: Math.max(0, Math.floor(+d.vidas || 0)), skin: skinInfo(d.skin).k, ficha: limparFicha(d.ficha), codigo: limparCodigoAmigo(d.amigo) });
+    ON.sala.push({ conn, nome, moedas: Math.max(0, +d.moedas || 0), vidasInv: Math.max(0, Math.floor(+d.vidas || 0)), skin: skinInfo(d.skin).k, ficha: limparFicha(d.ficha), codigo: limparCodigoAmigo(d.amigo), arremesso: arremessoInfo(String(d.arremesso || "")).k });
     enviar(conn, { t: "bemvindo", nome, code: ON.code });
     enviarSala(); toast(`${nome} entrou na sala`); bip(880, .08);
     if (G.tela === "salaHost") render();
@@ -4224,7 +4470,7 @@ function hostSaiu(conn) {
 
 /* ---------- Anfitrião: começar ---------- */
 function comecarOnline() {
-  const lista = [{ nome: perfil(), local: true }].concat(ON.sala.filter(s => s.conn.open).map(s => ({ nome: s.nome, conn: s.conn, moedas: s.moedas, vidasInv: s.vidasInv, skin: s.skin, ficha: s.ficha })));
+  const lista = [{ nome: perfil(), local: true }].concat(ON.sala.filter(s => s.conn.open).map(s => ({ nome: s.nome, conn: s.conn, moedas: s.moedas, vidasInv: s.vidasInv, skin: s.skin, ficha: s.ficha, arremesso: s.arremesso })));
   for (let k = 1; k <= ON.robos; k++) lista.push({ nome: "Robô " + k, robo: true });
   if (lista.length < 3) { toast("Precisa de pelo menos 3 jogadores"); return; }
   const n = lista.length;
@@ -4236,7 +4482,7 @@ function comecarOnline() {
       cor: A_CORES[i % A_CORES.length], pele: A_PELE[i % A_PELE.length],
       vidas: A.cfg.vidas, vivo: true, moedas: 0, guardado: o.robo ? 0 : o.local ? (G.banco[o.nome] || 0) : (o.moedas || 0), ganho: 0, compradas: 0,
       home, x: home.x, y: home.y, alvo: null, modo: "casa", vel: A_VEL * aRnd(.88, 1.12), habil: aRnd(-.08, .08),
-      flash: 0, passo: 0, ctrl: false, tocou: false, saiuEm: null };
+      flash: 0, passo: 0, ctrl: false, tocou: false, saiuEm: null, arremesso: o.robo ? "bola" : o.local ? arremessoDe(o.nome) : (o.arremesso || "bola") };
   });
   A.P.forEach((p, i) => { if (!p.humano) return; vestir(p, lista[i].local ? skinDe(p.nome) : lista[i].skin); const f = lista[i].local ? personagemDe(p.nome) : lista[i].ficha; if (f) p.ficha = f; });
   A.cel = 0; ON.myIdx = 0; A.balls = []; A.fx = []; A.t = 0; A.fim = null; A.ptr = null; A.inicio = Date.now();
@@ -4244,7 +4490,7 @@ function comecarOnline() {
   ON.on = true; ON.pedido = null; ON.esperaTxt = ""; ON.fimVisto = false;
   $("app").hidden = true; $("arena").hidden = false; $("a-setup").hidden = true; $("a-game").hidden = false;
   window.scrollTo(0, 0);
-  const estatico = A.P.map(p => ({ nome: p.nome, cor: p.cor, pele: p.pele, skin: p.skin || "classico", ficha: p.ficha || null, humano: p.humano, hx: Math.round(p.home.x), hy: Math.round(p.home.y) }));
+  const estatico = A.P.map(p => ({ nome: p.nome, cor: p.cor, pele: p.pele, skin: p.skin || "classico", ficha: p.ficha || null, arremesso: p.arremesso || "bola", humano: p.humano, hx: Math.round(p.home.x), hy: Math.round(p.home.y) }));
   A.P.forEach(p => { if (p.conn) enviar(p.conn, { t: "start", P: estatico, eu: p.i, cfg: A.cfg }); });
   A.fp = false;
   novaPalavraA(aPick(A.P));
@@ -4259,7 +4505,7 @@ function estadoAtual() {
     t: "st", tt: +A.t.toFixed(2), msg: $("a-sub").textContent, espera: ON.esperaTxt || "",
     fim: A.fim ? { v: A.fim.vencedor.i } : null,
     P: A.P.map(p => [Math.round(p.x), Math.round(p.y), p.vidas, p.vivo ? 1 : 0, Math.round(p.moedas * 10) / 10, +p.flash.toFixed(2), p.modo, p.ctrl ? 1 : 0, p.tocou ? 1 : 0, p.humano ? 1 : 0, Math.round(p.ganho * 10) / 10]),
-    B: A.balls.map(b => [Math.round(b.from.x), Math.round(b.from.y), Math.round(b.to.x), Math.round(b.to.y), +b.t.toFixed(3), +b.T.toFixed(3)]),
+    B: A.balls.map(b => [Math.round(b.from.x), Math.round(b.from.y), Math.round(b.to.x), Math.round(b.to.y), +b.t.toFixed(3), +b.T.toFixed(3), b.k || "bola"]),
     Gs: (A.ges || []).filter(e => e.ate > performance.now()).map(e => [e.i, e.k, Math.round(performance.now() - e.ini)]),
     E: (A.emo || []).filter(e => e.ate > performance.now()).map(e => [e.i, e.k, Math.round(e.ate - performance.now())]),
     fx: A.fx.filter(f => !f.env).map(f => { f.env = true; return [Math.round(f.x), Math.round(f.y), f.txt, f.cor]; }),
@@ -4573,7 +4819,7 @@ function mostrarFimOnline() {
 }
 function novaRodadaSala() {
   clearInterval(ON.timer); fecharOv(); pararLoop();
-  ON.sala = A.P.filter(p => p.remoto && p.conn && p.conn.open).map(p => ({ conn: p.conn, nome: p.nome, moedas: Math.round(((p.guardado || 0) + Math.max(0, p.moedas)) * 10) / 10, vidasInv: p.vidasInv || 0, skin: p.skin || "classico", ficha: p.ficha || null }));
+  ON.sala = A.P.filter(p => p.remoto && p.conn && p.conn.open).map(p => ({ conn: p.conn, nome: p.nome, moedas: Math.round(((p.guardado || 0) + Math.max(0, p.moedas)) * 10) / 10, vidasInv: p.vidasInv || 0, skin: p.skin || "classico", ficha: p.ficha || null, arremesso: p.arremesso || "bola" }));
   ON.sala.forEach(s => enviar(s.conn, { t: "voltaSala" }));
   ON.on = false; A.P = []; A.fim = null;
   $("arena").hidden = true; $("app").hidden = false;
@@ -4608,7 +4854,7 @@ TELAS.entrar = () => `
       ${ON.codeEntrar ? "" : `<label for="en-code">Código da sala</label><input id="en-code" maxlength="8" autocapitalize="characters" placeholder="Ex.: K7QM" value="${esc(ON.codeDigitado || "")}">`}
       <label>Visão</label>
       <span class="seg2" role="group" aria-label="Visão do jogo" style="align-self:flex-start">
-        <button type="button" data-a="visaoFp" aria-pressed="${G.visaoOnline !== false}">1ª pessoa</button><button type="button" data-a="visaoCima" aria-pressed="${G.visaoOnline === false}">De cima</button>
+        <button type="button" data-a="visaoFp" aria-pressed="${G.visaoOnline !== false}">3D</button><button type="button" data-a="visaoCima" aria-pressed="${G.visaoOnline === false}">De cima</button>
       </span>
       <button class="lb-jogar" type="submit" style="flex:none;min-height:64px;font-size:28px" ${ON.conectando ? "disabled" : ""}>${ON.conectando ? "Entrando…" : "Entrar"}</button>
     </form>
@@ -4623,7 +4869,7 @@ TELAS.esperando = () => `
       <div class="chips">${ON.salaNomes.map(n => `<span class="chip">${esc(n)}${n === ON.meuNome ? " (você)" : ""}</span>`).join("")}${ON.robos ? `<span class="chip">+ ${ON.robos} ${ON.robos === 1 ? "robô" : "robôs"}</span>` : ""}</div>
       <label>Sua visão</label>
       <span class="seg2" role="group" aria-label="Visão do jogo" style="align-self:flex-start">
-        <button type="button" data-a="visaoFp" aria-pressed="${G.visaoOnline !== false}">1ª pessoa</button><button type="button" data-a="visaoCima" aria-pressed="${G.visaoOnline === false}">De cima</button>
+        <button type="button" data-a="visaoFp" aria-pressed="${G.visaoOnline !== false}">3D</button><button type="button" data-a="visaoCima" aria-pressed="${G.visaoOnline === false}">De cima</button>
       </span>
     </div>
   </section>`;
@@ -4647,7 +4893,7 @@ function entrarSala(code, nome, naoAbrir = false) {
   peer.on("open", () => {
     const conn = peer.connect(PREFIXO + code, { reliable: true, serialization: "json" });
     ON.hostConn = conn;
-    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome), ficha: personagemDe(nome), amigo: meuCodigoAmigo() }); });
+    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome), ficha: personagemDe(nome), amigo: meuCodigoAmigo(), arremesso: arremessoDe(nome) }); });
     conn.on("data", cliRecebe);
     conn.on("close", () => { if (ON.peer === peer) { toast("A conexão com a sala caiu."); sairOnline(); } });
   });
@@ -4673,7 +4919,7 @@ function cliRecebe(d) {
 }
 function iniciarCliente(d) {
   A.cfg = { ...PADRAO, ...(d.cfg || {}) };
-  A.P = d.P.map((o, i) => ({ i, nome: String(o.nome), cor: o.cor, pele: o.pele, skin: skinInfo(o.skin).k, ficha: o.ficha ? limparFicha(o.ficha) : null, humano: !!o.humano, home: { x: o.hx, y: o.hy },
+  A.P = d.P.map((o, i) => ({ i, nome: String(o.nome), cor: o.cor, pele: o.pele, skin: skinInfo(o.skin).k, ficha: o.ficha ? limparFicha(o.ficha) : null, arremesso: arremessoInfo(String(o.arremesso || "")).k, humano: !!o.humano, home: { x: o.hx, y: o.hy },
     x: o.hx, y: o.hy, tx: o.hx, ty: o.hy, vidas: A.cfg.vidas, vivo: true, moedas: 0, ganho: 0, compradas: 0,
     alvo: null, modo: "casa", vel: A_VEL, habil: 0, flash: 0, passo: 0, ctrl: false, tocou: false }));
   A.cel = d.eu; ON.myIdx = d.eu; ON.on = true; ON.host = false; ON.fimVisto = false; ON.actKey = "";
@@ -4705,7 +4951,7 @@ function aplicarEstado(s) {
     // emoji novo (não estava na tela antes): toca o barulhinho dele
     for (const e of A.emo) if (!antes.some(x => x.i === e.i && x.k === e.k && Math.abs(x.ate - e.ate) < 600)) somEmoji(e.k);
   }
-  A.balls = s.B.map(b => ({ from: { x: b[0], y: b[1] }, to: { x: b[2], y: b[3] }, t: b[4], T: b[5] }));
+  A.balls = s.B.map(b => ({ from: { x: b[0], y: b[1] }, to: { x: b[2], y: b[3] }, t: b[4], T: b[5], k: arremessoInfo(String(b[6] || "")).k }));
   for (const f of s.fx) {
     A.fx.push({ x: f[0], y: f[1], txt: f[2], cor: f[3], t: 0 });
     if (f[2] === "-1") bip(300, .2); else if (f[2] === "ACERTOU!") bip(1100, .15);
