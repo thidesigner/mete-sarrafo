@@ -244,6 +244,16 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .pacote-preco { display: flex; align-items: center; gap: 12px; }
 .pacote-preco s { color: #dbe6f5; font-weight: 800; font-size: 16px; opacity: .8; }
 .pacote-obs { font-size: 13px; color: #dbe6f5; }
+.aviso-faixa { display: block; width: 100%; overflow: hidden; white-space: nowrap; background: #ffd23f; color: #0b1b33; border: 2px solid #0b1b33; border-radius: 10px; padding: 6px 0; font-weight: 800; font-size: 15px; cursor: pointer; }
+.aviso-faixa span { display: inline-block; padding-left: 100%; animation: faixaCorre 14s linear infinite; }
+@keyframes faixaCorre { to { transform: translateX(-100%); } }
+@media (prefers-reduced-motion: reduce) { .aviso-faixa span { animation: none; padding-left: 10px; white-space: normal; } }
+.aviso-adm { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; background: rgba(5,10,25,.6); padding: 16px; }
+.aviso-caixa { width: min(420px, 100%); background: #0f3057; color: #fff; border: 4px solid #ffd23f; border-radius: 18px; padding: 18px; display: grid; gap: 12px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,.5); }
+.aviso-caixa p { font-size: 20px; font-weight: 800; margin: 0; overflow-wrap: anywhere; }
+.aviso-tag { justify-self: center; background: #ffd23f; color: #0b1b33; border-radius: 8px; padding: 3px 10px; font-weight: 800; }
+.aviso-caixa .lb-jogar { min-height: 56px; font-size: 24px; }
+.adm-json { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; background: rgba(0,0,0,.35); border-radius: 8px; padding: 8px; max-height: 200px; overflow-y: auto; }
 .lb-oferta { display: grid; grid-template-columns: 96px 1fr; gap: 10px 12px; align-items: center; background: rgba(11,27,51,.65); border: 3px solid #ffd23f; border-radius: 16px; padding: 12px; color: #fff; }
 .lb-oferta .lb-item-art { aspect-ratio: 1; filter: none; }
 .lb-oferta-txt { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
@@ -2273,6 +2283,7 @@ TELAS.lobby = () => {
           : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#ffd23f" stroke="#0b1b33" stroke-width="1.5" stroke-linejoin="round"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="#f4f7fb" stroke-width="2" stroke-linecap="round"/></svg>'}</button>
       </div>
     </div>
+    ${typeof avisoFaixa === "function" ? avisoFaixa() : ""}
     <h1 class="lb-title">Jogo de<br>Pergunta</h1>
     <div class="lb-stage">
       <div class="lb-side">
@@ -3774,7 +3785,7 @@ TELAS.adm = () => {
   if (!ajustesAbertos) { setTimeout(() => ir("lobby"), 0); return ""; }
   const jogs = jogadoresDoAparelho();
   if (!ADM.jog || !jogs.includes(ADM.jog)) ADM.jog = jogs.includes(perfil()) ? perfil() : jogs[0];
-  const n = ADM.jog, abas = { moedas: "Moedas", itens: "Itens", limitadas: "Limitadas", numeros: "Números" };
+  const n = ADM.jog, abas = { moedas: "Moedas", itens: "Itens", limitadas: "Limitadas", aviso: "Aviso", numeros: "Números" };
   const escolherJog = `<div class="chips">${jogs.map(j => `<button type="button" class="chip adm-chip" data-a="admJog" data-n="${esc(j)}" aria-pressed="${j === n}">${esc(j)}</button>`).join("")}</div>`;
   const chipItem = (tem, gratis, tipo, k, rot) => `<button type="button" class="chip adm-chip" data-a="admItem" data-t="${tipo}" data-k="${k}" aria-pressed="${tem}" ${gratis ? "disabled" : ""}>${rot}</button>`;
   let corpo = "";
@@ -3806,6 +3817,22 @@ TELAS.adm = () => {
       <form class="row" data-a="admLimPreco" data-k="${s.k}" autocomplete="off"><input id="adm-preco-${s.k}" type="number" min="1" max="5000" value="${s.preco}" aria-label="Preço da ${esc(s.nome)}"><button class="btn small" type="submit" style="flex:0 0 auto;width:auto">Mudar preço</button></form>
       ${mexeu ? `<button type="button" class="lb-pill" data-a="admLimVoltar" data-k="${s.k}">Voltar ao combinado (${brDataHora(Date.parse(s.ateOriginal))}, ${s.precoOriginal})</button>` : ""}
     </div>`; }).join("") + `<p class="dim" style="font-size:14px">Muda só neste celular. Para valer no celular de todo mundo, ou para criar uma edição limitada nova, peça ao Claude.</p>`;
+  if (ADM.aba === "aviso") corpo = `
+    <h3>Aviso para todo mundo</h3>
+    <p class="dim" style="font-size:14px">Aparece numa janela e numa faixa na tela inicial de quem estiver com o jogo aberto no site (oficial ou teste), em até 1 minuto depois de publicado.</p>
+    <textarea id="adm-aviso" maxlength="200" placeholder="Ex.: Hoje às 19h tem campeonato na Sala do Andre!" aria-label="Texto do aviso">${esc(ADM.avisoTexto || "")}</textarea>
+    <label for="adm-aviso-h">Vale por</label>
+    <select id="adm-aviso-h"><option value="1">1 hora</option><option value="24" selected>1 dia</option><option value="72">3 dias</option><option value="168">7 dias</option></select>
+    <button type="button" class="btn" data-a="admPrepararAviso">Preparar aviso</button>
+    ${ADM.avisoJSON ? `<div class="card" style="background:rgba(255,255,255,.06)">
+      <b>Para publicar:</b>
+      <ol class="rules"><li>Toque em <b>Copiar</b>.</li><li>Toque em <b>Abrir no GitHub</b> (entre com a sua conta).</li><li>Apague tudo que estiver lá, cole e toque em <b>Commit changes</b>.</li></ol>
+      <pre class="adm-json" id="adm-aviso-json">${esc(ADM.avisoJSON)}</pre>
+      <div class="adm-grade"><button type="button" class="btn small" data-a="admCopiarAviso">Copiar</button><a class="btn ghost small" href="${LINK_EDITAR_AVISOS}" target="_blank" rel="noopener">Abrir no GitHub</a></div>
+    </div>` : ""}
+    <p class="dim" style="font-size:14px">Ou fale para o Claude: "manda o aviso: …" que ele publica.</p>
+    ${avisosAtivos().length ? `<h3>Valendo agora</h3>${avisosAtivos().map(a => `<p>📢 ${esc(a.texto)} <span class="dim">(até ${brDataHora(Date.parse(a.ate))})</span></p>`).join("")}
+      <button type="button" class="lb-pill" data-a="admLimparAvisos">Preparar para apagar todos</button>` : ""}`;
   if (ADM.aba === "numeros") {
     const hist = G.historico || [], vit = Object.entries(G.vitorias || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
     const ricos = Object.entries(G.banco || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
@@ -3929,6 +3956,60 @@ naTelaComMusica = () => musicaDesejada() === "lobby";
   const q = new URLSearchParams(location.search);
   if (!q.get("sala") && !q.get("amigo") && G.tela === "lobby") mostrarAbertura();
 }
+</script>
+<script>
+/* ================= Avisos do ADM para todo mundo =================
+   Ficam em avisos.json, na raiz do site (GitHub Pages). Só quem pode mexer no repositório publica.
+   Cada jogo aberto confere o arquivo a cada minuto; aviso novo aparece uma vez em janela e,
+   enquanto vale, numa faixa na tela inicial. Dentro do Claude não chega (o artefato não lê o site). */
+const AVISOS = { lista: [], url: (location.pathname.includes("/teste/") ? "../" : "") + "avisos.json" };
+const avisoValido = a => a && typeof a === "object" && typeof a.id === "string" && typeof a.texto === "string" && a.texto.trim()
+  && (!a.ate || Date.now() <= Date.parse(a.ate)) && (!a.de || Date.now() >= Date.parse(a.de));
+const avisosAtivos = () => AVISOS.lista.filter(avisoValido);
+async function buscarAvisos() {
+  try {
+    const r = await fetch(AVISOS.url + "?t=" + Date.now(), { cache: "no-store" }); if (!r.ok) return;
+    const d = await r.json(); AVISOS.lista = Array.isArray(d.avisos) ? d.avisos.slice(0, 20) : [];
+  } catch { return; }
+  const vistos = G.avisosVistos = G.avisosVistos || [];
+  const novo = avisosAtivos().find(a => !vistos.includes(a.id));
+  if (novo) { vistos.push(novo.id); G.avisosVistos = vistos.slice(-50); salvar(); mostrarAviso(novo); }
+  if (G.tela === "lobby" && !$("app").hidden) render();
+}
+function mostrarAviso(a) {
+  let el = $("aviso-adm");
+  if (!el) { el = document.createElement("div"); el.id = "aviso-adm"; el.className = "aviso-adm"; el.setAttribute("role", "alertdialog"); el.setAttribute("aria-label", "Aviso do ADM"); document.body.append(el); }
+  el.innerHTML = `<div class="aviso-caixa"><span class="aviso-tag">📢 Aviso do ADM</span><p>${esc(a.texto.slice(0, 200))}</p><button type="button" class="lb-jogar" id="aviso-ok">OK!</button></div>`;
+  el.hidden = false; $("aviso-ok").onclick = () => { el.hidden = true; };
+  if (typeof tocarNotas === "function") tocarNotas([[72, 72, 0, .12, "square"], [79, 79, .14, .12, "square"], [84, 84, .28, .3, "square"]]);
+  vibrar([80, 50, 80]);
+}
+function avisoFaixa() {
+  const a = avisosAtivos().slice(-1)[0]; if (!a) return "";
+  return `<button type="button" class="aviso-faixa" data-a="verAviso"><span>📢 ${esc(a.texto.slice(0, 200))}</span></button>`;
+}
+acoes.verAviso = () => { const a = avisosAtivos().slice(-1)[0]; if (a) mostrarAviso(a); };
+if (location.protocol.startsWith("http") && !/claude|claudeusercontent/.test(location.hostname)) {
+  setTimeout(buscarAvisos, 1500); setInterval(() => { if (!document.hidden) buscarAvisos(); }, 60000);
+}
+
+/* aba "Aviso" no Painel de ADM: monta o arquivo novo para colar no GitHub */
+const LINK_EDITAR_AVISOS = "https://github.com/thidesigner/mete-sarrafo/edit/main/avisos.json";
+function montarAvisosNovos(texto, horas) {
+  const agora = Date.now(), id = "a" + agora.toString(36);
+  const mantidos = AVISOS.lista.filter(avisoValido).slice(-4);
+  return JSON.stringify({ avisos: [...mantidos, { id, texto: texto.slice(0, 200), de: new Date(agora).toISOString(), ate: new Date(agora + horas * 3600000).toISOString() }] }, null, 2);
+}
+acoes.admPrepararAviso = () => {
+  const t = ($("adm-aviso") || {}).value || ""; if (!t.trim()) { toast("Escreva o aviso"); return; }
+  ADM.avisoJSON = montarAvisosNovos(t.trim().replace(/\s+/g, " "), +($("adm-aviso-h") || {}).value || 24); ADM.avisoTexto = t;
+  const y = window.scrollY; render(); window.scrollTo(0, y);
+};
+acoes.admCopiarAviso = () => {
+  navigator.clipboard.writeText(ADM.avisoJSON || "").then(() => toast("Copiado! Agora abra o GitHub e cole."))
+    .catch(() => { const p = $("adm-aviso-json"); const r = document.createRange(); r.selectNodeContents(p); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); toast("Texto selecionado: copie"); });
+};
+acoes.admLimparAvisos = () => { ADM.avisoJSON = JSON.stringify({ avisos: [] }, null, 2); ADM.avisoTexto = ""; const y = window.scrollY; render(); window.scrollTo(0, y); };
 </script>
 
 <script>

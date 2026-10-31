@@ -90,6 +90,13 @@ Abre com **5 toques rápidos no título "Jogo de Pergunta"** da tela inicial e d
 - Tudo vale só no aparelho onde foi feito (não há servidor). Skin limitada nova ou mudança para todos: no código.
 - Não descreva o toque escondido em textos para as crianças. O segredo de verdade é o código de 5 números.
 
+## Avisos do ADM para todo mundo
+
+`avisos.json` na raiz do site: `{"avisos": [{"id", "texto" (até 200 letras), "de", "ate"}]}` (datas ISO). Todo jogo aberto no site (oficial e teste) lê o arquivo ao abrir e a cada minuto; aviso novo aparece uma vez numa janela "📢 Aviso do ADM" e, enquanto vale, numa faixa que corre na tela inicial. Dentro do Claude não chega.
+- Quando o pai pedir "manda o aviso: …": acrescente um aviso com `id` novo (ex.: `a` + data), `de` agora e `ate` (padrão 1 dia), apague os vencidos, commit e push direto na `main`. Em ~1 minuto chega em todos.
+- O pai também pode publicar sozinho pela aba "Aviso" do Painel de ADM (monta o arquivo; ele cola no editor do GitHub).
+- Só o pai pede aviso. Texto curto, para crianças, sem dados pessoais, sem links.
+
 ## Testes
 
 - Sintaxe: extraia os `<script>` de `teste/index.html` e rode `node --check`.
