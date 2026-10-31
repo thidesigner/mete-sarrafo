@@ -1216,7 +1216,7 @@ const SKINS = [
   { k: "guepardo", nome: "Guepardo Veloz", preco: 300, camisa: "#f4a261", pele: "#f4a261", heroi: true },
   // edição limitada: só dá para comprar até a data "ate" (horário de Brasília). Quem comprou fica com ela para sempre.
   { k: "galactica", nome: "Galáctica", preco: 500, camisa: "#2b1a6b", limitada: true, ate: "2026-11-06T23:59:59-03:00" },
-  { k: "buraconegro", nome: "Buraco Negro", preco: 600, camisa: "#0b0a16", limitada: true, ate: "2026-11-07T23:59:59-03:00" },
+  { k: "buraconegro", nome: "Buraco Negro", preco: 600, camisa: "#0b0a16", pele: "#120f22", limitada: true, ate: "2026-11-07T23:59:59-03:00" },
 ];
 /* Skin limitada ainda à venda? Depois do prazo some da loja para quem não tem. */
 const naVenda = s => !s.ate || Date.now() <= Date.parse(s.ate);
@@ -1835,6 +1835,12 @@ function desenharAcessorio2D(c, skin, x, y) {
       // brilho roxo em volta do corpo e da cabeça (a luz sendo puxada)
       const aura = c.createRadialGradient(x, y - 18, 8, x, y - 18, 56); aura.addColorStop(0, "rgba(120,60,220,0)"); aura.addColorStop(.55, "rgba(120,60,220,.22)"); aura.addColorStop(1, "rgba(120,60,220,0)");
       c.fillStyle = aura; c.beginPath(); c.arc(x, y - 18, 56, 0, Math.PI * 2); c.fill();
+      // ondas de gravidade saindo do corpo
+      for (let k = 0; k < 2; k++) { const f = (t * .5 + k * .5) % 1; c.strokeStyle = `rgba(170,110,255,${.35 * (1 - f)})`; c.lineWidth = 1.5; c.beginPath(); c.ellipse(x, y + 4, 16 + f * 44, 5 + f * 14, 0, 0, Math.PI * 2); c.stroke(); }
+      // jato de energia saindo do topo da cabeça
+      { const forca = .55 + .45 * Math.sin(t * 3.2), alto = 34 + 10 * forca, j = c.createLinearGradient(cx, cy - 16, cx, cy - 16 - alto);
+        j.addColorStop(0, `rgba(230,200,255,${.9 * forca})`); j.addColorStop(.4, `rgba(160,100,255,${.55 * forca})`); j.addColorStop(1, "rgba(120,60,220,0)");
+        c.fillStyle = j; c.beginPath(); c.moveTo(cx - 4, cy - 15); c.lineTo(cx - 1.5, cy - 16 - alto); c.lineTo(cx + 1.5, cy - 16 - alto); c.lineTo(cx + 4, cy - 15); c.closePath(); c.fill(); }
       // estrelas sendo puxadas em espiral, com rastro
       for (let i = 0; i < 14; i++) {
         const f = (t * .45 + i / 14) % 1, a0 = i * 2.7 + f * 9, r = 52 * (1 - f) + 6;
@@ -1849,6 +1855,13 @@ function desenharAcessorio2D(c, skin, x, y) {
       c.stroke();
       c.strokeStyle = `rgba(170,110,255,${.55 + .25 * Math.sin(t * 3)})`; c.lineWidth = 1.5;
       c.beginPath(); c.roundRect ? c.roundRect(x - 15, y - 20, 30, 30, 8) : c.rect(x - 15, y - 20, 30, 30); c.stroke();
+      // estrelinhas piscando dentro da roupa
+      for (let i = 0; i < 9; i++) { const sx = x - 12 + ((i * 37) % 24), sy = y - 17 + ((i * 53) % 25), br = .35 + .65 * Math.max(0, Math.sin(t * 2.5 + i * 1.9)); c.fillStyle = `rgba(255,255,255,${br})`; c.fillRect(sx, sy, i % 3 ? 1.2 : 1.8, i % 3 ? 1.2 : 1.8); }
+      // anel de luz contornando a cabeça escura
+      { const anel = c.createRadialGradient(hx, hy, 13, hx, hy, 20); anel.addColorStop(0, "rgba(255,180,90,0)"); anel.addColorStop(.25, `rgba(255,190,110,${.75 + .2 * Math.sin(t * 4)})`); anel.addColorStop(.6, "rgba(180,110,255,.45)"); anel.addColorStop(1, "rgba(120,60,220,0)");
+        c.fillStyle = anel; c.beginPath(); c.arc(hx, hy, 20, 0, Math.PI * 2); c.arc(hx, hy, 14.6, 0, Math.PI * 2, true); c.fill(); }
+      // sorriso brilhando
+      c.strokeStyle = "rgba(214,184,255,.95)"; c.lineWidth = 2; c.beginPath(); c.arc(x, y - 31, 5, .2, Math.PI - .2); c.stroke();
       // olhos brilhando
       for (const lado of [-1, 1]) { const g = c.createRadialGradient(x + lado * 5, y - 36, 0, x + lado * 5, y - 36, 5); g.addColorStop(0, "#ffffff"); g.addColorStop(.35, "#c79bff"); g.addColorStop(1, "rgba(160,90,255,0)"); c.fillStyle = g; c.beginPath(); c.arc(x + lado * 5, y - 36, 5, 0, Math.PI * 2); c.fill(); }
       // disco de luz: parte de trás, anel de fótons, arco que passa por cima, parte da frente
@@ -2384,8 +2397,12 @@ function acessorio3D(cabeca, skin) {
       });
       // arco de luz dobrada por cima (fica de pé, atrás da cabeça)
       const arco = new THREE.Mesh(new THREE.TorusGeometry(.27, .016, 8, 40, Math.PI), basico("#ffd29a", .9)); arco.position.z = .04; cabeca.add(arco);
-      // aura roxa e olhos brilhando
+      // aura roxa, anel de luz em volta da cabeça escura e jato de energia
       cabeca.add(new THREE.Mesh(new THREE.SphereGeometry(.3, 20, 14), basico("#6a35c8", .25)));
+      const halo = new THREE.Mesh(new THREE.SphereGeometry(.235, 24, 18), new THREE.MeshBasicMaterial({ color: "#ffb35c", side: THREE.BackSide, transparent: true, opacity: .55, blending: THREE.AdditiveBlending, depthWrite: false })); cabeca.add(halo);
+      const jato = new THREE.Mesh(new THREE.ConeGeometry(.06, .7, 12, 1, true), basico("#c8a2ff", .55)); jato.rotation.x = Math.PI; jato.position.y = .55; cabeca.add(jato);
+      const onda = new THREE.Mesh(new THREE.TorusGeometry(.5, .012, 6, 40), basico("#a070ff", .5)); onda.rotation.x = Math.PI / 2; onda.position.y = -1.25; onda.userData.gira = .6; cabeca.add(onda);
+      const sorriso = new THREE.Mesh(new THREE.TorusGeometry(.06, .012, 6, 16, Math.PI * .8), new THREE.MeshBasicMaterial({ color: "#d6b8ff" })); sorriso.position.set(0, -.05, -.19); sorriso.rotation.z = Math.PI * 1.1; cabeca.add(sorriso);
       for (const lado of [-1, 1]) { const o = new THREE.Mesh(new THREE.SphereGeometry(.035, 8, 6), new THREE.MeshBasicMaterial({ color: "#e4ccff" })); o.position.set(lado * .07, .03, -.19); cabeca.add(o); }
       // estrelinhas em órbita
       const orbita = new THREE.Group(); orbita.userData.gira = -.9; orbita.rotation.x = .25; cabeca.add(orbita);
