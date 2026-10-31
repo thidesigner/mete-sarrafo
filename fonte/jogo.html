@@ -205,6 +205,13 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .lb-avatar.av-buraconegro { animation: avBrilhaBn 2s ease-in-out infinite; }
 @keyframes avBrilhaBn { 50% { box-shadow: 0 0 18px rgba(255,150,60,.85); } }
 @media (prefers-reduced-motion: reduce) { .lb-avatar.av-buraconegro { animation: none; } }
+.av-sideral { position: relative; overflow: hidden; border-color: #7fd3ff !important; box-shadow: 0 0 12px rgba(110,198,255,.85);
+  background: radial-gradient(circle at 78% 82%, #4cc96a 0 4%, transparent 4.5%), radial-gradient(circle at 80% 85%, #3d8fe6 0 16%, transparent 17%),
+    radial-gradient(1.2px 1.2px at 20% 20%, #fff 50%, transparent 52%), radial-gradient(1px 1px at 70% 25%, #fff 50%, transparent 52%), radial-gradient(1.4px 1.4px at 30% 75%, #ffd6f5 50%, transparent 52%),
+    radial-gradient(circle at 30% 30%, #2a4aa8 0%, #13235a 55%, #050a24 100%) !important; }
+.lb-avatar.av-sideral { animation: avBrilhaSd 2.2s ease-in-out infinite; }
+@keyframes avBrilhaSd { 50% { box-shadow: 0 0 18px rgba(255,122,217,.8); } }
+@media (prefers-reduced-motion: reduce) { .lb-avatar.av-sideral { animation: none; } }
 @keyframes avBrilha { 50% { box-shadow: 0 0 16px rgba(255,210,63,.7); } }
 @media (prefers-reduced-motion: reduce) { .lb-avatar.av-galactico { animation: none; } }
 .av-loja { display: grid; place-items: center; padding: 8px 0; }
@@ -239,6 +246,7 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .pacote > * { position: relative; }
 .pacote + .pacote { margin-top: 4px; }
 .pacote.sk-limitada.pacote-buraconegro::before { opacity: .6; }
+.pacote.sk-limitada.pacote-sideral { background: radial-gradient(circle at 88% 18%, #ffe0a8 0 4%, transparent 4.5%), radial-gradient(circle at 10% 100%, #3d8fe6 0 16%, rgba(127,211,255,.4) 17.5%, transparent 21%), radial-gradient(ellipse 60% 50% at 70% 30%, rgba(255,110,200,.3) 0%, transparent 70%), linear-gradient(180deg, #050a24 0%, #13235a 100%) !important; border-color: #7fd3ff !important; box-shadow: 0 0 0 2px rgba(127,211,255,.35), 0 0 24px rgba(255,122,217,.45); }
 .pacote.sk-limitada.pacote-buraconegro { background: radial-gradient(circle at 80% 30%, #000 0 8%, rgba(255,160,70,.9) 9%, rgba(176,123,255,.6) 14%, transparent 24%), radial-gradient(circle at 20% 80%, #3a1a6e 0%, #0b0716 70%) !important; border-color: #ff9a3c !important; box-shadow: 0 0 0 2px rgba(255,154,60,.35), 0 0 24px rgba(176,123,255,.55); }
 .pacote-titulo { font-family: var(--display); font-size: 24px; color: #ffd23f; text-shadow: 0 3px 0 #0b1b33; }
 .pacote-itens { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 100%; }
@@ -320,6 +328,21 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
   radial-gradient(1.8px 1.8px at 50% 22%, #ffd9a8 50%, transparent 52%), radial-gradient(1.1px 1.1px at 64% 86%, #fff 50%, transparent 52%),
   radial-gradient(1.6px 1.6px at 88% 30%, #d6b8ff 50%, transparent 52%), radial-gradient(1px 1px at 22% 88%, #fff 50%, transparent 52%);
   background-size: 160px 160px; animation: galaxia 40s linear infinite; }
+.bgf[data-fundo="sideral"] { background:
+  radial-gradient(circle at 18% 104%, #4cc96a 0 6%, transparent 6.4%), radial-gradient(circle at 26% 98%, #4cc96a 0 4%, transparent 4.4%),
+  radial-gradient(circle at 20% 110%, #7fd3ff 0, #3d8fe6 14%, #1f5fc0 22%, rgba(127,211,255,.5) 23.5%, transparent 27%),
+  radial-gradient(ellipse 9% 2.2% at 82% 22%, transparent 0 50%, rgba(255,220,170,.9) 56% 78%, transparent 84%),
+  radial-gradient(circle at 82% 22%, #ffe0a8 0, #e9a35a 3%, transparent 3.4%),
+  radial-gradient(circle at 60% 40%, #e6ebf5 0 1.8%, transparent 2.1%),
+  radial-gradient(ellipse 60% 40% at 70% 30%, rgba(255,110,200,.25) 0%, transparent 70%),
+  linear-gradient(180deg, #050a24 0%, #13235a 60%, #0a1640 100%); }
+.bgf[data-fundo="sideral"]::before { background-image:
+  linear-gradient(155deg, transparent 46%, rgba(255,255,255,.0) 48%, rgba(170,230,255,.3) 49.6%, rgba(255,255,255,.55) 50%, transparent 50.2%),
+  radial-gradient(1.5px 1.5px at 10% 20%, #fff 50%, transparent 52%), radial-gradient(1.1px 1.1px at 32% 60%, #fff 50%, transparent 52%),
+  radial-gradient(2px 2px at 50% 12%, #cfe8ff 50%, transparent 52%), radial-gradient(1.2px 1.2px at 72% 76%, #fff 50%, transparent 52%),
+  radial-gradient(1.7px 1.7px at 92% 50%, #ffd6f5 50%, transparent 52%), radial-gradient(1px 1px at 44% 88%, #fff 50%, transparent 52%);
+  background-size: 620px 420px, 170px 170px, 170px 170px, 170px 170px, 170px 170px, 170px 170px, 170px 170px; animation: galaxia 50s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .bgf[data-fundo="sideral"]::before { animation: none; } }
 .bgf[data-fundo="galactico"] { background:
   radial-gradient(ellipse 15% 3% at 84% 63%, transparent 0 52%, rgba(205,185,255,.95) 56% 80%, transparent 84%),
   radial-gradient(circle at 84% 63%, #ffd98f 0, #f0a03c 3%, #c4561c 5.2%, transparent 5.5%),
@@ -1457,11 +1480,19 @@ const ARREMESSOS = [
   { k: "abobora", nome: "Abóbora", icone: "🎃", preco: 150, cor: "#ff8a1f" },
   { k: "estrela", nome: "Estrela", icone: "⭐", preco: 150, cor: "#ffe9a8" },
   { k: "buraconegro", nome: "Mini Buraco Negro", icone: "🌑", preco: 200, cor: "#b07bff", tipo: "arremesso", limitada: true, ate: "2026-11-07T23:59:59-03:00" },
+  { k: "sideral", nome: "Cometa", icone: "☄️", preco: 200, cor: "#7fd3ff", tipo: "arremesso", limitada: true, ate: "2026-11-02T12:00:00-03:00" },
 ];
 const arremessoInfo = k => ARREMESSOS.find(a => a.k === k) || ARREMESSOS[0];
 function temArremesso(n, k) { const a = ARREMESSOS.find(x => x.k === k); return !!a && (a.preco === 0 || (((G.inv || {})[n] || {}).arremessos || []).includes(k)); }
 function arremessoDe(n) { const k = ((G.inv || {})[n] || {}).arremesso; return temArremesso(n, k) ? k : "bola"; }
 function desenharArremesso2D(c, k, x, y, giro) {
+  if (k === "sideral") {
+    const t = performance.now() / 1000; c.save(); c.globalCompositeOperation = "lighter";
+    const a = giro * .2 + Math.PI * .75;   // o rastro fica sempre para trás e meio de lado
+    for (let i = 1; i <= 9; i++) { const d = i * 4.2, r = 9 - i * .8; c.fillStyle = `rgba(${i < 4 ? "255,240,160" : i < 7 ? "120,220,255" : "255,120,210"},${.75 - i * .07})`; c.beginPath(); c.arc(x + Math.cos(a) * d, y + Math.sin(a) * d, Math.max(1, r), 0, Math.PI * 2); c.fill(); }
+    c.fillStyle = `rgba(160,230,255,${.45 + .2 * Math.sin(t * 12)})`; c.beginPath(); c.arc(x, y, 14, 0, Math.PI * 2); c.fill();
+    c.restore(); c.fillStyle = "#ffffff"; c.beginPath(); c.arc(x, y, 8, 0, Math.PI * 2); c.fill(); return;
+  }
   if (k === "buraconegro") {
     const t = performance.now() / 1000; c.save(); c.globalCompositeOperation = "lighter";
     for (let i = 0; i < 2; i++) { c.strokeStyle = i ? "rgba(190,120,255,.9)" : "rgba(255,150,60,.95)"; c.lineWidth = 3 - i; c.beginPath(); c.ellipse(x, y, 22 - i * 4, 7 - i * 2, giro * .3 + t * 3, 0, Math.PI * 2); c.stroke(); }
@@ -1947,7 +1978,24 @@ function desenharAcessorio2D(c, skin, x, y) {
         const fg = c.createLinearGradient(mx, y, mx, y + fogo); fg.addColorStop(0, "rgba(255,240,170,1)"); fg.addColorStop(.5, "rgba(255,150,50,.9)"); fg.addColorStop(1, "rgba(255,60,120,0)");
         c.fillStyle = fg; c.beginPath(); c.moveTo(mx - 3, y); c.quadraticCurveTo(mx, y + fogo * 1.4, mx + 3, y); c.closePath(); c.fill(); c.restore();
       }
+      // planeta com anel girando mais longe, do outro lado
+      const ap = t * .7 + 4, ppx = x + Math.cos(ap) * 36, ppy = y - 30 + Math.sin(ap) * 7, planAtras = Math.sin(ap) < 0;
+      const planeta = () => {
+        const g = c.createRadialGradient(ppx - 1.5, ppy - 1.5, .5, ppx, ppy, 6); g.addColorStop(0, "#ffe0a8"); g.addColorStop(1, "#e07a3a");
+        c.fillStyle = g; c.beginPath(); c.arc(ppx, ppy, 5, 0, Math.PI * 2); c.fill();
+        c.strokeStyle = "rgba(255,200,240,.95)"; c.lineWidth = 1.4; c.beginPath(); c.ellipse(ppx, ppy, 9, 2.6, -.3, 0, Math.PI * 2); c.stroke();
+      };
+      if (planAtras) planeta();
+      // faíscas saindo do foguete
+      c.save(); c.globalCompositeOperation = "lighter";
+      for (let i = 0; i < 6; i++) { const f = (t * 1.6 + i / 6) % 1, lado = i % 2 ? 1 : -1; c.fillStyle = `rgba(255,${200 - f * 120},${120 + f * 100},${1 - f})`; c.beginPath(); c.arc(x + lado * 16 + Math.sin(i * 7 + t * 3) * 3 * f, y + 10 + f * 22, 1.6 - f, 0, Math.PI * 2); c.fill(); }
+      c.restore();
       if (cometaAtras) cometa(); if (luaAtras) lua();
+      // constelação na roupa
+      c.strokeStyle = "rgba(170,220,255,.45)"; c.lineWidth = .8; c.beginPath(); c.moveTo(x - 9, y - 12); c.lineTo(x - 11, y - 2); c.lineTo(x - 6, y + 4); c.moveTo(x + 8, y - 15); c.lineTo(x + 11, y - 9); c.lineTo(x + 10, y + 2); c.stroke();
+      // cinto dourado com luzinhas
+      c.fillStyle = "#ffd23f"; c.fillRect(x - 14, y + 6, 28, 3);
+      for (let i = 0; i < 3; i++) { c.fillStyle = Math.floor(t * 4 + i) % 3 === 0 ? "#ff5a7a" : "#7dff9a"; c.beginPath(); c.arc(x - 5 + i * 5, y + 7.5, 1.1, 0, Math.PI * 2); c.fill(); }
       // estrelinhas e a Terra no peito
       [[-9, -12], [8, -15], [-6, 4], [10, 2], [-11, -2], [5, 7], [-2, -17], [11, -9]].forEach(([a, b], i) => {
         const br = .5 + .5 * Math.sin(t * 3.5 + i * 2), sx = x + a, sy = y + b;
@@ -1972,7 +2020,7 @@ function desenharAcessorio2D(c, skin, x, y) {
       const pisca = .5 + .5 * Math.sin(t * 6);
       c.save(); c.globalCompositeOperation = "lighter"; c.fillStyle = `rgba(255,90,120,${.35 * pisca})`; c.beginPath(); c.arc(hx + 12, hy - 29, 6, 0, Math.PI * 2); c.fill(); c.restore();
       c.fillStyle = `rgb(255,${90 + 100 * pisca},${120 + 60 * pisca})`; c.beginPath(); c.arc(hx + 12, hy - 29, 2.6, 0, Math.PI * 2); c.fill();
-      if (!cometaAtras) cometa(); if (!luaAtras) lua();
+      if (!cometaAtras) cometa(); if (!luaAtras) lua(); if (!planAtras) planeta();
       break;
     }
     case "galactica": {
@@ -2545,6 +2593,11 @@ function acessorio3D(cabeca, skin) {
       // nebulosa em volta do capacete
       cabeca.add(new THREE.Mesh(new THREE.SphereGeometry(.36, 18, 14), brilha("#3d7bff", .16)));
       const anelNeb = new THREE.Mesh(new THREE.TorusGeometry(.42, .02, 6, 40), brilha("#ff7ad9", .45)); anelNeb.rotation.x = Math.PI / 2 - .3; anelNeb.userData.gira = .8; cabeca.add(anelNeb);
+      // planeta com anel em órbita mais larga e cinto dourado
+      const orbP = new THREE.Group(); orbP.rotation.x = .15; orbP.position.y = -.1; orbP.userData.gira = .7; cabeca.add(orbP);
+      const plan = new THREE.Mesh(new THREE.SphereGeometry(.06, 12, 10), brilha("#e9a35a", 1)); plan.position.set(0, .1, .62); orbP.add(plan);
+      const anelP = new THREE.Mesh(new THREE.TorusGeometry(.1, .01, 6, 24), brilha("#ffc8f0", .9)); anelP.rotation.x = Math.PI / 2.3; anelP.position.copy(plan.position); orbP.add(anelP);
+      add(new THREE.CylinderGeometry(.165, .165, .035, 16, 1, true), "#ffd23f", 0, -.66, 0, { side: THREE.DoubleSide });
       // lua girando em volta da cabeça
       const orbL = new THREE.Group(); orbL.rotation.x = -.25; orbL.userData.gira = -1.1; cabeca.add(orbL);
       const lua = new THREE.Mesh(new THREE.SphereGeometry(.055, 12, 10), new THREE.MeshLambertMaterial({ color: "#d6dcea" })); lua.position.set(-.38, .05, 0); orbL.add(lua);
@@ -2664,7 +2717,7 @@ function desenhar3D() {
     b.ry = b.ry ?? b.g.rotation.y;
     b.ry += ((b.dir - b.ry + Math.PI * 3) % (Math.PI * 2) - Math.PI) * .25;
     const ges = gestoAtivo(p), pose = ges ? poseGesto(ges.g.k, ges.f) : null;
-    const giros = ges ? { giro: 2, piao: 5, galactico: 1, buraconegro: 3 }[ges.g.k] || 0 : 0;
+    const giros = ges ? { giro: 2, piao: 5, galactico: 1, buraconegro: 3, sideral: 2 }[ges.g.k] || 0 : 0;
     b.g.rotation.set(pose ? pose.volta : 0, b.ry + (ges ? giros * ges.f * Math.PI * 2 : 0), pose ? -pose.incl : 0);
     if (pose) { b.g.position.y = pose.pulo * U * 1.6 + (pose.volta ? .5 * Math.sin(Math.PI * ges.f) : 0); b.g.translateX(pose.desl * U); b.g.scale.set((1 + pose.achata) * pose.tam, (1 - pose.achata) * pose.tam, (1 + pose.achata) * pose.tam); }
     else b.g.scale.set(1, 1, 1);
@@ -2938,7 +2991,8 @@ const AV_ICONES = ["🐶", "🐱", "🦊", "🐼", "🐸", "🦁", "🐯", "🐵
 const AV_CORES = ["#e4572e", "#2f80ed", "#37d99a", "#ffd23f", "#9b51e0", "#ff4d6d", "#0b1b33", "#f4a261"];
 /* fotos de perfil especiais (compradas na loja); a de edição limitada só vende até "ate" */
 const AV_ESPECIAIS = [{ k: "galactico", icone: "🪐", nome: "Galáctico", tipo: "avatar", limitada: true, preco: 200, ate: "2026-11-06T23:59:59-03:00" },
-  { k: "buraconegro", icone: "🕳️", nome: "Buraco Negro", tipo: "avatar", limitada: true, preco: 200, ate: "2026-11-07T23:59:59-03:00" }];
+  { k: "buraconegro", icone: "🕳️", nome: "Buraco Negro", tipo: "avatar", limitada: true, preco: 200, ate: "2026-11-07T23:59:59-03:00" },
+  { k: "sideral", icone: "🧑‍🚀", nome: "Espaço Sideral", tipo: "avatar", limitada: true, preco: 200, ate: "2026-11-02T12:00:00-03:00" }];
 const avEspecial = k => AV_ESPECIAIS.find(x => x.k === k) || null;
 const avValido = i => i === "" || AV_ICONES.includes(i) || !!avEspecial(i);
 function temAvatar(n, k) { return (((G.inv || {})[n] || {}).avatares || []).includes(k); }
@@ -3281,11 +3335,12 @@ acoes.som = el => { _acaoSom(el); atualizarSomArena(); if (G.som !== false) { mu
 
 <script>
 /* ================= Fundos ================= */
-const FUNDOS = [["basico", "Básico"], ["ceu", "Céu"], ["quadra", "Quadra"], ["floresta", "Floresta"], ["por", "Pôr do sol"], ["doce", "Doce"], ["noite", "Noite estrelada"], ["vulcao", "Vulcão"], ["galactico", "Galáctico"], ["buraconegro", "Buraco Negro"]];
-const PRECO_FUNDO = { basico: 0, ceu: 50, quadra: 50, floresta: 75, por: 100, doce: 100, noite: 150, vulcao: 200, galactico: 300, buraconegro: 300 };
+const FUNDOS = [["basico", "Básico"], ["ceu", "Céu"], ["quadra", "Quadra"], ["floresta", "Floresta"], ["por", "Pôr do sol"], ["doce", "Doce"], ["noite", "Noite estrelada"], ["vulcao", "Vulcão"], ["galactico", "Galáctico"], ["buraconegro", "Buraco Negro"], ["sideral", "Espaço Sideral"]];
+const PRECO_FUNDO = { basico: 0, ceu: 50, quadra: 50, floresta: 75, por: 100, doce: 100, noite: 150, vulcao: 200, galactico: 300, buraconegro: 300, sideral: 300 };
 /* fundos de edição limitada: só dá para comprar até "ate" (horário de Brasília); quem comprou fica com ele */
 const FUNDOS_LIM = [{ k: "galactico", nome: "Galáctico", tipo: "fundo", limitada: true, preco: 300, ate: "2026-11-06T23:59:59-03:00" },
-  { k: "buraconegro", nome: "Buraco Negro", tipo: "fundo", limitada: true, preco: 300, ate: "2026-11-07T23:59:59-03:00" }];
+  { k: "buraconegro", nome: "Buraco Negro", tipo: "fundo", limitada: true, preco: 300, ate: "2026-11-07T23:59:59-03:00" },
+  { k: "sideral", nome: "Espaço Sideral", tipo: "fundo", limitada: true, preco: 300, ate: "2026-11-02T12:00:00-03:00" }];
 const fundoLim = k => FUNDOS_LIM.find(f => f.k === k) || null;
 const fundoNaVenda = k => { const f = fundoLim(k); return !f || naVenda(f); };
 function temFundo(n, k) { return k === "basico" || (((G.inv || {})[n] || {}).fundos || []).includes(k); }
@@ -3417,20 +3472,23 @@ const EMOJIS = [
   // edição limitada: só dá para comprar até "ate" (horário de Brasília); quem comprou fica com ele
   { k: "galactico", e: "🌌", nome: "Galáctico", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-06T23:59:59-03:00" },
   { k: "buraconegro", e: "🕳️", nome: "Buraco Negro", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-07T23:59:59-03:00" },
+  { k: "sideral", e: "🌠", nome: "Estrela Cadente", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-02T12:00:00-03:00" },
 ];
 const emojiInfo = k => EMOJIS.find(e => e.k === k) || null;
 function temEmoji(n, k) { const e = emojiInfo(k); return !!e && (e.preco === 0 || (((G.inv || {})[n] || {}).emojis || []).includes(k)); }
 function darEmoji(n, k) { G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 }; G.inv[n].emojis = G.inv[n].emojis || []; if (!G.inv[n].emojis.includes(k)) G.inv[n].emojis.push(k); }
-/* ---------- Pacotes das coleções limitadas: tudo junto, 25% mais barato ---------- */
+/* ---------- Pacotes das coleções limitadas: tudo junto, com desconto (cada pacote tem o seu) ---------- */
 const ITEM_PACOTE = {
   skin: k => ({ icone: "👕", nome: "Skin", preco: () => skinInfo(k).preco, tem: n => temSkin(n, k), dar: n => darSkin(n, k), usar: n => { usarSkin(n, k); usarPersonagem(n, null); } }),
-  fundo: k => ({ icone: "🌠", nome: "Fundo", preco: () => PRECO_FUNDO[k], tem: n => temFundo(n, k), dar: n => darFundo(n, k), usar: () => { G.fundo = k; } }),
+  fundo: (k, ic = "🌠") => ({ icone: ic, nome: "Fundo", preco: () => PRECO_FUNDO[k], tem: n => temFundo(n, k), dar: n => darFundo(n, k), usar: () => { G.fundo = k; } }),
   emoji: (k, ic) => ({ icone: ic, nome: "Emoji", preco: () => emojiInfo(k).preco, tem: n => temEmoji(n, k), dar: n => darEmoji(n, k) }),
   gesto: (k, ic) => ({ icone: ic, nome: "Gesto", preco: () => gestoInfo(k).preco, tem: n => temGesto(n, k), dar: n => darGesto(n, k) }),
   foto: (k, ic) => ({ icone: ic, nome: "Foto", preco: () => avEspecial(k).preco, tem: n => temAvatar(n, k), dar: n => { G.inv[n].avatares = [...(G.inv[n].avatares || []), k]; }, usar: n => { G.inv[n].avatar = { ...avatarDe(n), i: k }; } }),
   arremesso: (k, ic) => ({ icone: ic, nome: "Arremesso", preco: () => arremessoInfo(k).preco, tem: n => temArremesso(n, k), dar: n => { G.inv[n].arremessos = [...(G.inv[n].arremessos || []), k]; }, usar: n => { G.inv[n].arremesso = k; } }),
 };
 const PACOTES = [
+  { id: "sideral", nome: "Pacote Espaço Sideral", emoji: "🌍", desconto: .1, ate: "2026-11-02T12:00:00-03:00",
+    itens: () => [ITEM_PACOTE.skin("sideral"), ITEM_PACOTE.fundo("sideral", "🪐"), ITEM_PACOTE.emoji("sideral", "🌠"), ITEM_PACOTE.gesto("sideral", "🛸"), ITEM_PACOTE.foto("sideral", "🧑‍🚀"), ITEM_PACOTE.arremesso("sideral", "☄️")] },
   { id: "buraconegro", nome: "Pacote Buraco Negro", emoji: "🕳️", desconto: .25, ate: "2026-11-07T23:59:59-03:00",
     itens: () => [ITEM_PACOTE.skin("buraconegro"), ITEM_PACOTE.fundo("buraconegro"), ITEM_PACOTE.emoji("buraconegro", "🕳️"), ITEM_PACOTE.gesto("buraconegro", "🌑"), ITEM_PACOTE.foto("buraconegro", "⚫"), ITEM_PACOTE.arremesso("buraconegro", "🌀")] },
   { id: "galactico", nome: "Pacote Galáctico", emoji: "🚀", desconto: .25, ate: "2026-11-06T23:59:59-03:00",
@@ -3540,6 +3598,7 @@ const SONS_EMOJI = {
   fogo: [[40, 76, 0, .35, "sawtooth"]],
   coroa: [[67, 67, 0, .12, "square"], [72, 72, .12, .12, "square"], [76, 76, .24, .3, "square"]],
   buraconegro: [[84, 40, 0, .7, "sawtooth"], [36, 30, .55, .5, "sine"]],
+  sideral: [[96, 72, 0, .45, "sine"], [91, 91, .4, .08, "triangle"], [96, 96, .5, .08, "triangle"], [100, 100, .6, .25, "triangle"]],
   galactico: [[60, 84, 0, .5, "sine"], [91, 91, .45, .12, "sine"], [96, 96, .58, .12, "sine"], [91, 91, .71, .3, "sine"]],
   trofeu: [[72, 72, 0, .1, "square"], [76, 76, .1, .1, "square"], [79, 79, .2, .1, "square"], [84, 84, .3, .35, "square"]],
 };
@@ -3605,6 +3664,8 @@ const GESTOS = [
   // edição limitada: só dá para comprar até "ate" (horário de Brasília); quem comprou fica com ele
   { k: "buraconegro", icone: "🌑", nome: "Sugado", preco: 250, dura: 2.2, tipo: "gesto", limitada: true, ate: "2026-11-07T23:59:59-03:00",
     som: [[84, 36, 0, 1, "sawtooth"], [36, 36, 1, .15, "sine"], [40, 90, 1.2, .5, "sine"], [96, 96, 1.7, .25, "triangle"]] },
+  { k: "sideral", icone: "🛸", nome: "Disco Voador", preco: 250, dura: 2.4, tipo: "gesto", limitada: true, ate: "2026-11-02T12:00:00-03:00",
+    som: [[72, 76, 0, .3, "sine"], [76, 72, .3, .3, "sine"], [72, 76, .6, .3, "sine"], [76, 72, .9, .3, "sine"], [79, 91, 1.3, .5, "triangle"], [91, 60, 1.8, .5, "sine"]] },
   { k: "galactico", icone: "🚀", nome: "Galáctico", preco: 250, dura: 2.4, tipo: "gesto", limitada: true, ate: "2026-11-06T23:59:59-03:00",
     som: [[48, 72, 0, .9, "sine"], [84, 84, .8, .1, "triangle"], [88, 88, .95, .1, "triangle"], [91, 91, 1.1, .1, "triangle"], [96, 96, 1.25, .35, "triangle"], [72, 55, 1.7, .6, "sine"]] },
 ];
@@ -3652,11 +3713,28 @@ function poseGesto(k, f) {
   if (k === "piao") { r.larg = Math.cos(f * T * 5); r.pulo = Math.sin(Math.PI * f) * 18; }
   if (k === "mortal") { r.pulo = Math.sin(Math.PI * f) * 46; r.volta = -f * T; }
   if (k === "buraconegro") { const ida = f < .5 ? f * 2 : (1 - f) * 2; r.tam = Math.max(.05, 1 - ida * ida * .95); r.larg = Math.cos(f * T * 3); }   // gira e é sugado, depois volta
+  if (k === "sideral") { r.pulo = Math.sin(Math.PI * f) * 28; r.incl = Math.sin(f * T * 3) * .12 * fim; r.larg = Math.cos(f * T * 2); }   // puxado pela luz do disco voador, girando
   if (k === "galactico") { r.pulo = Math.sin(Math.PI * f) * 42; r.incl = Math.sin(f * T * 1.5) * .18 * fim; }   // flutua sem gravidade
   return r;
 }
 /* brilho extra do gesto Galáctico: aura de nebulosa e estrelas girando em volta */
 function efeitoGesto2D(c, x, y, k, f) {
+  if (k === "sideral") {
+    const forca = Math.sin(Math.PI * Math.min(1, f)), t = performance.now() / 1000, uy = y - 58;
+    // feixe de luz do disco até o chão
+    c.save(); c.globalCompositeOperation = "lighter";
+    const fx = c.createLinearGradient(x, uy, x, y + 30); fx.addColorStop(0, `rgba(140,255,200,${.55 * forca})`); fx.addColorStop(1, "rgba(140,255,200,0)");
+    c.fillStyle = fx; c.beginPath(); c.moveTo(x - 9, uy + 4); c.lineTo(x + 9, uy + 4); c.lineTo(x + 30, y + 30); c.lineTo(x - 30, y + 30); c.closePath(); c.fill();
+    c.restore();
+    // o disco voador
+    c.save(); c.globalAlpha = Math.min(1, forca * 2);
+    c.fillStyle = "rgba(160,230,255,.85)"; c.beginPath(); c.ellipse(x, uy - 5, 10, 8, 0, Math.PI, 0); c.fill();
+    c.fillStyle = "#b8c4d8"; c.beginPath(); c.ellipse(x, uy, 26, 7, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = "#7d8aa3"; c.beginPath(); c.ellipse(x, uy + 2, 26, 4, 0, 0, Math.PI); c.fill();
+    for (let i = 0; i < 5; i++) { const on = Math.floor(t * 8 + i) % 2; c.fillStyle = on ? ["#ff5a7a", "#ffd23f", "#6ec6ff", "#7dff9a", "#ff7ad9"][i] : "#3b4660"; c.beginPath(); c.arc(x - 18 + i * 9, uy + 1, 2.2, 0, Math.PI * 2); c.fill(); }
+    c.restore();
+    return;
+  }
   if (k === "buraconegro") {
     const forca = Math.sin(Math.PI * Math.min(1, f)), cy = y - 6, t = performance.now() / 1000;
     c.save(); c.globalCompositeOperation = "lighter";
@@ -3714,7 +3792,7 @@ function animarPrevGestos() {
       c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, pw, ph);
       c.setTransform(k, 0, 0, k, (pw - 200 * k) / 2, 0);
       const f = parado ? .25 : ((ts / 1000) % (g.dura + .6)) / g.dura;
-      c.save(); c.translate(100, 96 + (g.k === "galactico" ? 22 : 0)); c.scale(1.5, 1.5); c.translate(-100, -96);   // o Galáctico sobe mais: começa mais embaixo
+      c.save(); c.translate(100, 96 + (g.k === "galactico" ? 22 : g.k === "sideral" ? 44 : 0)); c.scale(1.5, 1.5); c.translate(-100, -96);   // o Galáctico sobe mais: começa mais embaixo
       const r = f < 1 ? transformarGesto2D(c, 100, 96, g.k, f) : { passo: 0 };
       boneco.passo = r.passo || 0;
       desenharBoneco2(c, boneco, {});
