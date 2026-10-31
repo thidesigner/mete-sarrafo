@@ -248,6 +248,15 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .pacote.sk-limitada.pacote-buraconegro::before { opacity: .6; }
 .pacote.sk-limitada.pacote-sideral { background: radial-gradient(circle at 88% 18%, #ffe0a8 0 4%, transparent 4.5%), radial-gradient(circle at 10% 100%, #3d8fe6 0 16%, rgba(127,211,255,.4) 17.5%, transparent 21%), radial-gradient(ellipse 60% 50% at 70% 30%, rgba(255,110,200,.3) 0%, transparent 70%), linear-gradient(180deg, #050a24 0%, #13235a 100%) !important; border-color: #7fd3ff !important; box-shadow: 0 0 0 2px rgba(127,211,255,.35), 0 0 24px rgba(255,122,217,.45); }
 .pacote.sk-limitada.pacote-buraconegro { background: radial-gradient(circle at 80% 30%, #000 0 8%, rgba(255,160,70,.9) 9%, rgba(176,123,255,.6) 14%, transparent 24%), radial-gradient(circle at 20% 80%, #3a1a6e 0%, #0b0716 70%) !important; border-color: #ff9a3c !important; box-shadow: 0 0 0 2px rgba(255,154,60,.35), 0 0 24px rgba(176,123,255,.55); }
+.cantinho { display: grid; gap: 8px; border: 3px solid #ffd23f; border-radius: 18px; padding: 14px 12px; color: #fff; margin-top: 4px;
+  background: radial-gradient(ellipse 80% 40% at 50% 0, rgba(255,210,63,.28), transparent 70%), linear-gradient(180deg, #33240a 0%, #140e03 100%); box-shadow: 0 0 0 2px rgba(255,210,63,.3), 0 0 24px rgba(255,210,63,.4); }
+.cantinho .lb-secao { margin: 0; text-align: center; color: #ffd23f; }
+.cantinho-selo { margin: 0; text-align: center; font-size: 15px; }
+.cantinho .lb-sub { margin: 0; text-align: center; }
+.cantinho .fd-tile .lb-sub { font-size: 12px; margin-top: -4px; }
+.cantinho-fechado { text-align: center; opacity: .9; border-style: dashed; }
+.cantinho-fechado > b { font-family: var(--display); font-size: 20px; color: #ffd23f; }
+.selo-col { font-size: .9em; }
 .pacote-titulo { font-family: var(--display); font-size: 24px; color: #ffd23f; text-shadow: 0 3px 0 #0b1b33; }
 .pacote-itens { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 100%; }
 .pacote-itens span { display: grid; justify-items: center; gap: 2px; background: rgba(11,27,51,.55); border-radius: 10px; padding: 6px 2px; font-size: 11px; font-weight: 800; }
@@ -1247,9 +1256,17 @@ const SKINS = [
   { k: "galactica", nome: "Galáctica", preco: 500, camisa: "#2b1a6b", limitada: true, ate: "2026-11-06T23:59:59-03:00" },
   { k: "buraconegro", nome: "Buraco Negro", preco: 600, camisa: "#0b0a16", pele: "#120f22", limitada: true, ate: "2026-11-07T23:59:59-03:00" },
   { k: "sideral", nome: "Espaço Sideral", preco: 450, camisa: "#13235a", limitada: true, ate: "2026-11-02T12:00:00-03:00" },
+  // cantinho secreto: só quem tem algum item de edição limitada consegue comprar (não acaba)
+  { k: "colecionador", nome: "Rei Dourado", preco: 400, camisa: "#d9a21b", secreto: true },
 ];
 /* Skin limitada ainda à venda? Depois do prazo some da loja para quem não tem. */
 const naVenda = s => !s.ate || Date.now() <= Date.parse(s.ate);
+/* Selo de colecionador: quem tem item de edição limitada ganha medalha (1 = bronze, 5 = prata, 10 = ouro).
+   Fica aqui no começo porque a tela inicial aparece antes da parte da loja/ADM carregar. */
+const SELOS = ["", "🥉", "🥈", "🥇"], SELO_NOMES = ["", "Bronze", "Prata", "Ouro"];
+function qtdLimitadas(n) { try { return n ? todasLimitadas().filter(x => temLim(n, x)).length : 0; } catch (e) { return 0; } }
+function nivelSelo(n) { const q = qtdLimitadas(n); return q >= 10 ? 3 : q >= 5 ? 2 : q >= 1 ? 1 : 0; }
+const nomeComSelo = p => p.nome + (SELOS[p.selo] ? " " + SELOS[p.selo] : "");
 function faltaParaAcabar(s) {
   // dias contados pelo calendário de Brasília (31/out -> 2/nov = 2 dias, mesmo faltando menos de 48 h)
   const ms = Date.parse(s.ate) - Date.now(), h = Math.ceil(ms / 3600000), diaBR = t => Math.floor((t - 3 * 3600000) / 86400000), d = diaBR(Date.parse(s.ate)) - diaBR(Date.now());
@@ -1364,7 +1381,7 @@ function comecarArena() {
       home, x: home.x, y: home.y, alvo: null, modo: "casa", vel: A_VEL * aRnd(.88, 1.12), habil: aRnd(-.08, .08),
       flash: 0, passo: 0, ctrl: false, tocou: false, saiuEm: null, time: o.time };
   });
-  A.P.forEach(p => { if (p.humano) { vestir(p, skinDe(p.nome)); const f = personagemDe(p.nome); if (f) p.ficha = f; p.arremesso = arremessoDe(p.nome); } });
+  A.P.forEach(p => { if (p.humano) { vestir(p, skinDe(p.nome)); const f = personagemDe(p.nome); if (f) p.ficha = f; p.arremesso = arremessoDe(p.nome); p.selo = nivelSelo(p.nome); } });
   A.cel = Math.max(0, A.P.findIndex(p => p.nome === s.dono));
   A.balls = []; A.fx = []; A.t = 0; A.fim = null; A.ptr = null; A.inicio = Date.now();
   A.st = { palavras: 0, acertos: 0, erros: 0, timeouts: 0, votos: 0, votosOk: 0, arremessos: 0, acertosBola: 0, rodadas: 0, compras: 0, moedas: {}, eventos: [] };
@@ -1480,12 +1497,20 @@ const ARREMESSOS = [
   { k: "abobora", nome: "Abóbora", icone: "🎃", preco: 150, cor: "#ff8a1f" },
   { k: "estrela", nome: "Estrela", icone: "⭐", preco: 150, cor: "#ffe9a8" },
   { k: "buraconegro", nome: "Mini Buraco Negro", icone: "🌑", preco: 200, cor: "#b07bff", tipo: "arremesso", limitada: true, ate: "2026-11-07T23:59:59-03:00" },
+  { k: "moedaouro", nome: "Moeda de Ouro", icone: "🪙", preco: 150, cor: "#ffd23f", secreto: true },
   { k: "sideral", nome: "Cometa", icone: "☄️", preco: 200, cor: "#7fd3ff", tipo: "arremesso", limitada: true, ate: "2026-11-02T12:00:00-03:00" },
 ];
 const arremessoInfo = k => ARREMESSOS.find(a => a.k === k) || ARREMESSOS[0];
 function temArremesso(n, k) { const a = ARREMESSOS.find(x => x.k === k); return !!a && (a.preco === 0 || (((G.inv || {})[n] || {}).arremessos || []).includes(k)); }
 function arremessoDe(n) { const k = ((G.inv || {})[n] || {}).arremesso; return temArremesso(n, k) ? k : "bola"; }
 function desenharArremesso2D(c, k, x, y, giro) {
+  if (k === "moedaouro") {
+    const larg = Math.abs(Math.cos(giro * .8)) * 11 + 1.5;   // a moeda gira no ar
+    c.fillStyle = "#b8860b"; c.beginPath(); c.ellipse(x + 1.5, y, larg, 11, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = "#ffd23f"; c.beginPath(); c.ellipse(x, y, larg, 11, 0, 0, Math.PI * 2); c.fill();
+    if (larg > 6) { c.fillStyle = "#b8860b"; c.font = "bold 13px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("$", x, y + 1); }
+    c.fillStyle = "rgba(255,255,255,.7)"; c.beginPath(); c.arc(x - larg * .4, y - 5, 1.6, 0, Math.PI * 2); c.fill(); return;
+  }
   if (k === "sideral") {
     const t = performance.now() / 1000; c.save(); c.globalCompositeOperation = "lighter";
     const a = giro * .2 + Math.PI * .75;   // o rastro fica sempre para trás e meio de lado
@@ -1820,7 +1845,7 @@ function desenharBoneco2(c, p, ph) {
   }
   }
   c.fillStyle = "#f4f7fb"; c.font = "700 22px Nunito, sans-serif"; c.textAlign = "center"; c.textBaseline = "middle";
-  c.fillText(p.nome, x, y + 44);
+  c.fillText(nomeComSelo(p), x, y + 44);
   const nv = Math.min(p.vidas, 10);
   for (let v = 0; v < nv; v++) { c.fillStyle = "#ff4d6d"; c.beginPath(); c.arc(x - (nv - 1) * 8 + v * 16, y - 72, 6, 0, Math.PI * 2); c.fill(); }
   if (isPerg) {
@@ -1946,6 +1971,29 @@ function desenharAcessorio2D(c, skin, x, y) {
       // anel de fótons bem fino colado na cabeça
       c.strokeStyle = `rgba(255,220,170,${.22 + .12 * Math.sin(t * 5)})`; c.lineWidth = 1; c.beginPath(); c.arc(hx, hy, 16.6, 0, Math.PI * 2); c.stroke();
       disco(true);
+      c.restore();
+      break;
+    }
+    case "colecionador": {
+      const t = performance.now() / 1000;
+      // medalha grande no peito, com fita
+      c.fillStyle = "#e63946"; c.beginPath(); c.moveTo(x - 6, y - 18); c.lineTo(x, y - 9); c.lineTo(x + 6, y - 18); c.closePath(); c.fill();
+      c.fillStyle = "#fff3b0"; c.beginPath(); c.arc(x, y - 4, 6.5, 0, Math.PI * 2); c.fill();
+      c.fillStyle = "#e0a800"; c.beginPath(); c.arc(x, y - 4, 5, 0, Math.PI * 2); c.fill();
+      c.fillStyle = "#fff3b0"; c.beginPath(); for (let j = 0; j < 10; j++) { const rr = j % 2 ? 1.4 : 3.4, aa = -Math.PI / 2 + j * Math.PI / 5; c.lineTo(x + Math.cos(aa) * rr, y - 4 + Math.sin(aa) * rr); } c.closePath(); c.fill();
+      // coroa alta com pedras coloridas
+      c.fillStyle = "#ffd23f"; c.strokeStyle = "#a87400"; c.lineWidth = 1.5; c.beginPath();
+      c.moveTo(hx - 14, hy - 10); c.lineTo(hx - 16, hy - 26); c.lineTo(hx - 8, hy - 18); c.lineTo(hx, hy - 30); c.lineTo(hx + 8, hy - 18); c.lineTo(hx + 16, hy - 26); c.lineTo(hx + 14, hy - 10);
+      c.closePath(); c.fill(); c.stroke();
+      [["#ff4d6d", -8], ["#3dd9ff", 0], ["#37d99a", 8]].forEach(([cor, dx]) => { c.fillStyle = cor; c.beginPath(); c.arc(hx + dx, hy - 14, 2.3, 0, Math.PI * 2); c.fill(); });
+      // brilhos dourados girando em volta
+      c.save(); c.globalCompositeOperation = "lighter";
+      for (let i = 0; i < 6; i++) {
+        const a = t * 1.5 + i * Math.PI / 3, sx = x + Math.cos(a) * 26, sy = y - 18 + Math.sin(a) * 18, br = .5 + .5 * Math.sin(t * 5 + i), r = 3.4 * br + 1;
+        c.fillStyle = `rgba(255,220,90,${.4 + .6 * br})`; c.beginPath();
+        for (let j = 0; j < 8; j++) { const rr = j % 2 ? r * .35 : r, aa = j * Math.PI / 4; c.lineTo(sx + Math.cos(aa) * rr, sy + Math.sin(aa) * rr); }
+        c.closePath(); c.fill();
+      }
       c.restore();
       break;
     }
@@ -2506,7 +2554,7 @@ function montarBonecos3D() {
 }
 function montarExtras3D(p, g, pernaE, pernaD, bracoE, bracoD, corpoMat) {
   {
-    const tag = etiqueta({ nome: p.nome, vidas: "" }, timeDe(p) ? timeDe(p).cor : undefined); tag.position.y = 1.95; g.add(tag);
+    const tag = etiqueta({ nome: nomeComSelo(p), vidas: "" }, timeDe(p) ? timeDe(p).cor : undefined); tag.position.y = 1.95; g.add(tag);
     const perg = etiqueta({ nome: "?", vidas: "" }, "#ffd23f"); perg.scale.set(.9, .34, 1); perg.position.y = 2.35; perg.visible = false; g.add(perg);
     corpoMat = deixarDesenho(g, corpoMat);
     const giram = []; g.traverse(o => { if (o.userData && o.userData.gira) giram.push(o); });
@@ -2565,6 +2613,17 @@ function acessorio3D(cabeca, skin) {
       for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2, m = new THREE.Mesh(new THREE.SphereGeometry(.018, 6, 4), new THREE.MeshBasicMaterial({ color: k % 2 ? "#ffd29a" : "#d6b8ff" })); m.position.set(Math.cos(a) * (.55 + (k % 3) * .06), (k % 2 ? .05 : -.05), Math.sin(a) * (.55 + (k % 3) * .06)); orbita.add(m); }
       // espiral na roupa
       for (let k = 0; k < 9; k++) { const a = k * .9, r = .02 + k * .016, m = new THREE.Mesh(new THREE.SphereGeometry(.016, 6, 4), new THREE.MeshBasicMaterial({ color: "#b07bff" })); m.position.set(Math.cos(a) * r, -.48 + Math.sin(a) * r, -.14); cabeca.add(m); }
+      break;
+    }
+    case "colecionador": {
+      const ouro = cor => new THREE.MeshBasicMaterial({ color: cor });
+      add(new THREE.CylinderGeometry(.16, .16, .1, 12, 1, true), "#ffd23f", 0, .22, 0, { side: THREE.DoubleSide });
+      for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2; add(new THREE.ConeGeometry(.045, .13, 6), "#ffd23f", Math.cos(a) * .15, .33, Math.sin(a) * .15); }
+      ["#ff4d6d", "#3dd9ff", "#37d99a"].forEach((cor, k) => { const m = new THREE.Mesh(new THREE.SphereGeometry(.025, 8, 6), ouro(cor)); m.position.set((k - 1) * .08, .22, -.16); cabeca.add(m); });
+      const med = new THREE.Mesh(new THREE.CylinderGeometry(.07, .07, .02, 20), ouro("#ffd23f")); med.rotation.x = Math.PI / 2; med.position.set(0, -.45, -.15); cabeca.add(med);
+      const fita = new THREE.Mesh(new THREE.ConeGeometry(.05, .1, 3), ouro("#e63946")); fita.rotation.z = Math.PI; fita.position.set(0, -.36, -.15); cabeca.add(fita);
+      const orb = new THREE.Group(); orb.userData.gira = 1.4; orb.position.y = -.2; cabeca.add(orb);
+      for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2, m = new THREE.Mesh(new THREE.OctahedronGeometry(.035), ouro("#ffe27a")); m.position.set(Math.cos(a) * .48, (k % 2 ? .08 : -.08), Math.sin(a) * .48); orb.add(m); }
       break;
     }
     case "sideral": {
@@ -2727,7 +2786,7 @@ function desenhar3D() {
     const rot = p.nome + "|" + p.vidas;
     if (rot !== b.rotulo) {
       b.rotulo = rot; b.g.remove(b.tag); b.tag.material.map.dispose();
-      b.tag = etiqueta({ nome: p.nome + (p.humano ? "" : " 🤖"), vidas: "●".repeat(Math.min(10, p.vidas)) }, timeDe(p) ? timeDe(p).cor : undefined); b.tag.position.y = 1.95; b.g.add(b.tag);
+      b.tag = etiqueta({ nome: nomeComSelo(p) + (p.humano ? "" : " 🤖"), vidas: "●".repeat(Math.min(10, p.vidas)) }, timeDe(p) ? timeDe(p).cor : undefined); b.tag.position.y = 1.95; b.g.add(b.tag);
     }
     b.perg.visible = (ph.k === "pergunta" || ph.k === "segredo") && ph.perg === p;
     b.tag.visible = !(dono && p === dono);   // o seu nome ficaria grande na frente da câmera
@@ -2853,7 +2912,7 @@ TELAS.lobby = () => {
     <div class="lb-top">
       <button class="lb-pill lb-perfil" data-a="perfil" aria-label="Trocar jogador">
         ${avatarHTML(avatarDe(nome), nome)}
-        <span class="lb-pinfo"><b>${esc(nome)}</b><span aria-label="${vit} ${vit === 1 ? "vitória" : "vitórias"}" title="Vitórias">🏆 ${vit}</span></span>
+        <span class="lb-pinfo"><b>${esc(nome)}${nivelSelo(nome) ? ` <span class="selo-col" title="Selo de colecionador ${SELO_NOMES[nivelSelo(nome)]}" aria-label="Selo de colecionador ${SELO_NOMES[nivelSelo(nome)]}">${SELOS[nivelSelo(nome)]}</span>` : ""}</b><span aria-label="${vit} ${vit === 1 ? "vitória" : "vitórias"}" title="Vitórias">🏆 ${vit}</span></span>
       </button>
       <div class="lb-dir">
         ${invVidas(nome) ? `<div class="lb-pill lb-vidas" aria-label="${invVidas(nome)} vidas extras"><span aria-hidden="true">❤</span><b>${invVidas(nome)}</b></div>` : ""}
@@ -2876,7 +2935,7 @@ TELAS.lobby = () => {
         <button class="lb-btn" data-a="mais">${ICONES.regras}<span>Regras</span>${sugestoes.length ? `<i class="lb-badge">${sugestoes.length}</i>` : ""}</button>
       </div>
       <button type="button" class="lb-boneco" data-a="minhasSkins" aria-label="Trocar a skin de ${esc(nome)}"><canvas id="lb-canvas" aria-hidden="true"></canvas><span class="lb-trocar" aria-hidden="true">👕</span></button>
-      <div class="lb-nome">${esc(nome)}</div>
+      <div class="lb-nome">${esc(nome)}${nivelSelo(nome) ? ` <span class="selo-col" title="Selo de colecionador ${SELO_NOMES[nivelSelo(nome)]}" aria-label="Selo de colecionador ${SELO_NOMES[nivelSelo(nome)]}">${SELOS[nivelSelo(nome)]}</span>` : ""}</div>
     </div>
     ${G.p && !G.p.fim ? `<button class="lb-cont" data-a="continuar">Continuar partida com bola de verdade</button>` : ""}
     <div class="lb-bottom">
@@ -2899,6 +2958,7 @@ TELAS.loja = () => {
     </div>
     <h1 class="lb-title">Loja</h1>
     ${pacoteHTML(nome, moedas)}
+    ${cantinhoHTML(nome, moedas)}
     <div class="lb-oferta">
       <div class="lb-item-art" style="background:#ff4d6d">${coracao}</div>
       <div class="lb-oferta-txt">
@@ -2909,7 +2969,7 @@ TELAS.loja = () => {
       <button class="lb-comprar" data-a="comprarLoja" ${pode ? "" : "disabled"}>${pode ? (G.lojaConf === "vida" ? "Confirmar?" : `<span class="lb-coin" aria-hidden="true">$</span>${preco}`) : `Faltam ${fmtM(preco - moedas)}`}</button>
     </div>
     <h2 class="lb-secao">Skins</h2>
-    <div class="fd-grid">${SKINS.filter(s => naVenda(s) || temSkin(nome, s.k)).sort((a, b) => !!b.limitada - !!a.limitada).map(s => {
+    <div class="fd-grid">${SKINS.filter(s => !s.secreto && (naVenda(s) || temSkin(nome, s.k))).sort((a, b) => !!b.limitada - !!a.limitada).map(s => {
       const tem = temSkin(nome, s.k), usando = skinDe(nome) === s.k, podeS = moedas >= s.preco;
       const rotulo = usando ? "Usando" : tem ? "Usar" : G.lojaConf === "skin:" + s.k ? "Confirmar?" : podeS ? `<span class="lb-coin" aria-hidden="true">$</span>${s.preco}` : `$ ${s.preco}`;
       return `<div class="fd-tile${tem ? "" : " fd-travado"}${s.limitada ? " sk-limitada" : ""}"${usando ? ' aria-current="true"' : ""}>
@@ -2934,7 +2994,7 @@ TELAS.loja = () => {
     </div>
     <h2 class="lb-secao">Arremessos</h2>
     <p class="lb-sub" style="margin-top:-6px">O que você joga quando acerta a palavra. Funciona igual à bola, só muda o jeito.</p>
-    <div class="fd-grid">${ARREMESSOS.filter(a => naVenda(a) || temArremesso(nome, a.k)).sort((a, b) => !!b.limitada - !!a.limitada).map(a => {
+    <div class="fd-grid">${ARREMESSOS.filter(a => !a.secreto && (naVenda(a) || temArremesso(nome, a.k))).sort((a, b) => !!b.limitada - !!a.limitada).map(a => {
       const tem = temArremesso(nome, a.k), usando = arremessoDe(nome) === a.k, podeA = moedas >= a.preco;
       const rotulo = usando ? "Usando" : tem ? "Usar" : G.lojaConf === "arr:" + a.k ? "Confirmar?" : podeA ? `<span class="lb-coin" aria-hidden="true">$</span>${a.preco}` : `$ ${a.preco}`;
       return `<div class="fd-tile${tem ? "" : " fd-travado"}${a.limitada ? " sk-limitada" : ""}"${usando ? ' aria-current="true"' : ""}>
@@ -2960,7 +3020,7 @@ TELAS.loja = () => {
     </div>
     <h2 class="lb-secao">Emojis</h2>
     <p class="lb-sub" style="margin-top:-6px">Para mandar durante a partida. Aparecem em cima do seu bonequinho.</p>
-    <div class="fd-grid">${EMOJIS.filter(e => naVenda(e) || temEmoji(nome, e.k)).sort((a, b) => !!b.limitada - !!a.limitada).map(e => {
+    <div class="fd-grid">${EMOJIS.filter(e => !e.secreto && (naVenda(e) || temEmoji(nome, e.k))).sort((a, b) => !!b.limitada - !!a.limitada).map(e => {
       const tem = temEmoji(nome, e.k), podeE = moedas >= e.preco;
       const rotulo = tem ? "Você tem" : G.lojaConf === "emoji:" + e.k ? "Confirmar?" : podeE ? `<span class="lb-coin" aria-hidden="true">$</span>${e.preco}` : `$ ${e.preco}`;
       return `<div class="fd-tile${tem ? "" : " fd-travado"}${e.limitada ? " sk-limitada" : ""}">
@@ -2985,6 +3045,24 @@ TELAS.loja = () => {
     </div>
   </section>`;
 };
+/* ---------- Cantinho secreto: só aparece aberto para quem tem item de edição limitada ---------- */
+function cantinhoHTML(nome, moedas) {
+  const nv = nivelSelo(nome), q = qtdLimitadas(nome);
+  if (!nv) return `<div class="cantinho cantinho-fechado"><b>🔒 Cantinho Secreto</b><span>Só para colecionadores. Tenha um item de <b>edição limitada</b> para abrir.</span></div>`;
+  const prox = nv === 1 ? `Com 5 limitados vira 🥈 Prata (falta${5 - q > 1 ? "m" : ""} ${5 - q}).` : nv === 2 ? `Com 10 limitados vira 🥇 Ouro (falta${10 - q > 1 ? "m" : ""} ${10 - q}).` : "Você tem o selo mais alto!";
+  const botao = (tem, usando, conf, preco, extra) => { const pode = moedas >= preco; return `<button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" ${extra} ${usando || (!tem && !pode) ? "disabled" : ""}>${usando ? "Usando" : tem ? (conf === null ? "Você tem" : "Usar") : G.lojaConf === conf ? "Confirmar?" : pode ? `<span class="lb-coin" aria-hidden="true">$</span>${preco}` : `$ ${preco}`}</button>`; };
+  const tiles = [
+    ...SKINS.filter(x => x.secreto).map(x => { const tem = temSkin(nome, x.k); return `<div class="fd-tile${tem ? "" : " fd-travado"}"><canvas class="sk-prev" data-skin="${x.k}" aria-label="Bonequinho com a skin ${esc(x.nome)}"></canvas><b>${esc(x.nome)}</b>${botao(tem, skinDe(nome) === x.k, "skin:" + x.k, x.preco, `data-a="comprarSkin" data-s="${x.k}"`)}</div>`; }),
+    ...ARREMESSOS.filter(x => x.secreto).map(x => { const tem = temArremesso(nome, x.k); return `<div class="fd-tile${tem ? "" : " fd-travado"}"><span class="em-art" aria-hidden="true">${x.icone}</span><b>${esc(x.nome)}</b><span class="lb-sub">Arremesso</span>${botao(tem, arremessoDe(nome) === x.k, "arr:" + x.k, x.preco, `data-a="comprarArremesso" data-k="${x.k}"`)}</div>`; }),
+    ...EMOJIS.filter(x => x.secreto).map(x => { const tem = temEmoji(nome, x.k); return `<div class="fd-tile${tem ? "" : " fd-travado"}"><span class="em-art" aria-hidden="true">${x.e}</span><b>${esc(x.nome)}</b><span class="lb-sub">Emoji</span>${botao(tem, tem, null, x.preco, `data-a="comprarEmoji" data-e="${x.k}"`).replace("Usando", "Você tem")}</div>`; })];
+  return `<div class="cantinho">
+    <h2 class="lb-secao">🗝️ Cantinho Secreto</h2>
+    <p class="cantinho-selo">Seu selo: <b>${SELOS[nv]} ${SELO_NOMES[nv]}</b> · ${q} ${q === 1 ? "item limitado" : "itens limitados"}. ${prox}</p>
+    <p class="lb-sub">Itens que só colecionadores podem comprar. Não acabam.</p>
+    <div class="fd-grid">${tiles.join("")}</div>
+  </div>`;
+}
+const soColecionador = (x, nome) => { if (x && x.secreto && !nivelSelo(nome)) { toast("Só colecionadores podem comprar esse item"); return true; } return false; };
 /* ---------- Foto de perfil: ícone + cor de fundo (sem foto de verdade, porque é jogo de crianças e aparece para os amigos) ---------- */
 const AV_ICONES = ["🐶", "🐱", "🦊", "🐼", "🐸", "🦁", "🐯", "🐵", "🦄", "🐲", "🦖", "🐙", "🦈", "🐧", "🦉", "🐝",
   "⚽", "🏀", "🎮", "🚀", "⭐", "🔥", "⚡", "👑", "🤖", "👽", "🍕", "🌈"];
@@ -3472,6 +3550,7 @@ const EMOJIS = [
   // edição limitada: só dá para comprar até "ate" (horário de Brasília); quem comprou fica com ele
   { k: "galactico", e: "🌌", nome: "Galáctico", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-06T23:59:59-03:00" },
   { k: "buraconegro", e: "🕳️", nome: "Buraco Negro", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-07T23:59:59-03:00" },
+  { k: "diamante", e: "💎", nome: "Diamante", preco: 120, secreto: true },
   { k: "sideral", e: "🌠", nome: "Estrela Cadente", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-02T12:00:00-03:00" },
 ];
 const emojiInfo = k => EMOJIS.find(e => e.k === k) || null;
@@ -3534,6 +3613,7 @@ acoes.comprarArremesso = el => {
   const usar = () => { G.inv = G.inv || {}; G.inv[nome] = G.inv[nome] || { vidas: 0 }; G.inv[nome].arremesso = k; salvarPlacar(); };
   if (temArremesso(nome, k)) { usar(); const y = window.scrollY; render(); window.scrollTo(0, y); toast(`Agora você joga ${a.nome} ${a.icone}`); return; }
   if (!naVenda(a)) { toast("Esse arremesso de edição limitada já acabou"); return; }
+  if (soColecionador(a, nome)) return;
   if ((G.banco[nome] || 0) < a.preco) return;
   if (G.lojaConf !== "arr:" + k) { pedirConfirmacao("arr:" + k); return; }
   clearTimeout(lojaConfT); G.lojaConf = false;
@@ -3561,6 +3641,7 @@ acoes.comprarEmoji = el => {
   const k = el.dataset.e, nome = perfil(), e = emojiInfo(k);
   if (!e || temEmoji(nome, k)) return;
   if (!naVenda(e)) { toast("Esse emoji de edição limitada já acabou"); return; }
+  if (soColecionador(e, nome)) return;
   if ((G.banco[nome] || 0) < e.preco) return;
   if (G.lojaConf !== "emoji:" + k) { pedirConfirmacao("emoji:" + k); return; }
   clearTimeout(lojaConfT); G.lojaConf = false;
@@ -3598,6 +3679,7 @@ const SONS_EMOJI = {
   fogo: [[40, 76, 0, .35, "sawtooth"]],
   coroa: [[67, 67, 0, .12, "square"], [72, 72, .12, .12, "square"], [76, 76, .24, .3, "square"]],
   buraconegro: [[84, 40, 0, .7, "sawtooth"], [36, 30, .55, .5, "sine"]],
+  diamante: [[96, 96, 0, .06, "sine"], [100, 100, .07, .06, "sine"], [103, 103, .14, .06, "sine"], [108, 108, .21, .3, "sine"]],
   sideral: [[96, 72, 0, .45, "sine"], [91, 91, .4, .08, "triangle"], [96, 96, .5, .08, "triangle"], [100, 100, .6, .25, "triangle"]],
   galactico: [[60, 84, 0, .5, "sine"], [91, 91, .45, .12, "sine"], [96, 96, .58, .12, "sine"], [91, 91, .71, .3, "sine"]],
   trofeu: [[72, 72, 0, .1, "square"], [76, 76, .1, .1, "square"], [79, 79, .2, .1, "square"], [84, 84, .3, .35, "square"]],
@@ -3818,6 +3900,7 @@ acoes.comprarSkin = el => {
   const k = el.dataset.s, nome = perfil(), s = skinInfo(k);
   if (temSkin(nome, k)) { usarSkin(nome, k); salvarPlacar(); const y = window.scrollY; render(); window.scrollTo(0, y); toast(`Agora você está de ${s.nome}`); return; }
   if (!naVenda(s)) { toast("Essa edição limitada já acabou"); return; }
+  if (soColecionador(s, nome)) return;
   if ((G.banco[nome] || 0) < s.preco) return;
   if (G.lojaConf !== "skin:" + k) { pedirConfirmacao("skin:" + k); return; }
   clearTimeout(lojaConfT); G.lojaConf = false;
