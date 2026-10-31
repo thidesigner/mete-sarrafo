@@ -460,6 +460,7 @@ function renderActOnline() {
 /* ---------- Fim de partida online ---------- */
 function mostrarFimOnline() {
   const v = A.fim.vencedor, me = A.P[ON.myIdx];
+  if ((A.fim.ganhadores || [v]).some(p => p.skin === "buraconegro")) explosaoEstrelas();
   const ord = [...A.P].sort((a, b) => (b.vivo - a.vivo) || (b.moedas - a.moedas));
   let nota = 0;
   const desenhar = enviado => abrirOv(`

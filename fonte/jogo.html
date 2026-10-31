@@ -265,6 +265,12 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .time-pick { display: flex; flex-wrap: wrap; gap: 6px; }
 .time-pick button { flex: 1; min-width: 64px; }
 .mini .tponto { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: middle; border: 1px solid #0b1b33; }
+.explosao { position: absolute; inset: 0; pointer-events: none; z-index: 8; display: grid; place-items: center; overflow: hidden; }
+.explosao .ex-buraco { position: absolute; width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle, #000 0 45%, #ffd66b 50%, #ff7ad9 62%, #6ec6ff 72%, transparent 76%); animation: exBuraco 2.4s ease-out forwards; }
+.explosao b { position: absolute; font-size: 22px; text-shadow: 0 0 8px currentColor; animation: exEstrela 1.8s ease-out forwards; opacity: 0; }
+@keyframes exBuraco { 0% { transform: scale(0) rotate(0); } 25% { transform: scale(1.6) rotate(180deg); } 100% { transform: scale(0) rotate(720deg); } }
+@keyframes exEstrela { 0% { opacity: 1; transform: translate(0, 0) scale(.3); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--x), var(--y)) scale(1.2) rotate(180deg); } }
+@media (prefers-reduced-motion: reduce) { .explosao { display: none; } }
 .lb-oferta { display: grid; grid-template-columns: 96px 1fr; gap: 10px 12px; align-items: center; background: rgba(11,27,51,.65); border: 3px solid #ffd23f; border-radius: 16px; padding: 12px; color: #fff; }
 .lb-oferta .lb-item-art { aspect-ratio: 1; filter: none; }
 .lb-oferta-txt { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
@@ -1712,7 +1718,24 @@ function torcidaCima(c, animada) {
     c.fillStyle = "rgba(255,226,190,.9)"; c.beginPath(); c.arc(q.x, q.y - pulo - 9, 5, 0, Math.PI * 2); c.fill();
   }
 }
+/* efeito especial da skin Buraco Negro: a bolada abre um mini buraco negro que suga as faíscas */
+const atiradorBuracoNegro = () => !!(A.ph && A.ph.atir && A.ph.atir.skin === "buraconegro");
+CIMA.buracos = [];
+function buracosCima(c) {
+  const dt = 1 / 60;
+  CIMA.buracos = CIMA.buracos.filter(b => {
+    b.t += dt; const f = b.t / 1.3, tam = Math.sin(Math.PI * Math.min(1, f)) * 40, t = performance.now() / 1000;
+    c.save(); c.globalCompositeOperation = "lighter";
+    for (let k = 0; k < 3; k++) { c.strokeStyle = ["rgba(255,200,90,.9)", "rgba(255,122,217,.8)", "rgba(110,198,255,.8)"][k]; c.lineWidth = 4 - k; c.beginPath(); c.ellipse(b.x, b.y, tam * (1.6 - k * .2), tam * .45, t * 3 + k, 0, Math.PI * 2); c.stroke(); }
+    for (let i = 0; i < 12; i++) { const a = i * .52 + f * 9, r = tam * 2.2 * (1 - (f * 1.5 + i / 12) % 1); c.fillStyle = `rgba(255,236,190,.85)`; c.beginPath(); c.arc(b.x + Math.cos(a) * r, b.y + Math.sin(a) * r * .5, 2.2, 0, Math.PI * 2); c.fill(); }
+    c.restore();
+    c.fillStyle = "#000"; c.beginPath(); c.arc(b.x, b.y, tam * .55, 0, Math.PI * 2); c.fill();
+    return b.t < 1.3;
+  });
+}
 function faiscasCima(c) {
+  for (const f of A.fx) if (f.txt === "-1" && !f.faiscaCima && atiradorBuracoNegro()) { f.faiscaCima = true; CIMA.buracos.push({ x: f.x, y: f.y - 20, t: 0 }); somEmoji("buraconegro"); }
+  buracosCima(c);
   for (const f of A.fx) if (f.txt === "-1" && !f.faiscaCima) {
     f.faiscaCima = true;
     for (let i = 0; i < 16; i++) { const a = Math.random() * Math.PI * 2, v = 120 + Math.random() * 220; CIMA.faiscas.push({ x: f.x, y: f.y - 30, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 120, t: 0, cor: i % 2 ? "#ff4d6d" : "#ffd23f" }); }
@@ -1865,12 +1888,21 @@ function desenharAcessorio2D(c, skin, x, y) {
       // olhos brilhando
       for (const lado of [-1, 1]) { const g = c.createRadialGradient(x + lado * 5, y - 36, 0, x + lado * 5, y - 36, 5); g.addColorStop(0, "#ffffff"); g.addColorStop(.35, "#c79bff"); g.addColorStop(1, "rgba(160,90,255,0)"); c.fillStyle = g; c.beginPath(); c.arc(x + lado * 5, y - 36, 5, 0, Math.PI * 2); c.fill(); }
       // disco de luz: parte de trás, anel de fótons, arco que passa por cima, parte da frente
+      const CORES_DISCO = [[255, 214, 107], [255, 140, 50], [255, 122, 217], [110, 198, 255], [200, 120, 255]];
       const disco = frente => {
-        for (let k = 0; k < 4; k++) {
-          const g = c.createLinearGradient(cx - 34, cy, cx + 34, cy), fase = (t * 1.1 + k * .25) % 1;
-          g.addColorStop(0, "rgba(255,110,30,.15)"); g.addColorStop(Math.max(.01, fase * .7), `rgba(255,${170 + k * 20},${70 + k * 30},1)`); g.addColorStop(Math.min(.99, fase * .7 + .25), "rgba(200,120,255,.95)"); g.addColorStop(1, "rgba(255,110,30,.15)");
-          c.strokeStyle = g; c.lineWidth = 3.4 - k * .6;
-          c.beginPath(); c.ellipse(cx, cy, 33 - k * 3.5, 8 - k * .9, -.16, frente ? 0 : Math.PI, frente ? Math.PI : Math.PI * 2); c.stroke();
+        for (let k = 0; k < 5; k++) {
+          const g = c.createLinearGradient(cx - 40, cy, cx + 40, cy), fase = (t * 1.1 + k * .2) % 1, c1 = CORES_DISCO[k], c2 = CORES_DISCO[(k + 2) % 5];
+          g.addColorStop(0, `rgba(${c1},.15)`); g.addColorStop(Math.max(.01, fase * .7), `rgba(${c1},1)`); g.addColorStop(Math.min(.99, fase * .7 + .25), `rgba(${c2},.95)`); g.addColorStop(1, `rgba(${c1},.15)`);
+          c.strokeStyle = g; c.lineWidth = 3.8 - k * .55;
+          c.beginPath(); c.ellipse(cx, cy, 40 - k * 3.8, 9.5 - k * .9, -.16, frente ? 0 : Math.PI, frente ? Math.PI : Math.PI * 2); c.stroke();
+        }
+        // faíscas coloridas girando no disco
+        for (let i = 0; i < 10; i++) {
+          const a = t * 2.2 + i * .63; if ((Math.sin(a) > 0) !== frente) continue;
+          const r = 30 + (i % 3) * 5, sx = cx + Math.cos(a) * r, sy = cy + Math.sin(a) * r * .24, cor = CORES_DISCO[i % 5], br = .6 + .4 * Math.sin(t * 6 + i);
+          c.fillStyle = `rgba(${cor},${br})`; c.beginPath();
+          for (let j = 0; j < 8; j++) { const rr = j % 2 ? .9 : 2.6, aa = j * Math.PI / 4; c.lineTo(sx + Math.cos(aa) * rr, sy + Math.sin(aa) * rr); }
+          c.closePath(); c.fill();
         }
       };
       c.globalCompositeOperation = "lighter";
@@ -2086,8 +2118,18 @@ function mostrarCompra(p) {
     ov.querySelector("#ov-nao").addEventListener("click", () => { fecharOv(); eliminarA(p); });
   });
 }
+/* vitória de quem usa a Buraco Negro: explosão de estrelas coloridas na tela */
+function explosaoEstrelas() {
+  const caixa = document.querySelector("#a-game .stage-wrap"); if (!caixa) return;
+  const el = document.createElement("div"); el.className = "explosao"; el.setAttribute("aria-hidden", "true");
+  const cores = ["#ffd66b", "#ff8a2a", "#ff7ad9", "#6ec6ff", "#c08bff", "#ffffff"];
+  el.innerHTML = `<i class="ex-buraco"></i>` + Array.from({ length: 36 }, (_, i) => { const a = i / 36 * Math.PI * 2, d = 120 + (i % 4) * 40; return `<b style="--x:${Math.cos(a) * d}px;--y:${Math.sin(a) * d}px;color:${cores[i % cores.length]};animation-delay:${(i % 6) * .05}s">★</b>`; }).join("");
+  caixa.append(el); setTimeout(() => el.remove(), 2600);
+  if (typeof tocarNotas === "function") tocarNotas([[40, 90, 0, .6, "sawtooth"], [84, 84, .55, .12, "square"], [88, 88, .67, .12, "square"], [91, 91, .79, .12, "square"], [96, 96, .91, .5, "square"]]);
+}
 function mostrarFim() {
   const v = A.fim.vencedor;
+  if ((A.fim.ganhadores || [v]).some(p => p.skin === "buraconegro")) explosaoEstrelas();
   const ord = [...A.P].sort((a, b) => (b.vivo - a.vivo) || ((b.saiuEm || 0) - (a.saiuEm || 0)));
   const pessoas = A.P.filter(p => p.humano).map(p => p.nome);
   abrirOv(`
@@ -2291,6 +2333,13 @@ function texturaArremesso(k) {
   if (!TEX_ARR[k]) TEX_ARR[k] = texturaCanvas(128, 128, (c) => { c.font = "100px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(arremessoInfo(k).icone, 64, 70); });
   return TEX_ARR[k];
 }
+function buraco3D(x, z) {
+  const g = new THREE.Group(); g.position.set(x, 1, z);
+  g.add(new THREE.Mesh(new THREE.SphereGeometry(.28, 16, 12), new THREE.MeshBasicMaterial({ color: "#000000" })));
+  ["#ffd66b", "#ff7ad9", "#6ec6ff"].forEach((cor, k) => { const m = new THREE.Mesh(new THREE.TorusGeometry(.5 + k * .14, .03, 6, 40), new THREE.MeshBasicMaterial({ color: cor, transparent: true, opacity: .9, blending: THREE.AdditiveBlending, depthWrite: false })); m.rotation.x = Math.PI / 2 + .3; g.add(m); });
+  F.scene.add(g); F.buracos = F.buracos || []; F.buracos.push({ g, t: 0 });
+  if (typeof somEmoji === "function") somEmoji("buraconegro");
+}
 function soltarFaiscas(x, z, cor) {
   for (let i = 0; i < 14; i++) {
     const m = new THREE.Mesh(new THREE.SphereGeometry(.05, 6, 4), new THREE.MeshBasicMaterial({ color: i % 2 ? cor : "#ffd23f" }));
@@ -2392,7 +2441,7 @@ function acessorio3D(cabeca, skin) {
       const basico = (cor, op) => new THREE.MeshBasicMaterial({ color: cor, transparent: op < 1, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false });
       // disco de luz inclinado, girando (cada anel numa velocidade)
       const pivo = new THREE.Group(); pivo.rotation.x = Math.PI / 2 + .25; pivo.position.y = .02; cabeca.add(pivo);
-      [[.42, .03, "#ff8a2a", 1, 1.4], [.36, .024, "#ffc46b", 1, 2.1], [.31, .018, "#c08bff", .95, 2.8], [.47, .012, "#ffe0a0", .8, 1]].forEach(([r, tubo, cor, op, vel]) => {
+      [[.46, .032, "#ff8a2a", 1, 1.4], [.4, .026, "#ffd66b", 1, 2.1], [.34, .02, "#ff7ad9", .95, 2.8], [.52, .014, "#6ec6ff", .85, 1], [.29, .014, "#c08bff", .95, 3.4]].forEach(([r, tubo, cor, op, vel]) => {
         const m = new THREE.Mesh(new THREE.TorusGeometry(r, tubo, 8, 48), basico(cor, op)); m.userData.gira = vel; pivo.add(m);
       });
       // arco de luz dobrada por cima (fica de pé, atrás da cabeça)
@@ -2569,7 +2618,15 @@ function desenhar3D() {
     m.rastro.forEach((r, k) => { const h = m.hist[(k + 1) * 2]; r.visible = !!h; if (h) r.position.copy(h); });
   });
   // faíscas quando alguém leva bolada
-  for (const fx of A.fx) if (fx.txt === "-1" && !fx.faisca3D) { fx.faisca3D = true; soltarFaiscas(W3(fx.x), W3(fx.y), "#ff4d6d"); }
+  for (const fx of A.fx) if (fx.txt === "-1" && !fx.faisca3D) {
+    fx.faisca3D = true;
+    if (atiradorBuracoNegro()) buraco3D(W3(fx.x), W3(fx.y)); else soltarFaiscas(W3(fx.x), W3(fx.y), "#ff4d6d");
+  }
+  F.buracos = (F.buracos || []).filter(b => {
+    b.t += 1 / 60; const tam = Math.max(.01, Math.sin(Math.PI * Math.min(1, b.t / 1.3)));
+    b.g.scale.setScalar(tam); b.g.rotation.y += .15;
+    if (b.t > 1.3) { F.scene.remove(b.g); return false; } return true;
+  });
   const dt3 = 1 / 60;
   F.faiscas = F.faiscas.filter(p => {
     p.t += dt3; p.v.y -= 9 * dt3; p.m.position.addScaledVector(p.v, dt3); p.m.scale.setScalar(Math.max(.1, 1 - p.t));
