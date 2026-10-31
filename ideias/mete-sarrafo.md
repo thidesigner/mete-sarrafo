@@ -26,6 +26,11 @@ Ideia do Andre: um jogo de celular e PC que mistura forca com queimada. Quem adi
 
 - O modo "1ª pessoa" virou **3D vendo o bonequinho**: a câmera fica atrás e um pouco acima do seu bonequinho (com a skin), como no Brawl Stars. Arrastar gira a câmera em volta dele; a mira e o joystick continuam iguais. O botão da partida troca entre "Ver de cima" e "Ver em 3D".
 
+## Gráfico da partida em 3D (31/out)
+
+- Estádio novo: céu de noite com estrelas, quadra pintada com o nome do jogo no meio, mureta com letreiro, arquibancada com torcida colorida (pula mais na hora da bola) e refletores brilhando.
+- Bonequinhos com cara de desenho animado (sombreado em faixas e contorno preto) e sombra no chão. Bola com rastro e faíscas quando alguém leva bolada.
+
 ## Avisos do ADM (31/out)
 
 - O ADM (o pai) consegue mandar um aviso para todo mundo que estiver com o jogo aberto no site, como nos jogos com servidor. Aparece numa janela "📢 Aviso do ADM" e numa faixa amarela que corre na tela inicial enquanto o aviso vale.
