@@ -1233,11 +1233,13 @@ const SKINS = [
   // edição limitada: só dá para comprar até a data "ate" (horário de Brasília). Quem comprou fica com ela para sempre.
   { k: "galactica", nome: "Galáctica", preco: 500, camisa: "#2b1a6b", limitada: true, ate: "2026-11-06T23:59:59-03:00" },
   { k: "buraconegro", nome: "Buraco Negro", preco: 600, camisa: "#0b0a16", pele: "#120f22", limitada: true, ate: "2026-11-07T23:59:59-03:00" },
+  { k: "sideral", nome: "Espaço Sideral", preco: 450, camisa: "#13235a", limitada: true, ate: "2026-11-02T12:00:00-03:00" },
 ];
 /* Skin limitada ainda à venda? Depois do prazo some da loja para quem não tem. */
 const naVenda = s => !s.ate || Date.now() <= Date.parse(s.ate);
 function faltaParaAcabar(s) {
-  const ms = Date.parse(s.ate) - Date.now(), h = Math.ceil(ms / 3600000), d = Math.floor(ms / 86400000);
+  // dias contados pelo calendário de Brasília (31/out -> 2/nov = 2 dias, mesmo faltando menos de 48 h)
+  const ms = Date.parse(s.ate) - Date.now(), h = Math.ceil(ms / 3600000), diaBR = t => Math.floor((t - 3 * 3600000) / 86400000), d = diaBR(Date.parse(s.ate)) - diaBR(Date.now());
   const dia = new Date(Date.parse(s.ate) - 3 * 3600000), data = `${dia.getUTCDate()}/${dia.getUTCMonth() + 1}`;
   return h <= 24 ? (h <= 1 ? "Última hora!" : `Acaba em ${h} h`) : d <= 1 ? `Acaba amanhã (${data})` : `Acaba em ${d} dias (${data})`;
 }
@@ -1926,6 +1928,41 @@ function desenharAcessorio2D(c, skin, x, y) {
       c.restore();
       break;
     }
+    case "sideral": {
+      const t = performance.now() / 1000;
+      // cometa e lua girando em volta do corpo (o que está atrás é desenhado antes)
+      const ac = t * 1.8, cxm = x + Math.cos(ac) * 30, cym = y - 14 + Math.sin(ac) * 9, cometaAtras = Math.sin(ac) < 0;
+      const al = -t * 1.1 + 2, lx = hx + Math.cos(al) * 22, ly = hy - 6 + Math.sin(al) * 5, luaAtras = Math.sin(al) < 0;
+      const cometa = () => {
+        c.save(); c.globalCompositeOperation = "lighter";
+        for (let k = 1; k <= 7; k++) { const a = ac - k * .12, tx = x + Math.cos(a) * 30, ty = y - 14 + Math.sin(a) * 9; c.fillStyle = `rgba(${k < 4 ? "120,220,255" : "190,140,255"},${.55 - k * .07})`; c.beginPath(); c.arc(tx, ty, 4 - k * .45, 0, Math.PI * 2); c.fill(); }
+        c.restore();
+        c.fillStyle = "#ffffff"; c.beginPath(); c.arc(cxm, cym, 3.4, 0, Math.PI * 2); c.fill();
+      };
+      const lua = () => {
+        const g = c.createRadialGradient(lx - 1.5, ly - 1.5, .5, lx, ly, 5); g.addColorStop(0, "#ffffff"); g.addColorStop(1, "#aab4c8");
+        c.fillStyle = g; c.beginPath(); c.arc(lx, ly, 4.5, 0, Math.PI * 2); c.fill();
+        c.fillStyle = "rgba(90,100,130,.5)"; c.beginPath(); c.arc(lx + 1.3, ly + .8, 1.1, 0, Math.PI * 2); c.arc(lx - 1.4, ly - 1, .8, 0, Math.PI * 2); c.fill();
+      };
+      if (cometaAtras) cometa(); if (luaAtras) lua();
+      // estrelinhas e a Terra no peito
+      [[-9, -12], [8, -15], [-6, 4], [10, 2], [-11, -2]].forEach(([a, b], i) => { c.fillStyle = `rgba(255,255,255,${.5 + .5 * Math.sin(t * 3.5 + i * 2)})`; c.beginPath(); c.arc(x + a, y + b, i % 2 ? 1.1 : 1.6, 0, Math.PI * 2); c.fill(); });
+      const tg = c.createRadialGradient(x - 2, y - 8, 1, x, y - 6, 7); tg.addColorStop(0, "#7fd3ff"); tg.addColorStop(1, "#1f6fd1");
+      c.fillStyle = tg; c.beginPath(); c.arc(x, y - 6, 6, 0, Math.PI * 2); c.fill();
+      c.fillStyle = "#4cc96a"; c.beginPath(); c.ellipse(x - 2, y - 8, 2.6, 1.6, .5, 0, Math.PI * 2); c.ellipse(x + 2.5, y - 4, 2, 1.3, -.3, 0, Math.PI * 2); c.fill();
+      // capacete de vidro com reflexo e antena piscando
+      const vg = c.createRadialGradient(hx - 6, hy - 8, 2, hx, hy, 21); vg.addColorStop(0, "rgba(180,235,255,.45)"); vg.addColorStop(1, "rgba(80,120,255,.18)");
+      c.fillStyle = vg; c.beginPath(); c.arc(hx, hy, 20, 0, Math.PI * 2); c.fill();
+      c.strokeStyle = "#9fd8ff"; c.lineWidth = 2.6; c.stroke();
+      c.strokeStyle = "rgba(255,255,255,.75)"; c.lineWidth = 2; c.beginPath(); c.arc(hx, hy, 16, Math.PI * 1.15, Math.PI * 1.45); c.stroke();
+      c.fillStyle = "#c9d6ea"; c.fillRect(hx - 15, hy + 15, 30, 5);
+      c.strokeStyle = "#c9d6ea"; c.lineWidth = 1.6; c.beginPath(); c.moveTo(hx + 8, hy - 18); c.lineTo(hx + 12, hy - 28); c.stroke();
+      const pisca = .5 + .5 * Math.sin(t * 6);
+      c.save(); c.globalCompositeOperation = "lighter"; c.fillStyle = `rgba(255,90,120,${.35 * pisca})`; c.beginPath(); c.arc(hx + 12, hy - 29, 6, 0, Math.PI * 2); c.fill(); c.restore();
+      c.fillStyle = `rgb(255,${90 + 100 * pisca},${120 + 60 * pisca})`; c.beginPath(); c.arc(hx + 12, hy - 29, 2.6, 0, Math.PI * 2); c.fill();
+      if (!cometaAtras) cometa(); if (!luaAtras) lua();
+      break;
+    }
     case "galactica": {
       const t = performance.now() / 1000;
       // estrelas na roupa
@@ -2468,6 +2505,28 @@ function acessorio3D(cabeca, skin) {
       for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2, m = new THREE.Mesh(new THREE.SphereGeometry(.018, 6, 4), new THREE.MeshBasicMaterial({ color: k % 2 ? "#ffd29a" : "#d6b8ff" })); m.position.set(Math.cos(a) * (.55 + (k % 3) * .06), (k % 2 ? .05 : -.05), Math.sin(a) * (.55 + (k % 3) * .06)); orbita.add(m); }
       // espiral na roupa
       for (let k = 0; k < 9; k++) { const a = k * .9, r = .02 + k * .016, m = new THREE.Mesh(new THREE.SphereGeometry(.016, 6, 4), new THREE.MeshBasicMaterial({ color: "#b07bff" })); m.position.set(Math.cos(a) * r, -.48 + Math.sin(a) * r, -.14); cabeca.add(m); }
+      break;
+    }
+    case "sideral": {
+      const brilha = (cor, op) => new THREE.MeshBasicMaterial({ color: cor, transparent: op < 1, opacity: op, blending: op < 1 ? THREE.AdditiveBlending : THREE.NormalBlending, depthWrite: op >= 1 });
+      // capacete de vidro azulado, gola e antena com luz
+      cabeca.add(new THREE.Mesh(new THREE.SphereGeometry(.29, 20, 16), new THREE.MeshLambertMaterial({ color: "#9fd8ff", transparent: true, opacity: .28, depthWrite: false })));
+      add(new THREE.TorusGeometry(.21, .035, 8, 24), "#c9d6ea", 0, -.21, 0).rotation.x = Math.PI / 2;
+      add(new THREE.CylinderGeometry(.008, .008, .2, 6), "#c9d6ea", .1, .36, 0).rotation.z = -.35;
+      const luz = new THREE.Mesh(new THREE.SphereGeometry(.035, 10, 8), brilha("#ff6a8a", 1)); luz.position.set(.135, .46, 0); cabeca.add(luz);
+      const brilhoLuz = new THREE.Mesh(new THREE.SphereGeometry(.07, 10, 8), brilha("#ff6a8a", .4)); brilhoLuz.position.copy(luz.position); cabeca.add(brilhoLuz);
+      // a Terra no peito
+      const terra = new THREE.Mesh(new THREE.SphereGeometry(.07, 14, 10), brilha("#3d8fe6", 1)); terra.position.set(0, -.42, -.15); cabeca.add(terra);
+      for (const [a, b] of [[-.025, .02], [.03, -.02]]) { const m = new THREE.Mesh(new THREE.SphereGeometry(.03, 8, 6), brilha("#4cc96a", 1)); m.position.set(a, -.42 + b, -.19); cabeca.add(m); }
+      // cometa com rastro girando em volta do corpo
+      const orb = new THREE.Group(); orb.position.y = -.4; orb.rotation.x = .2; orb.userData.gira = 1.8; cabeca.add(orb);
+      const cab = new THREE.Mesh(new THREE.SphereGeometry(.045, 10, 8), brilha("#ffffff", 1)); cab.position.set(.5, 0, 0); orb.add(cab);
+      for (let k = 1; k <= 6; k++) { const a = -k * .13, m = new THREE.Mesh(new THREE.SphereGeometry(.04 - k * .005, 8, 6), brilha(k < 4 ? "#78dcff" : "#be8cff", .7 - k * .09)); m.position.set(Math.cos(a) * .5, 0, Math.sin(a) * .5); orb.add(m); }
+      // lua girando em volta da cabeça
+      const orbL = new THREE.Group(); orbL.rotation.x = -.25; orbL.userData.gira = -1.1; cabeca.add(orbL);
+      const lua = new THREE.Mesh(new THREE.SphereGeometry(.055, 12, 10), new THREE.MeshLambertMaterial({ color: "#d6dcea" })); lua.position.set(-.38, .05, 0); orbL.add(lua);
+      // estrelinhas na roupa
+      for (const [a, b] of [[-.13, -.32], [.12, -.3], [-.1, -.6], [.13, -.58]]) { const m = new THREE.Mesh(new THREE.SphereGeometry(.016, 6, 4), brilha("#ffffff", 1)); m.position.set(a, b, -.14); cabeca.add(m); }
       break;
     }
     case "galactica": {
