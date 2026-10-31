@@ -259,6 +259,12 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .aviso-caixa .lb-jogar { min-height: 56px; font-size: 24px; }
 .adm-status { background: rgba(55,217,154,.15); border: 2px solid #37d99a; border-radius: 10px; padding: 8px 10px; font-weight: 700; }
 .adm-json { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; background: rgba(0,0,0,.35); border-radius: 8px; padding: 8px; max-height: 200px; overflow-y: auto; }
+.times-lista { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin: 4px 0; }
+.time-card { border: 3px solid; border-radius: 12px; padding: 6px 8px; display: grid; gap: 0; background: rgba(11,27,51,.35); text-align: left; font-size: 14px; line-height: 1.3; }
+.time-card b { font-family: var(--display); font-size: 14px; }
+.time-pick { display: flex; flex-wrap: wrap; gap: 6px; }
+.time-pick button { flex: 1; min-width: 64px; }
+.mini .tponto { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: middle; border: 1px solid #0b1b33; }
 .lb-oferta { display: grid; grid-template-columns: 96px 1fr; gap: 10px 12px; align-items: center; background: rgba(11,27,51,.65); border: 3px solid #ffd23f; border-radius: 16px; padding: 12px; color: #fff; }
 .lb-oferta .lb-item-art { aspect-ratio: 1; filter: none; }
 .lb-oferta-txt { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
@@ -554,10 +560,37 @@ function bip(freq = 880, dur = .12) {
 }
 function vibrar(ms) { try { navigator.vibrate && navigator.vibrate(ms); } catch {} }
 
+/* ---------- Times (2, 3 ou 4 por time; regras combinadas com o pai em 31/out) ----------
+   - a bola só acerta jogadores dos outros times (o time de quem atira não corre);
+   - o time de quem pergunta não chuta;
+   - ganha o time que sobrar com alguém vivo. */
+const TIMES = [{ nome: "Azul", cor: "#2f80ed" }, { nome: "Vermelho", cor: "#ff4d6d" }, { nome: "Verde", cor: "#37d99a" }, { nome: "Amarelo", cor: "#ffd23f" },
+  { nome: "Roxo", cor: "#9b51e0" }, { nome: "Laranja", cor: "#f4a261" }, { nome: "Rosa", cor: "#ff8fcf" }, { nome: "Branco", cor: "#e9eef5" }];
+const mesmoTime = (a, b) => !!a && !!b && a.time != null && a.time === b.time;
+const timeDe = p => (p && p.time != null ? TIMES[p.time] : null);
+/* sorteia os times: espalha as pessoas, completa com robôs e deixa cada time junto na roda */
+function sortearTimes(lista, tam, comRobos) {
+  if (!tam) return lista.map(o => ({ ...o, time: null }));
+  const nTimes = Math.min(TIMES.length, Math.max(2, comRobos ? Math.ceil(lista.length / tam) : Math.floor(lista.length / tam)));
+  const pessoas = lista.filter(o => o.humano).sort(() => Math.random() - .5), robos = lista.filter(o => !o.humano);
+  const times = Array.from({ length: nTimes }, () => []);
+  pessoas.forEach((o, i) => times[i % nTimes].push(o));
+  let r = 0;
+  for (const o of robos) { const alvo = times.reduce((m, t) => (t.length < m.length ? t : m)); alvo.push(o); r++; }
+  if (comRobos) { let k = robos.length; for (const t of times) while (t.length < tam) t.push({ nome: "Robô " + ++k, humano: false }); }
+  return times.flatMap((t, ti) => t.map(o => ({ ...o, time: ti })));
+}
+function htmlTimes(jogadores) {
+  const n = Math.max(...jogadores.map(p => p.time)) + 1;
+  return `<div class="times-lista">${Array.from({ length: n }, (_, t) => `<div class="time-card" style="border-color:${TIMES[t].cor}"><b style="color:${TIMES[t].cor}">${TIMES[t].nome}</b><span>${jogadores.filter(p => p.time === t).map(p => esc(p.nome) + (p.humano === false ? " 🤖" : "")).join(", ")}</span></div>`).join("")}</div>`;
+}
+
 /* ---------- Partida ---------- */
 function comecarPartida() {
   const c = G.cfg;
-  G.j = G.nomes.map((nome, i) => ({ i, nome, vidas: c.vidas, vivo: true, moedas: 0, guardado: G.banco[nome] || 0, ganho: 0, compradas: 0, saiuEm: null }));
+  const comTime = G.timeTam && G.nomes.length >= G.timeTam * 2 ? sortearTimes(G.nomes.map(nome => ({ nome, humano: true })), G.timeTam, false) : null;
+  G.j = G.nomes.map((nome, i) => ({ i, nome, vidas: c.vidas, vivo: true, moedas: 0, guardado: G.banco[nome] || 0, ganho: 0, compradas: 0, saiuEm: null, time: comTime ? comTime.find(o => o.nome === nome).time : null }));
+  G.comTimes = !!comTime;
   G.p = { inicio: agora(), palavras: 0, acertos: 0, erros: 0, timeouts: 0, votos: 0, votosOk: 0, arremessos: 0, acertosBola: 0, rodadas: 0, compras: 0, dicas: 0, moedas: {}, eventos: [] };
   G.perg = null; ir("sorteio");
 }
@@ -565,7 +598,7 @@ function definirPerguntador(i) { G.perg = i; G.segredoAberto = false; evento("pe
 function iniciarRodada() {
   const n = G.j.length;
   G.ordem = [];
-  for (let k = 1; k < n; k++) { const p = G.j[(G.perg + k) % n]; if (p.vivo) G.ordem.push(p.i); }
+  for (let k = 1; k < n; k++) { const p = G.j[(G.perg + k) % n]; if (p.vivo && !mesmoTime(p, G.j[G.perg])) G.ordem.push(p.i); }
   G.vez = 0; G.voltas = 0; G.p.palavras++;
   evento("palavra", { tema: G.tema, tamanho: G.palavra.length });
   if (!G.ordem.length) { terminar(G.perg); return; }
@@ -611,12 +644,12 @@ function desfazerHit(i) {
 function eliminar(i) {
   const p = G.j[i]; p.vivo = false; p.saiuEm = agora() - G.p.inicio; evento("saiu", { quem: p.nome });
   const v = vivos();
-  if (v.length === 1) { terminar(v[0].i); return; }
+  if (G.comTimes ? new Set(v.map(q => q.time)).size === 1 : v.length === 1) { terminar(v[0].i); return; }
   salvar(); ir("bola"); toast(`${p.nome} saiu do jogo`);
 }
 function fimDaBola() {
   const atir = G.j[G.atir];
-  const sobrev = vivos().filter(p => p.i !== G.atir && !G.atingidos.includes(p.i));
+  const sobrev = vivos().filter(p => p.i !== G.atir && !mesmoTime(p, atir) && !G.atingidos.includes(p.i));
   sobrev.forEach(p => ganhar(p, G.cfg.mSobreviver, "sobreviver"));
   G.p.rodadas++;
   evento("rodada", { atirador: atir.nome, atingidos: G.atingidos.length, sobreviveram: sobrev.length });
@@ -624,8 +657,10 @@ function fimDaBola() {
   definirPerguntador(G.atir);
 }
 async function terminar(vencedor) {
-  G.p.fim = agora(); G.p.vencedor = G.j[vencedor].nome;
-  G.vitorias = G.vitorias || {}; G.vitorias[G.p.vencedor] = (G.vitorias[G.p.vencedor] || 0) + 1;
+  const v = G.j[vencedor], tv = G.comTimes ? timeDe(v) : null;
+  G.p.fim = agora(); G.p.vencedor = tv ? "Time " + tv.nome : v.nome; G.p.corVencedor = tv ? tv.cor : null;
+  G.vitorias = G.vitorias || {};
+  (tv ? G.j.filter(p => mesmoTime(p, v)) : [v]).forEach(p => { G.vitorias[p.nome] = (G.vitorias[p.nome] || 0) + 1; });
   evento("fim", { vencedor: G.p.vencedor });
   G.j.forEach(guardarGanhos);
   sfxVitoria();
@@ -664,8 +699,8 @@ function ligar(root) {
 function barra() {
   const atual = G.tela === "bola" ? G.atir : (G.tela === "pergunta" ? G.ordem[G.vez] : null);
   return `<div class="scorebar">${G.j.map(p => `
-    <div class="mini${p.vivo ? "" : " out"}${p.i === atual ? " now" : ""}">
-      <b>${esc(p.nome)}${p.i === G.perg && G.tela !== "bola" ? " ?" : ""}</b>
+    <div class="mini${p.vivo ? "" : " out"}${p.i === atual ? " now" : ""}"${G.comTimes && timeDe(p) ? ` style="border-color:${timeDe(p).cor}"` : ""}>
+      <b>${G.comTimes && timeDe(p) ? `<i class="tponto" style="background:${timeDe(p).cor}"></i>` : ""}${esc(p.nome)}${p.i === G.perg && G.tela !== "bola" ? " ?" : ""}</b>
       <span class="hearts">${p.vivo ? "●".repeat(Math.min(10, p.vidas)) : "fora"}</span>
       <span class="coin">${fmtM(p.moedas)}</span>
     </div>`).join("")}</div>`;
@@ -701,6 +736,11 @@ TELAS.inicio = () => {
     <div class="row"><input id="nome" maxlength="20" placeholder="Nome do jogador" aria-label="Nome do jogador"><button class="btn small" style="flex:0 0 auto;width:auto" type="submit">Pôr</button></div>
     <div class="chips">${G.nomes.map((n, i) => `<span class="chip"><span class="seat">${i + 1}</span>${esc(n)}<button type="button" data-a="tirar" data-i="${i}" aria-label="Tirar ${esc(n)}">×</button></span>`).join("")}</div>
   </form>
+  <div class="card">
+    <h3>Times</h3>
+    <div class="seg2 time-pick" role="group" aria-label="Jogar em times">${[[0, "Cada um por si"], [2, "2 por time"], [3, "3 por time"], [4, "4 por time"]].map(([v, t]) => `<button type="button" data-a="tamTime" data-v="${v}" aria-pressed="${(G.timeTam || 0) === v}">${t}</button>`).join("")}</div>
+    ${G.timeTam ? `<p class="dim" style="font-size:14px">${G.nomes.length >= G.timeTam * 2 ? "Os times são sorteados quando a partida começa." : `Para ${G.timeTam} por time precisa de pelo menos ${G.timeTam * 2} jogadores. Com menos, joga cada um por si.`}</p>` : ""}
+  </div>
   <button class="btn" data-a="comecar" ${ok ? "" : "disabled"}>${ok ? "Começar partida" : "Coloque pelo menos 3 jogadores"}</button>
   <div class="card">
     <h3>Regras rápidas</h3>
@@ -747,6 +787,7 @@ function blocoSugestoes() {
 
 TELAS.sorteio = () => `
   ${topo("Partida começando")}
+  ${G.comTimes ? `<h2>Times sorteados!</h2>${htmlTimes(G.j)}<p class="dim">A bola só vale em quem é de outro time. Quem é do time de quem pergunta não chuta.</p>` : ""}
   <h2>Quem pergunta primeiro?</h2>
   <button class="btn" data-a="sortear">Sortear</button>
   <p class="dim">Ou escolha:</p>
@@ -840,7 +881,7 @@ TELAS.novoPerg = () => `
 TELAS.bola = () => {
   const atir = G.j[G.atir];
   depoisFn = tic;
-  const alvos = vivos().filter(p => p.i !== G.atir);
+  const alvos = vivos().filter(p => p.i !== G.atir && !mesmoTime(p, atir));
   return `
     ${topo("Bola!")}
     ${barra()}
@@ -1205,9 +1246,11 @@ function abrirArena() {
 function fecharArena() {
   pararLoop(); $("arena").hidden = true; $("app").hidden = false; G.tela = "lobby"; salvar(); render(); window.scrollTo(0, 0);
 }
+acoes.tamTime = el => { G.timeTam = +el.dataset.v; salvar(); render(); };
 function pessoasSetup() { return G.nomes.filter(n => !A.setup.robo[n]); }
 function renderSetup() {
   const s = A.setup, pessoas = pessoasSetup();
+  if (s.time == null) s.time = G.timeTam || 0;
   if (!pessoas.includes(s.dono)) s.dono = pessoas[0] || null;
   const total = G.nomes.length + s.extras;
   const ok = pessoas.length >= 1 && total >= 3 && total <= 20;
@@ -1240,6 +1283,11 @@ function renderSetup() {
         <p class="dim" style="font-size:14px">Em 3D a câmera fica atrás do bonequinho de quem está com o celular. Arraste para girar.</p>
       </div>
       <div class="card">
+        <h3>Times</h3>
+        <div class="seg2 time-pick" role="group" aria-label="Jogar em times">${[[0, "Cada um por si"], [2, "2 por time"], [3, "3 por time"], [4, "4 por time"]].map(([v, t]) => `<button type="button" data-tam="${v}" aria-pressed="${(s.time || 0) === v}">${t}</button>`).join("")}</div>
+        ${s.time ? `<p class="dim" style="font-size:14px">Os times são sorteados quando a partida começa. Se faltar gente, robôs completam.</p>` : ""}
+      </div>
+      <div class="card">
         <h3>Robôs extras</h3>
         <div class="stepper"><button class="btn ghost" type="button" id="as-menos" aria-label="Menos um robô">−</button><b id="as-extras">${s.extras}</b><button class="btn ghost" type="button" id="as-mais" aria-label="Mais um robô">+</button></div>
         <p class="dim" style="font-size:14px">Total na quadra: ${total} (de 3 a 20).</p>
@@ -1262,6 +1310,7 @@ function renderSetup() {
   $("as-menos").addEventListener("click", () => { s.extras = Math.max(0, s.extras - 1); renderSetup(); });
   $("as-mais").addEventListener("click", () => { if (G.nomes.length + s.extras < 20) s.extras++; renderSetup(); });
   $("as-voltar").addEventListener("click", fecharArena);
+  box.querySelectorAll("[data-tam]").forEach(b => b.addEventListener("click", () => { s.time = +b.dataset.tam; G.timeTam = s.time; salvar(); renderSetup(); }));
   $("as-fp1").addEventListener("click", () => { s.fp = true; renderSetup(); });
   $("as-fp0").addEventListener("click", () => { s.fp = false; renderSetup(); });
   $("as-start").addEventListener("click", comecarArena);
@@ -1270,8 +1319,10 @@ function renderSetup() {
 /* ---------- Partida ---------- */
 function comecarArena() {
   const s = A.setup;
-  const lista = G.nomes.map(n => ({ nome: n, humano: !s.robo[n] }));
+  let lista = G.nomes.map(n => ({ nome: n, humano: !s.robo[n] }));
   for (let k = 1; k <= s.extras; k++) lista.push({ nome: "Robô " + k, humano: false });
+  lista = sortearTimes(lista, s.time || 0, true);
+  A.times = !!s.time;
   const n = lista.length;
   A.cfg = { ...G.cfg };
   A.P = lista.map((o, i) => {
@@ -1280,7 +1331,7 @@ function comecarArena() {
     return { i, nome: o.nome, humano: o.humano, cor: A_CORES[i % A_CORES.length], pele: A_PELE[i % A_PELE.length],
       vidas: A.cfg.vidas, vivo: true, moedas: 0, guardado: o.humano ? (G.banco[o.nome] || 0) : 0, ganho: 0, compradas: 0,
       home, x: home.x, y: home.y, alvo: null, modo: "casa", vel: A_VEL * aRnd(.88, 1.12), habil: aRnd(-.08, .08),
-      flash: 0, passo: 0, ctrl: false, tocou: false, saiuEm: null };
+      flash: 0, passo: 0, ctrl: false, tocou: false, saiuEm: null, time: o.time };
   });
   A.P.forEach(p => { if (p.humano) { vestir(p, skinDe(p.nome)); const f = personagemDe(p.nome); if (f) p.ficha = f; p.arremesso = arremessoDe(p.nome); } });
   A.cel = Math.max(0, A.P.findIndex(p => p.nome === s.dono));
@@ -1289,9 +1340,12 @@ function comecarArena() {
   $("a-setup").hidden = true; $("a-game").hidden = false;
   window.scrollTo(0, 0);
   A.fp = false;
-  novaPalavraA(aPick(A.P));
   iniciarLoop();
   ligarVisao(s.fp !== false);
+  if (A.times) {   // mostra os times sorteados antes de começar
+    abrirOv(`<h2>Times sorteados!</h2>${htmlTimes(A.P)}<p class="dim">A bola só acerta os outros times. Quem é do time de quem pergunta não chuta.</p><button class="btn" id="ov-ok" type="button">Começar</button>`,
+      ov => ov.querySelector("#ov-ok").addEventListener("click", () => { fecharOv(); novaPalavraA(aPick(A.P)); }));
+  } else novaPalavraA(aPick(A.P));
 }
 function aEvento(tipo, extra) { A.st.eventos.push({ t: Math.round(A.t * 10) / 10, tipo, ...extra }); if (A.st.eventos.length > 400) A.st.eventos.shift(); }
 function aVivos() { return A.P.filter(p => p.vivo); }
@@ -1309,7 +1363,7 @@ function comecarPerguntaA(perg, tema, palavra, letra) {
   const rev = new Set();
   [...palavra].forEach((c, i) => { if (c === letra || c === " ") rev.add(i); });
   const n = A.P.length, ordem = [];
-  for (let k = 1; k < n; k++) { const p = A.P[(perg.i + k) % n]; if (p.vivo) ordem.push(p); }
+  for (let k = 1; k < n; k++) { const p = A.P[(perg.i + k) % n]; if (p.vivo && !mesmoTime(p, perg)) ordem.push(p); }
   if (!ordem.length) { terminarA(perg); return; }
   A.ph = { k: "pergunta", perg, tema, palavra, rev, ordem, idx: 0, voltas: 0, votou: false, pensa: 0, prazo: 0, espera: false };
   A.st.palavras++; aEvento("palavra", { perg: perg.nome, tema, palavra });
@@ -1366,6 +1420,7 @@ function iniciarBolaA(atir) {
     atir.alvo = { x: AC, y: AC }; atir.modo = "centro";
     for (const p of aVivos()) {
       if (p === atir) continue;
+      if (mesmoTime(p, atir)) { p.ctrl = false; continue; }   // o time de quem atira fica no lugar
       p.tocou = false;
       p.ctrl = p.humano && p.i === A.cel && !atir.humano;
       if (p.ctrl) { p.modo = "fugindo"; p.alvo = null; continue; }
@@ -1377,7 +1432,7 @@ function iniciarBolaA(atir) {
   if (atir.humano && A.cel !== atir.i) mostrarPasse(atir, "atirar", go); else go();
   renderAct();
 }
-function aCorrendo() { const ph = A.ph; return aVivos().filter(p => p !== ph.atir && (p.modo === "fugindo" || p.modo === "voltando")); }
+function aCorrendo() { const ph = A.ph; return aVivos().filter(p => p !== ph.atir && !mesmoTime(p, ph.atir) && (p.modo === "fugindo" || p.modo === "voltando")); }
 /* ---------- Coisas de arremessar (só a aparência; todas funcionam igual à bola) ---------- */
 const ARREMESSOS = [
   { k: "bola", nome: "Bola", icone: "🟠", preco: 0, cor: "#ffb347" },
@@ -1435,11 +1490,12 @@ function comprarA(p) {
 function eliminarA(p) {
   p.vivo = false; p.alvo = null; p.modo = "fora"; p.ctrl = false; p.saiuEm = A.t;
   aEvento("saiu", { quem: p.nome }); aMsg(`${p.nome} perdeu todas as vidas e saiu.`);
-  const v = aVivos(); if (v.length === 1) terminarA(v[0]);
+  const v = aVivos();
+  if (A.times ? new Set(v.map(q => q.time)).size === 1 : v.length === 1) terminarA(v[0]);
 }
 function fimRodadaA(forcado) {
   const ph = A.ph, atir = ph.atir;
-  const sobrev = aVivos().filter(p => p !== atir && !ph.atingidos.has(p) && p.modo === "casa");
+  const sobrev = aVivos().filter(p => p !== atir && !mesmoTime(p, atir) && !ph.atingidos.has(p) && p.modo === "casa");
   sobrev.forEach(p => aGanhar(p, A.cfg.mSobreviver, "sobreviver"));
   for (const p of aVivos()) { if (p !== atir && p.modo !== "casa") { p.alvo = { ...p.home }; p.modo = "voltando"; } p.ctrl = false; }
   A.st.rodadas++; aEvento("rodada", { atirador: atir.nome, sobreviveram: sobrev.length });
@@ -1450,17 +1506,18 @@ function fimRodadaA(forcado) {
 }
 async function terminarA(v) {
   if (A.fim) return;
-  A.fim = { vencedor: v, t: A.t };
-  if (v.humano) { G.vitorias = G.vitorias || {}; G.vitorias[v.nome] = (G.vitorias[v.nome] || 0) + 1; }
+  const time = A.times ? timeDe(v) : null, ganhadores = time ? A.P.filter(p => mesmoTime(p, v)) : [v];
+  A.fim = { vencedor: v, t: A.t, titulo: time ? "Time " + time.nome : v.nome, cor: time ? time.cor : null, ganhadores };
+  ganhadores.filter(p => p.humano && !p.remoto).forEach(p => { G.vitorias = G.vitorias || {}; G.vitorias[p.nome] = (G.vitorias[p.nome] || 0) + 1; });
   A.balls = [];
-  aEvento("fim", { vencedor: v.nome });
+  aEvento("fim", { vencedor: A.fim.titulo });
   A.P.filter(p => p.humano && !p.remoto).forEach(guardarGanhos);   // no online, cada um soma no próprio celular
   G.historico = (G.historico || []).slice(-99);
-  G.historico.push({ em: Date.now(), dur: Math.round(A.t), vencedor: v.nome, jog: A.P.filter(p => p.humano).map(p => p.nome), robos: A.P.filter(p => !p.humano).length,
+  G.historico.push({ em: Date.now(), dur: Math.round(A.t), vencedor: A.fim.titulo, jog: A.P.filter(p => p.humano).map(p => p.nome), robos: A.P.filter(p => !p.humano).length,
     palavras: A.st.eventos.filter(e => e.tipo === "palavra" && e.palavra).map(e => e.palavra) });
   salvar();
   sfxVitoria();
-  aMsg(`${v.nome} venceu!`);
+  aMsg(`${A.fim.titulo} venceu!`);
   mostrarFim();
   if (db && podeGravar) {
     try {
@@ -1565,7 +1622,8 @@ function desenharA() {
   c.setTransform(k, 0, 0, k, 0, 0);
   const ph = A.ph || {};
   torcidaCima(c, ph.k === "bola");
-  for (const p of A.P) { c.strokeStyle = "rgba(244,247,251,.45)"; c.lineWidth = 4; c.beginPath(); c.arc(p.home.x, p.home.y, 34, 0, Math.PI * 2); c.stroke(); }
+  for (const p of A.P) { const t = timeDe(p); c.strokeStyle = t ? t.cor : "rgba(244,247,251,.45)"; c.lineWidth = t ? 7 : 4; c.beginPath(); c.arc(p.home.x, p.home.y, 34, 0, Math.PI * 2); c.stroke(); }
+  for (const p of A.P) { const t = timeDe(p); if (!t || !p.vivo) continue; c.fillStyle = t.cor; c.globalAlpha = .45; c.beginPath(); c.ellipse(p.x, p.y + 40, 30, 11, 0, 0, Math.PI * 2); c.fill(); c.globalAlpha = 1; }
   // sombras no chão
   c.fillStyle = "rgba(5,15,35,.35)";
   for (const p of A.P) if (p.vivo) { const ges = typeof gestoAtivo === "function" && gestoAtivo(p), sobe = ges ? poseGesto(ges.g.k, ges.f).pulo : 0;
@@ -1855,7 +1913,7 @@ function hudA() {
   $("a-clock").textContent = fmtT(A.t * 1000);
   const bar = $("a-bar");
   const atual = ph.k === "bola" ? ph.atir : (ph.k === "pergunta" ? ph.ordem[ph.idx] : null);
-  bar.innerHTML = A.P.map(p => `<div class="mini${p.vivo ? "" : " out"}${p === atual ? " now" : ""}"><b>${esc(p.nome)}${p.humano ? "" : " 🤖"}</b><span class="hearts">${p.vivo ? "●".repeat(Math.min(10, p.vidas)) : "fora"}</span><span class="coin">${fmtM(p.moedas)}</span></div>`).join("");
+  bar.innerHTML = A.P.map(p => `<div class="mini${p.vivo ? "" : " out"}${p === atual ? " now" : ""}"${timeDe(p) ? ` style="border-color:${timeDe(p).cor}"` : ""}><b>${timeDe(p) ? `<i class="tponto" style="background:${timeDe(p).cor}"></i>` : ""}${esc(p.nome)}${p.humano ? "" : " 🤖"}</b><span class="hearts">${p.vivo ? "●".repeat(Math.min(10, p.vidas)) : "fora"}</span><span class="coin">${fmtM(p.moedas)}</span></div>`).join("");
   if (ph.k === "pergunta" || ph.k === "voto") {
     $("a-phase").textContent = `${ph.perg.nome} pergunta · volta ${(ph.voltas || 0) + 1}`;
     $("a-tema").textContent = ph.tema; $("a-word").textContent = aMascara(ph);
@@ -2020,7 +2078,8 @@ function mostrarFim() {
   const ord = [...A.P].sort((a, b) => (b.vivo - a.vivo) || ((b.saiuEm || 0) - (a.saiuEm || 0)));
   const pessoas = A.P.filter(p => p.humano).map(p => p.nome);
   abrirOv(`
-    <p class="dim">Quem sobrou por último</p><div class="big-name">${esc(v.nome)}</div><h2>venceu!</h2>
+    <p class="dim">${A.fim.cor ? "O time que sobrou" : "Quem sobrou por último"}</p><div class="big-name"${A.fim.cor ? ` style="color:${A.fim.cor}"` : ""}>${esc(A.fim.titulo || v.nome)}</div><h2>venceu!</h2>
+    ${A.fim.cor ? `<p>${A.fim.ganhadores.map(p => esc(p.nome)).join(", ")}</p>` : ""}
     <table class="score"><thead><tr><th>Jogador</th><th class="num">Ganhou</th></tr></thead><tbody>${ord.map(p => `<tr class="${p.vivo ? "" : "out"}"><td style="text-align:left">${esc(p.nome)}${p.humano ? "" : " 🤖"}</td><td class="num coin">+${fmtM(p.ganho)}</td></tr>`).join("")}</tbody></table>
     <p class="dim" style="font-size:14px">${fmtT(A.t * 1000)} de partida · ${A.st.acertos} acertos · ${A.st.arremessos} bolas, ${A.st.acertosBola} na mosca</p>
     <button class="btn" id="ov-sug" type="button">Cada pessoa dá uma nota e uma sugestão</button>
@@ -2278,7 +2337,7 @@ function montarBonecos3D() {
 }
 function montarExtras3D(p, g, pernaE, pernaD, bracoE, bracoD, corpoMat) {
   {
-    const tag = etiqueta({ nome: p.nome, vidas: "" }); tag.position.y = 1.95; g.add(tag);
+    const tag = etiqueta({ nome: p.nome, vidas: "" }, timeDe(p) ? timeDe(p).cor : undefined); tag.position.y = 1.95; g.add(tag);
     const perg = etiqueta({ nome: "?", vidas: "" }, "#ffd23f"); perg.scale.set(.9, .34, 1); perg.position.y = 2.35; perg.visible = false; g.add(perg);
     corpoMat = deixarDesenho(g, corpoMat);
     const giram = []; g.traverse(o => { if (o.userData && o.userData.gira) giram.push(o); });
@@ -2286,7 +2345,7 @@ function montarExtras3D(p, g, pernaE, pernaD, bracoE, bracoD, corpoMat) {
     const sombra = new THREE.Mesh(new THREE.PlaneGeometry(.9, .9), new THREE.MeshBasicMaterial({ map: F.sombraTex, transparent: true, depthWrite: false }));
     sombra.rotation.x = -Math.PI / 2; sombra.position.y = .015; F.scene.add(sombra); F.seats.push(sombra);
     F.bonecos.push({ p, g, pernaE, pernaD, bracoE, bracoD, corpoMat, tag, perg, sombra, giram, rotulo: "", lx: p.x, ly: p.y, dir: 0 });
-    const seat = new THREE.Mesh(new THREE.RingGeometry(.3, .36, 32), new THREE.MeshBasicMaterial({ color: "#8fb0d8" }));
+    const seat = new THREE.Mesh(new THREE.RingGeometry(.3, timeDe(p) ? .42 : .36, 32), new THREE.MeshBasicMaterial({ color: timeDe(p) ? timeDe(p).cor : "#8fb0d8" }));
     seat.rotation.x = -Math.PI / 2; seat.position.set(p.home.x * U - AC * U, .02, p.home.y * U - AC * U);
     F.scene.add(seat); F.seats.push(seat);
   }
@@ -2457,7 +2516,7 @@ function desenhar3D() {
     const rot = p.nome + "|" + p.vidas;
     if (rot !== b.rotulo) {
       b.rotulo = rot; b.g.remove(b.tag); b.tag.material.map.dispose();
-      b.tag = etiqueta({ nome: p.nome + (p.humano ? "" : " 🤖"), vidas: "●".repeat(Math.min(10, p.vidas)) }); b.tag.position.y = 1.95; b.g.add(b.tag);
+      b.tag = etiqueta({ nome: p.nome + (p.humano ? "" : " 🤖"), vidas: "●".repeat(Math.min(10, p.vidas)) }, timeDe(p) ? timeDe(p).cor : undefined); b.tag.position.y = 1.95; b.g.add(b.tag);
     }
     b.perg.visible = (ph.k === "pergunta" || ph.k === "segredo") && ph.perg === p;
     b.tag.visible = !(dono && p === dono);   // o seu nome ficaria grande na frente da câmera

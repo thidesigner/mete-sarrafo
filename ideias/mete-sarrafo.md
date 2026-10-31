@@ -15,6 +15,15 @@ Ideia do Andre: um jogo de celular e PC que mistura forca com queimada. Quem adi
 - Botão "tá difícil": todo mundo vota. Se a maioria concordar, quem pergunta perde metade das moedas e passa a vez.
 - Quem perde as 3 vidas sai. A última pessoa que sobra ganha.
 
+## Times (31/out)
+
+- Dá para jogar em times de 2, 3 ou 4 (ou "cada um por si", como antes). Vale nos bonequinhos, no online e na bola de verdade.
+- Os times são sorteados quando a partida começa. Nos bonequinhos e no online, robôs completam se faltar gente; na bola de verdade, o time sai com quem tiver.
+- A bola só acerta os outros times: o time de quem atira não corre.
+- O time de quem pergunta não chuta (para ninguém combinar a resposta).
+- Ganha o time que sobrar com alguém vivo. A vitória conta para todo mundo do time.
+- Cores: Azul, Vermelho, Verde, Amarelo (e mais Roxo, Laranja, Rosa e Branco se tiver muitos times).
+
 ## Moedas e loja
 
 - Moedas do jogo (nunca dinheiro de verdade), guardadas entre partidas.

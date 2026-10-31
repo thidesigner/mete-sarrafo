@@ -4,7 +4,8 @@
 const ON = { on: false, host: false, peer: null, code: "", sala: [], robos: 2, fp: true, timer: null, hostConn: null, myIdx: 0,
   meuNome: "", salaNomes: [], pedido: null, esperaTxt: "", actKey: "", fimVisto: false, movT: 0, movUlt: "", conectando: false };
 const PREFIXO = "metesarrafo-v1-";
-const SALA_DO_ANDRE = "ANDREK7Q";   // código fixo: é o que está no QR impresso (materiais/)
+const SALA_DO_ANDRE = "ANDREK7Q";
+ON.time = G.timeTam || 0;   // times no online (0 = cada um por si)   // código fixo: é o que está no QR impresso (materiais/)
 const onHost = () => ON.on && ON.host;
 const onCli = () => ON.on && !ON.host;
 function gerarCodigo() { const L = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; let c = ""; for (let i = 0; i < 4; i++) c += L[Math.floor(Math.random() * L.length)]; return c; }
@@ -72,6 +73,9 @@ TELAS.salaHost = () => {
       ${ON.sala.length ? "" : `<p class="dim">Esperando os amigos entrarem…</p>`}
       <h3>Robôs</h3>
       <div class="stepper"><button class="btn ghost" type="button" data-a="robosMenos" aria-label="Menos um robô">−</button><b>${ON.robos}</b><button class="btn ghost" type="button" data-a="robosMais" aria-label="Mais um robô">+</button></div>
+      <h3>Times</h3>
+      <div class="seg2 time-pick" role="group" aria-label="Jogar em times">${[[0, "Cada um por si"], [2, "2 por time"], [3, "3 por time"], [4, "4 por time"]].map(([v, t]) => `<button type="button" data-a="timeOnline" data-v="${v}" aria-pressed="${(ON.time || 0) === v}">${t}</button>`).join("")}</div>
+      ${ON.time ? `<p class="dim" style="font-size:14px">Os times são sorteados quando você tocar em Começar. Se faltar gente, robôs completam.</p>` : ""}
       <h3>Sua visão</h3>
       <span class="seg2" role="group" aria-label="Visão do jogo" style="align-self:flex-start">
         <button type="button" data-a="visaoFp" aria-pressed="${ON.fp !== false}">3D</button><button type="button" data-a="visaoCima" aria-pressed="${ON.fp === false}">De cima</button>
@@ -84,6 +88,7 @@ TELAS.salaHost = () => {
 Object.assign(acoes, {
   encerrarSala() { encerrarOnline(); },
   trocarSala() { const fixa = ON.code !== SALA_DO_ANDRE; G.salaFixa = fixa; salvar(); criarSala(fixa); },
+  timeOnline(el) { ON.time = +el.dataset.v; G.timeTam = ON.time; salvar(); render(); },
   robosMenos() { ON.robos = Math.max(0, ON.robos - 1); enviarSala(); render(); },
   robosMais() { if (1 + ON.sala.length + ON.robos < 20) ON.robos++; enviarSala(); render(); },
   visaoFp() { guardarDigitado(); ON.fp = true; G.visaoOnline = true; salvar(); render(); },
@@ -135,6 +140,9 @@ function comecarOnline() {
   const lista = [{ nome: perfil(), local: true }].concat(ON.sala.filter(s => s.conn.open).map(s => ({ nome: s.nome, conn: s.conn, moedas: s.moedas, vidasInv: s.vidasInv, skin: s.skin, ficha: s.ficha, arremesso: s.arremesso })));
   for (let k = 1; k <= ON.robos; k++) lista.push({ nome: "Robô " + k, robo: true });
   if (lista.length < 3) { toast("Precisa de pelo menos 3 jogadores"); return; }
+  // times: sorteia e completa com robôs; cada time fica junto na roda
+  const sorteada = sortearTimes(lista.map(o => ({ ...o, humano: !o.robo })), ON.time || 0, true).map(o => ({ ...o, robo: !o.humano }));
+  lista.length = 0; lista.push(...sorteada); A.times = !!ON.time;
   const n = lista.length;
   A.cfg = { ...G.cfg };
   A.P = lista.map((o, i) => {
@@ -144,20 +152,23 @@ function comecarOnline() {
       cor: A_CORES[i % A_CORES.length], pele: A_PELE[i % A_PELE.length],
       vidas: A.cfg.vidas, vivo: true, moedas: 0, guardado: o.robo ? 0 : o.local ? (G.banco[o.nome] || 0) : (o.moedas || 0), ganho: 0, compradas: 0,
       home, x: home.x, y: home.y, alvo: null, modo: "casa", vel: A_VEL * aRnd(.88, 1.12), habil: aRnd(-.08, .08),
-      flash: 0, passo: 0, ctrl: false, tocou: false, saiuEm: null, arremesso: o.robo ? "bola" : o.local ? arremessoDe(o.nome) : (o.arremesso || "bola") };
+      flash: 0, passo: 0, ctrl: false, tocou: false, saiuEm: null, arremesso: o.robo ? "bola" : o.local ? arremessoDe(o.nome) : (o.arremesso || "bola"), time: o.time };
   });
   A.P.forEach((p, i) => { if (!p.humano) return; vestir(p, lista[i].local ? skinDe(p.nome) : lista[i].skin); const f = lista[i].local ? personagemDe(p.nome) : lista[i].ficha; if (f) p.ficha = f; });
-  A.cel = 0; ON.myIdx = 0; A.balls = []; A.fx = []; A.t = 0; A.fim = null; A.ptr = null; A.inicio = Date.now();
+  A.cel = ON.myIdx = Math.max(0, lista.findIndex(o => o.local)); A.balls = []; A.fx = []; A.t = 0; A.fim = null; A.ptr = null; A.inicio = Date.now();
   A.st = { palavras: 0, acertos: 0, erros: 0, timeouts: 0, votos: 0, votosOk: 0, arremessos: 0, acertosBola: 0, rodadas: 0, compras: 0, moedas: {}, eventos: [] };
   ON.on = true; ON.pedido = null; ON.esperaTxt = ""; ON.fimVisto = false;
   $("app").hidden = true; $("arena").hidden = false; $("a-setup").hidden = true; $("a-game").hidden = false;
   window.scrollTo(0, 0);
-  const estatico = A.P.map(p => ({ nome: p.nome, cor: p.cor, pele: p.pele, skin: p.skin || "classico", ficha: p.ficha || null, arremesso: p.arremesso || "bola", humano: p.humano, hx: Math.round(p.home.x), hy: Math.round(p.home.y) }));
-  A.P.forEach(p => { if (p.conn) enviar(p.conn, { t: "start", P: estatico, eu: p.i, cfg: A.cfg }); });
+  const estatico = A.P.map(p => ({ nome: p.nome, cor: p.cor, pele: p.pele, skin: p.skin || "classico", ficha: p.ficha || null, arremesso: p.arremesso || "bola", time: p.time, humano: p.humano, hx: Math.round(p.home.x), hy: Math.round(p.home.y) }));
+  A.P.forEach(p => { if (p.conn) enviar(p.conn, { t: "start", P: estatico, eu: p.i, cfg: A.cfg, times: A.times }); });
   A.fp = false;
-  novaPalavraA(aPick(A.P));
   iniciarLoop();
   ligarVisao(ON.fp !== false);
+  if (A.times) {
+    abrirOv(`<h2>Times sorteados!</h2>${htmlTimes(A.P)}<p class="dim">A bola só acerta os outros times. Quem é do time de quem pergunta não chuta.</p><button class="btn" id="ov-ok" type="button">Começar</button>`,
+      ov => ov.querySelector("#ov-ok").addEventListener("click", () => { fecharOv(); novaPalavraA(aPick(A.P)); }));
+  } else novaPalavraA(aPick(A.P));
   clearInterval(ON.timer); ON.timer = setInterval(enviarEstado, 70);
 }
 function estadoAtual() {
@@ -452,7 +463,7 @@ function mostrarFimOnline() {
   const ord = [...A.P].sort((a, b) => (b.vivo - a.vivo) || (b.moedas - a.moedas));
   let nota = 0;
   const desenhar = enviado => abrirOv(`
-    <p class="dim">Quem sobrou por último</p><div class="big-name">${esc(v.nome)}</div><h2>${v === me ? "Você venceu!" : "venceu!"}</h2>
+    <p class="dim">${A.fim.cor ? "O time que sobrou" : "Quem sobrou por último"}</p><div class="big-name"${A.fim.cor ? ` style="color:${A.fim.cor}"` : ""}>${esc(A.fim.titulo || v.nome)}</div><h2>${(A.fim.ganhadores || [v]).includes(me) ? (A.fim.cor ? "Seu time venceu!" : "Você venceu!") : "venceu!"}</h2>
     <table class="score"><thead><tr><th>Jogador</th><th class="num">Ganhou</th></tr></thead><tbody>${ord.map(p => `<tr class="${p.vivo ? "" : "out"}"><td style="text-align:left">${esc(p.nome)}${p.humano ? "" : " 🤖"}${p === me ? " (você)" : ""}</td><td class="num coin">+${fmtM(p.ganho || 0)}</td></tr>`).join("")}</tbody></table>
     ${enviado ? `<div class="card" style="background:var(--court-2)"><h3>Valeu pela ideia!</h3></div>` : `
     <div class="card" style="background:var(--court-2);text-align:left">
@@ -581,10 +592,12 @@ function cliRecebe(d) {
 }
 function iniciarCliente(d) {
   A.cfg = { ...PADRAO, ...(d.cfg || {}) };
-  A.P = d.P.map((o, i) => ({ i, nome: String(o.nome), cor: o.cor, pele: o.pele, skin: skinInfo(o.skin).k, ficha: o.ficha ? limparFicha(o.ficha) : null, arremesso: arremessoInfo(String(o.arremesso || "")).k, humano: !!o.humano, home: { x: o.hx, y: o.hy },
+  A.P = d.P.map((o, i) => ({ i, nome: String(o.nome), cor: o.cor, pele: o.pele, skin: skinInfo(o.skin).k, ficha: o.ficha ? limparFicha(o.ficha) : null, arremesso: arremessoInfo(String(o.arremesso || "")).k, time: Number.isInteger(o.time) && TIMES[o.time] ? o.time : null, humano: !!o.humano, home: { x: o.hx, y: o.hy },
     x: o.hx, y: o.hy, tx: o.hx, ty: o.hy, vidas: A.cfg.vidas, vivo: true, moedas: 0, ganho: 0, compradas: 0,
     alvo: null, modo: "casa", vel: A_VEL, habil: 0, flash: 0, passo: 0, ctrl: false, tocou: false }));
   A.cel = d.eu; ON.myIdx = d.eu; ON.on = true; ON.host = false; ON.fimVisto = false; ON.actKey = "";
+  A.times = !!d.times;
+  if (A.times && A.P[d.eu] && timeDe(A.P[d.eu])) setTimeout(() => toast(`Você é do Time ${timeDe(A.P[d.eu]).nome}! A bola só vale nos outros times.`), 400);
   A.balls = []; A.fx = []; A.t = 0; A.fim = null; A.ptr = null; A.ph = { k: "segredo", perg: null };
   A.st = { palavras: 0, acertos: 0, erros: 0, timeouts: 0, votos: 0, votosOk: 0, arremessos: 0, acertosBola: 0, rodadas: 0, compras: 0, moedas: {}, eventos: [] };
   fecharOv();
@@ -628,10 +641,11 @@ function aplicarEstado(s) {
   if (chave !== ON.actKey) { ON.actKey = chave; renderAct(); }
   if (s.fim && !ON.fimVisto) {
     ON.fimVisto = true;
-    A.fim = { vencedor: A.P[s.fim.v], t: A.t };
+    { const v = A.P[s.fim.v], tv = A.times ? timeDe(v) : null;
+      A.fim = { vencedor: v, t: A.t, titulo: tv ? "Time " + tv.nome : v.nome, cor: tv ? tv.cor : null, ganhadores: tv ? A.P.filter(p => mesmoTime(p, v)) : [v] }; }
     if (me) {
       G.banco[ON.meuNome] = Math.round(((G.banco[ON.meuNome] || 0) + Math.max(0, me.moedas)) * 10) / 10;   // soma o que ganhou na partida
-      if (A.fim.vencedor === me) { G.vitorias = G.vitorias || {}; G.vitorias[ON.meuNome] = (G.vitorias[ON.meuNome] || 0) + 1; }
+      if (A.fim.ganhadores.includes(me)) { G.vitorias = G.vitorias || {}; G.vitorias[ON.meuNome] = (G.vitorias[ON.meuNome] || 0) + 1; }
       salvar();
     }
     sfxVitoria(); mostrarFim();

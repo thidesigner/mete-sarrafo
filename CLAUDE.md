@@ -76,6 +76,10 @@ Botão "Criar" na tela inicial: editor de personagens (arrastar peças). Cada pe
 - `ferramentas/blender/personagem_para_stl.py`: GLB → peça única fechada, em pé, na altura em mm.
 - Plano, cuidados (venda, Inmetro, segurança, LGPD) e dúvidas: `ideias/personagens-e-impressao-3d.md`. Venda de bonecos é sempre fora do jogo, entre adultos.
 
+## Times
+
+`TIMES`, `mesmoTime`, `sortearTimes` em `fonte/jogo.html`. Cada jogador tem `time` (índice) ou `null`. Bonequinhos: `A.setup.time` e `A.times`; online: `ON.time` (vai no `start` como `times` e no `P` estático); bola de verdade: `G.timeTam` e `G.comTimes`. Regras: o time de quem pergunta fica fora da `ordem`, o time de quem atira não corre nem leva bolada (`aCorrendo`), e ganha o time que sobrar.
+
 ## Ajustes trancados
 
 Os Ajustes do jogo (engrenagem na tela inicial) pedem um código de 5 números que só o pai sabe.
