@@ -1,4 +1,10 @@
-
 {
-  "avisos": []
+  "avisos": [
+    {
+      "id": "a202610310142",
+      "texto": "Terá muitos eventos semana que vem! Fique de olho! 🎉",
+      "de": "2026-10-31T01:42:16Z",
+      "ate": "2026-11-01T01:42:16Z"
+    }
+  ]
 }
