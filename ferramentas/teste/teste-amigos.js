@@ -5,6 +5,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const T = 
   const S = __dirname;
   const b = await chromium.launch({ args: ['--use-gl=swiftshader'] });
   const ctx = await b.newContext({ viewport: { width: 400, height: 860 } });
+  await ctx.route(u => u.pathname.endsWith('/avisos.json'), r => r.fulfill({ contentType: 'application/json', body: '{"avisos":[]}' }));   // avisos de verdade não atrapalham o teste
   await ctx.route('**/peerjs.min.js', r => r.fulfill({ body: fs.readFileSync(T + 'mockpeer.js'), contentType: 'application/javascript' }));
   await ctx.route('**/three.min.js', r => r.fulfill({ body: fs.readFileSync(T + 'vendor/three.min.js'), contentType: 'application/javascript' }));
   await ctx.route('https://cdnjs.cloudflare.com/**', r => r.fulfill({ body: '', contentType: 'application/javascript' }));

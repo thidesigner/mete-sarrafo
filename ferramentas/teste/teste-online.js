@@ -7,6 +7,7 @@ const AQUI = __dirname;
   const b = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist'] });
   const ctx = await b.newContext({ viewport: { width: 400, height: 860 } });
   await ctx.route('**/three.min.js', r => r.fulfill({ body: fs.readFileSync(path.join(AQUI, 'vendor/three.min.js')), contentType: 'application/javascript' }));
+  await ctx.route(u => u.pathname.endsWith('/avisos.json'), r => r.fulfill({ contentType: 'application/json', body: '{"avisos":[]}' }));   // avisos de verdade não atrapalham o teste
   await ctx.route('**/peerjs.min.js', r => r.fulfill({ body: fs.readFileSync(path.join(AQUI, 'mockpeer.js')), contentType: 'application/javascript' }));
   const errs = [];
   const host = await ctx.newPage(); host.on('pageerror', e => errs.push('host: ' + e.message));
