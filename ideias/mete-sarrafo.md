@@ -77,3 +77,12 @@ Ideia do Andre: um jogo de celular e PC que mistura forca com queimada. Quem adi
 
 - Com as regras de hoje as partidas ficam longas: ~8 min com 3 jogadores, ~19 min com 6, ~49 min com 12.
 - A vida extra de 250 fica cara com poucos jogadores e barata com muitos, porque sobreviver rende muito.
+
+## Eventos do ADM (31/out)
+
+O pai escolheu três funções novas para o Painel de ADM, na aba **Eventos**. Elas chegam em todo mundo que estiver com o jogo aberto no site (oficial ou teste) em até 1 minuto, igual aos avisos. Dentro do Claude não chegam.
+
+- **Evento de moedas:** moedas x2 (dobro) ou x3 (triplo) nas partidas, por 1 hora, 1 dia, 3 dias ou 7 dias. Vale também no online, porque quem abre a sala é quem conta as moedas. Aparece uma faixa roxa na tela inicial e na loja.
+- **Promoção na loja:** toda a loja, ou só skins, emojis, gestos, arremessos, fundos ou fotos, com 10, 20, 30 ou 50% de desconto, por um tempo. Os pacotes também ficam mais baratos. Aparece uma faixa laranja (tocar nela abre a loja).
+- **Código de presente:** o ADM cria um código de 4 a 12 letras ou números (ex.: FESTA) que dá moedas (50 a 1000) ou um item da loja. Na loja tem o campo "🎁 Código de presente". Cada jogador usa cada código uma vez só. Se já tiver o item, avisa e não gasta o código. No site vai só a "impressão digital" do código, não o texto; o pai vê os códigos que criou só no celular dele.
+

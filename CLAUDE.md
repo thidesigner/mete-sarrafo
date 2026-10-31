@@ -102,6 +102,7 @@ Abre com **5 toques rápidos no título "Jogo de Pergunta"** da tela inicial e d
 - Quando o pai pedir "manda o aviso: …": acrescente um aviso com `id` novo (ex.: `a` + data), `de` agora e `ate` (padrão 1 dia), apague os vencidos, commit e push direto na `main`. Em ~1 minuto chega em todos.
 - O pai também publica sozinho pela aba "Aviso" do Painel de ADM. Com a **chave do GitHub** guardada no celular dele (token fino, só o repositório `mete-sarrafo`, só Contents leitura e escrita), o botão "Publicar para todo mundo" grava `avisos.json` direto pela API do GitHub. A chave fica só em `localStorage["ms-adm-chave"]` daquele aparelho, fora do estado do jogo (`ms-festa`). **Nunca peça, guarde, escreva ou faça commit dessa chave.** Sem chave, a aba monta o arquivo para colar no editor do GitHub.
 - Só o pai pede aviso. Texto curto, para crianças, sem dados pessoais, sem links.
+- O mesmo arquivo também guarda os **eventos** da aba "Eventos" do ADM: `eventos` (`{id, mult: 2|3, de, ate}`, moedas multiplicadas em `ganhar`/`aGanhar`), `promos` (`{id, alvo, desc: 10|20|30|50, de, ate}`, aplicada em `aplicarPromo`) e `presentes` (`{id, h, moedas | item: "tipo:k", de, ate}`). Ao mexer no arquivo (por exemplo, "manda o aviso"), **mantenha essas chaves**. Código de presente: no arquivo vai só o hash (`hashPresente`, SHA-256 com o sal `mete-sarrafo-presente:`); **nunca escreva o texto do código no repositório**. Gravação pelo celular do pai: `gravarSite`.
 
 ## Testes
 

@@ -274,6 +274,12 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .aviso-caixa p { font-size: 20px; font-weight: 800; margin: 0; overflow-wrap: anywhere; }
 .aviso-tag { justify-self: center; background: #ffd23f; color: #0b1b33; border-radius: 8px; padding: 3px 10px; font-weight: 800; }
 .aviso-caixa .lb-jogar { min-height: 56px; font-size: 24px; }
+.evt-faixa { display: block; width: 100%; background: linear-gradient(90deg, #7c3aed, #ff7ad9); color: #fff; border: 2px solid #0b1b33; border-radius: 10px; padding: 7px 10px; font-weight: 800; font-size: 15px; text-align: center; }
+.evt-faixa.evt-promo { background: linear-gradient(90deg, #ff8a1f, #ffd23f); color: #0b1b33; }
+button.evt-faixa { cursor: pointer; font-family: inherit; }
+.presente-form { display: flex; gap: 8px; align-items: center; }
+.presente-form input { flex: 1; min-width: 0; text-transform: uppercase; letter-spacing: 1px; }
+.presente-form .btn { flex: 0 0 auto; width: auto; }
 .adm-status { background: rgba(55,217,154,.15); border: 2px solid #37d99a; border-radius: 10px; padding: 8px 10px; font-weight: 700; }
 .adm-json { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; background: rgba(0,0,0,.35); border-radius: 8px; padding: 8px; max-height: 200px; overflow-y: auto; }
 .times-lista { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin: 4px 0; }
@@ -578,7 +584,7 @@ function pagarVida(p, preco) {
 /* partida com bola de verdade salva antes desta mudança: separa o guardado do que ganhou */
 if (G.j) G.j.forEach(p => { if (p.guardado == null) { p.guardado = Math.max(0, Math.round((p.moedas - p.ganho) * 10) / 10); p.moedas = p.ganho; } });
 function guardarGanhos(p) { G.banco[p.nome] = Math.round(((G.banco[p.nome] || 0) + Math.max(0, p.moedas)) * 10) / 10; }
-function ganhar(p, v, tipo) { p.moedas += v; p.ganho += v; if (G.p) G.p.moedas[tipo] = (G.p.moedas[tipo] || 0) + v; }
+function ganhar(p, v, tipo) { v = comEvento(v); p.moedas += v; p.ganho += v; if (G.p) G.p.moedas[tipo] = (G.p.moedas[tipo] || 0) + v; }
 
 let toastT = null;
 function toast(txt, acao, fn) {
@@ -1267,6 +1273,15 @@ const SELOS = ["", "🥉", "🥈", "🥇"], SELO_NOMES = ["", "Bronze", "Prata",
 function qtdLimitadas(n) { try { return n ? todasLimitadas().filter(x => temLim(n, x)).length : 0; } catch (e) { return 0; } }
 function nivelSelo(n) { const q = qtdLimitadas(n); return q >= 10 ? 3 : q >= 5 ? 2 : q >= 1 ? 1 : 0; }
 const nomeComSelo = p => p.nome + (SELOS[p.selo] ? " " + SELOS[p.selo] : "");
+/* Eventos do ADM: chegam pelo avisos.json junto com os avisos (só no site): moedas em dobro, promoção na loja e códigos de presente */
+const EVT = { eventos: [], promos: [], presentes: [] };
+const EVT_NO_SITE = location.protocol.startsWith("http") && !/claude|claudeusercontent/.test(location.hostname);
+const PROMO_ALVOS = { tudo: "Toda a loja", skin: "Skins", emoji: "Emojis", gesto: "Gestos", arremesso: "Arremessos", fundo: "Fundos", avatar: "Fotos de perfil" };
+const evtValido = e => !!e && typeof e === "object" && typeof e.id === "string" && (!e.ate || Date.now() <= Date.parse(e.ate)) && (!e.de || Date.now() >= Date.parse(e.de));
+const eventoMoedas = () => EVT.eventos.filter(e => evtValido(e) && (e.mult === 2 || e.mult === 3)).sort((a, b) => b.mult - a.mult)[0] || null;
+const multMoedas = () => { const e = eventoMoedas(); return e ? e.mult : 1; };
+const promoAtiva = () => EVT.promos.filter(x => evtValido(x) && PROMO_ALVOS[x.alvo] && [10, 20, 30, 50].includes(x.desc)).slice(-1)[0] || null;
+const comEvento = v => v > 0 ? Math.round(v * multMoedas() * 10) / 10 : v;
 function faltaParaAcabar(s) {
   // dias contados pelo calendário de Brasília (31/out -> 2/nov = 2 dias, mesmo faltando menos de 48 h)
   const ms = Date.parse(s.ate) - Date.now(), h = Math.ceil(ms / 3600000), diaBR = t => Math.floor((t - 3 * 3600000) / 86400000), d = diaBR(Date.parse(s.ate)) - diaBR(Date.now());
@@ -1397,7 +1412,7 @@ function comecarArena() {
 }
 function aEvento(tipo, extra) { A.st.eventos.push({ t: Math.round(A.t * 10) / 10, tipo, ...extra }); if (A.st.eventos.length > 400) A.st.eventos.shift(); }
 function aVivos() { return A.P.filter(p => p.vivo); }
-function aGanhar(p, v, tipo) { p.moedas += v; p.ganho += v; A.st.moedas[tipo] = (A.st.moedas[tipo] || 0) + v; }
+function aGanhar(p, v, tipo) { v = comEvento(v); p.moedas += v; p.ganho += v; A.st.moedas[tipo] = (A.st.moedas[tipo] || 0) + v; }
 function aFx(x, y, txt, cor) { A.fx.push({ x, y, txt, cor, t: 0 }); }
 function aMsg(txt) { $("a-sub").textContent = txt; }
 
@@ -2924,6 +2939,7 @@ TELAS.lobby = () => {
       </div>
     </div>
     ${typeof avisoFaixa === "function" ? avisoFaixa() : ""}
+    ${typeof eventoFaixa === "function" ? eventoFaixa() : ""}
     <h1 class="lb-title">Jogo de<br>Pergunta</h1>
     <div class="lb-stage">
       <div class="lb-side">
@@ -2957,6 +2973,7 @@ TELAS.loja = () => {
       <div class="lb-pill lb-moedas"><span class="lb-coin" aria-hidden="true">$</span><b>${fmtM(moedas)}</b></div>
     </div>
     <h1 class="lb-title">Loja</h1>
+    ${typeof lojaEventosHTML === "function" ? lojaEventosHTML() : ""}
     ${pacoteHTML(nome, moedas)}
     ${cantinhoHTML(nome, moedas)}
     <div class="lb-oferta">
@@ -4512,6 +4529,19 @@ const limInfo = k => todasLimitadas().find(x => chaveLim(x) === k);
 const temLim = (j, x) => (x.tipo === "fundo" ? temFundo(j, x.k) : x.tipo === "emoji" ? temEmoji(j, x.k) : x.tipo === "gesto" ? temGesto(j, x.k) : x.tipo === "avatar" ? temAvatar(j, x.k) : x.tipo === "arremesso" ? temArremesso(j, x.k) : temSkin(j, x.k));
 function aplicarLimitadas() {
   todasLimitadas().forEach(s => { const o = (G.admLim || {})[chaveLim(s)] || {}; s.ate = o.ate || s.ateOriginal; s.preco = o.preco || s.precoOriginal; if (s.tipo === "fundo") PRECO_FUNDO[s.k] = s.preco; });
+  aplicarPromo();
+}
+/* promoção do ADM: baixa o preço do que estiver na promoção (x.promo guarda o preço sem desconto) */
+let PRECO_FUNDO_BASE = null;
+function aplicarPromo() {
+  if (!PRECO_FUNDO_BASE) PRECO_FUNDO_BASE = { ...PRECO_FUNDO };
+  const pr = promoAtiva(), fator = alvo => pr && (pr.alvo === "tudo" || pr.alvo === alvo) ? 1 - pr.desc / 100 : 1;
+  const desc = (base, f) => base > 0 && f < 1 ? Math.max(1, Math.round(base * f)) : base;
+  [["skin", SKINS], ["emoji", EMOJIS], ["gesto", GESTOS], ["arremesso", ARREMESSOS], ["avatar", AV_ESPECIAIS]].forEach(([alvo, L]) => L.forEach(x => {
+    if (!x.limitada && x.precoBase == null) x.precoBase = x.preco;
+    const base = x.limitada ? x.preco : x.precoBase; x.preco = desc(base, fator(alvo)); x.promo = x.preco < base ? base : 0;
+  }));
+  Object.keys(PRECO_FUNDO).forEach(k => { const lim = FUNDOS_LIM.find(f => f.k === k), base = lim ? lim.preco : PRECO_FUNDO_BASE[k]; PRECO_FUNDO[k] = desc(base, fator("fundo")); });
 }
 aplicarLimitadas();
 function jogadoresDoAparelho() {
@@ -4524,7 +4554,7 @@ TELAS.adm = () => {
   if (!ajustesAbertos) { setTimeout(() => ir("lobby"), 0); return ""; }
   const jogs = jogadoresDoAparelho();
   if (!ADM.jog || !jogs.includes(ADM.jog)) ADM.jog = jogs.includes(perfil()) ? perfil() : jogs[0];
-  const n = ADM.jog, abas = { moedas: "Moedas", itens: "Itens", limitadas: "Limitadas", aviso: "Aviso", numeros: "Números" };
+  const n = ADM.jog, abas = { moedas: "Moedas", itens: "Itens", limitadas: "Limitadas", aviso: "Aviso", eventos: "Eventos", numeros: "Números" };
   const escolherJog = `<div class="chips">${jogs.map(j => `<button type="button" class="chip adm-chip" data-a="admJog" data-n="${esc(j)}" aria-pressed="${j === n}">${esc(j)}</button>`).join("")}</div>`;
   const chipItem = (tem, gratis, tipo, k, rot) => `<button type="button" class="chip adm-chip" data-a="admItem" data-t="${tipo}" data-k="${k}" aria-pressed="${tem}" ${gratis ? "disabled" : ""}>${rot}</button>`;
   let corpo = "";
@@ -4595,6 +4625,7 @@ TELAS.adm = () => {
     </div>
     <p class="dim" style="font-size:14px">Também dá para falar para o Claude: "manda o aviso: …".</p>`;
   }
+  if (ADM.aba === "eventos") corpo = admEventosHTML();
   if (ADM.aba === "numeros") {
     const hist = G.historico || [], vit = Object.entries(G.vitorias || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
     const ricos = Object.entries(G.banco || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
@@ -4732,6 +4763,11 @@ async function buscarAvisos() {
   try {
     const r = await fetch(AVISOS.url + "?t=" + Date.now(), { cache: "no-store" }); if (!r.ok) return;
     const d = await r.json(); AVISOS.lista = Array.isArray(d.avisos) ? d.avisos.slice(0, 20) : [];
+    const lst = (v, n) => Array.isArray(v) ? v.filter(x => x && typeof x === "object").slice(0, n) : [];
+    const antes = JSON.stringify([eventoMoedas(), promoAtiva()]);
+    EVT.eventos = lst(d.eventos, 10); EVT.promos = lst(d.promos, 10); EVT.presentes = lst(d.presentes, 50);
+    aplicarLimitadas();
+    if (antes !== JSON.stringify([eventoMoedas(), promoAtiva()]) && G.tela === "loja" && !$("app").hidden && !(document.activeElement && document.activeElement.id === "pres-cod")) { const y = window.scrollY; render(); window.scrollTo(0, y); }
   } catch { return; }
   const vistos = G.avisosVistos = G.avisosVistos || [];
   const novo = avisosAtivos().find(a => !vistos.includes(a.id));
@@ -4778,18 +4814,23 @@ function chaveGitHub() { try { return localStorage.getItem("ms-adm-chave") || ""
 const cabecalhos = () => ({ Authorization: "Bearer " + chaveGitHub(), Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" });
 const paraBase64 = t => { const b = new TextEncoder().encode(t); let s = ""; b.forEach(x => (s += String.fromCharCode(x))); return btoa(s); };
 const deBase64 = t => new TextDecoder().decode(Uint8Array.from(atob(t.replace(/\n/g, "")), c => c.charCodeAt(0)));
-async function gravarAvisos(montar, msg) {
+/* grava o avisos.json inteiro (avisos + eventos + promoções + presentes), mantendo o que a mudança não mexe */
+async function gravarSite(muda, msg) {
   const r = await fetch(REPO_API + "?ref=main&t=" + Date.now(), { headers: cabecalhos(), cache: "no-store" });
   if (r.status === 401 || r.status === 403) throw new Error("A chave não vale mais ou não tem permissão. Crie outra.");
   if (!r.ok) throw new Error("Não consegui ler os avisos (" + r.status + ").");
-  const atual = await r.json(); let dados = { avisos: [] };
-  try { dados = JSON.parse(deBase64(atual.content)); } catch {}
-  const novo = montar(Array.isArray(dados.avisos) ? dados.avisos : []);
+  const atual = await r.json(); let dados = {};
+  try { dados = JSON.parse(deBase64(atual.content)) || {}; } catch {}
+  ["avisos", "eventos", "promos", "presentes"].forEach(k => { if (!Array.isArray(dados[k])) dados[k] = []; });
+  const novo = muda(dados), limpo = { avisos: novo.avisos || [] };
+  ["eventos", "promos", "presentes"].forEach(k => { const v = (novo[k] || []).filter(x => !x.ate || Date.now() <= Date.parse(x.ate)); if (v.length) limpo[k] = v; });
   const w = await fetch(REPO_API, { method: "PUT", headers: { ...cabecalhos(), "Content-Type": "application/json" },
-    body: JSON.stringify({ message: msg, content: paraBase64(JSON.stringify({ avisos: novo }, null, 2) + "\n"), sha: atual.sha, branch: "main" }) });
+    body: JSON.stringify({ message: msg, content: paraBase64(JSON.stringify(limpo, null, 2) + "\n"), sha: atual.sha, branch: "main" }) });
   if (!w.ok) throw new Error("O GitHub não aceitou (" + w.status + "). Tente de novo.");
-  AVISOS.lista = novo;
+  AVISOS.lista = limpo.avisos; EVT.eventos = limpo.eventos || []; EVT.promos = limpo.promos || []; EVT.presentes = limpo.presentes || [];
+  aplicarLimitadas();
 }
+const gravarAvisos = (montar, msg) => gravarSite(d => ({ ...d, avisos: montar(d.avisos) }), msg);
 const reRenderAdm = () => { if (G.tela === "adm") { const y = window.scrollY; render(); window.scrollTo(0, y); } };
 Object.assign(acoes, {
   async admGuardarChave() {
@@ -4825,6 +4866,128 @@ Object.assign(acoes, {
     catch (e) { ADM.avisoStatus = e.message; }
     reRenderAdm();
   },
+});
+/* ================= Eventos: moedas em dobro, promoção e códigos de presente ================= */
+const normCodigo = t => String(t || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
+async function hashPresente(c) {
+  const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("mete-sarrafo-presente:" + c));
+  return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join("");
+}
+function nomePremio(p) {
+  if (p.moedas) return Math.round(p.moedas) + " moedas";
+  const [tipo, k] = String(p.item || "").split(":");
+  const x = tipo === "skin" ? SKINS.find(i => i.k === k) : tipo === "emoji" ? emojiInfo(k) : tipo === "gesto" ? gestoInfo(k) : tipo === "arremesso" ? ARREMESSOS.find(i => i.k === k) : tipo === "avatar" ? avEspecial(k) : null;
+  if (tipo === "fundo") { const f = FUNDOS.find(([fk]) => fk === k); return f ? "o fundo " + f[1] : ""; }
+  if (!x) return "";
+  return { skin: "a skin ", emoji: "o emoji " + (x.e || "") + " ", gesto: "o gesto " + (x.icone || "") + " ", arremesso: "o arremesso " + (x.icone || "") + " ", avatar: "a foto " }[tipo] + x.nome;
+}
+function darPremio(nome, p) {
+  G.inv = G.inv || {}; G.inv[nome] = G.inv[nome] || { vidas: 0 };
+  const txt = nomePremio(p); if (!txt) return null;
+  if (p.moedas) { const v = Math.round(+p.moedas); if (!(v >= 1 && v <= 5000)) return null; G.banco[nome] = Math.round(((G.banco[nome] || 0) + v) * 10) / 10; return { txt }; }
+  const [tipo, k] = String(p.item).split(":");
+  const tem = { skin: () => temSkin(nome, k), emoji: () => temEmoji(nome, k), gesto: () => temGesto(nome, k), arremesso: () => temArremesso(nome, k), fundo: () => temFundo(nome, k), avatar: () => temAvatar(nome, k) }[tipo];
+  if (tem()) return { txt, jaTem: true };
+  ({ skin: () => darSkin(nome, k), emoji: () => darEmoji(nome, k), gesto: () => darGesto(nome, k), fundo: () => darFundo(nome, k),
+    arremesso: () => { G.inv[nome].arremessos = [...(G.inv[nome].arremessos || []), k]; }, avatar: () => { G.inv[nome].avatares = [...(G.inv[nome].avatares || []), k]; } })[tipo]();
+  return { txt };
+}
+function mostrarPresente(nome, txt) {
+  let el = $("aviso-adm");
+  if (!el) { el = document.createElement("div"); el.id = "aviso-adm"; el.className = "aviso-adm"; el.setAttribute("role", "alertdialog"); document.body.append(el); }
+  el.setAttribute("aria-label", "Presente");
+  el.innerHTML = `<div class="aviso-caixa"><span class="aviso-tag">🎁 Presente!</span><p>${esc(nome)} ganhou ${esc(txt)}!</p><button type="button" class="lb-jogar" id="aviso-ok">Oba!</button></div>`;
+  el.hidden = false; $("aviso-ok").onclick = () => { el.hidden = true; };
+  if (typeof tocarNotas === "function") tocarNotas([[72, 72, 0, .1, "square"], [76, 76, .1, .1, "square"], [79, 79, .2, .1, "square"], [84, 84, .3, .12, "square"], [88, 88, .42, .4, "square"]]);
+  vibrar([60, 40, 60, 40, 120]);
+}
+acoes.usarPresente = async () => {
+  const inp = $("pres-cod"), c = normCodigo(inp && inp.value), nome = perfil();
+  if (c.length < 4) { toast("Digite o código de presente"); return; }
+  let h; try { h = await hashPresente(c); } catch { toast("Não deu para conferir o código aqui"); return; }
+  const p = EVT.presentes.find(x => evtValido(x) && x.h === h);
+  if (!p) { toast("Esse código não existe ou já acabou"); return; }
+  G.presentesUsados = G.presentesUsados || {}; const usados = G.presentesUsados[nome] = G.presentesUsados[nome] || [];
+  if (usados.includes(p.id)) { toast(`${nome} já usou esse código`); return; }
+  const r = darPremio(nome, p); if (!r) { toast("Esse presente não funciona nesta versão do jogo"); return; }
+  if (r.jaTem) { toast(`${nome} já tem ${r.txt}`); return; }
+  usados.push(p.id); G.presentesUsados[nome] = usados.slice(-100); salvarPlacar();
+  if (inp) inp.value = "";
+  const y = window.scrollY; render(); window.scrollTo(0, y); mostrarPresente(nome, r.txt);
+};
+function lojaEventosHTML() {
+  const pr = promoAtiva(), ev = eventoMoedas();
+  return `${pr ? `<div class="evt-faixa evt-promo">🏷️ <b>Promoção!</b> ${PROMO_ALVOS[pr.alvo]} com ${pr.desc}% de desconto até ${brDataHora(Date.parse(pr.ate))}</div>` : ""}
+    ${ev ? `<div class="evt-faixa">🎉 <b>Evento:</b> moedas x${ev.mult} nas partidas até ${brDataHora(Date.parse(ev.ate))}</div>` : ""}
+    ${EVT_NO_SITE ? `<form class="presente-form" data-a="usarPresente" autocomplete="off"><input id="pres-cod" maxlength="12" placeholder="🎁 Código de presente" aria-label="Código de presente" autocapitalize="characters" spellcheck="false"><button class="btn small" type="submit">Usar</button></form>` : ""}`;
+}
+function eventoFaixa() {
+  const pr = promoAtiva(), ev = eventoMoedas();
+  return `${ev ? `<div class="evt-faixa">🎉 Evento: moedas x${ev.mult} nas partidas!</div>` : ""}${pr ? `<button type="button" class="evt-faixa evt-promo" data-a="loja">🏷️ Promoção: ${PROMO_ALVOS[pr.alvo]} ${pr.desc}% off na loja!</button>` : ""}`;
+}
+function opcoesPremio() {
+  const op = (v, t) => `<option value="${v}">${esc(t)}</option>`, grupo = (t, l) => l.length ? `<optgroup label="${t}">${l.join("")}</optgroup>` : "";
+  return grupo("Moedas", [50, 100, 200, 500, 1000].map(v => op("moedas:" + v, v + " moedas")))
+    + grupo("Skins", SKINS.filter(x => x.preco > 0).map(x => op("skin:" + x.k, x.nome)))
+    + grupo("Emojis", EMOJIS.filter(x => x.preco > 0).map(x => op("emoji:" + x.k, x.e + " " + x.nome)))
+    + grupo("Gestos", GESTOS.filter(x => x.preco > 0).map(x => op("gesto:" + x.k, x.icone + " " + x.nome)))
+    + grupo("Arremessos", ARREMESSOS.filter(x => x.preco > 0).map(x => op("arremesso:" + x.k, x.icone + " " + x.nome)))
+    + grupo("Fundos", FUNDOS.filter(([k]) => k !== "basico").map(([k, t]) => op("fundo:" + k, t)))
+    + grupo("Fotos de perfil", AV_ESPECIAIS.map(x => op("avatar:" + x.k, x.icone + " " + x.nome)));
+}
+function admEventosHTML() {
+  if (!(chaveGitHub() && PODE_PUBLICAR_DIRETO)) return `<h3>Eventos para todo mundo</h3><p>Para publicar daqui, abra o jogo pelo site e guarde a chave do GitHub na aba <b>Aviso</b>. Também dá para pedir ao Claude, por exemplo: "começa um evento de moedas em dobro até domingo".</p>`;
+  const ev = eventoMoedas(), pr = promoAtiva(), pres = EVT.presentes.filter(evtValido), ocupado = ADM.publicando ? "disabled" : "";
+  const dur = (id, padrao, extra) => `<select id="${id}">${[[1, "1 hora"], [24, "1 dia"], [72, "3 dias"], [168, "7 dias"], ...(extra || [])].map(([h, t]) => `<option value="${h}" ${h === padrao ? "selected" : ""}>${t}</option>`).join("")}</select>`;
+  return `${ADM.evtStatus ? `<p class="adm-status">${esc(ADM.evtStatus)}</p>` : ""}
+    <h3>🎉 Evento de moedas</h3>
+    ${ev ? `<p>Valendo: <b>moedas x${ev.mult}</b> até ${brDataHora(Date.parse(ev.ate))}</p><button type="button" class="lb-pill" data-a="admEncerrarEvt" data-tipo="eventos" ${ocupado}>Encerrar o evento</button>`
+      : `<p class="dim" style="font-size:14px">Enquanto valer, todo mundo ganha mais moedas nas partidas.</p>`}
+    <label for="adm-ev-mult">Moedas</label><select id="adm-ev-mult"><option value="2">x2 (dobro)</option><option value="3">x3 (triplo)</option></select>
+    <label for="adm-ev-h">Vale por</label>${dur("adm-ev-h", 24)}
+    <button type="button" class="btn" data-a="admCriarEvento" ${ocupado}>${ev ? "Trocar o evento" : "Começar o evento"}</button>
+    <h3>🏷️ Promoção na loja</h3>
+    ${pr ? `<p>Valendo: <b>${PROMO_ALVOS[pr.alvo]} com ${pr.desc}% de desconto</b> até ${brDataHora(Date.parse(pr.ate))}</p><button type="button" class="lb-pill" data-a="admEncerrarEvt" data-tipo="promos" ${ocupado}>Encerrar a promoção</button>` : ""}
+    <label for="adm-pr-alvo">O que fica mais barato</label><select id="adm-pr-alvo">${Object.entries(PROMO_ALVOS).map(([k, t]) => `<option value="${k}">${t}</option>`).join("")}</select>
+    <label for="adm-pr-desc">Desconto</label><select id="adm-pr-desc">${[10, 20, 30, 50].map(v => `<option value="${v}" ${v === 20 ? "selected" : ""}>${v}%</option>`).join("")}</select>
+    <label for="adm-pr-h">Vale por</label>${dur("adm-pr-h", 24)}
+    <button type="button" class="btn" data-a="admCriarPromo" ${ocupado}>${pr ? "Trocar a promoção" : "Começar a promoção"}</button>
+    <h3>🎁 Código de presente</h3>
+    <p class="dim" style="font-size:14px">Quem digitar o código na loja ganha o presente (uma vez por jogador). De 4 a 12 letras ou números.</p>
+    <input id="adm-pres-cod" maxlength="12" placeholder="Ex.: FESTA" aria-label="Código de presente" autocapitalize="characters" autocomplete="off" spellcheck="false">
+    <label for="adm-pres-premio">Presente</label><select id="adm-pres-premio">${opcoesPremio()}</select>
+    <label for="adm-pres-h">Vale por</label>${dur("adm-pres-h", 168, [[720, "30 dias"]])}
+    <button type="button" class="btn" data-a="admCriarPresente" ${ocupado}>Criar o código</button>
+    ${pres.length ? `<h3>Códigos valendo</h3>${pres.map(x => `<div class="adm-lim"><p>🎁 <b>${esc((G.admPresentes || {})[x.id] || "(criado em outro celular)")}</b> · ${esc(nomePremio(x))} · até ${brDataHora(Date.parse(x.ate))}</p><button type="button" class="lb-pill" data-a="admApagarPresente" data-id="${esc(x.id)}" ${ocupado}>Apagar este código</button></div>`).join("")}` : ""}
+    <p class="dim" style="font-size:14px">Chega em todo mundo com o jogo aberto no site em até 1 minuto. Dentro do Claude não chega.</p>`;
+}
+async function publicarEvt(muda, msg, ok) {
+  ADM.publicando = true; ADM.evtStatus = "Publicando…"; reRenderAdm();
+  try { await gravarSite(muda, msg); ADM.evtStatus = ok; } catch (e) { ADM.evtStatus = e.message || "Não deu certo. Tente de novo."; }
+  ADM.publicando = false; reRenderAdm();
+}
+const periodo = id => { const agora = Date.now(), h = +($(id) || {}).value || 24; return { de: new Date(agora).toISOString(), ate: new Date(agora + h * 3600000).toISOString() }; };
+Object.assign(acoes, {
+  admCriarEvento() {
+    const mult = +($("adm-ev-mult") || {}).value === 3 ? 3 : 2, t = periodo("adm-ev-h");
+    publicarEvt(d => ({ ...d, eventos: [{ id: "e" + Date.now().toString(36), mult, ...t }] }), "Evento de moedas", `Evento de moedas x${mult} publicado! Chega em todo mundo em até 1 minuto. 🎉`);
+  },
+  admCriarPromo() {
+    const alvo = PROMO_ALVOS[($("adm-pr-alvo") || {}).value] ? $("adm-pr-alvo").value : "tudo", desc = [10, 20, 30, 50].includes(+$("adm-pr-desc").value) ? +$("adm-pr-desc").value : 20, t = periodo("adm-pr-h");
+    publicarEvt(d => ({ ...d, promos: [{ id: "p" + Date.now().toString(36), alvo, desc, ...t }] }), "Promoção na loja", `Promoção publicada: ${PROMO_ALVOS[alvo]} com ${desc}% de desconto. 🏷️`);
+  },
+  async admCriarPresente() {
+    const c = normCodigo(($("adm-pres-cod") || {}).value);
+    if (c.length < 4) { ADM.evtStatus = "O código precisa ter de 4 a 12 letras ou números."; reRenderAdm(); return; }
+    const [tipo, v] = String(($("adm-pres-premio") || {}).value).split(":"), premio = tipo === "moedas" ? { moedas: +v } : { item: tipo + ":" + v };
+    if (!nomePremio(premio)) return;
+    let h; try { h = await hashPresente(c); } catch { ADM.evtStatus = "Este navegador não conseguiu criar o código."; reRenderAdm(); return; }
+    const id = "g" + Date.now().toString(36), t = periodo("adm-pres-h");
+    G.admPresentes = { ...(G.admPresentes || {}), [id]: c }; salvar();
+    publicarEvt(d => ({ ...d, presentes: [...d.presentes.filter(x => evtValido(x) && x.h !== h).slice(-29), { id, h, ...premio, ...t }] }), "Código de presente", `Código ${c} criado: vale ${nomePremio(premio)}. 🎁`);
+  },
+  admApagarPresente(el) { const id = el.dataset.id; publicarEvt(d => ({ ...d, presentes: d.presentes.filter(x => x.id !== id) }), "Apaga código de presente", "Código apagado."); },
+  admEncerrarEvt(el) { const k = el.dataset.tipo === "promos" ? "promos" : "eventos"; publicarEvt(d => ({ ...d, [k]: [] }), k === "promos" ? "Encerra a promoção" : "Encerra o evento de moedas", k === "promos" ? "Promoção encerrada." : "Evento encerrado."); },
 });
 acoes.admLimparAvisos = () => { ADM.avisoJSON = JSON.stringify({ avisos: [] }, null, 2); ADM.avisoTexto = ""; const y = window.scrollY; render(); window.scrollTo(0, y); };
 </script>
