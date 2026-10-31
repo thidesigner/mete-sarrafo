@@ -647,6 +647,7 @@ function aplicarEstado(s) {
     if (me) {
       G.banco[ON.meuNome] = Math.round(((G.banco[ON.meuNome] || 0) + Math.max(0, me.moedas)) * 10) / 10;   // soma o que ganhou na partida
       if (A.fim.ganhadores.includes(me)) { G.vitorias = G.vitorias || {}; G.vitorias[ON.meuNome] = (G.vitorias[ON.meuNome] || 0) + 1; }
+      if (typeof fimDePartidaMissao === "function") fimDePartidaMissao(ON.meuNome, me.moedas, A.fim.ganhadores.includes(me));
       salvar();
     }
     sfxVitoria(); mostrarFim();

@@ -86,3 +86,12 @@ O pai escolheu três funções novas para o Painel de ADM, na aba **Eventos**. E
 - **Promoção na loja:** toda a loja, ou só skins, emojis, gestos, arremessos, fundos ou fotos, com 10, 20, 30 ou 50% de desconto, por um tempo. Os pacotes também ficam mais baratos. Aparece uma faixa laranja (tocar nela abre a loja).
 - **Código de presente:** o ADM cria um código de 4 a 12 letras ou números (ex.: FESTA) que dá moedas (50 a 1000) ou um item da loja. Na loja tem o campo "🎁 Código de presente". Cada jogador usa cada código uma vez só. Se já tiver o item, avisa e não gasta o código. No site vai só a "impressão digital" do código, não o texto; o pai vê os códigos que criou só no celular dele.
 
+## Presente diário, Missões do dia e Contagem regressiva (31/out, ideia do Andre)
+
+Botão **Missões** na tela inicial (lado direito). Ganha a etiqueta "🎁!" quando há algo para pegar. Tudo fica no celular e vale para cada jogador (nome).
+
+- **Presente diário:** uma vez por dia, botão "Pegar". Dias seguidos valem mais: 10, 15, 20, 25, 30, 40 e 75 moedas no 7º dia, e depois recomeça. Quem pula um dia volta para o dia 1. O dia muda à meia-noite de Brasília.
+- **Missões do dia:** 3 por dia, iguais para todo mundo (sorteadas pela data, nunca duas do mesmo tipo). Podem sair: Jogue 2 partidas (20), Jogue 3 partidas (30), Ganhe 1 partida (30), Ganhe 2 partidas (50), Ganhe 15 moedas nas partidas (25), Ganhe 30 moedas nas partidas (40), Mande 3 emojis nas partidas (15) e Faça 2 gestos nas partidas (15). Contam nas partidas de bonequinhos, na bola de verdade e no online (cada um no seu celular). Missão completa: botão "Pegar" (uma vez).
+- **Contagem regressiva:** faixa vermelha na tela inicial quando um item limitado que o jogador ainda não tem acaba em até 48 h ("⏳ Espaço Sideral: Acaba em 2 dias (2/11)!"). Se já tem a skin mas falta algo da coleção, aparece "Coleção …". Tocar abre a loja.
+- Os valores são um ponto de partida para o Andre ajustar. Quem mudar a data do celular consegue pegar o presente de novo (não tem servidor para conferir).
+
