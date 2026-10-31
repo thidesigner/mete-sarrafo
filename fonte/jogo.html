@@ -1211,10 +1211,10 @@ function renderSetup() {
       <div class="card">
         <h3>Visão do jogo</h3>
         <span class="seg2" role="group" aria-label="Visão do jogo" style="align-self:flex-start">
-          <button type="button" id="as-fp1" aria-pressed="${s.fp !== false}">Primeira pessoa</button>
+          <button type="button" id="as-fp1" aria-pressed="${s.fp !== false}">3D</button>
           <button type="button" id="as-fp0" aria-pressed="${s.fp === false}">De cima</button>
         </span>
-        <p class="dim" style="font-size:14px">Em primeira pessoa você vê pelos olhos de quem está com o celular.</p>
+        <p class="dim" style="font-size:14px">Em 3D a câmera fica atrás do bonequinho de quem está com o celular. Arraste para girar.</p>
       </div>
       <div class="card">
         <h3>Robôs extras</h3>
@@ -1934,7 +1934,7 @@ function init3D() {
     const r = new THREE.WebGLRenderer({ antialias: true });
     r.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
     r.domElement.id = "a-3d";
-    r.domElement.setAttribute("aria-label", "Quadra em primeira pessoa");
+    r.domElement.setAttribute("aria-label", "Quadra em 3D");
     $("a-canvas").after(r.domElement);
     F.r = r; F.el = r.domElement;
   } catch { return false; }
@@ -2124,11 +2124,11 @@ function ligarToque3D() {
 }
 function mira3D() {
   const dir = new THREE.Vector3(); F.cam.getWorldDirection(dir);
-  let dist = 9;
-  if (dir.y < -.02) dist = Math.min(9, F.cam.position.y / -dir.y);
+  let dist = 13;
+  if (dir.y < -.02) dist = Math.min(13, F.cam.position.y / -dir.y);
   const flat = Math.hypot(dir.x, dir.z) || 1;
   const fx = dir.x / flat, fz = dir.z / flat;
-  const horiz = dir.y < -.02 ? dist * flat : 9;
+  const horiz = dir.y < -.02 ? dist * flat : 13;
   return { x: F.cam.position.x + fx * horiz, z: F.cam.position.z + fz * horiz };
 }
 function atirar3D() {
@@ -2156,10 +2156,11 @@ function desenhar3D() {
   // bonecos
   for (const b of F.bonecos) {
     const p = b.p;
-    b.g.visible = p.vivo && !(dono && p === dono && dono.vivo);
+    b.g.visible = p.vivo;   // 3D vendo o bonequinho: o seu também aparece
     if (!p.vivo) continue;
     const mx = p.x - b.lx, my = p.y - b.ly;
     if (Math.hypot(mx, my) > .5) b.dir = Math.atan2(-mx, -my);
+    else if (dono && p === dono) b.dir = F.yaw;   // parado, o seu bonequinho olha para onde a câmera olha
     else if (p.modo === "casa" || p.modo === "mira") b.dir = Math.atan2(-(AC - p.x), -(AC - p.y));
     b.lx = p.x; b.ly = p.y;
     b.g.position.set(W3(p.x), 0, W3(p.y));
@@ -2179,6 +2180,7 @@ function desenhar3D() {
       b.tag = etiqueta({ nome: p.nome + (p.humano ? "" : " 🤖"), vidas: "●".repeat(Math.min(10, p.vidas)) }); b.tag.position.y = 1.95; b.g.add(b.tag);
     }
     b.perg.visible = (ph.k === "pergunta" || ph.k === "segredo") && ph.perg === p;
+    b.tag.visible = !(dono && p === dono);   // o seu nome ficaria grande na frente da câmera
     const emo = emojiAtivo(p), emoK = emo ? emo.e : "";
     if (emoK !== (b.emoK || "")) {
       if (b.emo) { b.g.remove(b.emo); b.emo.material.map.dispose(); b.emo = null; }
@@ -2188,7 +2190,7 @@ function desenhar3D() {
   }
   // bola na mão
   const atir = ph.k === "bola" || ph.k === "troca" ? ph.atir : null;
-  F.held.visible = !!atir && atir.vivo && !A.balls.length && !(dono && atir === dono);
+  F.held.visible = !!atir && atir.vivo && !A.balls.length;
   if (F.held.visible) F.held.position.set(W3(atir.x) + .3, 1, W3(atir.y));
   // bolas voando
   while (F.balls.length < A.balls.length) { const m = new THREE.Mesh(new THREE.SphereGeometry(.13, 16, 12), new THREE.MeshLambertMaterial({ color: "#ff8a1f" })); F.scene.add(m); F.balls.push(m); }
@@ -2198,11 +2200,14 @@ function desenhar3D() {
     m.position.set(W3(b.from.x + (b.to.x - b.from.x) * f), .9 + Math.sin(Math.PI * f) * 1.2 - f * .8, W3(b.from.y + (b.to.y - b.from.y) * f));
   });
   // câmera
+  // câmera atrás e um pouco acima do seu bonequinho (como nos jogos de celular); arrastar gira em volta dele
   if (dono && dono.vivo) {
-    F.cam.position.set(W3(dono.x), 1.45, W3(dono.y));
-    if (dono.ctrl) F.cam.position.y += Math.abs(Math.sin(dono.passo / 14)) * .05;
-  } else { F.cam.position.set(0, 9, 7.5); F.yaw = 0; F.pitch = -.85; }
-  F.cam.rotation.set(F.pitch, F.yaw, 0);
+    const atras = 3.1, alto = 1.9, fx = -Math.sin(F.yaw), fz = -Math.cos(F.yaw);
+    const alvo = { x: F.camX ?? W3(dono.x), z: F.camZ ?? W3(dono.y) };
+    alvo.x += (W3(dono.x) - alvo.x) * .25; alvo.z += (W3(dono.y) - alvo.z) * .25; F.camX = alvo.x; F.camZ = alvo.z;   // segue suave
+    F.cam.position.set(alvo.x - fx * atras, alto + Math.max(0, -F.pitch) * 1.6, alvo.z - fz * atras);
+    F.cam.rotation.set(F.pitch - .3, F.yaw, 0);
+  } else { F.camX = F.camZ = null; F.cam.position.set(0, 9, 7.5); F.yaw = 0; F.pitch = -.85; F.cam.rotation.set(F.pitch, F.yaw, 0); }
   // controles e marcas
   const correndo = dono && dono.ctrl;
   const atirando = ph.k === "bola" && ph.pronto && ph.atir === dono && dono.humano && !A.fim;
@@ -2232,13 +2237,13 @@ function desenhar3D() {
   F.r.render(F.scene, F.cam);
 }
 function ligarVisao(fp) {
-  if (fp && !init3D()) { toast("A visão em primeira pessoa não carregou. Usando a visão de cima."); fp = false; }
+  if (fp && !init3D()) { toast("A visão em 3D não carregou. Usando a visão de cima."); fp = false; }
   A.fp = fp;
   $("a-canvas").hidden = fp;
   if (F.el) F.el.hidden = !fp;
   if (F.ui) F.ui.hidden = !fp;
   if (fp) { montarBonecos3D(); F.faseKey = ""; }
-  const b = $("a-visao"); if (b) b.textContent = fp ? "Ver de cima" : "Primeira pessoa";
+  const b = $("a-visao"); if (b) b.textContent = fp ? "Ver de cima" : "Ver em 3D";
   renderAct();
 }
 
@@ -2247,7 +2252,7 @@ $("a-visao").addEventListener("click", () => ligarVisao(!A.fp));
 
 <script>
 /* ================= Tela inicial (lobby) ================= */
-const MODOS = { fp: "Bonequinhos · 1ª pessoa", cima: "Bonequinhos · de cima", juiz: "Bola de verdade" };
+const MODOS = { fp: "Bonequinhos · 3D", cima: "Bonequinhos · de cima", juiz: "Bola de verdade" };
 const ICONES = {
   loja: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1.2 11.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8z" fill="#ffd23f" stroke="#0b1b33" stroke-width="1.6"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8" fill="none" stroke="#0b1b33" stroke-width="1.8"/></svg>`,
   sug: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v10H10l-5 4v-4H4z" fill="#37d99a" stroke="#0b1b33" stroke-width="1.6" stroke-linejoin="round"/><circle cx="9" cy="10" r="1.2" fill="#0b1b33"/><circle cx="12" cy="10" r="1.2" fill="#0b1b33"/><circle cx="15" cy="10" r="1.2" fill="#0b1b33"/></svg>`,

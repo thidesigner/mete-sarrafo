@@ -74,7 +74,7 @@ TELAS.salaHost = () => {
       <div class="stepper"><button class="btn ghost" type="button" data-a="robosMenos" aria-label="Menos um robô">−</button><b>${ON.robos}</b><button class="btn ghost" type="button" data-a="robosMais" aria-label="Mais um robô">+</button></div>
       <h3>Sua visão</h3>
       <span class="seg2" role="group" aria-label="Visão do jogo" style="align-self:flex-start">
-        <button type="button" data-a="visaoFp" aria-pressed="${ON.fp !== false}">1ª pessoa</button><button type="button" data-a="visaoCima" aria-pressed="${ON.fp === false}">De cima</button>
+        <button type="button" data-a="visaoFp" aria-pressed="${ON.fp !== false}">3D</button><button type="button" data-a="visaoCima" aria-pressed="${ON.fp === false}">De cima</button>
       </span>
       <p class="dim" style="font-size:14px">Total: ${total} jogadores (de 3 a 20). Cada amigo escolhe a visão no celular dele.</p>
     </div>
@@ -516,7 +516,7 @@ TELAS.entrar = () => `
       ${ON.codeEntrar ? "" : `<label for="en-code">Código da sala</label><input id="en-code" maxlength="8" autocapitalize="characters" placeholder="Ex.: K7QM" value="${esc(ON.codeDigitado || "")}">`}
       <label>Visão</label>
       <span class="seg2" role="group" aria-label="Visão do jogo" style="align-self:flex-start">
-        <button type="button" data-a="visaoFp" aria-pressed="${G.visaoOnline !== false}">1ª pessoa</button><button type="button" data-a="visaoCima" aria-pressed="${G.visaoOnline === false}">De cima</button>
+        <button type="button" data-a="visaoFp" aria-pressed="${G.visaoOnline !== false}">3D</button><button type="button" data-a="visaoCima" aria-pressed="${G.visaoOnline === false}">De cima</button>
       </span>
       <button class="lb-jogar" type="submit" style="flex:none;min-height:64px;font-size:28px" ${ON.conectando ? "disabled" : ""}>${ON.conectando ? "Entrando…" : "Entrar"}</button>
     </form>
@@ -531,7 +531,7 @@ TELAS.esperando = () => `
       <div class="chips">${ON.salaNomes.map(n => `<span class="chip">${esc(n)}${n === ON.meuNome ? " (você)" : ""}</span>`).join("")}${ON.robos ? `<span class="chip">+ ${ON.robos} ${ON.robos === 1 ? "robô" : "robôs"}</span>` : ""}</div>
       <label>Sua visão</label>
       <span class="seg2" role="group" aria-label="Visão do jogo" style="align-self:flex-start">
-        <button type="button" data-a="visaoFp" aria-pressed="${G.visaoOnline !== false}">1ª pessoa</button><button type="button" data-a="visaoCima" aria-pressed="${G.visaoOnline === false}">De cima</button>
+        <button type="button" data-a="visaoFp" aria-pressed="${G.visaoOnline !== false}">3D</button><button type="button" data-a="visaoCima" aria-pressed="${G.visaoOnline === false}">De cima</button>
       </span>
     </div>
   </section>`;
