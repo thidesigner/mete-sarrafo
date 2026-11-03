@@ -1312,9 +1312,9 @@ const SKINS = [
   { k: "buraconegro", nome: "Buraco Negro", preco: 600, camisa: "#0b0a16", pele: "#120f22", limitada: true, ate: "2026-11-07T23:59:59-03:00" },
   { k: "sideral", nome: "Espaço Sideral", preco: 450, camisa: "#13235a", limitada: true, ate: "2026-11-02T12:00:00-03:00" },
   // cantinho secreto: só quem tem algum item de edição limitada consegue comprar (não acaba)
-  { k: "gelo", nome: "Gelo", preco: 500, camisa: "#5fb3e6", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
-  { k: "fogo", nome: "Fogo", preco: 500, camisa: "#d9381e", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
-  { k: "gelofogo", nome: "Gelo e Fogo", preco: 500, camisa: "#d9381e", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
+  { k: "gelo", nome: "Gelo", preco: 700, camisa: "#5fb3e6", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
+  { k: "fogo", nome: "Fogo", preco: 700, camisa: "#d9381e", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
+  { k: "gelofogo", nome: "Gelo e Fogo", preco: 700, camisa: "#d9381e", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
   { k: "colecionador", nome: "Rei Dourado", preco: 400, camisa: "#d9a21b", secreto: true },
 ];
 /* Skin limitada ainda à venda? Depois do prazo some da loja para quem não tem. */
@@ -2162,6 +2162,26 @@ function desenharAcessorio2D(c, skin, x, y) {
         c.fillStyle = "#3d8fe6"; c.beginPath(); c.arc(x, y - 4, 6, Math.PI / 2, Math.PI * 1.5); c.fill();
         c.fillStyle = "#ff6a2a"; c.beginPath(); c.arc(x, y - 4, 6, -Math.PI / 2, Math.PI / 2); c.fill();
       }
+      // brilho em volta (aura), chão e mãos
+      c.save(); c.globalCompositeOperation = "lighter";
+      const aura = (cx, cor, a) => { const g = c.createRadialGradient(cx, y - 18, 6, cx, y - 18, 44); g.addColorStop(0, `rgba(${cor},0)`); g.addColorStop(.55, `rgba(${cor},${a})`); g.addColorStop(1, `rgba(${cor},0)`); c.fillStyle = g; c.beginPath(); c.arc(cx, y - 18, 44, 0, Math.PI * 2); c.fill(); };
+      const pulso = .16 + .06 * Math.sin(t * 3);
+      if (meio) { c.save(); c.beginPath(); c.rect(x - 50, y - 70, 50, 110); c.clip(); aura(x, "110,200,255", pulso); c.restore(); c.save(); c.beginPath(); c.rect(x, y - 70, 50, 110); c.clip(); aura(x, "255,120,40", pulso); c.restore(); }
+      else aura(x, gelo ? "110,200,255" : "255,120,40", pulso);
+      // chão: gelo rachado e/ou chamas em roda
+      for (let i = 0; i < 14; i++) {
+        const a = i / 14 * Math.PI * 2 + t * (gelo && !meio ? .3 : -.6), ex = x + Math.cos(a) * 24, ey = y + 25 + Math.sin(a) * 7, ehGelo = meio ? Math.cos(a) < 0 : gelo;
+        if (ehGelo) { c.fillStyle = `rgba(210,240,255,${.55 + .3 * Math.sin(t * 4 + i)})`; c.beginPath(); c.moveTo(ex - 2.5, ey); c.lineTo(ex, ey - 6); c.lineTo(ex + 2.5, ey); c.closePath(); c.fill(); }
+        else { const h = 6 + 3 * Math.sin(t * 12 + i * 2); c.fillStyle = `rgba(255,${120 + (i % 3) * 40},40,.8)`; c.beginPath(); c.moveTo(ex - 2.5, ey); c.quadraticCurveTo(ex, ey - h * 1.3, ex + 2.5, ey); c.fill(); }
+      }
+      c.restore();
+      // mãos: cristal (gelo) e chama (fogo)
+      const maoE = meio ? "gelo" : gelo ? "gelo" : "fogo", maoD = meio ? "fogo" : gelo ? "gelo" : "fogo";
+      [[x - 20, maoE], [x + 20, maoD]].forEach(([mx, tipo], i) => { if (tipo === "gelo") { cristal(mx, y + 4, 9, i ? .3 : -.3); floco(mx, y + 6, 2.4, t * 2); } else chama(mx, y + 6, 12, i * 3); });
+      // olhos brilhando
+      c.save(); c.globalCompositeOperation = "lighter";
+      [[hx - 5, meio ? "120,210,255" : gelo ? "120,210,255" : "255,170,40"], [hx + 5, meio ? "255,170,40" : gelo ? "120,210,255" : "255,170,40"]].forEach(([ox, cor]) => { const g = c.createRadialGradient(ox, hy - 2, 0, ox, hy - 2, 5); g.addColorStop(0, `rgba(${cor},.9)`); g.addColorStop(1, `rgba(${cor},0)`); c.fillStyle = g; c.beginPath(); c.arc(ox, hy - 2, 5, 0, Math.PI * 2); c.fill(); });
+      c.restore();
       break;
     }
     case "colecionador": {
@@ -2830,6 +2850,16 @@ function acessorio3D(cabeca, skin) {
       if (fogo) { cabeca.add(new THREE.Mesh(new THREE.SphereGeometry(.31, 16, 12), luz("#ff6a2a", .13)));
         const orb = new THREE.Group(); orb.userData.gira = -1.6; orb.position.y = -.3; cabeca.add(orb);
         for (let k = 0; k < (meio ? 3 : 6); k++) { const a = (meio ? -Math.PI / 2 : 0) + k / (meio ? 3 : 6) * Math.PI * (meio ? 1 : 2), m = new THREE.Mesh(new THREE.SphereGeometry(.03, 8, 6), luz(k % 2 ? "#ffb347" : "#ff5a1f", 1)); m.position.set(Math.cos(a) * .44, (k % 2 ? .18 : 0), Math.sin(a) * .44); orb.add(m); } }
+      // chão congelado / em chamas e ombreiras de cristal / chama
+      const chao = new THREE.Group(); chao.position.y = -1.22; chao.userData.gira = gelo && !meio ? .4 : -.8; cabeca.add(chao);
+      for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2, deGelo = meio ? Math.cos(a) < 0 : gelo;
+        const m = new THREE.Mesh(new THREE.ConeGeometry(deGelo ? .035 : .04, deGelo ? .12 : .16, deGelo ? 4 : 7), deGelo ? new THREE.MeshLambertMaterial({ color: "#d6f0ff", transparent: true, opacity: .9 }) : luz(k % 2 ? "#ff9a1f" : "#ff4d1f", 1));
+        m.position.set(Math.cos(a) * .42, .06, Math.sin(a) * .42); chao.add(m); }
+      const disco = new THREE.Mesh(new THREE.RingGeometry(.3, .5, 32), luz(meio ? "#ffffff" : gelo ? "#9fdcff" : "#ff7a2a", .35)); disco.rotation.x = -Math.PI / 2; disco.position.y = .01; chao.add(disco);
+      [[-1, meio ? true : gelo], [1, meio ? false : gelo]].forEach(([lado, deGelo]) => {
+        const m = new THREE.Mesh(new THREE.ConeGeometry(deGelo ? .05 : .06, deGelo ? .18 : .2, deGelo ? 4 : 8), deGelo ? new THREE.MeshLambertMaterial({ color: "#bfe8ff", transparent: true, opacity: .9 }) : luz("#ff7a2a", 1));
+        m.position.set(lado * .2, -.24, 0); m.rotation.z = -lado * .5; cabeca.add(m);
+        if (!deGelo) { const n = new THREE.Mesh(new THREE.ConeGeometry(.03, .12, 6), luz("#ffe66b", .9)); n.position.set(lado * .2, -.26, 0); n.rotation.z = -lado * .5; cabeca.add(n); } });
       if (meio) { const anel = new THREE.Group(); anel.userData.gira = 1.4; anel.rotation.x = .25; anel.position.y = -.3; cabeca.add(anel);
         [["#7fd0ff", 0], ["#ff7a2a", Math.PI]].forEach(([cor, r0]) => { const m = new THREE.Mesh(new THREE.TorusGeometry(.5, .015, 6, 30, Math.PI), luz(cor, .9)); m.rotation.x = Math.PI / 2; m.rotation.z = r0; anel.add(m); }); }
       break;
