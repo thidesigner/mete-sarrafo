@@ -29,6 +29,7 @@ Qualquer pessoa pode ler tudo o que estiver aqui, inclusive o histórico. Por is
 | `fonte/jogo.html` | Código do jogo (mesma página do artefato "Mete Sarrafo: Modo Festa" no Claude) |
 | `fonte/online.js` | Modo online: cada um no seu celular, via PeerJS (só no site, não funciona dentro do Claude) |
 | `fonte/oficina-3d.html` | Código do artefato "Oficina 3D do Andre" (fluxo da impressão, checklist, diário e correções) |
+| `fonte/central-de-eventos.html` | Código do artefato "Central de Eventos" (publica eventos sem abrir o GitHub) |
 | `fonte/caderno-de-ideias.html` | Código do artefato "Ideias do Jogo do Andre" (caderno + simulação) |
 | `ferramentas/montar.py` | Gera a versão de teste e promove para a oficial |
 | `ferramentas/teste/` | Teste automático do modo online (dois navegadores com conexão imitada) |
@@ -103,6 +104,7 @@ Abre com **5 toques rápidos no título "Jogo de Pergunta"** da tela inicial e d
 - Quando o pai pedir "manda o aviso: …": acrescente um aviso com `id` novo (ex.: `a` + data), `de` agora e `ate` (padrão 1 dia), apague os vencidos, commit e push direto na `main`. Em ~1 minuto chega em todos.
 - O pai também publica sozinho pela aba "Aviso" do Painel de ADM. Com a **chave do GitHub** guardada no celular dele (token fino, só o repositório `mete-sarrafo`, só Contents leitura e escrita), o botão "Publicar para todo mundo" grava `avisos.json` direto pela API do GitHub. A chave fica só em `localStorage["ms-adm-chave"]` daquele aparelho, fora do estado do jogo (`ms-festa`). **Nunca peça, guarde, escreva ou faça commit dessa chave.** Sem chave, a aba monta o arquivo para colar no editor do GitHub.
 - Só o pai pede aviso. Texto curto, para crianças, sem dados pessoais, sem links.
+- Pelo chat também vale para eventos: "manda o evento: moedas em dobro até domingo", "promoção de 30% nas skins por 1 dia", "código de presente FESTA com 200 moedas" (no arquivo vai só o hash) ou "encerra a promoção". Faça igual ao aviso: edite `avisos.json`, commit e push direto na `main`.
 - O mesmo arquivo também guarda os **eventos** da aba "Eventos" do ADM: `eventos` (`{id, mult: 2|3, de, ate}`, moedas multiplicadas em `ganhar`/`aGanhar`), `promos` (`{id, alvo, desc: 10|20|30|50, de, ate}`, aplicada em `aplicarPromo`) e `presentes` (`{id, h, moedas | item: "tipo:k", de, ate}`). Ao mexer no arquivo (por exemplo, "manda o aviso"), **mantenha essas chaves**. Código de presente: no arquivo vai só o hash (`hashPresente`, SHA-256 com o sal `mete-sarrafo-presente:`); **nunca escreva o texto do código no repositório**. Gravação pelo celular do pai: `gravarSite`.
 
 ## Testes
@@ -118,6 +120,7 @@ Os endereços não ficam no repositório. Ache cada um pelo nome na lista de art
 
 - **Ideias do Jogo do Andre** (caderno de ideias): banco `ideias` (fichas com etapas, chat com o Claude e diário) e `simulacoes/mete-sarrafo` (ajustes da simulação). Código em `fonte/caderno-de-ideias.html`.
 - **Mete Sarrafo: Modo Festa** (jogo dentro do Claude, sem modo online): banco `sugestoes`, `partidas`, `placar/moedas` e `personagens`. Capacidades: db, user, sample, downloads. Publicado a partir de `fonte/jogo.html`.
+- **Central de Eventos** (só do pai): publica avisos, evento de moedas, promoção, código de presente e encerramentos sem abrir o GitHub. Código em `fonte/central-de-eventos.html` (o id da tarefa aparece como `TRIGGER_PENDENTE`; troque só na cópia publicada). Capacidade: `mcp` com o conector "Claude Code Remote", ferramenta `fire_trigger`. O botão dispara a tarefa agendada "Publicar evento do Jogo de Pergunta" (sem horário, uma sessão nova por pedido), que recebe `PEDIDO_JSON: {acao, …}`, grava `avisos.json`, faz commit e push na `main`. Leva alguns minutos.
 - **Oficina 3D do Andre**: banco `preparo/checklist`, `impressoes` (diário) e `pendencias` (correções e dúvidas). Capacidades: db, user. Publicado a partir de `fonte/oficina-3d.html`.
 
 Nos arquivos de `fonte/`, o endereço do Modo Festa aparece como `https://claude.ai/artifact/PENDENTE`. Ao publicar um desses artefatos, troque só na cópia publicada, sem gravar o endereço aqui.

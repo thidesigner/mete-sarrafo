@@ -1,0 +1,203 @@
+<title>Central de Eventos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@500;700;800&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: painel de controle de uma coluna, com o mesmo azul-marinho e amarelo do jogo; abas por tipo de evento e um bilhete de prévia antes de publicar. */
+:root {
+  --bg: #eef3fa; --painel: #ffffff; --tinta: #0b1b33; --suave: #51627d; --linha: #c9d6e8;
+  --marca: #0f3057; --amarelo: #ffd23f; --verde: #1f9d6b; --verde-fundo: #e2f6ee; --erro: #c62839; --erro-fundo: #fde7ea;
+  --display: "Bungee", "Arial Black", system-ui, sans-serif; --corpo: "Nunito", system-ui, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #08142a; --painel: #0f2240; --tinta: #eef3fa; --suave: #9fb2cf; --linha: #24406a; --marca: #ffd23f; --amarelo: #ffd23f;
+  --verde: #4fd9a2; --verde-fundo: #0f3a2e; --erro: #ff8a96; --erro-fundo: #3a1520; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #08142a; --painel: #0f2240; --tinta: #eef3fa; --suave: #9fb2cf; --linha: #24406a; --marca: #ffd23f; --amarelo: #ffd23f;
+  --verde: #4fd9a2; --verde-fundo: #0f3a2e; --erro: #ff8a96; --erro-fundo: #3a1520; color-scheme: dark }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--tinta); font: 500 16px/1.5 var(--corpo); padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+main { max-width: 560px; margin: 0 auto; display: grid; gap: 16px; }
+header { display: grid; gap: 4px; }
+h1 { font: 400 clamp(26px, 7vw, 34px)/1.1 var(--display); color: var(--marca); margin: 0; text-wrap: balance; }
+header p { margin: 0; color: var(--suave); }
+.abas { display: flex; flex-wrap: wrap; gap: 6px; }
+.aba { font: 800 14px var(--corpo); padding: 8px 12px; border-radius: 999px; border: 2px solid var(--linha); background: var(--painel); color: var(--tinta); cursor: pointer; }
+.aba[aria-selected="true"] { background: var(--amarelo); border-color: var(--amarelo); color: #0b1b33; }
+.painel { background: var(--painel); border: 2px solid var(--linha); border-radius: 16px; padding: 16px; display: grid; gap: 12px; }
+.painel h2 { font: 400 18px var(--display); margin: 0; color: var(--marca); }
+label { font-weight: 800; font-size: 14px; display: grid; gap: 4px; }
+.dica { font-weight: 500; color: var(--suave); font-size: 13px; }
+input, select, textarea { font: 600 16px var(--corpo); color: var(--tinta); background: var(--bg); border: 2px solid var(--linha); border-radius: 10px; padding: 10px; width: 100%; min-width: 0; }
+textarea { min-height: 84px; resize: vertical; }
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible { outline: 3px solid var(--amarelo); outline-offset: 2px; }
+.linha2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 420px) { .linha2 { grid-template-columns: 1fr; } }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 800 14px var(--corpo); padding: 6px 12px; border-radius: 10px; border: 2px solid var(--linha); background: var(--bg); color: var(--tinta); cursor: pointer; }
+.chip[aria-pressed="true"] { border-color: var(--marca); background: var(--marca); color: var(--bg); }
+.bilhete { border: 2px dashed var(--linha); border-radius: 12px; padding: 12px; display: grid; gap: 4px; }
+.bilhete b { font-size: 15px; }
+.bilhete span { color: var(--suave); font-size: 14px; font-variant-numeric: tabular-nums; }
+.publicar { font: 400 18px var(--display); padding: 14px; border-radius: 14px; border: 0; background: var(--amarelo); color: #0b1b33; cursor: pointer; box-shadow: 0 4px 0 #b8900b; }
+.publicar:disabled { opacity: .55; cursor: default; }
+.status { border-radius: 12px; padding: 10px 12px; font-weight: 700; }
+.status.ok { background: var(--verde-fundo); color: var(--verde); }
+.status.erro { background: var(--erro-fundo); color: var(--erro); }
+.status.info { background: var(--bg); color: var(--suave); }
+.hist { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.hist li { display: grid; gap: 2px; padding: 10px 12px; border-radius: 12px; background: var(--painel); border: 1px solid var(--linha); }
+.hist small { color: var(--suave); font-variant-numeric: tabular-nums; }
+.vazio { color: var(--suave); }
+code { font: 500 13px var(--mono); }
+a { color: var(--marca); font-weight: 800; }
+@media (prefers-reduced-motion: no-preference) { .aba, .chip, .publicar { transition: transform .1s; } .publicar:active { transform: translateY(2px); } }
+</style>
+
+<main>
+  <header>
+    <h1>Central de Eventos</h1>
+    <p>Avisos, moedas em dobro, promoções e códigos de presente para todo mundo que joga o Jogo de Pergunta no site.</p>
+  </header>
+
+  <div class="abas" role="tablist" id="abas">
+    <button class="aba" role="tab" id="aba-aviso" data-aba="aviso" aria-selected="true">📢 Aviso</button>
+    <button class="aba" role="tab" id="aba-evento" data-aba="evento" aria-selected="false">🎉 Moedas</button>
+    <button class="aba" role="tab" id="aba-promo" data-aba="promo" aria-selected="false">🏷️ Promoção</button>
+    <button class="aba" role="tab" id="aba-presente" data-aba="presente" aria-selected="false">🎁 Presente</button>
+    <button class="aba" role="tab" id="aba-encerrar" data-aba="encerrar" aria-selected="false">⏹️ Encerrar</button>
+  </div>
+
+  <section class="painel" id="form" aria-live="polite"></section>
+
+  <div id="status" class="status info" hidden></div>
+
+  <section class="painel">
+    <h2>Enviados daqui</h2>
+    <p class="dica">Fica só neste aparelho. Cada pedido leva alguns minutos para entrar no jogo; depois aparece em até 1 minuto para quem estiver jogando.</p>
+    <ul class="hist" id="hist"></ul>
+    <p class="dica">Conferir: <a href="https://thidesigner.github.io/mete-sarrafo/" target="_blank" rel="noopener">jogo oficial</a> · <a href="https://github.com/thidesigner/mete-sarrafo/commits/main/avisos.json" target="_blank" rel="noopener">histórico do avisos.json</a></p>
+  </section>
+</main>
+
+<script>
+const TRIGGER_ID = "TRIGGER_PENDENTE";   // tarefa "Publicar evento do Jogo de Pergunta" (só no artefato publicado)
+const SERVIDOR = "Claude Code Remote";
+const DUR = [[1, "1 hora"], [3, "3 horas"], [24, "1 dia"], [72, "3 dias"], [168, "7 dias"], [720, "30 dias"]];
+const ALVOS = { tudo: "Toda a loja", skin: "Skins", emoji: "Emojis", gesto: "Gestos", arremesso: "Arremessos", fundo: "Fundos", avatar: "Fotos de perfil" };
+const PREMIOS = [["moedas:50", "50 moedas"], ["moedas:100", "100 moedas"], ["moedas:200", "200 moedas"], ["moedas:500", "500 moedas"], ["moedas:1000", "1000 moedas"],
+  ["skin:bone", "Skin Boné"], ["skin:pirata", "Skin Pirata"], ["skin:dino", "Skin Dinossauro"], ["skin:cometa", "Skin Capitã Cometa"], ["skin:turbo", "Skin Turbo Blindado"],
+  ["emoji:coroa", "Emoji 👑 Coroa"], ["emoji:trofeu", "Emoji 🏆 Troféu"], ["gesto:mortal", "Gesto 🤸 Mortal"], ["arremesso:pizza", "Arremesso 🍕 Pizza"], ["fundo:noite", "Fundo Noite estrelada"]];
+const LISTAS = { avisos: "Todos os avisos", eventos: "Evento de moedas", promos: "Promoção", presentes: "Todos os códigos de presente" };
+const $ = id => document.getElementById(id);
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const brHora = ms => { const d = new Date(ms - 3 * 3600000); return `${d.getUTCDate()}/${d.getUTCMonth() + 1} às ${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`; };
+const ler = (k, v) => { try { const x = localStorage.getItem(k); return x ? JSON.parse(x) : v; } catch { return v; } };
+const gravar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+const normCod = t => String(t || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
+
+const S = { aba: "aviso", texto: "", horas: 24, mult: 2, alvo: "tudo", desc: 20, codigo: "", premio: "moedas:100", lista: "eventos", enviando: false };
+let mcp = null, mcpPronto = false;
+
+const durSelect = id => `<label for="${id}">Vale por<select id="${id}" data-campo="horas">${DUR.map(([h, t]) => `<option value="${h}" ${S.horas === h ? "selected" : ""}>${t}</option>`).join("")}</select></label>`;
+const chips = (campo, opcoes) => `<div class="chips">${opcoes.map(([v, t]) => `<button type="button" class="chip" data-campo="${campo}" data-valor="${v}" aria-pressed="${String(S[campo]) === String(v)}">${t}</button>`).join("")}</div>`;
+
+function pedido() {
+  const h = S.horas;
+  if (S.aba === "aviso") return { acao: "aviso", texto: S.texto.trim().replace(/\s+/g, " ").slice(0, 200), horas: h };
+  if (S.aba === "evento") return { acao: "evento", mult: S.mult, horas: h };
+  if (S.aba === "promo") return { acao: "promo", alvo: S.alvo, desc: S.desc, horas: h };
+  if (S.aba === "presente") { const [tipo, v] = S.premio.split(":"); return { acao: "presente", codigo: normCod(S.codigo), horas: h, ...(tipo === "moedas" ? { moedas: +v } : { item: S.premio }) }; }
+  return { acao: "encerrar", lista: S.lista };
+}
+function resumo(p) {
+  const ate = p.horas ? ` · até ${brHora(Date.now() + p.horas * 3600000)}` : "";
+  if (p.acao === "aviso") return [`📢 "${p.texto || "…"}"`, `Aparece numa janela e numa faixa na tela inicial${ate}`];
+  if (p.acao === "evento") return [`🎉 Moedas x${p.mult} nas partidas`, `Todo mundo ganha ${p.mult === 2 ? "o dobro" : "o triplo"} de moedas${ate}`];
+  if (p.acao === "promo") return [`🏷️ ${ALVOS[p.alvo]} com ${p.desc}% de desconto`, `Os preços caem na loja de todo mundo${ate}`];
+  if (p.acao === "presente") return [`🎁 Código ${p.codigo || "…"}`, `Vale ${(PREMIOS.find(x => x[0] === S.premio) || [, ""])[1]}, uma vez por jogador${ate}`];
+  return [`⏹️ Encerrar: ${LISTAS[p.lista]}`, "Some do jogo de todo mundo em alguns minutos"];
+}
+function valido(p) {
+  if (p.acao === "aviso" && p.texto.length < 3) return "Escreva o aviso (pelo menos 3 letras).";
+  if (p.acao === "aviso" && /https?:|www\./i.test(p.texto)) return "Avisos não podem ter links.";
+  if (p.acao === "presente" && p.codigo.length < 4) return "O código precisa ter de 4 a 12 letras ou números.";
+  return "";
+}
+
+function renderForm() {
+  document.querySelectorAll(".aba").forEach(b => b.setAttribute("aria-selected", String(b.dataset.aba === S.aba)));
+  let corpo = "";
+  if (S.aba === "aviso") corpo = `<h2>Aviso para todo mundo</h2>
+    <label for="f-texto">Texto do aviso <span class="dica">Curto, para crianças, sem links e sem dados pessoais. Até 200 letras.</span>
+      <textarea id="f-texto" data-campo="texto" maxlength="200" placeholder="Ex.: Hoje às 19h tem campeonato na Sala do Andre!">${esc(S.texto)}</textarea></label>${durSelect("f-horas")}`;
+  if (S.aba === "evento") corpo = `<h2>Evento de moedas</h2><p class="dica">Enquanto valer, as moedas ganhas nas partidas são multiplicadas. Um evento novo substitui o anterior.</p>
+    ${chips("mult", [[2, "x2 (dobro)"], [3, "x3 (triplo)"]])}${durSelect("f-horas")}`;
+  if (S.aba === "promo") corpo = `<h2>Promoção na loja</h2><p class="dica">Uma promoção nova substitui a anterior.</p>
+    <label for="f-alvo">O que fica mais barato<select id="f-alvo" data-campo="alvo">${Object.entries(ALVOS).map(([k, t]) => `<option value="${k}" ${S.alvo === k ? "selected" : ""}>${t}</option>`).join("")}</select></label>
+    ${chips("desc", [[10, "10%"], [20, "20%"], [30, "30%"], [50, "50%"]])}${durSelect("f-horas")}`;
+  if (S.aba === "presente") corpo = `<h2>Código de presente</h2><p class="dica">Quem digitar o código na loja ganha o presente, uma vez por jogador. No site vai só a "impressão digital" do código, não o texto.</p>
+    <div class="linha2"><label for="f-codigo">Código<input id="f-codigo" data-campo="codigo" maxlength="12" autocomplete="off" spellcheck="false" autocapitalize="characters" placeholder="FESTA" value="${esc(S.codigo)}"></label>
+    <label for="f-premio">Presente<select id="f-premio" data-campo="premio">${PREMIOS.map(([v, t]) => `<option value="${v}" ${S.premio === v ? "selected" : ""}>${t}</option>`).join("")}</select></label></div>${durSelect("f-horas")}`;
+  if (S.aba === "encerrar") corpo = `<h2>Encerrar agora</h2><p class="dica">Tira do jogo o que você escolher.</p>
+    ${chips("lista", Object.entries(LISTAS))}`;
+  const p = pedido(), [t1, t2] = resumo(p), erro = valido(p);
+  $("form").innerHTML = `${corpo}
+    <div class="bilhete" id="previa"><b>${esc(t1)}</b><span>${esc(t2)}</span></div>
+    <button type="button" class="publicar" id="publicar" ${S.enviando || !mcpPronto ? "disabled" : ""}>${S.enviando ? "Enviando…" : "Publicar para todo mundo"}</button>
+    ${erro ? `<p class="dica" id="aviso-erro">${esc(erro)}</p>` : ""}`;
+}
+function atualizarPrevia() {
+  const p = pedido(), [t1, t2] = resumo(p), erro = valido(p);
+  $("previa").innerHTML = `<b>${esc(t1)}</b><span>${esc(t2)}</span>`;
+  const e = $("aviso-erro"); if (e) e.textContent = erro;
+}
+function mostrarStatus(tipo, texto) { const el = $("status"); el.hidden = false; el.className = "status " + tipo; el.textContent = texto; }
+function renderHist() {
+  const h = ler("ce-hist", []);
+  $("hist").innerHTML = h.length ? h.slice().reverse().map(x => `<li><b>${esc(x.t1)}</b><small>Enviado em ${brHora(x.em)} · ${esc(x.t2)}</small></li>`).join("")
+    : `<li class="vazio">Nada enviado deste aparelho ainda. O primeiro pedido aparece aqui.</li>`;
+}
+
+document.addEventListener("click", e => {
+  const aba = e.target.closest(".aba"); if (aba) { S.aba = aba.dataset.aba; renderForm(); return; }
+  const chip = e.target.closest(".chip"); if (chip) { const c = chip.dataset.campo, v = chip.dataset.valor; S[c] = /^\d+$/.test(v) ? +v : v; renderForm(); return; }
+  if (e.target.id === "publicar") publicar();
+});
+document.addEventListener("input", e => { const c = e.target.dataset && e.target.dataset.campo; if (!c) return; S[c] = c === "horas" ? +e.target.value : e.target.value; if (c === "codigo") { const n = normCod(e.target.value); if (n !== e.target.value) e.target.value = n; S.codigo = n; } atualizarPrevia(); });
+
+async function publicar() {
+  const p = pedido(), erro = valido(p);
+  if (erro) { mostrarStatus("erro", erro); return; }
+  if (!mcp) { mostrarStatus("erro", "Este aparelho não consegue publicar daqui. Abra a Central de Eventos no claude.ai com a sua conta, ou peça no chat do Claude."); return; }
+  S.enviando = true; renderForm(); mostrarStatus("info", "Enviando o pedido…");
+  const [t1, t2] = resumo(p);
+  try {
+    await mcp.callTool(SERVIDOR, "fire_trigger", { trigger_id: TRIGGER_ID, text: "PEDIDO_JSON: " + JSON.stringify(p) }, { cache: false });
+    const h = ler("ce-hist", []); h.push({ em: Date.now(), t1, t2 }); gravar("ce-hist", h.slice(-30));
+    mostrarStatus("ok", "Pedido enviado! Em alguns minutos ele entra no jogo de todo mundo. Dá para acompanhar no histórico do avisos.json.");
+    if (p.acao === "aviso") S.texto = ""; if (p.acao === "presente") S.codigo = "";
+    renderHist();
+  } catch (err) {
+    const c = err && err.code;
+    const msg = c === "server_not_connected" ? "O conector Claude Code Remote não está ligado na sua conta. Ligue em claude.ai → Configurações → Conectores e tente de novo."
+      : c === "needs_reauth" ? "A conexão com o Claude Code Remote expirou. Reconecte em claude.ai → Configurações → Conectores."
+      : c === "not_in_manifest" || c === "approval_required" || c === "consent_required" ? "A Central precisa da sua permissão para usar o Claude Code Remote. Toque em Publicar de novo e escolha Permitir."
+      : c === "selection_required" ? "Escolha qual conexão do Claude Code Remote usar no aviso do claude.ai e tente de novo."
+      : c === "tool_error" ? "A tarefa \"Publicar evento do Jogo de Pergunta\" não aceitou o pedido. Ela pode ter sido apagada ou desligada; peça ao Claude para criá-la de novo."
+      : c === "not_granted" || c === "capability_disabled" ? "Este aparelho não consegue publicar daqui. Abra a Central de Eventos no claude.ai com a sua conta, ou peça no chat do Claude."
+      : "Não deu para confirmar se o pedido saiu. Confira o histórico do avisos.json em alguns minutos antes de tentar de novo.";
+    mostrarStatus("erro", msg);
+  }
+  S.enviando = false; renderForm();
+}
+
+renderForm(); renderHist();
+(async () => {
+  try { mcp = window.claude && window.claude.use ? await window.claude.use("mcp") : null; } catch { mcp = null; }
+  mcpPronto = true;
+  if (!mcp) mostrarStatus("info", "Para publicar, abra a Central de Eventos no claude.ai com a sua conta. Pelo chat também dá: \"manda o evento: …\".");
+  renderForm();
+})();
+</script>
