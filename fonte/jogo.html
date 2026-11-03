@@ -494,9 +494,10 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .ed-2d { display: block; width: 100%; height: 100%; }
 .sk-limitada { position: relative; background: radial-gradient(circle at 30% 20%, #6c3fd1 0%, #2b1a6b 45%, #0b0b2a 100%) !important; border-color: #ffd23f !important; box-shadow: 0 0 0 2px rgba(255,210,63,.35), 0 0 22px rgba(155,81,224,.55); }
 .sk-limitada::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background-image: radial-gradient(1.5px 1.5px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 78% 12%, #fff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 88% 52%, #ffe9a8 50%, transparent 51%), radial-gradient(1px 1px at 22% 62%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 55% 30%, #cfe3ff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 40% 85%, #fff 50%, transparent 51%); }
+.sk-selo.sk-selo-heroi { background: #ff4d6d; color: #fff; }
 .sk-selo { font-style: normal; font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; background: #ffd23f; color: #1b0f45; border-radius: 6px; padding: 2px 7px; justify-self: center; }
 .sk-prazo { font-size: 13px; font-weight: 700; color: #ffd23f; text-align: center; }
-.sk-heroi { font-style: normal; font-size: 10px; background: #ff4d6d; color: #fff; border-radius: 6px; padding: 1px 6px; }
+.sk-heroi { font-style: normal; font-size: 10px; background: #ff4d6d; color: #fff; border-radius: 6px; padding: 1px 6px; white-space: nowrap; flex: none; }
 .sk-prev { display: block; width: 100%; aspect-ratio: 1.3; max-width: 100%; border-radius: 9px; border: 2px solid #0b1b33; background: radial-gradient(circle at 50% 75%, #2a6fd6, #133a68 75%); }
 .fd-travado .sk-prev { filter: saturate(.6) brightness(.85); }
 .lb-secao { font-family: var(--display); color: #fff; font-size: 22px; margin: 6px 0 0; -webkit-text-stroke: 1.5px #0b1b33; paint-order: stroke fill; text-shadow: 0 3px 0 #0b1b33; }
@@ -1319,10 +1320,17 @@ const SKINS = [
   { k: "zumbi", nome: "Zumbi", preco: 150, camisa: "#6b5b95", pele: "#8fbf6a" },
   { k: "astronauta", nome: "Astronauta", preco: 150, camisa: "#e9eef5" },
   { k: "rei", nome: "Rei", preco: 200, camisa: "#7b2cbf" },
+  { k: "chef", nome: "Cozinheiro", preco: 80, camisa: "#f4f7fb" },
+  { k: "cowboy", nome: "Caubói", preco: 100, camisa: "#8a5a2b" },
+  { k: "pirata", nome: "Pirata", preco: 120, camisa: "#c1121f" },
+  { k: "dino", nome: "Dinossauro", preco: 180, camisa: "#3fa34d" },
   // heróis criados para o Jogo de Pergunta (visual próprio, sem copiar personagens de outros jogos)
   { k: "feiticeiro", nome: "Feiticeiro Azul", preco: 250, camisa: "#1d2b53", heroi: true },
   { k: "relampago", nome: "Ninja Relâmpago", preco: 250, camisa: "#2a9d55", heroi: true },
   { k: "guepardo", nome: "Guepardo Veloz", preco: 300, camisa: "#f4a261", pele: "#f4a261", heroi: true },
+  { k: "cometa", nome: "Capitã Cometa", preco: 300, camisa: "#6a1b9a", heroi: true },
+  { k: "dragao", nome: "Dragão Guerreiro", preco: 300, camisa: "#1b7a3a", heroi: true },
+  { k: "turbo", nome: "Turbo Blindado", preco: 350, camisa: "#8d99ae", heroi: true },
   // edição limitada: só dá para comprar até a data "ate" (horário de Brasília). Quem comprou fica com ela para sempre.
   { k: "galactica", nome: "Galáctica", preco: 500, camisa: "#2b1a6b", limitada: true, ate: "2026-11-06T23:59:59-03:00" },
   { k: "buraconegro", nome: "Buraco Negro", preco: 600, camisa: "#0b0a16", pele: "#120f22", limitada: true, ate: "2026-11-07T23:59:59-03:00" },
@@ -2063,6 +2071,71 @@ function desenharAcessorio2D(c, skin, x, y) {
         g.addColorStop(0, "rgba(120,220,255,.95)"); g.addColorStop(1, "rgba(120,220,255,0)");
         c.fillStyle = g; c.beginPath(); c.arc(x + lado * 21, y + 4, 10, 0, Math.PI * 2); c.fill();
       }
+      break;
+    }
+    case "chef":
+      c.fillStyle = "#ffffff"; c.strokeStyle = "#c9d3e0"; c.lineWidth = 1.2;
+      c.beginPath(); c.arc(hx - 7, hy - 22, 7, 0, Math.PI * 2); c.arc(hx + 7, hy - 22, 7, 0, Math.PI * 2); c.arc(hx, hy - 26, 8, 0, Math.PI * 2); c.fill();
+      ret(hx - 11, hy - 20, 22, 9, 2); c.strokeRect(hx - 11, hy - 20, 22, 9);
+      c.fillStyle = "#e63946"; c.beginPath(); c.moveTo(x - 9, y - 20); c.lineTo(x + 9, y - 20); c.lineTo(x + 3, y - 12); c.lineTo(x - 3, y - 12); c.closePath(); c.fill();
+      c.fillStyle = "#1b1b2b"; [-8, 0, 8].forEach(b => { c.beginPath(); c.arc(x - 6, y + b - 6, 1.4, 0, Math.PI * 2); c.arc(x + 6, y + b - 6, 1.4, 0, Math.PI * 2); c.fill(); });
+      break;
+    case "cowboy":
+      c.fillStyle = "#6b4423"; c.beginPath(); c.ellipse(hx, hy - 13, 22, 5, 0, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.moveTo(hx - 11, hy - 13); c.quadraticCurveTo(hx - 12, hy - 28, hx - 4, hy - 26); c.lineTo(hx, hy - 23); c.lineTo(hx + 4, hy - 26); c.quadraticCurveTo(hx + 12, hy - 28, hx + 11, hy - 13); c.closePath(); c.fill();
+      c.fillStyle = "#e9c46a"; c.fillRect(hx - 11, hy - 17, 22, 3);
+      c.fillStyle = "#e63946"; c.beginPath(); c.moveTo(x - 12, y - 20); c.lineTo(x + 12, y - 20); c.lineTo(x, y - 9); c.closePath(); c.fill();
+      c.fillStyle = "#ffffff"; [[-5, -18], [4, -17], [0, -13]].forEach(([a, b]) => { c.beginPath(); c.arc(x + a, y + b, 1, 0, Math.PI * 2); c.fill(); });
+      c.fillStyle = "#e9c46a"; c.beginPath(); for (let j = 0; j < 10; j++) { const rr = j % 2 ? 2 : 4.5, aa = -Math.PI / 2 + j * Math.PI / 5; c.lineTo(x - 7 + Math.cos(aa) * rr, y - 2 + Math.sin(aa) * rr); } c.closePath(); c.fill();
+      break;
+    case "pirata":
+      c.fillStyle = "#ffffff"; [-12, -4, 4].forEach(b => c.fillRect(x - 15, y + b, 30, 3));
+      c.fillStyle = "#1b1b2b"; c.beginPath(); c.moveTo(hx - 20, hy - 10); c.quadraticCurveTo(hx, hy - 34, hx + 20, hy - 10); c.quadraticCurveTo(hx, hy - 16, hx - 20, hy - 10); c.fill();
+      c.fillStyle = "#ffffff"; c.beginPath(); c.arc(hx, hy - 19, 3, 0, Math.PI * 2); c.fill(); c.fillRect(hx - 4, hy - 16, 8, 1.5);
+      c.fillStyle = "#1b1b2b"; c.beginPath(); c.ellipse(hx + 5, hy - 2, 4.5, 3.8, 0, 0, Math.PI * 2); c.fill();
+      c.strokeStyle = "#1b1b2b"; c.lineWidth = 1.2; c.beginPath(); c.moveTo(hx - 14, hy - 7); c.lineTo(hx + 5, hy - 2); c.lineTo(hx + 15, hy - 5); c.stroke();
+      c.fillStyle = "#ffd23f"; c.beginPath(); c.arc(hx - 15, hy + 3, 2.2, 0, Math.PI * 2); c.fill();
+      break;
+    case "dino": {
+      c.fillStyle = "#3fa34d"; c.beginPath(); c.arc(hx, hy - 2, 16.5, Math.PI * 1.02, Math.PI * 1.98); c.lineTo(hx + 16, hy - 6); c.lineTo(hx - 16, hy - 6); c.closePath(); c.fill();
+      c.fillStyle = "#ffffff"; for (let i = 0; i < 7; i++) { const tx = hx - 13 + i * 4.3; c.beginPath(); c.moveTo(tx, hy - 6); c.lineTo(tx + 2.1, hy - 2.5); c.lineTo(tx + 4.2, hy - 6); c.fill(); }
+      c.fillStyle = "#f4a261"; [-12, -4, 4, 12].forEach((dx, i) => { const by = hy - Math.sqrt(Math.max(0, 272 - dx * dx)) - 1; c.beginPath(); c.moveTo(hx + dx - 3.5, by + 3); c.lineTo(hx + dx, by - 5 - (i === 1 || i === 2 ? 2 : 0)); c.lineTo(hx + dx + 3.5, by + 3); c.fill(); });
+      c.fillStyle = "#c8f0b4"; c.beginPath(); c.ellipse(x, y - 4, 9, 11, 0, 0, Math.PI * 2); c.fill();
+      c.strokeStyle = "#2d7a37"; c.lineWidth = 1; c.beginPath(); [-8, -3, 2].forEach(b => { c.moveTo(x - 7, y + b); c.lineTo(x + 7, y + b); }); c.stroke();
+      c.fillStyle = "#3fa34d"; c.beginPath(); c.moveTo(x + 12, y + 4); c.quadraticCurveTo(x + 30, y + 10, x + 32, y + 22); c.quadraticCurveTo(x + 22, y + 12, x + 10, y + 10); c.closePath(); c.fill();
+      break;
+    }
+    case "cometa": {
+      const t = performance.now() / 1000, ond = Math.sin(t * 4) * 2;
+      c.fillStyle = "#e63946"; for (const lado of [-1, 1]) { c.beginPath(); c.moveTo(x + lado * 13, y - 20); c.quadraticCurveTo(x + lado * (24 + ond), y, x + lado * (22 - ond), y + 20); c.lineTo(x + lado * 14, y + 14); c.closePath(); c.fill(); }
+      c.fillStyle = "#6a1b9a"; c.beginPath(); c.moveTo(hx - 16, hy - 6); c.lineTo(hx + 16, hy - 6); c.lineTo(hx + 15, hy + 1); c.lineTo(hx - 15, hy + 1); c.closePath(); c.fill();
+      c.fillStyle = "#ffffff"; c.beginPath(); c.ellipse(hx - 5, hy - 2.5, 3.6, 2.6, 0, 0, Math.PI * 2); c.ellipse(hx + 5, hy - 2.5, 3.6, 2.6, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = "#1b1b2b"; c.beginPath(); c.arc(hx - 5, hy - 2.4, 1.6, 0, Math.PI * 2); c.arc(hx + 5, hy - 2.4, 1.6, 0, Math.PI * 2); c.fill();
+      c.fillStyle = "#ffd23f"; c.beginPath(); for (let j = 0; j < 10; j++) { const rr = j % 2 ? 2.4 : 6, aa = -Math.PI / 2 + j * Math.PI / 5; c.lineTo(x + 3 + Math.cos(aa) * rr, y - 8 + Math.sin(aa) * rr); } c.closePath(); c.fill();
+      c.strokeStyle = "#ffd23f"; c.lineWidth = 2; c.lineCap = "round"; c.beginPath(); c.moveTo(x - 3, y - 6); c.lineTo(x - 11, y + 1); c.moveTo(x - 1, y - 3); c.lineTo(x - 8, y + 5); c.stroke();
+      c.fillStyle = "#ffd23f"; c.fillRect(x - 15, y + 5, 30, 3);
+      break;
+    }
+    case "dragao": {
+      const t = performance.now() / 1000, bate = Math.sin(t * 5) * 3;
+      c.fillStyle = "#145c2c"; for (const lado of [-1, 1]) { c.beginPath(); c.moveTo(x + lado * 14, y - 16); c.lineTo(x + lado * (34 + bate), y - 30); c.lineTo(x + lado * (30 + bate), y - 18); c.lineTo(x + lado * (36 + bate), y - 12); c.lineTo(x + lado * (28 + bate), y - 6); c.lineTo(x + lado * 14, y - 4); c.closePath(); c.fill(); }
+      c.fillStyle = "#3fbf6a"; [[-7, -14], [0, -14], [7, -14], [-4, -8], [4, -8], [-7, -2], [0, -2], [7, -2]].forEach(([a, b]) => { c.beginPath(); c.arc(x + a, y + b, 2.6, 0, Math.PI); c.fill(); });
+      c.fillStyle = "#1b7a3a"; c.beginPath(); c.arc(hx, hy - 1, 16, Math.PI, Math.PI * 2); c.lineTo(hx + 16, hy - 4); c.lineTo(hx - 16, hy - 4); c.closePath(); c.fill();
+      c.fillStyle = "#ffd23f"; for (const lado of [-1, 1]) { c.beginPath(); c.moveTo(hx + lado * 7, hy - 14); c.quadraticCurveTo(hx + lado * 18, hy - 22, hx + lado * 20, hy - 30); c.quadraticCurveTo(hx + lado * 12, hy - 22, hx + lado * 12, hy - 11); c.closePath(); c.fill(); }
+      c.fillStyle = "#ff8a1f"; c.beginPath(); c.moveTo(hx, hy - 4); c.lineTo(hx - 3, hy - 11); c.lineTo(hx, hy - 9); c.lineTo(hx + 3, hy - 11); c.closePath(); c.fill();
+      break;
+    }
+    case "turbo": {
+      const t = performance.now() / 1000;
+      c.fillStyle = "#adb5bd"; c.beginPath(); c.arc(hx, hy - 1, 17, Math.PI * .95, Math.PI * 2.05); c.lineTo(hx + 16, hy + 4); c.lineTo(hx - 16, hy + 4); c.closePath(); c.fill();
+      c.fillStyle = "#1b1b2b"; c.beginPath(); c.roundRect ? c.roundRect(hx - 12, hy - 7, 24, 9, 4) : c.rect(hx - 12, hy - 7, 24, 9); c.fill();
+      const vg = c.createLinearGradient(hx - 12, 0, hx + 12, 0), sh = (t * .8) % 1; vg.addColorStop(0, "#2bd9ff"); vg.addColorStop(sh, "#ffffff"); vg.addColorStop(1, "#2bd9ff");
+      c.fillStyle = vg; c.beginPath(); c.roundRect ? c.roundRect(hx - 10, hy - 5.5, 20, 5, 2.5) : c.rect(hx - 10, hy - 5.5, 20, 5); c.fill();
+      c.fillStyle = "#6c757d"; for (const lado of [-1, 1]) { c.beginPath(); c.ellipse(x + lado * 15, y - 18, 7, 5, 0, 0, Math.PI * 2); c.fill(); }
+      const br = .6 + .4 * Math.sin(t * 6); c.save(); c.globalCompositeOperation = "lighter"; const rg = c.createRadialGradient(x, y - 7, 1, x, y - 7, 9); rg.addColorStop(0, `rgba(160,240,255,${br})`); rg.addColorStop(1, "rgba(43,217,255,0)"); c.fillStyle = rg; c.beginPath(); c.arc(x, y - 7, 9, 0, Math.PI * 2); c.fill();
+      for (const lado of [-1, 1]) { const h = 8 + Math.sin(t * 25 + lado) * 3, fg = c.createLinearGradient(0, y + 24, 0, y + 24 + h); fg.addColorStop(0, "rgba(255,240,170,1)"); fg.addColorStop(1, "rgba(255,120,40,0)"); c.fillStyle = fg; c.beginPath(); c.moveTo(x + lado * 7 - 3, y + 24); c.quadraticCurveTo(x + lado * 7, y + 24 + h * 1.5, x + lado * 7 + 3, y + 24); c.fill(); }
+      c.restore();
+      c.strokeStyle = "#2b2d42"; c.lineWidth = 1; c.beginPath(); c.moveTo(x - 15, y - 2); c.lineTo(x + 15, y - 2); c.moveTo(x, y + 2); c.lineTo(x, y + 10); c.stroke();
       break;
     }
     case "relampago":
@@ -2842,6 +2915,49 @@ function acessorio3D(cabeca, skin) {
     case "feiticeiro":
       for (let k = 0; k < 9; k++) { const a = k / 9 * Math.PI * 2; const m = add(new THREE.ConeGeometry(.06, .2, 6), "#bfe6ff", Math.cos(a) * .12, .19, Math.sin(a) * .12); m.rotation.z = -Math.cos(a) * .6; m.rotation.x = Math.sin(a) * .6; }
       add(new THREE.ConeGeometry(.07, .24, 6), "#bfe6ff", 0, .3, 0); break;
+    case "chef":
+      add(new THREE.CylinderGeometry(.13, .12, .14, 14), "#ffffff", 0, .24, 0);
+      for (const [a, b] of [[-.08, 0], [.08, 0], [0, .06]]) add(new THREE.SphereGeometry(.1, 12, 10), "#ffffff", a, .36 + b, 0);
+      add(new THREE.ConeGeometry(.08, .12, 4), "#e63946", 0, -.3, -.14).rotation.x = Math.PI; break;
+    case "cowboy":
+      add(new THREE.CylinderGeometry(.34, .34, .02, 24), "#6b4423", 0, .14, 0);
+      add(new THREE.CylinderGeometry(.14, .17, .16, 16), "#6b4423", 0, .23, 0);
+      add(new THREE.CylinderGeometry(.172, .172, .03, 16), "#e9c46a", 0, .17, 0);
+      add(new THREE.ConeGeometry(.1, .12, 4), "#e63946", 0, -.28, -.14).rotation.x = Math.PI; break;
+    case "pirata":
+      add(new THREE.BoxGeometry(.46, .1, .3), "#1b1b2b", 0, .19, 0);
+      add(new THREE.SphereGeometry(.17, 14, 10, 0, Math.PI * 2, 0, Math.PI / 2), "#1b1b2b", 0, .14, 0);
+      add(new THREE.SphereGeometry(.03, 8, 6), "#ffffff", 0, .24, -.16);
+      add(new THREE.CylinderGeometry(.045, .045, .02, 12), "#1b1b2b", .07, .03, -.19).rotation.x = Math.PI / 2;
+      for (const y0 of [-.38, -.5, -.62]) add(new THREE.BoxGeometry(.43, .03, .27), "#ffffff", 0, y0, 0);
+      break;
+    case "dino":
+      add(new THREE.SphereGeometry(.215, 18, 12, 0, Math.PI * 2, 0, Math.PI / 2), "#3fa34d", 0, .02, 0);
+      for (let k = 0; k < 4; k++) add(new THREE.ConeGeometry(.04, .1, 4), "#f4a261", 0, .2 - k * .03, .05 + k * .06).rotation.x = .4 + k * .2;
+      for (let k = 0; k < 6; k++) add(new THREE.ConeGeometry(.018, .05, 4), "#ffffff", -.1 + k * .04, -.01, -.19).rotation.x = Math.PI;
+      add(new THREE.ConeGeometry(.08, .45, 8), "#3fa34d", 0, -.75, .2).rotation.x = -1.2;
+      break;
+    case "cometa": {
+      add(new THREE.BoxGeometry(.32, .07, .04), "#6a1b9a", 0, .03, -.19);
+      const capa = add(new THREE.PlaneGeometry(.44, .6), "#e63946", 0, -.55, .16, { side: THREE.DoubleSide }); capa.rotation.x = .15;
+      const est = new THREE.Mesh(new THREE.OctahedronGeometry(.06), new THREE.MeshBasicMaterial({ color: "#ffd23f" })); est.position.set(0, -.42, -.15); est.scale.set(1, 1, .4); cabeca.add(est);
+      break;
+    }
+    case "dragao": {
+      for (const lado of [-1, 1]) { const ch = add(new THREE.ConeGeometry(.035, .22, 8), "#ffd23f", lado * .1, .25, .03); ch.rotation.z = -lado * .5; ch.rotation.x = .3;
+        const asa = new THREE.Mesh(new THREE.ShapeGeometry(new THREE.Shape([new THREE.Vector2(0, 0), new THREE.Vector2(.45, .3), new THREE.Vector2(.38, .05), new THREE.Vector2(.48, -.08), new THREE.Vector2(.3, -.18), new THREE.Vector2(0, -.2)])), new THREE.MeshLambertMaterial({ color: "#145c2c", side: THREE.DoubleSide }));
+        asa.position.set(lado * .1, -.38, .15); asa.scale.x = lado; asa.rotation.y = lado * -.5; cabeca.add(asa); }
+      add(new THREE.SphereGeometry(.21, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), "#1b7a3a", 0, .03, 0);
+      break;
+    }
+    case "turbo": {
+      add(new THREE.SphereGeometry(.225, 18, 14), "#adb5bd", 0, .01, .01);
+      add(new THREE.BoxGeometry(.3, .07, .05), "#2bd9ff", 0, .02, -.2, { emissive: "#2bd9ff" });
+      for (const lado of [-1, 1]) add(new THREE.SphereGeometry(.1, 12, 8), "#6c757d", lado * .25, -.32, 0);
+      const rea = new THREE.Mesh(new THREE.CylinderGeometry(.05, .05, .02, 16), new THREE.MeshBasicMaterial({ color: "#a0f0ff" })); rea.rotation.x = Math.PI / 2; rea.position.set(0, -.45, -.14); cabeca.add(rea);
+      for (const lado of [-1, 1]) { const f = new THREE.Mesh(new THREE.ConeGeometry(.05, .2, 8), new THREE.MeshBasicMaterial({ color: "#ffb347", transparent: true, opacity: .9, blending: THREE.AdditiveBlending, depthWrite: false })); f.rotation.x = Math.PI; f.position.set(lado * .1, -1.35, 0); cabeca.add(f); }
+      break;
+    }
     case "relampago":
       for (let k = 0; k < 9; k++) { const a = k / 9 * Math.PI * 2; const m = add(new THREE.ConeGeometry(.06, .2, 6), "#d9480f", Math.cos(a) * .13, .17, Math.sin(a) * .13); m.rotation.z = -Math.cos(a) * .9; m.rotation.x = Math.sin(a) * .9; }
       add(new THREE.CylinderGeometry(.206, .206, .07, 18, 1, true), "#ffd23f", 0, .09, 0, { side: THREE.DoubleSide }); break;
@@ -3334,9 +3450,9 @@ TELAS.loja = () => {
       const tem = temSkin(nome, s.k), usando = skinDe(nome) === s.k, podeS = moedas >= s.preco;
       const rotulo = usando ? "Usando" : tem ? "Usar" : G.lojaConf === "skin:" + s.k ? "Confirmar?" : podeS ? `<span class="lb-coin" aria-hidden="true">$</span>${s.preco}` : `$ ${s.preco}`;
       return `<div class="fd-tile${tem ? "" : " fd-travado"}${s.limitada ? " sk-limitada" : ""}"${usando ? ' aria-current="true"' : ""}>
-        ${s.limitada ? `<i class="sk-selo">Edição limitada</i>` : ""}
+        ${s.limitada ? `<i class="sk-selo">Edição limitada</i>` : s.heroi ? `<i class="sk-selo sk-selo-heroi">⚡ Herói</i>` : ""}
         <canvas class="sk-prev" data-skin="${s.k}" aria-label="Bonequinho com a skin ${esc(s.nome)}"></canvas>
-        <b>${esc(s.nome)}${s.heroi ? '<i class="sk-heroi">herói</i>' : ""}</b>
+        <b>${esc(s.nome)}</b>
         ${s.limitada && !tem && naVenda(s) ? `<span class="sk-prazo">⏳ ${faltaParaAcabar(s)}</span>` : ""}
         <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarSkin" data-s="${s.k}" ${usando || (!tem && !podeS) ? "disabled" : ""}>${rotulo}</button>
       </div>`; }).join("")}

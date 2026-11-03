@@ -111,3 +111,9 @@ Três coleções de **edição limitada**, à venda até **10/11 às 23h59** (Br
 
 Nas partidas de bonequinhos (no mesmo celular e no online), cada robô sorteia uma skin do jogo a cada partida, inclusive as limitadas (Galáctica, Buraco Negro, Espaço Sideral, Gelo, Fogo...). Tenta não repetir a mesma skin entre os robôs. Eles ficam iguais a um bonequinho de jogador; o nome "Robô 1", "Robô 2"... mostra quem é robô. Os efeitos das skins também valem para eles (por exemplo, o choque Gelo contra Fogo). Só não usam a skin secreta do Cantinho (Rei Dourado), que continua só para colecionadores.
 
+## Skins novas (3/nov, pedido do Andre)
+
+- **Normais:** Cozinheiro 80 (chapéu de chef, lenço vermelho e botões), Caubói 100 (chapéu de caubói, lenço e estrela de xerife), Pirata 120 (chapéu com caveira, tapa-olho, brinco e camisa listrada), Dinossauro 180 (capuz de dino com dentes e espinhos, barriga e rabo).
+- **Heróis** (criados para o jogo, originais): Capitã Cometa 300 (máscara roxa, capa vermelha balançando e cometa no peito), Dragão Guerreiro 300 (capacete com chifres dourados, escamas e asas batendo), Turbo Blindado 350 (armadura com visor brilhando, ombreiras, reator no peito e jatos nos pés).
+- Aparecem na loja, na tela inicial, de cima e no 3D; os robôs também podem sortear essas skins. Preços para o Andre ajustar.
+
