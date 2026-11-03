@@ -1394,6 +1394,12 @@ function faltaParaAcabar(s) {
   return h <= 24 ? (h <= 1 ? "Última hora!" : `Acaba em ${h} h`) : d <= 1 ? `Acaba amanhã (${data})` : `Acaba em ${d} dias (${data})`;
 }
 const skinInfo = k => SKINS.find(s => s.k === k) || SKINS[0];
+/* Robôs vestem skins do jogo: cada um sorteia uma (sem repetir, se der) a cada partida e fica igual a um jogador */
+const roboVestido = p => !p.humano && !!p.skin && p.skin !== "classico";
+function vestirRobos(lista) {
+  const pool = SKINS.filter(x => x.k !== "classico" && !x.secreto), usadas = new Set();
+  lista.filter(p => !p.humano).forEach(p => { const livres = pool.filter(x => !usadas.has(x.k)), x = (livres.length ? livres : pool)[Math.floor(Math.random() * (livres.length || pool.length))]; usadas.add(x.k); vestir(p, x.k); });
+}
 function vestir(p, k) { const s = skinInfo(k); p.skin = s.k; if (s.camisa) p.cor = s.camisa; if (s.pele) p.pele = s.pele; return p; }
 const AW = 1000, AC = 500, AH = 380, A_VEL = 230, A_BOLA = 700, A_RAIO = 44, A_MAXBOLA = 25;
 const aRnd = (a, b) => a + Math.random() * (b - a);
@@ -1501,6 +1507,7 @@ function comecarArena() {
       home, x: home.x, y: home.y, alvo: null, modo: "casa", vel: A_VEL * aRnd(.88, 1.12), habil: aRnd(-.08, .08),
       flash: 0, passo: 0, ctrl: false, tocou: false, saiuEm: null, time: o.time };
   });
+  vestirRobos(A.P);
   A.P.forEach(p => { if (p.humano) { vestir(p, skinDe(p.nome)); const f = personagemDe(p.nome); if (f) p.ficha = f; p.arremesso = arremessoDe(p.nome); p.selo = nivelSelo(p.nome); } });
   A.cel = Math.max(0, A.P.findIndex(p => p.nome === s.dono));
   A.balls = []; A.fx = []; A.t = 0; A.fim = null; A.ptr = null; A.inicio = Date.now();
@@ -1997,7 +2004,7 @@ function desenharBoneco2(c, p, ph) {
   c.strokeStyle = p.cor; c.lineWidth = 6;
   c.beginPath(); c.moveTo(x - 14, y - 10); c.lineTo(x - 20, y + 4 - anda * .5); c.moveTo(x + 14, y - 10); c.lineTo(x + 20, y + 4 + anda * .5); c.stroke();
   c.fillStyle = p.cor; c.beginPath(); c.roundRect ? c.roundRect(x - 15, y - 20, 30, 30, 8) : c.rect(x - 15, y - 20, 30, 30); c.fill();
-  if (p.humano) {
+  if (p.humano || roboVestido(p)) {
     c.fillStyle = p.pele; c.beginPath(); c.arc(x, y - 34, 15, 0, Math.PI * 2); c.fill();
     c.fillStyle = "#1b1b2b"; c.beginPath(); c.arc(x - 5, y - 36, 2.4, 0, Math.PI * 2); c.arc(x + 5, y - 36, 2.4, 0, Math.PI * 2); c.fill();
     c.strokeStyle = "#1b1b2b"; c.lineWidth = 2; c.beginPath(); c.arc(x, y - 31, 5, .2, Math.PI - .2); c.stroke();
@@ -2784,7 +2791,7 @@ function montarBonecos3D() {
     const bracoE = new THREE.Mesh(new THREE.BoxGeometry(.1, .45, .1), corpoMat); bracoE.geometry.translate(0, -.2, 0); bracoE.position.set(-.27, 1.03, 0);
     const bracoD = bracoE.clone(); bracoD.position.x = .27;
     let cabeca;
-    if (p.humano) {
+    if (p.humano || roboVestido(p)) {
       cabeca = new THREE.Mesh(new THREE.SphereGeometry(.2, 28, 20), new THREE.MeshLambertMaterial({ color: p.pele }));
       const olho = new THREE.Mesh(new THREE.SphereGeometry(.03, 8, 6), escuro);
       const o1 = olho.clone(); o1.position.set(-.07, .03, -.18); const o2 = olho.clone(); o2.position.set(.07, .03, -.18);

@@ -107,3 +107,7 @@ Três coleções de **edição limitada**, à venda até **10/11 às 23h59** (Br
 - **Gelo contra Fogo (efeito especial):** quando quem usa a skin Gelo acerta quem usa a skin Fogo (ou o contrário), sai um choque de vapor, cristais e chamas voando, com som de "tsss". Quem usa a skin Gelo e Fogo faz o choque em qualquer um que acertar. Funciona de cima, no 3D e no online.
 - Preço e prazo foram escolhidos pelo Claude (o Andre não disse); dá para mudar.
 
+## Robôs com skins (3/nov, ideia do Andre)
+
+Nas partidas de bonequinhos (no mesmo celular e no online), cada robô sorteia uma skin do jogo a cada partida, inclusive as limitadas (Galáctica, Buraco Negro, Espaço Sideral, Gelo, Fogo...). Tenta não repetir a mesma skin entre os robôs. Eles ficam iguais a um bonequinho de jogador; o nome "Robô 1", "Robô 2"... mostra quem é robô. Os efeitos das skins também valem para eles (por exemplo, o choque Gelo contra Fogo). Só não usam a skin secreta do Cantinho (Rei Dourado), que continua só para colecionadores.
+

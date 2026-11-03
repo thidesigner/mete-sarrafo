@@ -154,6 +154,7 @@ function comecarOnline() {
       home, x: home.x, y: home.y, alvo: null, modo: "casa", vel: A_VEL * aRnd(.88, 1.12), habil: aRnd(-.08, .08),
       flash: 0, passo: 0, ctrl: false, tocou: false, saiuEm: null, arremesso: o.robo ? "bola" : o.local ? arremessoDe(o.nome) : (o.arremesso || "bola"), time: o.time };
   });
+  vestirRobos(A.P);
   A.P.forEach((p, i) => { if (!p.humano) return; p.selo = lista[i].local ? nivelSelo(p.nome) : (lista[i].selo || 0); vestir(p, lista[i].local ? skinDe(p.nome) : lista[i].skin); const f = lista[i].local ? personagemDe(p.nome) : lista[i].ficha; if (f) p.ficha = f; });
   A.cel = ON.myIdx = Math.max(0, lista.findIndex(o => o.local)); A.balls = []; A.fx = []; A.t = 0; A.fim = null; A.ptr = null; A.inicio = Date.now();
   A.st = { palavras: 0, acertos: 0, erros: 0, timeouts: 0, votos: 0, votosOk: 0, arremessos: 0, acertosBola: 0, rodadas: 0, compras: 0, moedas: {}, eventos: [] };
