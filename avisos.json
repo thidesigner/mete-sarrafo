@@ -1,20 +1,6 @@
 {
-  "avisos": [
-    {
-      "id": "amvzxc0uc",
-      "texto": "DESCULPA EU NAO TER COMECADO O NOVO EVENTO.mas hoje eu vou comecar um evento gelo e fogo",
-      "de": "2026-11-03T00:02:46.980Z",
-      "ate": "2026-11-03T01:02:46.980Z"
-    }
-  ],
-  "eventos": [
-    {
-      "id": "emvzxcrz1",
-      "mult": 3,
-      "de": "2026-11-03T00:03:21.709Z",
-      "ate": "2026-11-03T01:03:21.709Z"
-    }
-  ],
+  "avisos": [],
+  "eventos": [],
   "promos": [
     {
       "id": "pmvzxcuc5",
