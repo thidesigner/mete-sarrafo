@@ -212,6 +212,9 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .lb-avatar.av-buraconegro { animation: avBrilhaBn 2s ease-in-out infinite; }
 @keyframes avBrilhaBn { 50% { box-shadow: 0 0 18px rgba(255,150,60,.85); } }
 @media (prefers-reduced-motion: reduce) { .lb-avatar.av-buraconegro { animation: none; } }
+.av-gelo { border-color: #bfe8ff !important; box-shadow: 0 0 12px rgba(127,208,255,.9); background: radial-gradient(circle at 30% 25%, #ffffff 0, #bfe8ff 25%, #5fb3e6 60%, #1f5f9e 100%) !important; }
+.av-fogo { border-color: #ffb347 !important; box-shadow: 0 0 12px rgba(255,120,40,.9); background: radial-gradient(circle at 50% 90%, #ffe66b 0, #ff9a1f 30%, #d9381e 65%, #5a0f05 100%) !important; }
+.av-gelofogo { border-color: #ffffff !important; box-shadow: -4px 0 10px rgba(127,208,255,.8), 4px 0 10px rgba(255,120,40,.8); background: linear-gradient(90deg, #5fb3e6 0 50%, #d9381e 50% 100%) !important; }
 .av-sideral { position: relative; overflow: hidden; border-color: #7fd3ff !important; box-shadow: 0 0 12px rgba(110,198,255,.85);
   background: radial-gradient(circle at 78% 82%, #4cc96a 0 4%, transparent 4.5%), radial-gradient(circle at 80% 85%, #3d8fe6 0 16%, transparent 17%),
     radial-gradient(1.2px 1.2px at 20% 20%, #fff 50%, transparent 52%), radial-gradient(1px 1px at 70% 25%, #fff 50%, transparent 52%), radial-gradient(1.4px 1.4px at 30% 75%, #ffd6f5 50%, transparent 52%),
@@ -253,6 +256,9 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .pacote > * { position: relative; }
 .pacote + .pacote { margin-top: 4px; }
 .pacote.sk-limitada.pacote-buraconegro::before { opacity: .6; }
+.pacote.sk-limitada.pacote-gelo { background: radial-gradient(ellipse 80% 30% at 50% 100%, #ffffff 0 60%, transparent 62%), linear-gradient(180deg, #0b2a55 0%, #3d8fe6 100%) !important; border-color: #bfe8ff !important; box-shadow: 0 0 0 2px rgba(191,232,255,.4), 0 0 24px rgba(127,208,255,.6); }
+.pacote.sk-limitada.pacote-fogo { background: radial-gradient(ellipse 80% 35% at 50% 100%, #ff9a1f 0%, #d9381e 50%, transparent 80%), linear-gradient(180deg, #1a0503 0%, #5a1208 100%) !important; border-color: #ffb347 !important; box-shadow: 0 0 0 2px rgba(255,179,71,.4), 0 0 24px rgba(255,100,30,.6); }
+.pacote.sk-limitada.pacote-gelofogo { background: linear-gradient(100deg, transparent 48%, rgba(255,255,255,.8) 49.5% 50.5%, transparent 52%), linear-gradient(90deg, #0b2a55 0%, #3d8fe6 45%, #d9381e 55%, #3a0a05 100%) !important; border-color: #ffffff !important; box-shadow: -6px 0 20px rgba(127,208,255,.55), 6px 0 20px rgba(255,100,30,.55); }
 .pacote.sk-limitada.pacote-sideral { background: radial-gradient(circle at 88% 18%, #ffe0a8 0 4%, transparent 4.5%), radial-gradient(circle at 10% 100%, #3d8fe6 0 16%, rgba(127,211,255,.4) 17.5%, transparent 21%), radial-gradient(ellipse 60% 50% at 70% 30%, rgba(255,110,200,.3) 0%, transparent 70%), linear-gradient(180deg, #050a24 0%, #13235a 100%) !important; border-color: #7fd3ff !important; box-shadow: 0 0 0 2px rgba(127,211,255,.35), 0 0 24px rgba(255,122,217,.45); }
 .pacote.sk-limitada.pacote-buraconegro { background: radial-gradient(circle at 80% 30%, #000 0 8%, rgba(255,160,70,.9) 9%, rgba(176,123,255,.6) 14%, transparent 24%), radial-gradient(circle at 20% 80%, #3a1a6e 0%, #0b0716 70%) !important; border-color: #ff9a3c !important; box-shadow: 0 0 0 2px rgba(255,154,60,.35), 0 0 24px rgba(176,123,255,.55); }
 .cantinho { display: grid; gap: 8px; border: 3px solid #ffd23f; border-radius: 18px; padding: 14px 12px; color: #fff; margin-top: 4px;
@@ -363,6 +369,35 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
   radial-gradient(1.8px 1.8px at 50% 22%, #ffd9a8 50%, transparent 52%), radial-gradient(1.1px 1.1px at 64% 86%, #fff 50%, transparent 52%),
   radial-gradient(1.6px 1.6px at 88% 30%, #d6b8ff 50%, transparent 52%), radial-gradient(1px 1px at 22% 88%, #fff 50%, transparent 52%);
   background-size: 160px 160px; animation: galaxia 40s linear infinite; }
+.bgf[data-fundo="gelo"] { background:
+  radial-gradient(ellipse 70% 22% at 20% 100%, #ffffff 0 96%, transparent 100%), radial-gradient(ellipse 60% 26% at 85% 100%, #e6f4ff 0 96%, transparent 100%),
+  linear-gradient(150deg, transparent 62%, #dff1ff 62.3%, #b8dcf5 70%, transparent 70.3%), linear-gradient(210deg, transparent 60%, #eaf6ff 60.3%, #c4e3f8 69%, transparent 69.3%),
+  radial-gradient(ellipse 80% 18% at 40% 22%, rgba(80,255,190,.35) 0%, transparent 70%), radial-gradient(ellipse 60% 14% at 70% 30%, rgba(170,120,255,.3) 0%, transparent 70%),
+  linear-gradient(180deg, #071a33 0%, #1a4f86 55%, #6fb6e6 100%); }
+.bgf[data-fundo="gelo"]::before { background-image:
+  radial-gradient(2px 2px at 10% 10%, #fff 50%, transparent 52%), radial-gradient(1.6px 1.6px at 35% 40%, #fff 50%, transparent 52%), radial-gradient(2.4px 2.4px at 60% 20%, #fff 50%, transparent 52%),
+  radial-gradient(1.5px 1.5px at 80% 60%, #fff 50%, transparent 52%), radial-gradient(2px 2px at 25% 75%, #fff 50%, transparent 52%), radial-gradient(1.8px 1.8px at 90% 90%, #fff 50%, transparent 52%);
+  background-size: 140px 140px; animation: neveCai 9s linear infinite; }
+@keyframes neveCai { to { background-position: 20px 140px; } }
+.bgf[data-fundo="fogo"] { background:
+  radial-gradient(ellipse 22% 10% at 50% 46%, rgba(255,230,107,.95) 0%, rgba(255,120,30,.7) 45%, transparent 75%),
+  linear-gradient(118deg, transparent 49%, #2a0a05 49.3% 100%) 0 0 / 50% 100% no-repeat, linear-gradient(242deg, transparent 49%, #2a0a05 49.3% 100%) 100% 0 / 50% 100% no-repeat,
+  radial-gradient(ellipse 90% 20% at 50% 100%, #ff6a1f 0%, #d9381e 40%, transparent 75%),
+  linear-gradient(180deg, #1a0503 0%, #5a1208 55%, #a3260d 100%); }
+.bgf[data-fundo="fogo"]::before { background-image:
+  radial-gradient(2px 2px at 15% 80%, #ffb347 50%, transparent 52%), radial-gradient(1.6px 1.6px at 40% 50%, #ff7a1a 50%, transparent 52%), radial-gradient(2.2px 2.2px at 65% 70%, #ffe66b 50%, transparent 52%),
+  radial-gradient(1.5px 1.5px at 85% 30%, #ff9a1f 50%, transparent 52%), radial-gradient(1.8px 1.8px at 30% 20%, #ffb347 50%, transparent 52%);
+  background-size: 150px 150px; animation: brasaSobe 7s linear infinite; }
+@keyframes brasaSobe { to { background-position: -15px -150px; } }
+.bgf[data-fundo="gelofogo"] { background:
+  linear-gradient(100deg, transparent 47.5%, rgba(255,255,255,.95) 49.3% 50.7%, transparent 52.5%),
+  radial-gradient(ellipse 50% 30% at 50% 50%, rgba(255,255,255,.35) 0%, transparent 70%),
+  linear-gradient(90deg, #0b2a55 0%, #3d8fe6 40%, #bfe8ff 49%, #ffb347 51%, #d9381e 60%, #3a0a05 100%); }
+.bgf[data-fundo="gelofogo"]::before { background-image:
+  radial-gradient(2px 2px at 10% 20%, #fff 50%, transparent 52%), radial-gradient(1.8px 1.8px at 30% 60%, #fff 50%, transparent 52%),
+  radial-gradient(2px 2px at 70% 40%, #ffb347 50%, transparent 52%), radial-gradient(1.6px 1.6px at 88% 75%, #ffe66b 50%, transparent 52%);
+  background-size: 160px 160px; animation: galaxia 40s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .bgf[data-fundo="gelo"]::before, .bgf[data-fundo="fogo"]::before, .bgf[data-fundo="gelofogo"]::before { animation: none; } }
 .bgf[data-fundo="sideral"] { background:
   radial-gradient(circle at 18% 104%, #4cc96a 0 6%, transparent 6.4%), radial-gradient(circle at 26% 98%, #4cc96a 0 4%, transparent 4.4%),
   radial-gradient(circle at 20% 110%, #7fd3ff 0, #3d8fe6 14%, #1f5fc0 22%, rgba(127,211,255,.5) 23.5%, transparent 27%),
@@ -1286,6 +1321,9 @@ const SKINS = [
   { k: "buraconegro", nome: "Buraco Negro", preco: 600, camisa: "#0b0a16", pele: "#120f22", limitada: true, ate: "2026-11-07T23:59:59-03:00" },
   { k: "sideral", nome: "Espaço Sideral", preco: 450, camisa: "#13235a", limitada: true, ate: "2026-11-02T12:00:00-03:00" },
   // cantinho secreto: só quem tem algum item de edição limitada consegue comprar (não acaba)
+  { k: "gelo", nome: "Gelo", preco: 700, camisa: "#5fb3e6", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
+  { k: "fogo", nome: "Fogo", preco: 700, camisa: "#d9381e", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
+  { k: "gelofogo", nome: "Gelo e Fogo", preco: 700, camisa: "#d9381e", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
   { k: "colecionador", nome: "Rei Dourado", preco: 400, camisa: "#d9a21b", secreto: true },
 ];
 /* Skin limitada ainda à venda? Depois do prazo some da loja para quem não tem. */
@@ -1574,11 +1612,27 @@ const ARREMESSOS = [
   { k: "buraconegro", nome: "Mini Buraco Negro", icone: "🌑", preco: 200, cor: "#b07bff", tipo: "arremesso", limitada: true, ate: "2026-11-07T23:59:59-03:00" },
   { k: "moedaouro", nome: "Moeda de Ouro", icone: "🪙", preco: 150, cor: "#ffd23f", secreto: true },
   { k: "sideral", nome: "Cometa", icone: "☄️", preco: 200, cor: "#7fd3ff", tipo: "arremesso", limitada: true, ate: "2026-11-02T12:00:00-03:00" },
+  { k: "gelo", nome: "Bola de Neve", icone: "❄️", preco: 200, cor: "#e6f7ff", tipo: "arremesso", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
+  { k: "fogo", nome: "Bola de Fogo", icone: "🔥", preco: 200, cor: "#ff7a2a", tipo: "arremesso", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
+  { k: "gelofogo", nome: "Cometa Gelo e Fogo", icone: "☯️", preco: 200, cor: "#ffffff", tipo: "arremesso", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
 ];
 const arremessoInfo = k => ARREMESSOS.find(a => a.k === k) || ARREMESSOS[0];
 function temArremesso(n, k) { const a = ARREMESSOS.find(x => x.k === k); return !!a && (a.preco === 0 || (((G.inv || {})[n] || {}).arremessos || []).includes(k)); }
 function arremessoDe(n) { const k = ((G.inv || {})[n] || {}).arremesso; return temArremesso(n, k) ? k : "bola"; }
 function desenharArremesso2D(c, k, x, y, giro) {
+  if (k === "gelo" || k === "fogo" || k === "gelofogo") {
+    const t = performance.now() / 1000, a = giro * .2 + Math.PI * .75;
+    c.save(); c.globalCompositeOperation = "lighter";
+    for (let i = 1; i <= 9; i++) { const d = i * 4.4, r = 8.5 - i * .75, gelo = k === "gelo" || (k === "gelofogo" && i % 2);
+      c.fillStyle = gelo ? `rgba(220,245,255,${.8 - i * .08})` : `rgba(255,${200 - i * 15},${60 - i * 5},${.85 - i * .08})`;
+      const lado = k === "gelofogo" ? (i % 2 ? -1 : 1) * 2.5 : Math.sin(t * 20 + i) * (k === "fogo" ? 2 : .5);
+      c.beginPath(); c.arc(x + Math.cos(a) * d - Math.sin(a) * lado, y + Math.sin(a) * d + Math.cos(a) * lado, Math.max(1, r), 0, Math.PI * 2); c.fill(); }
+    c.restore();
+    if (k === "gelo") { const g = c.createRadialGradient(x - 3, y - 3, 1, x, y, 10); g.addColorStop(0, "#ffffff"); g.addColorStop(1, "#a9d8f5"); c.fillStyle = g; c.beginPath(); c.arc(x, y, 9, 0, Math.PI * 2); c.fill(); }
+    else if (k === "fogo") { const g = c.createRadialGradient(x, y, 1, x, y, 11); g.addColorStop(0, "#fff3b0"); g.addColorStop(.5, "#ff9a1f"); g.addColorStop(1, "#d9381e"); c.fillStyle = g; c.beginPath(); c.arc(x, y, 10, 0, Math.PI * 2); c.fill(); }
+    else { c.fillStyle = "#7fd0ff"; c.beginPath(); c.arc(x, y, 9, Math.PI / 2 + giro, Math.PI * 1.5 + giro); c.fill(); c.fillStyle = "#ff7a2a"; c.beginPath(); c.arc(x, y, 9, -Math.PI / 2 + giro, Math.PI / 2 + giro); c.fill(); }
+    return;
+  }
   if (k === "moedaouro") {
     const larg = Math.abs(Math.cos(giro * .8)) * 11 + 1.5;   // a moeda gira no ar
     c.fillStyle = "#b8860b"; c.beginPath(); c.ellipse(x + 1.5, y, larg, 11, 0, 0, Math.PI * 2); c.fill();
@@ -1867,7 +1921,33 @@ function buracosCima(c) {
     return b.t < 1.3;
   });
 }
+/* Gelo contra Fogo: quando Gelo acerta Fogo (ou o contrário), ou quem usa Gelo e Fogo acerta alguém, sai um choque de vapor, cristais e chamas */
+function choqueGeloFogo(fx) {
+  const at = A.ph && A.ph.atir; if (!at || !["gelo", "fogo", "gelofogo"].includes(at.skin)) return false;
+  if (at.skin === "gelofogo") return true;
+  let alvo = null, dm = 1e9; for (const p of A.P) { if (p === at) continue; const d = Math.hypot(p.x - fx.x, p.y - fx.y); if (d < dm) { dm = d; alvo = p; } }
+  return !!alvo && dm < 120 && alvo.skin === (at.skin === "gelo" ? "fogo" : "gelo");
+}
+CIMA.choques = [];
+function choquesCima(c) {
+  CIMA.choques = CIMA.choques.filter(ch => {
+    ch.t += 1 / 60; const q = ch.t / 1.2;
+    c.save();
+    for (let i = 0; i < 6; i++) { const a = i * 1.05 + .3, d = 8 + q * 34; c.fillStyle = `rgba(255,255,255,${.6 * (1 - q)})`; c.beginPath(); c.arc(ch.x + Math.cos(a) * d, ch.y + Math.sin(a) * d * .6 - q * 20, 9 + q * 12, 0, Math.PI * 2); c.fill(); }
+    c.globalCompositeOperation = "lighter";
+    ch.p.forEach(pt => { const d = pt.v * q * 70, px = ch.x + Math.cos(pt.a) * d, py = ch.y + Math.sin(pt.a) * d + q * q * 30;
+      c.fillStyle = pt.gelo ? `rgba(200,240,255,${1 - q})` : `rgba(255,${120 + pt.v * 80},30,${1 - q})`;
+      c.save(); c.translate(px, py); c.rotate(pt.a + q * 6); if (pt.gelo) c.fillRect(-3, -1.5, 6, 3); else { c.beginPath(); c.arc(0, 0, 3.2 * (1 - q) + .5, 0, Math.PI * 2); c.fill(); } c.restore(); });
+    c.restore();
+    return ch.t < 1.2;
+  });
+}
 function faiscasCima(c) {
+  for (const f of A.fx) if (f.txt === "-1" && !f.faiscaCima && choqueGeloFogo(f)) {
+    f.faiscaCima = true; somEmoji("choque");
+    CIMA.choques.push({ x: f.x, y: f.y - 20, t: 0, p: Array.from({ length: 18 }, (_, i) => ({ a: i / 18 * Math.PI * 2 + Math.random() * .3, v: .5 + Math.random() * .6, gelo: i % 2 === 0 })) });
+  }
+  choquesCima(c);
   for (const f of A.fx) if (f.txt === "-1" && !f.faiscaCima && atiradorBuracoNegro()) { f.faiscaCima = true; CIMA.buracos.push({ x: f.x, y: f.y - 20, t: 0 }); somEmoji("buraconegro"); }
   buracosCima(c);
   for (const f of A.fx) if (f.txt === "-1" && !f.faiscaCima) {
@@ -2047,6 +2127,69 @@ function desenharAcessorio2D(c, skin, x, y) {
       // anel de fótons bem fino colado na cabeça
       c.strokeStyle = `rgba(255,220,170,${.22 + .12 * Math.sin(t * 5)})`; c.lineWidth = 1; c.beginPath(); c.arc(hx, hy, 16.6, 0, Math.PI * 2); c.stroke();
       disco(true);
+      c.restore();
+      break;
+    }
+    case "gelo": case "fogo": case "gelofogo": {
+      const t = performance.now() / 1000, gelo = skin !== "fogo", fogo = skin !== "gelo", meio = skin === "gelofogo";
+      if (meio) {   // metade da roupa azul (lado esquerdo)
+        c.save(); c.beginPath(); c.rect(x - 22, y - 22, 22, 34); c.clip();
+        c.fillStyle = "#5fb3e6"; c.beginPath(); c.roundRect ? c.roundRect(x - 15, y - 20, 30, 30, 8) : c.rect(x - 15, y - 20, 30, 30); c.fill();
+        c.restore();
+        c.strokeStyle = "#ffffff"; c.lineWidth = 1.5; c.beginPath(); c.moveTo(x, y - 20); c.lineTo(x - 2, y - 12); c.lineTo(x + 2, y - 6); c.lineTo(x, y + 10); c.stroke();
+      }
+      const cristal = (cx, cy, h, ang) => { c.save(); c.translate(cx, cy); c.rotate(ang); const g = c.createLinearGradient(0, -h, 0, 0); g.addColorStop(0, "#ffffff"); g.addColorStop(1, "#7fd0ff");
+        c.fillStyle = g; c.strokeStyle = "rgba(255,255,255,.9)"; c.lineWidth = 1; c.beginPath(); c.moveTo(-3.5, 0); c.lineTo(0, -h); c.lineTo(3.5, 0); c.closePath(); c.fill(); c.stroke(); c.restore(); };
+      const chama = (cx, cy, h, fase) => { const bal = Math.sin(t * 9 + fase) * 2.2, hh = h * (.85 + .15 * Math.sin(t * 13 + fase));
+        const g = c.createLinearGradient(cx, cy, cx, cy - hh); g.addColorStop(0, "#ff3d1f"); g.addColorStop(.55, "#ff9a1f"); g.addColorStop(1, "#ffe66b");
+        c.fillStyle = g; c.beginPath(); c.moveTo(cx - 5, cy); c.quadraticCurveTo(cx - 6 + bal, cy - hh * .55, cx + bal, cy - hh); c.quadraticCurveTo(cx + 6 + bal, cy - hh * .55, cx + 5, cy); c.closePath(); c.fill(); };
+      const floco = (fx, fy, r, a) => { c.save(); c.translate(fx, fy); c.rotate(a); c.strokeStyle = "rgba(235,250,255,.95)"; c.lineWidth = 1.2; c.beginPath();
+        for (let i = 0; i < 6; i++) { const aa = i * Math.PI / 3; c.moveTo(0, 0); c.lineTo(Math.cos(aa) * r, Math.sin(aa) * r); } c.stroke(); c.restore(); };
+      // coroa: cristais (gelo) e/ou chamas (fogo)
+      const pontas = [-12, -6, 0, 6, 12];
+      pontas.forEach((dx, i) => {
+        const cy = hy - Math.sqrt(Math.max(0, 225 - dx * dx)) + 3, h = i === 2 ? 15 : i % 2 ? 11 : 8, ang = dx * .04;
+        if (meio ? dx < 0 : gelo) cristal(hx + dx, cy, h, ang); else if (meio ? dx > 0 : fogo) chama(hx + dx, cy, h + 4, i * 1.7);
+        else { cristal(hx - 1.5, cy, h, -.1); chama(hx + 1.5, cy, h + 2, 2); }
+      });
+      if (gelo) {   // flocos girando e fumacinha de frio saindo da boca
+        for (let i = 0; i < (meio ? 3 : 5); i++) { const a = t * 1.2 + i * (meio ? 2.1 : 1.26), fx = x + Math.cos(a) * 27, fy = y - 16 + Math.sin(a) * 15; if (!meio || Math.cos(a) < 0) floco(fx, fy, 3.2, t + i); }
+        if (!meio) { const f = (t * .8) % 1; c.fillStyle = `rgba(230,248,255,${.7 * (1 - f)})`; c.beginPath(); c.arc(hx + 12 + f * 12, hy + 3 - f * 3, 2.5 + f * 4, 0, Math.PI * 2); c.fill(); }
+        c.strokeStyle = "rgba(255,255,255,.7)"; c.lineWidth = 1; c.beginPath(); c.moveTo(x - 11, y - 14); c.lineTo(x - 6, y - 9); c.moveTo(x - 9, y - 4); c.lineTo(x - 4, y + 1); if (!meio) { c.moveTo(x + 5, y - 15); c.lineTo(x + 10, y - 10); } c.stroke();
+      }
+      if (fogo) {   // faíscas subindo e chama no peito
+        c.save(); c.globalCompositeOperation = "lighter";
+        for (let i = 0; i < 7; i++) { const f = (t * .9 + i / 7) % 1, sx = x + (meio ? 6 + (i % 3) * 6 : -16 + (i * 13) % 32) + Math.sin(t * 4 + i) * 3, sy = y + 10 - f * 60; c.fillStyle = `rgba(255,${180 - f * 100},40,${1 - f})`; c.beginPath(); c.arc(sx, sy, 1.8 - f, 0, Math.PI * 2); c.fill(); }
+        c.restore();
+        if (!meio) chama(x, y + 2, 13, 0);
+      }
+      if (meio) {   // anel de gelo e fogo girando e o símbolo no peito
+        const a0 = t * 1.6;
+        c.lineWidth = 3; c.strokeStyle = "rgba(127,208,255,.9)"; c.beginPath(); c.ellipse(x, y - 14, 30, 9, -.15, a0, a0 + Math.PI); c.stroke();
+        c.strokeStyle = "rgba(255,140,40,.9)"; c.beginPath(); c.ellipse(x, y - 14, 30, 9, -.15, a0 + Math.PI, a0 + Math.PI * 2); c.stroke();
+        c.fillStyle = "#ffffff"; c.beginPath(); c.arc(x, y - 4, 6, 0, Math.PI * 2); c.fill();
+        c.fillStyle = "#3d8fe6"; c.beginPath(); c.arc(x, y - 4, 6, Math.PI / 2, Math.PI * 1.5); c.fill();
+        c.fillStyle = "#ff6a2a"; c.beginPath(); c.arc(x, y - 4, 6, -Math.PI / 2, Math.PI / 2); c.fill();
+      }
+      // brilho em volta (aura), chão e mãos
+      c.save(); c.globalCompositeOperation = "lighter";
+      const aura = (cx, cor, a) => { const g = c.createRadialGradient(cx, y - 18, 6, cx, y - 18, 44); g.addColorStop(0, `rgba(${cor},0)`); g.addColorStop(.55, `rgba(${cor},${a})`); g.addColorStop(1, `rgba(${cor},0)`); c.fillStyle = g; c.beginPath(); c.arc(cx, y - 18, 44, 0, Math.PI * 2); c.fill(); };
+      const pulso = .16 + .06 * Math.sin(t * 3);
+      if (meio) { c.save(); c.beginPath(); c.rect(x - 50, y - 70, 50, 110); c.clip(); aura(x, "110,200,255", pulso); c.restore(); c.save(); c.beginPath(); c.rect(x, y - 70, 50, 110); c.clip(); aura(x, "255,120,40", pulso); c.restore(); }
+      else aura(x, gelo ? "110,200,255" : "255,120,40", pulso);
+      // chão: gelo rachado e/ou chamas em roda
+      for (let i = 0; i < 14; i++) {
+        const a = i / 14 * Math.PI * 2 + t * (gelo && !meio ? .3 : -.6), ex = x + Math.cos(a) * 24, ey = y + 25 + Math.sin(a) * 7, ehGelo = meio ? Math.cos(a) < 0 : gelo;
+        if (ehGelo) { c.fillStyle = `rgba(210,240,255,${.55 + .3 * Math.sin(t * 4 + i)})`; c.beginPath(); c.moveTo(ex - 2.5, ey); c.lineTo(ex, ey - 6); c.lineTo(ex + 2.5, ey); c.closePath(); c.fill(); }
+        else { const h = 6 + 3 * Math.sin(t * 12 + i * 2); c.fillStyle = `rgba(255,${120 + (i % 3) * 40},40,.8)`; c.beginPath(); c.moveTo(ex - 2.5, ey); c.quadraticCurveTo(ex, ey - h * 1.3, ex + 2.5, ey); c.fill(); }
+      }
+      c.restore();
+      // mãos: cristal (gelo) e chama (fogo)
+      const maoE = meio ? "gelo" : gelo ? "gelo" : "fogo", maoD = meio ? "fogo" : gelo ? "gelo" : "fogo";
+      [[x - 20, maoE], [x + 20, maoD]].forEach(([mx, tipo], i) => { if (tipo === "gelo") { cristal(mx, y + 4, 9, i ? .3 : -.3); floco(mx, y + 6, 2.4, t * 2); } else chama(mx, y + 6, 12, i * 3); });
+      // olhos brilhando
+      c.save(); c.globalCompositeOperation = "lighter";
+      [[hx - 5, meio ? "120,210,255" : gelo ? "120,210,255" : "255,170,40"], [hx + 5, meio ? "255,170,40" : gelo ? "120,210,255" : "255,170,40"]].forEach(([ox, cor]) => { const g = c.createRadialGradient(ox, hy - 2, 0, ox, hy - 2, 5); g.addColorStop(0, `rgba(${cor},.9)`); g.addColorStop(1, `rgba(${cor},0)`); c.fillStyle = g; c.beginPath(); c.arc(ox, hy - 2, 5, 0, Math.PI * 2); c.fill(); });
       c.restore();
       break;
     }
@@ -2564,6 +2707,14 @@ function texturaArremesso(k) {
   if (!TEX_ARR[k]) TEX_ARR[k] = texturaCanvas(128, 128, (c) => { c.font = "100px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(arremessoInfo(k).icone, 64, 70); });
   return TEX_ARR[k];
 }
+function choque3D(x, z) {
+  const g = new THREE.Group(); g.position.set(x, 1, z);
+  const vapor = new THREE.Mesh(new THREE.SphereGeometry(.4, 14, 10), new THREE.MeshBasicMaterial({ color: "#ffffff", transparent: true, opacity: .6, depthWrite: false })); g.add(vapor);
+  const p = Array.from({ length: 16 }, (_, i) => { const gelo = i % 2 === 0, m = new THREE.Mesh(gelo ? new THREE.OctahedronGeometry(.07) : new THREE.SphereGeometry(.06, 6, 4), new THREE.MeshBasicMaterial({ color: gelo ? "#bfe8ff" : (i % 4 === 1 ? "#ffb347" : "#ff5a1f") }));
+    g.add(m); const a = i / 16 * Math.PI * 2; return { m, v: new THREE.Vector3(Math.cos(a) * (2 + Math.random() * 2), 2 + Math.random() * 2.5, Math.sin(a) * (2 + Math.random() * 2)) }; });
+  F.scene.add(g); F.choques = F.choques || []; F.choques.push({ g, vapor, p, t: 0 });
+  if (typeof somEmoji === "function") somEmoji("choque");
+}
 function buraco3D(x, z) {
   const g = new THREE.Group(); g.position.set(x, 1, z);
   g.add(new THREE.Mesh(new THREE.SphereGeometry(.28, 16, 12), new THREE.MeshBasicMaterial({ color: "#000000" })));
@@ -2689,6 +2840,37 @@ function acessorio3D(cabeca, skin) {
       for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2, m = new THREE.Mesh(new THREE.SphereGeometry(.018, 6, 4), new THREE.MeshBasicMaterial({ color: k % 2 ? "#ffd29a" : "#d6b8ff" })); m.position.set(Math.cos(a) * (.55 + (k % 3) * .06), (k % 2 ? .05 : -.05), Math.sin(a) * (.55 + (k % 3) * .06)); orbita.add(m); }
       // espiral na roupa
       for (let k = 0; k < 9; k++) { const a = k * .9, r = .02 + k * .016, m = new THREE.Mesh(new THREE.SphereGeometry(.016, 6, 4), new THREE.MeshBasicMaterial({ color: "#b07bff" })); m.position.set(Math.cos(a) * r, -.48 + Math.sin(a) * r, -.14); cabeca.add(m); }
+      break;
+    }
+    case "gelo": case "fogo": case "gelofogo": {
+      const gelo = skin !== "fogo", fogo = skin !== "gelo", meio = skin === "gelofogo";
+      const luz = (cor, op) => new THREE.MeshBasicMaterial({ color: cor, transparent: op < 1, opacity: op, blending: op < 1 ? THREE.AdditiveBlending : THREE.NormalBlending, depthWrite: op >= 1 });
+      if (meio) { const m = new THREE.Mesh(new THREE.BoxGeometry(.18, .42, .27), new THREE.MeshLambertMaterial({ color: "#5fb3e6" })); m.position.set(-.1, -.5, 0); cabeca.add(m); }
+      for (let k = 0; k < 7; k++) {   // coroa de cristais e/ou chamas
+        const a = Math.PI + (k - 3) * .42, x0 = Math.sin(a) * .17, z0 = Math.cos(a) * .17;
+        const deGelo = meio ? x0 < 0 : gelo, h = k === 3 ? .2 : .13;
+        const m = new THREE.Mesh(new THREE.ConeGeometry(deGelo ? .03 : .045, h, deGelo ? 4 : 8), deGelo ? new THREE.MeshLambertMaterial({ color: "#bfe8ff", transparent: true, opacity: .9 }) : luz(k % 2 ? "#ff9a1f" : "#ff4d1f", 1));
+        m.position.set(x0, .17 + h / 2, z0 - .04); m.rotation.z = -x0 * 1.5; cabeca.add(m);
+        if (!deGelo) { const n = new THREE.Mesh(new THREE.ConeGeometry(.022, h * .6, 6), luz("#ffe66b", .9)); n.position.set(x0, .16 + h * .3, z0 - .04); cabeca.add(n); }
+      }
+      if (gelo) { cabeca.add(new THREE.Mesh(new THREE.SphereGeometry(.32, 16, 12), luz("#7fd0ff", .14)));
+        const orb = new THREE.Group(); orb.userData.gira = 1.2; orb.position.y = -.3; cabeca.add(orb);
+        for (let k = 0; k < (meio ? 3 : 6); k++) { const a = (meio ? Math.PI / 2 : 0) + k / (meio ? 3 : 6) * Math.PI * (meio ? 1 : 2), m = new THREE.Mesh(new THREE.OctahedronGeometry(.04), luz("#e6f7ff", 1)); m.position.set(Math.cos(a) * .48, (k % 2 ? .1 : -.1), Math.sin(a) * .48); orb.add(m); } }
+      if (fogo) { cabeca.add(new THREE.Mesh(new THREE.SphereGeometry(.31, 16, 12), luz("#ff6a2a", .13)));
+        const orb = new THREE.Group(); orb.userData.gira = -1.6; orb.position.y = -.3; cabeca.add(orb);
+        for (let k = 0; k < (meio ? 3 : 6); k++) { const a = (meio ? -Math.PI / 2 : 0) + k / (meio ? 3 : 6) * Math.PI * (meio ? 1 : 2), m = new THREE.Mesh(new THREE.SphereGeometry(.03, 8, 6), luz(k % 2 ? "#ffb347" : "#ff5a1f", 1)); m.position.set(Math.cos(a) * .44, (k % 2 ? .18 : 0), Math.sin(a) * .44); orb.add(m); } }
+      // chão congelado / em chamas e ombreiras de cristal / chama
+      const chao = new THREE.Group(); chao.position.y = -1.22; chao.userData.gira = gelo && !meio ? .4 : -.8; cabeca.add(chao);
+      for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2, deGelo = meio ? Math.cos(a) < 0 : gelo;
+        const m = new THREE.Mesh(new THREE.ConeGeometry(deGelo ? .035 : .04, deGelo ? .12 : .16, deGelo ? 4 : 7), deGelo ? new THREE.MeshLambertMaterial({ color: "#d6f0ff", transparent: true, opacity: .9 }) : luz(k % 2 ? "#ff9a1f" : "#ff4d1f", 1));
+        m.position.set(Math.cos(a) * .42, .06, Math.sin(a) * .42); chao.add(m); }
+      const disco = new THREE.Mesh(new THREE.RingGeometry(.3, .5, 32), luz(meio ? "#ffffff" : gelo ? "#9fdcff" : "#ff7a2a", .35)); disco.rotation.x = -Math.PI / 2; disco.position.y = .01; chao.add(disco);
+      [[-1, meio ? true : gelo], [1, meio ? false : gelo]].forEach(([lado, deGelo]) => {
+        const m = new THREE.Mesh(new THREE.ConeGeometry(deGelo ? .05 : .06, deGelo ? .18 : .2, deGelo ? 4 : 8), deGelo ? new THREE.MeshLambertMaterial({ color: "#bfe8ff", transparent: true, opacity: .9 }) : luz("#ff7a2a", 1));
+        m.position.set(lado * .2, -.24, 0); m.rotation.z = -lado * .5; cabeca.add(m);
+        if (!deGelo) { const n = new THREE.Mesh(new THREE.ConeGeometry(.03, .12, 6), luz("#ffe66b", .9)); n.position.set(lado * .2, -.26, 0); n.rotation.z = -lado * .5; cabeca.add(n); } });
+      if (meio) { const anel = new THREE.Group(); anel.userData.gira = 1.4; anel.rotation.x = .25; anel.position.y = -.3; cabeca.add(anel);
+        [["#7fd0ff", 0], ["#ff7a2a", Math.PI]].forEach(([cor, r0]) => { const m = new THREE.Mesh(new THREE.TorusGeometry(.5, .015, 6, 30, Math.PI), luz(cor, .9)); m.rotation.x = Math.PI / 2; m.rotation.z = r0; anel.add(m); }); }
       break;
     }
     case "colecionador": {
@@ -2852,7 +3034,7 @@ function desenhar3D() {
     b.ry = b.ry ?? b.g.rotation.y;
     b.ry += ((b.dir - b.ry + Math.PI * 3) % (Math.PI * 2) - Math.PI) * .25;
     const ges = gestoAtivo(p), pose = ges ? poseGesto(ges.g.k, ges.f) : null;
-    const giros = ges ? { giro: 2, piao: 5, galactico: 1, buraconegro: 3, sideral: 2 }[ges.g.k] || 0 : 0;
+    const giros = ges ? { giro: 2, piao: 5, galactico: 1, buraconegro: 3, sideral: 2, gelofogo: 3 }[ges.g.k] || 0 : 0;
     b.g.rotation.set(pose ? pose.volta : 0, b.ry + (ges ? giros * ges.f * Math.PI * 2 : 0), pose ? -pose.incl : 0);
     if (pose) { b.g.position.y = pose.pulo * U * 1.6 + (pose.volta ? .5 * Math.sin(Math.PI * ges.f) : 0); b.g.translateX(pose.desl * U); b.g.scale.set((1 + pose.achata) * pose.tam, (1 - pose.achata) * pose.tam, (1 + pose.achata) * pose.tam); }
     else b.g.scale.set(1, 1, 1);
@@ -2900,8 +3082,14 @@ function desenhar3D() {
   // faíscas quando alguém leva bolada
   for (const fx of A.fx) if (fx.txt === "-1" && !fx.faisca3D) {
     fx.faisca3D = true;
-    if (atiradorBuracoNegro()) buraco3D(W3(fx.x), W3(fx.y)); else soltarFaiscas(W3(fx.x), W3(fx.y), "#ff4d6d");
+    if (atiradorBuracoNegro()) buraco3D(W3(fx.x), W3(fx.y)); else if (choqueGeloFogo(fx)) choque3D(W3(fx.x), W3(fx.y)); else soltarFaiscas(W3(fx.x), W3(fx.y), "#ff4d6d");
   }
+  F.choques = (F.choques || []).filter(ch => {
+    ch.t += 1 / 60; const q = ch.t / 1.2;
+    ch.vapor.scale.setScalar(.3 + q * 2.2); ch.vapor.material.opacity = .6 * (1 - q);
+    ch.p.forEach(pt => { pt.v.y -= 6 / 60; pt.m.position.addScaledVector(pt.v, 1 / 60); pt.m.rotation.x += .2; pt.m.scale.setScalar(Math.max(.1, 1 - q)); });
+    if (ch.t > 1.2) { F.scene.remove(ch.g); return false; } return true;
+  });
   F.buracos = (F.buracos || []).filter(b => {
     b.t += 1 / 60; const tam = Math.max(.01, Math.sin(Math.PI * Math.min(1, b.t / 1.3)));
     b.g.scale.setScalar(tam); b.g.rotation.y += .15;
@@ -3208,7 +3396,10 @@ const AV_CORES = ["#e4572e", "#2f80ed", "#37d99a", "#ffd23f", "#9b51e0", "#ff4d6
 /* fotos de perfil especiais (compradas na loja); a de edição limitada só vende até "ate" */
 const AV_ESPECIAIS = [{ k: "galactico", icone: "🪐", nome: "Galáctico", tipo: "avatar", limitada: true, preco: 200, ate: "2026-11-06T23:59:59-03:00" },
   { k: "buraconegro", icone: "🕳️", nome: "Buraco Negro", tipo: "avatar", limitada: true, preco: 200, ate: "2026-11-07T23:59:59-03:00" },
-  { k: "sideral", icone: "🧑‍🚀", nome: "Espaço Sideral", tipo: "avatar", limitada: true, preco: 200, ate: "2026-11-02T12:00:00-03:00" }];
+  { k: "sideral", icone: "🧑‍🚀", nome: "Espaço Sideral", tipo: "avatar", limitada: true, preco: 200, ate: "2026-11-02T12:00:00-03:00" },
+  { k: "gelo", icone: "❄️", nome: "Gelo", tipo: "avatar", preco: 200, limitada: true, ate: "2026-11-10T23:59:59-03:00" },
+  { k: "fogo", icone: "🔥", nome: "Fogo", tipo: "avatar", preco: 200, limitada: true, ate: "2026-11-10T23:59:59-03:00" },
+  { k: "gelofogo", icone: "☯️", nome: "Gelo e Fogo", tipo: "avatar", preco: 200, limitada: true, ate: "2026-11-10T23:59:59-03:00" }];
 const avEspecial = k => AV_ESPECIAIS.find(x => x.k === k) || null;
 const avValido = i => i === "" || AV_ICONES.includes(i) || !!avEspecial(i);
 function temAvatar(n, k) { return (((G.inv || {})[n] || {}).avatares || []).includes(k); }
@@ -3551,12 +3742,15 @@ acoes.som = el => { _acaoSom(el); atualizarSomArena(); if (G.som !== false) { mu
 
 <script>
 /* ================= Fundos ================= */
-const FUNDOS = [["basico", "Básico"], ["ceu", "Céu"], ["quadra", "Quadra"], ["floresta", "Floresta"], ["por", "Pôr do sol"], ["doce", "Doce"], ["noite", "Noite estrelada"], ["vulcao", "Vulcão"], ["galactico", "Galáctico"], ["buraconegro", "Buraco Negro"], ["sideral", "Espaço Sideral"]];
-const PRECO_FUNDO = { basico: 0, ceu: 50, quadra: 50, floresta: 75, por: 100, doce: 100, noite: 150, vulcao: 200, galactico: 300, buraconegro: 300, sideral: 300 };
+const FUNDOS = [["basico", "Básico"], ["ceu", "Céu"], ["quadra", "Quadra"], ["floresta", "Floresta"], ["por", "Pôr do sol"], ["doce", "Doce"], ["noite", "Noite estrelada"], ["vulcao", "Vulcão"], ["galactico", "Galáctico"], ["buraconegro", "Buraco Negro"], ["sideral", "Espaço Sideral"], ["gelo", "Gelo"], ["fogo", "Fogo"], ["gelofogo", "Gelo e Fogo"]];
+const PRECO_FUNDO = { basico: 0, ceu: 50, quadra: 50, floresta: 75, por: 100, doce: 100, noite: 150, vulcao: 200, galactico: 300, buraconegro: 300, sideral: 300, gelo: 300, fogo: 300, gelofogo: 300 };
 /* fundos de edição limitada: só dá para comprar até "ate" (horário de Brasília); quem comprou fica com ele */
 const FUNDOS_LIM = [{ k: "galactico", nome: "Galáctico", tipo: "fundo", limitada: true, preco: 300, ate: "2026-11-06T23:59:59-03:00" },
   { k: "buraconegro", nome: "Buraco Negro", tipo: "fundo", limitada: true, preco: 300, ate: "2026-11-07T23:59:59-03:00" },
-  { k: "sideral", nome: "Espaço Sideral", tipo: "fundo", limitada: true, preco: 300, ate: "2026-11-02T12:00:00-03:00" }];
+  { k: "sideral", nome: "Espaço Sideral", tipo: "fundo", limitada: true, preco: 300, ate: "2026-11-02T12:00:00-03:00" },
+  { k: "gelo", nome: "Gelo", tipo: "fundo", preco: 300, limitada: true, ate: "2026-11-10T23:59:59-03:00" },
+  { k: "fogo", nome: "Fogo", tipo: "fundo", preco: 300, limitada: true, ate: "2026-11-10T23:59:59-03:00" },
+  { k: "gelofogo", nome: "Gelo e Fogo", tipo: "fundo", preco: 300, limitada: true, ate: "2026-11-10T23:59:59-03:00" }];
 const fundoLim = k => FUNDOS_LIM.find(f => f.k === k) || null;
 const fundoNaVenda = k => { const f = fundoLim(k); return !f || naVenda(f); };
 function temFundo(n, k) { return k === "basico" || (((G.inv || {})[n] || {}).fundos || []).includes(k); }
@@ -3690,6 +3884,9 @@ const EMOJIS = [
   { k: "buraconegro", e: "🕳️", nome: "Buraco Negro", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-07T23:59:59-03:00" },
   { k: "diamante", e: "💎", nome: "Diamante", preco: 120, secreto: true },
   { k: "sideral", e: "🌠", nome: "Estrela Cadente", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-02T12:00:00-03:00" },
+  { k: "gelo", e: "🧊", nome: "Congelou", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
+  { k: "labareda", e: "🌋", nome: "Pegou Fogo", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
+  { k: "gelofogo", e: "☯️", nome: "Gelo e Fogo", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
 ];
 const emojiInfo = k => EMOJIS.find(e => e.k === k) || null;
 function temEmoji(n, k) { const e = emojiInfo(k); return !!e && (e.preco === 0 || (((G.inv || {})[n] || {}).emojis || []).includes(k)); }
@@ -3704,6 +3901,12 @@ const ITEM_PACOTE = {
   arremesso: (k, ic) => ({ icone: ic, nome: "Arremesso", preco: () => arremessoInfo(k).preco, tem: n => temArremesso(n, k), dar: n => { G.inv[n].arremessos = [...(G.inv[n].arremessos || []), k]; }, usar: n => { G.inv[n].arremesso = k; } }),
 };
 const PACOTES = [
+  { id: "gelofogo", nome: "Pacote Gelo e Fogo", emoji: "☯️", desconto: .25, ate: "2026-11-10T23:59:59-03:00",
+    itens: () => [ITEM_PACOTE.skin("gelofogo"), ITEM_PACOTE.fundo("gelofogo", "⚡"), ITEM_PACOTE.emoji("gelofogo", "☯️"), ITEM_PACOTE.gesto("gelofogo", "⚔️"), ITEM_PACOTE.foto("gelofogo", "☯️"), ITEM_PACOTE.arremesso("gelofogo", "💫")] },
+  { id: "gelo", nome: "Pacote Gelo", emoji: "❄️", desconto: .25, ate: "2026-11-10T23:59:59-03:00",
+    itens: () => [ITEM_PACOTE.skin("gelo"), ITEM_PACOTE.fundo("gelo", "🏔️"), ITEM_PACOTE.emoji("gelo", "🧊"), ITEM_PACOTE.gesto("gelo", "🥶"), ITEM_PACOTE.foto("gelo", "❄️"), ITEM_PACOTE.arremesso("gelo", "⛄")] },
+  { id: "fogo", nome: "Pacote Fogo", emoji: "🔥", desconto: .25, ate: "2026-11-10T23:59:59-03:00",
+    itens: () => [ITEM_PACOTE.skin("fogo"), ITEM_PACOTE.fundo("fogo", "🌄"), ITEM_PACOTE.emoji("labareda", "🌋"), ITEM_PACOTE.gesto("fogo", "💥"), ITEM_PACOTE.foto("fogo", "🔥"), ITEM_PACOTE.arremesso("fogo", "☄️")] },
   { id: "sideral", nome: "Pacote Espaço Sideral", emoji: "🌍", desconto: .1, ate: "2026-11-02T12:00:00-03:00",
     itens: () => [ITEM_PACOTE.skin("sideral"), ITEM_PACOTE.fundo("sideral", "🪐"), ITEM_PACOTE.emoji("sideral", "🌠"), ITEM_PACOTE.gesto("sideral", "🛸"), ITEM_PACOTE.foto("sideral", "🧑‍🚀"), ITEM_PACOTE.arremesso("sideral", "☄️")] },
   { id: "buraconegro", nome: "Pacote Buraco Negro", emoji: "🕳️", desconto: .25, ate: "2026-11-07T23:59:59-03:00",
@@ -3817,6 +4020,10 @@ const SONS_EMOJI = {
   fogo: [[40, 76, 0, .35, "sawtooth"]],
   coroa: [[67, 67, 0, .12, "square"], [72, 72, .12, .12, "square"], [76, 76, .24, .3, "square"]],
   buraconegro: [[84, 40, 0, .7, "sawtooth"], [36, 30, .55, .5, "sine"]],
+  gelo: [[100, 100, 0, .05, "sine"], [96, 96, .06, .05, "sine"], [103, 103, .12, .05, "sine"], [91, 84, .2, .4, "triangle"]],
+  labareda: [[40, 64, 0, .25, "sawtooth"], [64, 52, .22, .3, "sawtooth"], [76, 76, .5, .15, "square"]],
+  gelofogo: [[100, 100, 0, .08, "sine"], [96, 96, .1, .08, "sine"], [45, 70, .25, .35, "sawtooth"]],
+  choque: [[100, 70, 0, .5, "sawtooth"], [44, 32, 0, .45, "square"], [96, 96, .35, .08, "sine"], [91, 91, .45, .12, "sine"]],
   diamante: [[96, 96, 0, .06, "sine"], [100, 100, .07, .06, "sine"], [103, 103, .14, .06, "sine"], [108, 108, .21, .3, "sine"]],
   sideral: [[96, 72, 0, .45, "sine"], [91, 91, .4, .08, "triangle"], [96, 96, .5, .08, "triangle"], [100, 100, .6, .25, "triangle"]],
   galactico: [[60, 84, 0, .5, "sine"], [91, 91, .45, .12, "sine"], [96, 96, .58, .12, "sine"], [91, 91, .71, .3, "sine"]],
@@ -3885,6 +4092,12 @@ const GESTOS = [
   // edição limitada: só dá para comprar até "ate" (horário de Brasília); quem comprou fica com ele
   { k: "buraconegro", icone: "🌑", nome: "Sugado", preco: 250, dura: 2.2, tipo: "gesto", limitada: true, ate: "2026-11-07T23:59:59-03:00",
     som: [[84, 36, 0, 1, "sawtooth"], [36, 36, 1, .15, "sine"], [40, 90, 1.2, .5, "sine"], [96, 96, 1.7, .25, "triangle"]] },
+  { k: "gelo", icone: "🥶", nome: "Congelar", preco: 250, dura: 2.2, tipo: "gesto", limitada: true, ate: "2026-11-10T23:59:59-03:00",
+    som: [[96, 96, 0, .06, "sine"], [100, 100, .08, .06, "sine"], [91, 79, .2, .5, "triangle"], [60, 40, 1.45, .3, "square"], [96, 96, 1.6, .05, "sine"], [91, 91, 1.68, .05, "sine"]] },
+  { k: "fogo", icone: "💥", nome: "Explosão", preco: 250, dura: 1.8, tipo: "gesto", limitada: true, ate: "2026-11-10T23:59:59-03:00",
+    som: [[48, 72, 0, .5, "sawtooth"], [40, 28, .55, .5, "square"], [76, 76, .9, .2, "square"]] },
+  { k: "gelofogo", icone: "⚔️", nome: "Duelo", preco: 250, dura: 2.2, tipo: "gesto", limitada: true, ate: "2026-11-10T23:59:59-03:00",
+    som: [[96, 96, 0, .08, "sine"], [45, 60, .3, .25, "sawtooth"], [100, 100, .65, .08, "sine"], [48, 64, .95, .25, "sawtooth"], [84, 96, 1.4, .4, "triangle"]] },
   { k: "sideral", icone: "🛸", nome: "Disco Voador", preco: 250, dura: 2.4, tipo: "gesto", limitada: true, ate: "2026-11-02T12:00:00-03:00",
     som: [[72, 76, 0, .3, "sine"], [76, 72, .3, .3, "sine"], [72, 76, .6, .3, "sine"], [76, 72, .9, .3, "sine"], [79, 91, 1.3, .5, "triangle"], [91, 60, 1.8, .5, "sine"]] },
   { k: "galactico", icone: "🚀", nome: "Galáctico", preco: 250, dura: 2.4, tipo: "gesto", limitada: true, ate: "2026-11-06T23:59:59-03:00",
@@ -3934,12 +4147,41 @@ function poseGesto(k, f) {
   if (k === "piao") { r.larg = Math.cos(f * T * 5); r.pulo = Math.sin(Math.PI * f) * 18; }
   if (k === "mortal") { r.pulo = Math.sin(Math.PI * f) * 46; r.volta = -f * T; }
   if (k === "buraconegro") { const ida = f < .5 ? f * 2 : (1 - f) * 2; r.tam = Math.max(.05, 1 - ida * ida * .95); r.larg = Math.cos(f * T * 3); }   // gira e é sugado, depois volta
+  if (k === "gelo") { if (f > .62 && f < .75) r.desl = Math.sin(f * 220) * 4; else if (f >= .75) r.pulo = Math.sin(Math.PI * (f - .75) / .25) * 16; }   // congela parado, treme, quebra e pula
+  if (k === "fogo") { r.pulo = f < .45 ? Math.sin(Math.PI * f / .45) * 34 : 0; r.achata = f >= .45 && f < .6 ? .2 * Math.sin(Math.PI * (f - .45) / .15) : 0; }
+  if (k === "gelofogo") { r.larg = Math.cos(f * T * 3); r.pulo = Math.sin(Math.PI * f) * 14; }
   if (k === "sideral") { r.pulo = Math.sin(Math.PI * f) * 28; r.incl = Math.sin(f * T * 3) * .12 * fim; r.larg = Math.cos(f * T * 2); }   // puxado pela luz do disco voador, girando
   if (k === "galactico") { r.pulo = Math.sin(Math.PI * f) * 42; r.incl = Math.sin(f * T * 1.5) * .18 * fim; }   // flutua sem gravidade
   return r;
 }
 /* brilho extra do gesto Galáctico: aura de nebulosa e estrelas girando em volta */
 function efeitoGesto2D(c, x, y, k, f) {
+  if (k === "gelo") {
+    if (f < .72) {   // bloco de gelo em volta do bonequinho
+      const a = Math.min(1, f * 5); c.save(); c.globalAlpha = .55 * a; c.fillStyle = "#bfe8ff"; c.strokeStyle = "#ffffff"; c.lineWidth = 2;
+      c.beginPath(); c.roundRect ? c.roundRect(x - 26, y - 56, 52, 86, 8) : c.rect(x - 26, y - 56, 52, 86); c.fill(); c.globalAlpha = .9 * a; c.stroke();
+      c.strokeStyle = "rgba(255,255,255,.9)"; c.beginPath(); c.moveTo(x - 18, y - 46); c.lineTo(x - 8, y - 36); c.moveTo(x + 10, y + 10); c.lineTo(x + 18, y + 20); if (f > .6) { c.moveTo(x - 4, y - 56); c.lineTo(x + 3, y - 20); c.lineTo(x - 5, y + 30); } c.stroke(); c.restore();
+    } else {   // quebra: pedaços voando
+      const q = (f - .72) / .28;
+      for (let i = 0; i < 10; i++) { const a = i * .63, d = 10 + q * 46; c.fillStyle = `rgba(200,236,255,${1 - q})`; c.save(); c.translate(x + Math.cos(a) * d, y - 14 + Math.sin(a) * d * .8 + q * q * 20); c.rotate(a + q * 5); c.fillRect(-4, -3, 8, 6); c.restore(); }
+    }
+    return;
+  }
+  if (k === "fogo") {
+    if (f > .4) {   // anel de fogo saindo do chão
+      const q = Math.min(1, (f - .4) / .6), r = 10 + q * 52; c.save(); c.globalCompositeOperation = "lighter";
+      for (let i = 0; i < 3; i++) { c.strokeStyle = `rgba(255,${80 + i * 70},${30 + i * 20},${(1 - q) * (.9 - i * .2)})`; c.lineWidth = 7 - i * 2; c.beginPath(); c.ellipse(x, y + 24, r - i * 5, (r - i * 5) * .32, 0, 0, Math.PI * 2); c.stroke(); }
+      c.restore();
+    }
+    return;
+  }
+  if (k === "gelofogo") {   // bolinha de gelo e de fogo girando em volta
+    const forca = Math.sin(Math.PI * Math.min(1, f)), a = f * Math.PI * 6; c.save(); c.globalCompositeOperation = "lighter";
+    [["127,208,255", 0], ["255,130,40", Math.PI]].forEach(([cor, a0]) => { const bx = x + Math.cos(a + a0) * 32, by = y - 10 + Math.sin(a + a0) * 12;
+      const g = c.createRadialGradient(bx, by, 1, bx, by, 12 * forca + 1); g.addColorStop(0, "rgba(255,255,255,1)"); g.addColorStop(.4, `rgba(${cor},.95)`); g.addColorStop(1, `rgba(${cor},0)`);
+      c.fillStyle = g; c.beginPath(); c.arc(bx, by, 12 * forca + 1, 0, Math.PI * 2); c.fill(); });
+    c.restore(); return;
+  }
   if (k === "sideral") {
     const forca = Math.sin(Math.PI * Math.min(1, f)), t = performance.now() / 1000, uy = y - 58;
     // feixe de luz do disco até o chão
