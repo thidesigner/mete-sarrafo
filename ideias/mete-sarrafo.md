@@ -95,3 +95,14 @@ Botão **Missões** na tela inicial (lado direito). Ganha a etiqueta "🎁!" qua
 - **Contagem regressiva:** faixa vermelha na tela inicial quando um item limitado que o jogador ainda não tem acaba em até 48 h ("⏳ Espaço Sideral: Acaba em 2 dias (2/11)!"). Se já tem a skin mas falta algo da coleção, aparece "Coleção …". Tocar abre a loja.
 - Os valores são um ponto de partida para o Andre ajustar. Quem mudar a data do celular consegue pegar o presente de novo (não tem servidor para conferir).
 
+## Coleções Gelo contra Fogo (3/nov, ideia do Andre)
+
+Três coleções de **edição limitada**, à venda até **10/11 às 23h59** (Brasília). Depois somem da loja; quem comprou fica com tudo. Contam para o selo de colecionador.
+
+- **Gelo ❄️:** Skin Gelo 500 (roupa azul-gelo, coroa de cristais, flocos girando e fumacinha de frio), Fundo Gelo 300 (montanhas de neve, aurora e neve caindo), Emoji Congelou 🧊 150, Gesto Congelar 🥶 250 (vira estátua de gelo e quebra), Foto Gelo ❄️ 200, Arremesso Bola de Neve ❄️ 200.
+- **Fogo 🔥:** Skin Fogo 500 (roupa vermelha, chamas mexendo na cabeça, faíscas subindo e chama no peito), Fundo Fogo 300 (vulcão com lava e brasas subindo), Emoji Pegou Fogo 🌋 150, Gesto Explosão 💥 250 (pula e solta um anel de fogo), Foto Fogo 🔥 200, Arremesso Bola de Fogo 🔥 200.
+- **Gelo e Fogo ☯️:** Skin Gelo e Fogo 500 (metade azul, metade vermelha, cristais de um lado e chamas do outro, anel de gelo e fogo girando), Fundo Gelo e Fogo 300 (metade gelo, metade lava, com um raio no meio), Emoji Gelo e Fogo ☯️ 150, Gesto Duelo ⚔️ 250, Foto Gelo e Fogo ☯️ 200, Arremesso Cometa Gelo e Fogo ☯️ 200.
+- **Pacotes:** Pacote Gelo, Pacote Fogo e Pacote Gelo e Fogo, cada um com os 6 itens por 1.200 (em vez de 1.600, 25% de desconto). Quem já tem algum paga só o que falta.
+- **Gelo contra Fogo (efeito especial):** quando quem usa a skin Gelo acerta quem usa a skin Fogo (ou o contrário), sai um choque de vapor, cristais e chamas voando, com som de "tsss". Quem usa a skin Gelo e Fogo faz o choque em qualquer um que acertar. Funciona de cima, no 3D e no online.
+- Preço e prazo foram escolhidos pelo Claude (o Andre não disse); dá para mudar.
+
