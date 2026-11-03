@@ -49,6 +49,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 .hist { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .hist li { display: grid; gap: 2px; padding: 10px 12px; border-radius: 12px; background: var(--painel); border: 1px solid var(--linha); }
 .hist small { color: var(--suave); font-variant-numeric: tabular-nums; }
+.hist .topo { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.selo { font-size: 12px; font-weight: 800; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.selo.enviado { background: var(--bg); color: var(--suave); border: 1px solid var(--linha); }
+.selo.publicado { background: var(--verde-fundo); color: var(--verde); }
+.selo.erro { background: var(--erro-fundo); color: var(--erro); }
+.hist .obs { font-size: 13px; color: var(--suave); }
 .vazio { color: var(--suave); }
 code { font: 500 13px var(--mono); }
 a { color: var(--marca); font-weight: 800; }
@@ -74,8 +80,8 @@ a { color: var(--marca); font-weight: 800; }
   <div id="status" class="status info" hidden></div>
 
   <section class="painel">
-    <h2>Enviados daqui</h2>
-    <p class="dica">Fica só neste aparelho. Cada pedido leva alguns minutos para entrar no jogo; depois aparece em até 1 minuto para quem estiver jogando.</p>
+    <h2>Pedidos enviados</h2>
+    <p class="dica">Aparece igual no celular e no computador. Cada pedido leva alguns minutos para entrar no jogo; depois chega em até 1 minuto para quem estiver jogando.</p>
     <ul class="hist" id="hist"></ul>
     <p class="dica">Conferir: <a href="https://thidesigner.github.io/mete-sarrafo/" target="_blank" rel="noopener">jogo oficial</a> · <a href="https://github.com/thidesigner/mete-sarrafo/commits/main/avisos.json" target="_blank" rel="noopener">histórico do avisos.json</a></p>
   </section>
@@ -154,11 +160,18 @@ function atualizarPrevia() {
   const e = $("aviso-erro"); if (e) e.textContent = erro;
 }
 function mostrarStatus(tipo, texto) { const el = $("status"); el.hidden = false; el.className = "status " + tipo; el.textContent = texto; }
+/* Histórico compartilhado: fica no banco do artefato (coleção "pedidos"), igual em todos os aparelhos.
+   O Claude marca cada pedido como "publicado" ou "erro" depois de gravar o avisos.json. */
+let db = null, HIST = [], histPronto = false;
+const SELO = { enviado: "⏳ Enviado", publicado: "✅ No jogo", erro: "⚠️ Não publicou" };
 function renderHist() {
-  const h = ler("ce-hist", []);
-  $("hist").innerHTML = h.length ? h.slice().reverse().map(x => `<li><b>${esc(x.t1)}</b><small>Enviado em ${brHora(x.em)} · ${esc(x.t2)}</small></li>`).join("")
-    : `<li class="vazio">Nada enviado deste aparelho ainda. O primeiro pedido aparece aqui.</li>`;
+  const h = db ? HIST : ler("ce-hist", []);
+  if (db && !histPronto) { $("hist").innerHTML = `<li class="vazio">Carregando os pedidos…</li>`; return; }
+  $("hist").innerHTML = h.length ? h.slice().sort((a, b) => b.em - a.em).slice(0, 30).map(x => { const st = SELO[x.status] ? x.status : "enviado";
+    return `<li><div class="topo"><b>${esc(x.t1)}</b><span class="selo ${st}">${SELO[st]}</span></div><small>Enviado em ${brHora(x.em)}${x.aparelho ? " pelo " + esc(x.aparelho) : ""} · ${esc(x.t2)}</small>${x.obs ? `<span class="obs">${esc(x.obs)}</span>` : ""}</li>`; }).join("")
+    : `<li class="vazio">Nenhum pedido ainda. Quando você publicar, ele aparece aqui em todos os aparelhos.</li>`;
 }
+const aparelho = () => /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent) ? "celular" : "computador";
 
 document.addEventListener("click", e => {
   const aba = e.target.closest(".aba"); if (aba) { S.aba = aba.dataset.aba; renderForm(); return; }
@@ -174,8 +187,11 @@ async function publicar() {
   S.enviando = true; renderForm(); mostrarStatus("info", "Enviando o pedido…");
   const [t1, t2] = resumo(p);
   try {
-    await mcp.callTool(SERVIDOR, "fire_trigger", { trigger_id: TRIGGER_ID, text: "PEDIDO_JSON: " + JSON.stringify(p) }, { cache: false });
-    const h = ler("ce-hist", []); h.push({ em: Date.now(), t1, t2 }); gravar("ce-hist", h.slice(-30));
+    const em = Date.now(), pedidoId = "p" + em.toString(36);
+    await mcp.callTool(SERVIDOR, "fire_trigger", { trigger_id: TRIGGER_ID, text: "PEDIDO_JSON: " + JSON.stringify({ ...p, pedido_id: pedidoId }) }, { cache: false });
+    const reg = { em, t1, t2, acao: p.acao, status: "enviado", aparelho: aparelho() };
+    if (db) { try { await db.collection("pedidos").doc(pedidoId).set(reg); } catch {} }
+    else { const h = ler("ce-hist", []); h.push(reg); gravar("ce-hist", h.slice(-30)); }
     mostrarStatus("ok", "Pedido enviado! Em alguns minutos ele entra no jogo de todo mundo. Dá para acompanhar no histórico do avisos.json.");
     if (p.acao === "aviso") S.texto = ""; if (p.acao === "presente") S.codigo = "";
     renderHist();
@@ -194,6 +210,14 @@ async function publicar() {
 }
 
 renderForm(); renderHist();
+(async () => {
+  try { db = window.claude && window.claude.use ? await window.claude.use("db") : null; } catch { db = null; }
+  if (db) {
+    db.collection("pedidos").onSnapshot(snap => { HIST = (snap.docs || []).map(d => (typeof d.data === "function" ? d.data() : d.data) || {}).filter(x => x && x.em); histPronto = true; renderHist(); },
+      () => { histPronto = true; renderHist(); });
+  }
+  renderHist();
+})();
 (async () => {
   try { mcp = window.claude && window.claude.use ? await window.claude.use("mcp") : null; } catch { mcp = null; }
   mcpPronto = true;
