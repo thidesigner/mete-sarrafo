@@ -214,6 +214,15 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 @media (prefers-reduced-motion: reduce) { .lb-avatar.av-buraconegro { animation: none; } }
 .av-gelo { border-color: #bfe8ff !important; box-shadow: 0 0 12px rgba(127,208,255,.9); background: radial-gradient(circle at 30% 25%, #ffffff 0, #bfe8ff 25%, #5fb3e6 60%, #1f5f9e 100%) !important; }
 .av-fogo { border-color: #ffb347 !important; box-shadow: 0 0 12px rgba(255,120,40,.9); background: radial-gradient(circle at 50% 90%, #ffe66b 0, #ff9a1f 30%, #d9381e 65%, #5a0f05 100%) !important; }
+.lb-avatar.av-gelo { animation: avGelo 2.4s ease-in-out infinite; }
+.lb-avatar.av-fogo { animation: avFogo 1.4s ease-in-out infinite; }
+.lb-avatar.av-gelofogo { animation: avGeloFogo 2s ease-in-out infinite; }
+@keyframes avGelo { 50% { box-shadow: 0 0 20px rgba(191,232,255,1); } }
+@keyframes avFogo { 50% { box-shadow: 0 0 20px rgba(255,140,40,1), 0 -4px 14px rgba(255,220,100,.8); } }
+@keyframes avGeloFogo { 50% { box-shadow: -8px 0 18px rgba(127,208,255,1), 8px 0 18px rgba(255,120,40,1); } }
+.pacote.sk-limitada.pacote-gelo, .pacote.sk-limitada.pacote-fogo, .pacote.sk-limitada.pacote-gelofogo { animation: pacBrilho 2.6s ease-in-out infinite; }
+@keyframes pacBrilho { 50% { filter: brightness(1.12) saturate(1.15); } }
+@media (prefers-reduced-motion: reduce) { .lb-avatar.av-gelo, .lb-avatar.av-fogo, .lb-avatar.av-gelofogo, .pacote.sk-limitada.pacote-gelo, .pacote.sk-limitada.pacote-fogo, .pacote.sk-limitada.pacote-gelofogo { animation: none; } }
 .av-gelofogo { border-color: #ffffff !important; box-shadow: -4px 0 10px rgba(127,208,255,.8), 4px 0 10px rgba(255,120,40,.8); background: linear-gradient(90deg, #5fb3e6 0 50%, #d9381e 50% 100%) !important; }
 .av-sideral { position: relative; overflow: hidden; border-color: #7fd3ff !important; box-shadow: 0 0 12px rgba(110,198,255,.85);
   background: radial-gradient(circle at 78% 82%, #4cc96a 0 4%, transparent 4.5%), radial-gradient(circle at 80% 85%, #3d8fe6 0 16%, transparent 17%),
@@ -370,6 +379,9 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
   radial-gradient(1.6px 1.6px at 88% 30%, #d6b8ff 50%, transparent 52%), radial-gradient(1px 1px at 22% 88%, #fff 50%, transparent 52%);
   background-size: 160px 160px; animation: galaxia 40s linear infinite; }
 .bgf[data-fundo="gelo"] { background:
+  conic-gradient(from 150deg at 50% 0, #e6f7ff 0 60deg, transparent 0) 0 0 / 26px 24px repeat-x,
+  conic-gradient(from 155deg at 50% 0, rgba(200,236,255,.85) 0 50deg, transparent 0) 13px 0 / 26px 40px repeat-x,
+  radial-gradient(circle at 78% 16%, #ffffff 0 4.5%, rgba(220,240,255,.5) 5.5%, transparent 10%),
   radial-gradient(ellipse 70% 22% at 20% 100%, #ffffff 0 96%, transparent 100%), radial-gradient(ellipse 60% 26% at 85% 100%, #e6f4ff 0 96%, transparent 100%),
   linear-gradient(150deg, transparent 62%, #dff1ff 62.3%, #b8dcf5 70%, transparent 70.3%), linear-gradient(210deg, transparent 60%, #eaf6ff 60.3%, #c4e3f8 69%, transparent 69.3%),
   radial-gradient(ellipse 80% 18% at 40% 22%, rgba(80,255,190,.35) 0%, transparent 70%), radial-gradient(ellipse 60% 14% at 70% 30%, rgba(170,120,255,.3) 0%, transparent 70%),
@@ -380,6 +392,8 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
   background-size: 140px 140px; animation: neveCai 9s linear infinite; }
 @keyframes neveCai { to { background-position: 20px 140px; } }
 .bgf[data-fundo="fogo"] { background:
+  repeating-linear-gradient(170deg, transparent 0 34px, rgba(255,140,40,.55) 34px 36px, transparent 36px 70px) 0 100% / 100% 22% no-repeat,
+  radial-gradient(ellipse 14% 22% at 50% 30%, rgba(90,70,70,.45) 0%, transparent 70%),
   radial-gradient(ellipse 22% 10% at 50% 46%, rgba(255,230,107,.95) 0%, rgba(255,120,30,.7) 45%, transparent 75%),
   linear-gradient(118deg, transparent 49%, #2a0a05 49.3% 100%) 0 0 / 50% 100% no-repeat, linear-gradient(242deg, transparent 49%, #2a0a05 49.3% 100%) 100% 0 / 50% 100% no-repeat,
   radial-gradient(ellipse 90% 20% at 50% 100%, #ff6a1f 0%, #d9381e 40%, transparent 75%),
@@ -390,6 +404,8 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
   background-size: 150px 150px; animation: brasaSobe 7s linear infinite; }
 @keyframes brasaSobe { to { background-position: -15px -150px; } }
 .bgf[data-fundo="gelofogo"] { background:
+  radial-gradient(circle at 50% 50%, #ffffff 0 2%, rgba(200,230,255,.8) 3.5%, transparent 9%),
+  conic-gradient(from 150deg at 50% 0, #e6f7ff 0 60deg, transparent 0) 0 0 / 26px 24px repeat-x,
   linear-gradient(100deg, transparent 47.5%, rgba(255,255,255,.95) 49.3% 50.7%, transparent 52.5%),
   radial-gradient(ellipse 50% 30% at 50% 50%, rgba(255,255,255,.35) 0%, transparent 70%),
   linear-gradient(90deg, #0b2a55 0%, #3d8fe6 40%, #bfe8ff 49%, #ffb347 51%, #d9381e 60%, #3a0a05 100%); }
@@ -1630,7 +1646,9 @@ function desenharArremesso2D(c, k, x, y, giro) {
     c.restore();
     if (k === "gelo") { const g = c.createRadialGradient(x - 3, y - 3, 1, x, y, 10); g.addColorStop(0, "#ffffff"); g.addColorStop(1, "#a9d8f5"); c.fillStyle = g; c.beginPath(); c.arc(x, y, 9, 0, Math.PI * 2); c.fill(); }
     else if (k === "fogo") { const g = c.createRadialGradient(x, y, 1, x, y, 11); g.addColorStop(0, "#fff3b0"); g.addColorStop(.5, "#ff9a1f"); g.addColorStop(1, "#d9381e"); c.fillStyle = g; c.beginPath(); c.arc(x, y, 10, 0, Math.PI * 2); c.fill(); }
-    else { c.fillStyle = "#7fd0ff"; c.beginPath(); c.arc(x, y, 9, Math.PI / 2 + giro, Math.PI * 1.5 + giro); c.fill(); c.fillStyle = "#ff7a2a"; c.beginPath(); c.arc(x, y, 9, -Math.PI / 2 + giro, Math.PI / 2 + giro); c.fill(); }
+    if (k !== "fogo") { const br = .5 + .5 * Math.sin(t * 14); c.fillStyle = `rgba(255,255,255,${br})`; c.beginPath(); for (let j = 0; j < 8; j++) { const rr = j % 2 ? 1 : 4, aa = j * Math.PI / 4; c.lineTo(x - 4 + Math.cos(aa) * rr, y - 4 + Math.sin(aa) * rr); } c.closePath(); c.fill(); }
+    if (k !== "gelo") for (let i = 0; i < 3; i++) { const d = 30 + i * 9; c.fillStyle = `rgba(80,70,70,${.25 - i * .06})`; c.beginPath(); c.arc(x + Math.cos(a) * d, y + Math.sin(a) * d - i * 2, 4 + i * 2, 0, Math.PI * 2); c.fill(); }
+    if (k === "gelofogo") { c.fillStyle = "#7fd0ff"; c.beginPath(); c.arc(x, y, 9, Math.PI / 2 + giro, Math.PI * 1.5 + giro); c.fill(); c.fillStyle = "#ff7a2a"; c.beginPath(); c.arc(x, y, 9, -Math.PI / 2 + giro, Math.PI / 2 + giro); c.fill(); }
     return;
   }
   if (k === "moedaouro") {
@@ -2170,6 +2188,20 @@ function desenharAcessorio2D(c, skin, x, y) {
         c.fillStyle = "#ffffff"; c.beginPath(); c.arc(x, y - 4, 6, 0, Math.PI * 2); c.fill();
         c.fillStyle = "#3d8fe6"; c.beginPath(); c.arc(x, y - 4, 6, Math.PI / 2, Math.PI * 1.5); c.fill();
         c.fillStyle = "#ff6a2a"; c.beginPath(); c.arc(x, y - 4, 6, -Math.PI / 2, Math.PI / 2); c.fill();
+      }
+      // pingentes de gelo na barra da roupa e rachaduras de lava brilhando
+      if (gelo) for (let i = 0; i < (meio ? 3 : 6); i++) { const px = x - 13 + i * 5.2, h = 4 + (i % 2) * 3 + Math.sin(t * 2 + i) * .6;
+        const g = c.createLinearGradient(px, y + 9, px, y + 9 + h); g.addColorStop(0, "#ffffff"); g.addColorStop(1, "rgba(160,220,255,.6)"); c.fillStyle = g; c.beginPath(); c.moveTo(px - 2, y + 9); c.lineTo(px, y + 9 + h); c.lineTo(px + 2, y + 9); c.closePath(); c.fill(); }
+      if (fogo) { const br = .55 + .45 * Math.sin(t * 5); c.save(); c.strokeStyle = `rgba(255,${170 + 60 * br},60,${.6 + .4 * br})`; c.lineWidth = 1.4; c.shadowColor = "#ff8a1f"; c.shadowBlur = 6; c.beginPath();
+        if (meio) { c.moveTo(x + 4, y - 16); c.lineTo(x + 9, y - 10); c.lineTo(x + 7, y - 3); c.moveTo(x + 9, y - 10); c.lineTo(x + 13, y - 12); c.moveTo(x + 6, y + 2); c.lineTo(x + 11, y + 7); }
+        else { c.moveTo(x - 11, y - 16); c.lineTo(x - 6, y - 11); c.lineTo(x - 9, y - 3); c.moveTo(x - 6, y - 11); c.lineTo(x - 1, y - 13); c.moveTo(x + 10, y - 15); c.lineTo(x + 6, y - 8); c.lineTo(x + 11, y + 2); c.moveTo(x - 4, y + 4); c.lineTo(x + 2, y + 8); }
+        c.stroke(); c.restore(); }
+      if (gelo && !meio) for (let i = 0; i < 6; i++) { const f = (t * .35 + i / 6) % 1, sx = x - 34 + ((i * 23) % 68) + Math.sin(t + i) * 4, sy = y - 70 + f * 100; c.fillStyle = `rgba(255,255,255,${.9 * Math.sin(Math.PI * f)})`; c.beginPath(); c.arc(sx, sy, 1.5, 0, Math.PI * 2); c.fill(); }
+      if (fogo && !meio) for (let i = 0; i < 3; i++) { const f = (t * .5 + i / 3) % 1; c.fillStyle = `rgba(90,70,70,${.35 * (1 - f)})`; c.beginPath(); c.arc(hx - 6 + i * 6 + Math.sin(t * 2 + i) * 4, hy - 26 - f * 26, 3 + f * 6, 0, Math.PI * 2); c.fill(); }
+      if (meio) {   // raios estalando entre o lado gelo e o lado fogo
+        c.save(); c.globalCompositeOperation = "lighter"; c.strokeStyle = `rgba(230,240,255,${.5 + .5 * Math.abs(Math.sin(t * 17))})`; c.lineWidth = 1.6; c.shadowColor = "#bfe8ff"; c.shadowBlur = 8;
+        for (const lado of [-1, 1]) { c.beginPath(); let px = x, py = y - 46; c.moveTo(px, py); for (let j = 0; j < 4; j++) { px = x + lado * (6 + j * 5) + Math.sin(t * 30 + j) * 3; py = y - 46 + j * 7 + Math.cos(t * 23 + j) * 2; c.lineTo(px, py); } c.stroke(); }
+        c.restore();
       }
       // brilho em volta (aura), chão e mãos
       c.save(); c.globalCompositeOperation = "lighter";
@@ -2859,6 +2891,11 @@ function acessorio3D(cabeca, skin) {
       if (fogo) { cabeca.add(new THREE.Mesh(new THREE.SphereGeometry(.31, 16, 12), luz("#ff6a2a", .13)));
         const orb = new THREE.Group(); orb.userData.gira = -1.6; orb.position.y = -.3; cabeca.add(orb);
         for (let k = 0; k < (meio ? 3 : 6); k++) { const a = (meio ? -Math.PI / 2 : 0) + k / (meio ? 3 : 6) * Math.PI * (meio ? 1 : 2), m = new THREE.Mesh(new THREE.SphereGeometry(.03, 8, 6), luz(k % 2 ? "#ffb347" : "#ff5a1f", 1)); m.position.set(Math.cos(a) * .44, (k % 2 ? .18 : 0), Math.sin(a) * .44); orb.add(m); } }
+      // pingentes de gelo na barra e rachaduras de lava no peito
+      if (gelo) for (let k = 0; k < (meio ? 3 : 6); k++) { const m = new THREE.Mesh(new THREE.ConeGeometry(.022, .1 + (k % 2) * .05, 4), new THREE.MeshLambertMaterial({ color: "#e6f7ff", transparent: true, opacity: .9 })); m.rotation.x = Math.PI; m.position.set(-.15 + k * .06, -.76, -.13); cabeca.add(m); }
+      if (fogo) [[.06, -.4, .5], [.1, -.5, -.6], [.04, -.6, .3], ...(meio ? [] : [[-.08, -.42, -.5], [-.1, -.56, .6]])].forEach(([x0, y0, r]) => { const m = new THREE.Mesh(new THREE.BoxGeometry(.012, .1, .01), luz("#ffb347", 1)); m.position.set(x0, y0, -.142); m.rotation.z = r; cabeca.add(m); });
+      if (meio) { const raio = new THREE.Group(); raio.userData.gira = 3; raio.position.y = .05; cabeca.add(raio);
+        for (let k = 0; k < 4; k++) { const m = new THREE.Mesh(new THREE.BoxGeometry(.012, .14, .012), luz("#e6f0ff", .9)); const a = k / 4 * Math.PI * 2; m.position.set(Math.cos(a) * .3, .12 + (k % 2) * .05, Math.sin(a) * .3); m.rotation.z = (k % 2 ? .6 : -.6); raio.add(m); } }
       // chão congelado / em chamas e ombreiras de cristal / chama
       const chao = new THREE.Group(); chao.position.y = -1.22; chao.userData.gira = gelo && !meio ? .4 : -.8; cabeca.add(chao);
       for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2, deGelo = meio ? Math.cos(a) < 0 : gelo;
@@ -4064,8 +4101,20 @@ function desenharEmojis2D(c) {
   for (const p of A.P || []) {
     const e = p.vivo && emojiAtivo(p); if (!e) continue;
     const x = p.x, y = Math.max(40, p.y - 112);
+    const esp = ["gelo", "labareda", "gelofogo"].includes(e.k), t = performance.now() / 1000;
+    if (esp) {   // balão especial dos emojis Gelo, Fogo e Gelo e Fogo
+      const g = c.createLinearGradient(x - 34, y, x + 34, y);
+      if (e.k === "gelo") { g.addColorStop(0, "#e6f7ff"); g.addColorStop(1, "#9fdcff"); } else if (e.k === "labareda") { g.addColorStop(0, "#ffe9a8"); g.addColorStop(1, "#ff9a5a"); } else { g.addColorStop(0, "#bfe8ff"); g.addColorStop(.5, "#ffffff"); g.addColorStop(1, "#ffb37a"); }
+      c.fillStyle = g; c.strokeStyle = e.k === "gelo" ? "#3d8fe6" : e.k === "labareda" ? "#d9381e" : "#7c3aed"; c.lineWidth = 4;
+      c.beginPath(); c.arc(x, y, 34, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.save(); c.globalCompositeOperation = "lighter";
+      for (let i = 0; i < 8; i++) { const a = t * 2 + i * Math.PI / 4, gelo = e.k === "gelo" || (e.k === "gelofogo" && i % 2), px = x + Math.cos(a) * 44, py = y + Math.sin(a) * 44;
+        c.fillStyle = gelo ? "rgba(200,240,255,.9)" : "rgba(255,150,40,.9)"; c.beginPath(); if (gelo) { for (let j = 0; j < 8; j++) { const rr = j % 2 ? 1.2 : 4, aa = j * Math.PI / 4; c.lineTo(px + Math.cos(aa) * rr, py + Math.sin(aa) * rr); } c.closePath(); } else c.arc(px, py, 3 + Math.sin(t * 10 + i), 0, Math.PI * 2); c.fill(); }
+      c.restore(); c.fillStyle = g;
+    } else {
     c.fillStyle = "rgba(244,247,251,.95)"; c.strokeStyle = "#0b1b33"; c.lineWidth = 4;
     c.beginPath(); c.arc(x, y, 34, 0, Math.PI * 2); c.fill(); c.stroke();
+    }
     c.beginPath(); c.moveTo(x - 9, y + 30); c.lineTo(x, y + 48); c.lineTo(x + 9, y + 30); c.fill();
     c.font = "40px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(e.e, x, y + 2);
   }
@@ -4164,7 +4213,9 @@ function efeitoGesto2D(c, x, y, k, f) {
     } else {   // quebra: pedaços voando
       const q = (f - .72) / .28;
       for (let i = 0; i < 10; i++) { const a = i * .63, d = 10 + q * 46; c.fillStyle = `rgba(200,236,255,${1 - q})`; c.save(); c.translate(x + Math.cos(a) * d, y - 14 + Math.sin(a) * d * .8 + q * q * 20); c.rotate(a + q * 5); c.fillRect(-4, -3, 8, 6); c.restore(); }
+      if (q < .25) { c.save(); c.globalCompositeOperation = "lighter"; c.fillStyle = `rgba(220,245,255,${.8 * (1 - q / .25)})`; c.beginPath(); c.arc(x, y - 14, 30 + q * 80, 0, Math.PI * 2); c.fill(); c.restore(); }
     }
+    if (f < .72) for (let i = 0; i < 6; i++) { const a = f * 9 + i * 1.05, fx = x + Math.cos(a) * 36, fy = y - 14 + Math.sin(a) * 30; c.save(); c.translate(fx, fy); c.rotate(a); c.strokeStyle = "rgba(255,255,255,.9)"; c.lineWidth = 1.3; c.beginPath(); for (let j = 0; j < 6; j++) { const aa = j * Math.PI / 3; c.moveTo(0, 0); c.lineTo(Math.cos(aa) * 4, Math.sin(aa) * 4); } c.stroke(); c.restore(); }
     return;
   }
   if (k === "fogo") {
@@ -4172,6 +4223,11 @@ function efeitoGesto2D(c, x, y, k, f) {
       const q = Math.min(1, (f - .4) / .6), r = 10 + q * 52; c.save(); c.globalCompositeOperation = "lighter";
       for (let i = 0; i < 3; i++) { c.strokeStyle = `rgba(255,${80 + i * 70},${30 + i * 20},${(1 - q) * (.9 - i * .2)})`; c.lineWidth = 7 - i * 2; c.beginPath(); c.ellipse(x, y + 24, r - i * 5, (r - i * 5) * .32, 0, 0, Math.PI * 2); c.stroke(); }
       c.restore();
+      for (let i = 0; i < 4; i++) { const sx = x - 18 + i * 12, q2 = Math.min(1, (f - .4) / .6); c.fillStyle = `rgba(90,80,80,${.4 * (1 - q2)})`; c.beginPath(); c.arc(sx, y + 10 - q2 * 40 - (i % 2) * 8, 6 + q2 * 9, 0, Math.PI * 2); c.fill(); }
+    } else {   // foguinho embaixo dos pés enquanto sobe
+      c.save(); c.globalCompositeOperation = "lighter"; const h = 16 + Math.sin(f * 60) * 4;
+      const g = c.createLinearGradient(x, y + 26, x, y + 26 + h); g.addColorStop(0, "rgba(255,240,150,1)"); g.addColorStop(.5, "rgba(255,140,40,.9)"); g.addColorStop(1, "rgba(255,60,30,0)");
+      c.fillStyle = g; c.beginPath(); c.moveTo(x - 10, y + 26); c.quadraticCurveTo(x, y + 26 + h * 1.6, x + 10, y + 26); c.closePath(); c.fill(); c.restore();
     }
     return;
   }
@@ -4180,6 +4236,10 @@ function efeitoGesto2D(c, x, y, k, f) {
     [["127,208,255", 0], ["255,130,40", Math.PI]].forEach(([cor, a0]) => { const bx = x + Math.cos(a + a0) * 32, by = y - 10 + Math.sin(a + a0) * 12;
       const g = c.createRadialGradient(bx, by, 1, bx, by, 12 * forca + 1); g.addColorStop(0, "rgba(255,255,255,1)"); g.addColorStop(.4, `rgba(${cor},.95)`); g.addColorStop(1, `rgba(${cor},0)`);
       c.fillStyle = g; c.beginPath(); c.arc(bx, by, 12 * forca + 1, 0, Math.PI * 2); c.fill(); });
+    const b1 = [x + Math.cos(a) * 32, y - 10 + Math.sin(a) * 12], b2 = [x - Math.cos(a) * 32, y - 10 - Math.sin(a) * 12];   // raio ligando as duas
+    c.strokeStyle = `rgba(235,245,255,${.7 * forca})`; c.lineWidth = 1.5; c.beginPath(); c.moveTo(b1[0], b1[1]);
+    for (let j = 1; j < 6; j++) { const q = j / 6; c.lineTo(b1[0] + (b2[0] - b1[0]) * q + Math.sin(f * 90 + j * 2) * 5, b1[1] + (b2[1] - b1[1]) * q + Math.cos(f * 70 + j) * 5); } c.lineTo(b2[0], b2[1]); c.stroke();
+    if (f > .45 && f < .6) { const q = (f - .45) / .15; c.fillStyle = `rgba(255,255,255,${1 - q})`; c.beginPath(); for (let j = 0; j < 16; j++) { const rr = j % 2 ? 6 : 22 + q * 10, aa = j * Math.PI / 8; c.lineTo(x + Math.cos(aa) * rr, y - 10 + Math.sin(aa) * rr); } c.closePath(); c.fill(); }
     c.restore(); return;
   }
   if (k === "sideral") {
