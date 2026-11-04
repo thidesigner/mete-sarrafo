@@ -124,3 +124,20 @@ Na aba **Eventos** do Painel de ADM e na Central de Eventos:
 - **Volta das limitadas:** uma coleção limitada que já acabou (Galáctica, Buraco Negro, Espaço Sideral, Gelo, Fogo ou Gelo e Fogo) volta para a loja por um tempo, com o pacote. Aparece uma faixa verde "🔁 A coleção … voltou para a loja!" e a contagem regressiva.
 - **Vida extra grátis:** enquanto valer, cada partida começa com +1 ou +2 vidas para todo mundo (bonequinhos, online e bola de verdade). Faixa "❤️ Evento: +1 vida em cada partida!".
 
+## Pets (4/nov, ideia do Andre)
+
+Parte **Pets** na loja. O pet anda do lado do bonequinho na tela inicial, na partida (de cima e 3D) e no online (os outros veem). Cada pet tem um **poder pequeno** (escolha do Andre: enfeite + pequeno poder). Robôs não têm pet. Tocar em "Tirar" deixa o pet em casa.
+
+| Pet | Preço | Poder |
+|---|---|---|
+| Cachorrinho 🐶 | 150 | Farejador: +0,5 moeda a cada letra certa |
+| Gatinho 🐱 | 150 | Sortudo: +1 moeda cada vez que escapa da bola numa rodada |
+| Coelho 🐰 | 200 | Pulinho: corre 8% mais rápido |
+| Hamster 🐹 | 120 | Cofrinho: +3 moedas no fim de cada partida |
+| Gatinho Galáctico (edição limitada, até 11/11) | 300 | Estrela da sorte: +1 moeda por rodada em que escapa e corre 5% mais rápido |
+
+- **Ovo surpresa** (100 moedas): sai um pet normal que o jogador ainda não tem (nunca o limitado). Quem já tem todos não consegue comprar.
+- Os poderes valem nas partidas de bonequinhos (no mesmo celular e no online). Na bola de verdade o pet não aparece.
+- O pet limitado conta para o selo de colecionador. O ADM pode dar ou tirar pets (aba Itens) e usar pet como presente (código ou presente para todos).
+- Preços e poderes são um começo para o Andre ajustar.
+

@@ -263,6 +263,8 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .pacote.sk-limitada.pacote-gelofogo { background: linear-gradient(100deg, transparent 48%, rgba(255,255,255,.8) 49.5% 50.5%, transparent 52%), linear-gradient(90deg, #0b2a55 0%, #3d8fe6 45%, #d9381e 55%, #3a0a05 100%) !important; border-color: #ffffff !important; box-shadow: -6px 0 20px rgba(127,208,255,.55), 6px 0 20px rgba(255,100,30,.55); }
 .pacote.sk-limitada.pacote-sideral { background: radial-gradient(circle at 88% 18%, #ffe0a8 0 4%, transparent 4.5%), radial-gradient(circle at 10% 100%, #3d8fe6 0 16%, rgba(127,211,255,.4) 17.5%, transparent 21%), radial-gradient(ellipse 60% 50% at 70% 30%, rgba(255,110,200,.3) 0%, transparent 70%), linear-gradient(180deg, #050a24 0%, #13235a 100%) !important; border-color: #7fd3ff !important; box-shadow: 0 0 0 2px rgba(127,211,255,.35), 0 0 24px rgba(255,122,217,.45); }
 .pacote.sk-limitada.pacote-buraconegro { background: radial-gradient(circle at 80% 30%, #000 0 8%, rgba(255,160,70,.9) 9%, rgba(176,123,255,.6) 14%, transparent 24%), radial-gradient(circle at 20% 80%, #3a1a6e 0%, #0b0716 70%) !important; border-color: #ff9a3c !important; box-shadow: 0 0 0 2px rgba(255,154,60,.35), 0 0 24px rgba(176,123,255,.55); }
+.pet-poder { font-size: 12px; line-height: 1.3; color: #c9d6ea; text-align: center; }
+canvas.pet-prev { width: 100%; display: block; border-radius: 12px; background: radial-gradient(circle at 50% 70%, rgba(255,255,255,.12), transparent 70%); }
 .cantinho { display: grid; gap: 8px; border: 3px solid #ffd23f; border-radius: 18px; padding: 14px 12px; color: #fff; margin-top: 4px;
   background: radial-gradient(ellipse 80% 40% at 50% 0, rgba(255,210,63,.28), transparent 70%), linear-gradient(180deg, #33240a 0%, #140e03 100%); box-shadow: 0 0 0 2px rgba(255,210,63,.3), 0 0 24px rgba(255,210,63,.4); }
 .cantinho .lb-secao { margin: 0; text-align: center; color: #ffd23f; }
@@ -1529,7 +1531,7 @@ function comecarArena() {
       flash: 0, passo: 0, ctrl: false, tocou: false, saiuEm: null, time: o.time };
   });
   vestirRobos(A.P);
-  A.P.forEach(p => { if (p.humano) { vestir(p, skinDe(p.nome)); const f = personagemDe(p.nome); if (f) p.ficha = f; p.arremesso = arremessoDe(p.nome); p.selo = nivelSelo(p.nome); } });
+  A.P.forEach(p => { if (p.humano) { vestir(p, skinDe(p.nome)); const f = personagemDe(p.nome); if (f) p.ficha = f; p.arremesso = arremessoDe(p.nome); p.selo = nivelSelo(p.nome); p.pet = petDe(p.nome); const pt = petInfo(p.pet); if (pt && pt.vel) p.vel *= pt.vel; } });
   A.cel = Math.max(0, A.P.findIndex(p => p.nome === s.dono));
   A.balls = []; A.fx = []; A.t = 0; A.fim = null; A.ptr = null; A.inicio = Date.now();
   A.st = { palavras: 0, acertos: 0, erros: 0, timeouts: 0, votos: 0, votosOk: 0, arremessos: 0, acertosBola: 0, rodadas: 0, compras: 0, moedas: {}, eventos: [] };
@@ -1586,7 +1588,7 @@ function chanceA(ph, p) {
 function chuteA(p, certo, chute, timeout) {
   const ph = A.ph, perg = ph.perg;
   if (certo) {
-    aGanhar(p, A.cfg.mAcerto, "acerto"); A.st.acertos++;
+    aGanhar(p, A.cfg.mAcerto, "acerto"); poderPet(p, "acerto"); A.st.acertos++;
     aEvento("acerto", { quem: p.nome }); aFx(p.x, p.y - 60, "ACERTOU!", "#37d99a");
     bip(1100, .2); vibrar(80);
     aMsg(`${p.nome} acertou: ${ph.palavra}! Pega a bola!`);
@@ -1652,6 +1654,76 @@ const ARREMESSOS = [
   { k: "gelofogo", nome: "Cometa Gelo e Fogo", icone: "☯️", preco: 200, cor: "#ffffff", tipo: "arremesso", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
 ];
 const arremessoInfo = k => ARREMESSOS.find(a => a.k === k) || ARREMESSOS[0];
+/* ---------- Pets: andam ao lado do bonequinho e têm um poder pequeno ---------- */
+const PETS = [
+  { k: "cachorro", nome: "Cachorrinho", icone: "🐶", preco: 150, poder: "Farejador: +0,5 moeda a cada letra certa", acerto: .5 },
+  { k: "gato", nome: "Gatinho", icone: "🐱", preco: 150, poder: "Sortudo: +1 moeda cada vez que escapa da bola numa rodada", sobreviver: 1 },
+  { k: "coelho", nome: "Coelho", icone: "🐰", preco: 200, poder: "Pulinho: corre um pouco mais rápido (+8%)", vel: 1.08 },
+  { k: "hamster", nome: "Hamster", icone: "🐹", preco: 120, poder: "Cofrinho: +3 moedas no fim de cada partida", fim: 3 },
+  // edição limitada: só dá para comprar até "ate"; quem comprou fica com ele
+  { k: "gatogalactico", nome: "Gatinho Galáctico", icone: "🐱", preco: 300, tipo: "pet", limitada: true, ate: "2026-11-11T23:59:59-03:00",
+    poder: "Estrela da sorte: +1 moeda por rodada em que escapa e corre um pouco mais rápido (+5%)", sobreviver: 1, vel: 1.05 },
+];
+PETS.forEach(x => { x.tipo = "pet"; });
+const PRECO_OVO = 100;
+const petInfo = k => PETS.find(x => x.k === k) || null;
+function temPet(n, k) { return !!petInfo(k) && (((G.inv || {})[n] || {}).pets || []).includes(k); }
+function petDe(n) { const k = ((G.inv || {})[n] || {}).pet; return temPet(n, k) ? k : null; }
+function darPet(n, k) { G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 }; G.inv[n].pets = G.inv[n].pets || []; if (!G.inv[n].pets.includes(k)) G.inv[n].pets.push(k); }
+/* poder do pet na partida (só jogadores humanos; robôs não têm pet) */
+function poderPet(p, quando) {
+  const x = p && p.humano && petInfo(p.pet); if (!x || !x[quando]) return;
+  if (quando === "acerto" || quando === "sobreviver" || quando === "fim") aGanhar(p, x[quando], "pet");
+}
+function desenharPet2D(c, k, x, y, t) {
+  const pet = petInfo(k); if (!pet) return;
+  const pul = Math.abs(Math.sin(t * 5)) * 3, px = x, py = y - pul;
+  c.save();
+  c.fillStyle = "rgba(0,0,0,.25)"; c.beginPath(); c.ellipse(x, y + 9, 10, 3, 0, 0, Math.PI * 2); c.fill();
+  const corpo = { cachorro: "#b5793f", gato: "#f4a23a", coelho: "#f4f1ec", hamster: "#e2b36b", gatogalactico: "#4b2a9e" }[k];
+  const escuro = { cachorro: "#6b4423", gato: "#c46a14", coelho: "#d6cfc4", hamster: "#a8743a", gatogalactico: "#24104f" }[k];
+  // rabo
+  c.strokeStyle = corpo; c.lineWidth = k === "coelho" || k === "hamster" ? 0 : 3; c.lineCap = "round";
+  if (k === "cachorro") { c.beginPath(); c.moveTo(px + 8, py + 2); c.lineTo(px + 13 + Math.sin(t * 14) * 3, py - 4); c.stroke(); }
+  if (k === "gato" || k === "gatogalactico") { c.beginPath(); c.moveTo(px + 8, py + 3); c.quadraticCurveTo(px + 16, py, px + 13 + Math.sin(t * 3) * 2, py - 8); c.stroke(); }
+  if (k === "coelho") { c.fillStyle = "#ffffff"; c.beginPath(); c.arc(px + 9, py + 3, 3, 0, Math.PI * 2); c.fill(); }
+  // corpo e cabeça
+  c.fillStyle = corpo; c.beginPath(); c.ellipse(px + 2, py + 3, k === "hamster" ? 9 : 8, k === "hamster" ? 7.5 : 5.5, 0, 0, Math.PI * 2); c.fill();
+  if (k !== "hamster") { c.beginPath(); c.arc(px - 6, py - 3, 6, 0, Math.PI * 2); c.fill(); }
+  const hx = k === "hamster" ? px - 1 : px - 6, hy = k === "hamster" ? py : py - 3;
+  // orelhas
+  c.fillStyle = escuro;
+  if (k === "cachorro") { c.beginPath(); c.ellipse(hx - 5, hy, 2.4, 4.5, .3, 0, Math.PI * 2); c.ellipse(hx + 4, hy - 1, 2.4, 4.5, -.3, 0, Math.PI * 2); c.fill(); }
+  if (k === "gato" || k === "gatogalactico") { c.fillStyle = corpo; c.beginPath(); c.moveTo(hx - 5.5, hy - 2); c.lineTo(hx - 4, hy - 9); c.lineTo(hx - 1, hy - 4); c.moveTo(hx + 5.5, hy - 2); c.lineTo(hx + 4, hy - 9); c.lineTo(hx + 1, hy - 4); c.fill(); }
+  if (k === "coelho") { c.fillStyle = corpo; c.beginPath(); c.ellipse(hx - 2.5, hy - 10, 2, 6, -.15, 0, Math.PI * 2); c.ellipse(hx + 2.5, hy - 10, 2, 6, .15, 0, Math.PI * 2); c.fill(); c.fillStyle = "#ffb3c7"; c.beginPath(); c.ellipse(hx - 2.5, hy - 10, 1, 4, -.15, 0, Math.PI * 2); c.ellipse(hx + 2.5, hy - 10, 1, 4, .15, 0, Math.PI * 2); c.fill(); }
+  if (k === "hamster") { c.beginPath(); c.arc(hx - 5, hy - 6, 2.2, 0, Math.PI * 2); c.arc(hx + 4, hy - 6, 2.2, 0, Math.PI * 2); c.fill(); c.fillStyle = "#fff4dc"; c.beginPath(); c.ellipse(hx, hy + 3, 5, 3.5, 0, 0, Math.PI * 2); c.fill(); }
+  // rosto
+  c.fillStyle = "#1b1b2b"; c.beginPath(); c.arc(hx - 2, hy - 1, 1, 0, Math.PI * 2); c.arc(hx + 2, hy - 1, 1, 0, Math.PI * 2); c.fill();
+  c.fillStyle = k === "cachorro" ? "#1b1b2b" : "#ff8fab"; c.beginPath(); c.arc(hx, hy + 1.3, .9, 0, Math.PI * 2); c.fill();
+  if (k === "gatogalactico") {   // estrelinhas no pelo e brilho
+    c.fillStyle = "#ffffff"; [[1, 2], [5, 4], [-6, -6], [-2, 5]].forEach(([a, b], i) => { c.globalAlpha = .5 + .5 * Math.sin(t * 4 + i); c.beginPath(); c.arc(px + a, py + b, .9, 0, Math.PI * 2); c.fill(); });
+    c.globalAlpha = 1; c.globalCompositeOperation = "lighter"; const g = c.createRadialGradient(px, py, 2, px, py, 16); g.addColorStop(0, "rgba(176,123,255,.35)"); g.addColorStop(1, "rgba(176,123,255,0)"); c.fillStyle = g; c.beginPath(); c.arc(px, py, 16, 0, Math.PI * 2); c.fill();
+  }
+  c.restore();
+}
+function pet3D(k) {
+  const pet = petInfo(k); if (!pet) return null;
+  const corpo = { cachorro: "#b5793f", gato: "#f4a23a", coelho: "#f4f1ec", hamster: "#e2b36b", gatogalactico: "#4b2a9e" }[k];
+  const escuro = { cachorro: "#6b4423", gato: "#c46a14", coelho: "#d6cfc4", hamster: "#a8743a", gatogalactico: "#24104f" }[k];
+  const m = cor => new THREE.MeshLambertMaterial({ color: cor });
+  const g = new THREE.Group(), add = (geo, cor, x, y, z) => { const o = new THREE.Mesh(geo, m(cor)); o.position.set(x, y, z); g.add(o); return o; };
+  const b = add(new THREE.SphereGeometry(.12, 14, 10), corpo, 0, .12, .04); b.scale.set(1, .8, k === "hamster" ? 1 : 1.4);
+  const cab = k === "hamster" ? null : add(new THREE.SphereGeometry(.09, 14, 10), corpo, 0, .22, -.12);
+  const hy = k === "hamster" ? .16 : .22, hz = k === "hamster" ? -.1 : -.19;
+  if (k === "cachorro") for (const l of [-1, 1]) add(new THREE.SphereGeometry(.035, 8, 6), escuro, l * .08, .22, -.12).scale.set(.6, 1.5, .6);
+  if (k === "gato" || k === "gatogalactico") for (const l of [-1, 1]) add(new THREE.ConeGeometry(.03, .07, 4), corpo, l * .05, .31, -.12);
+  if (k === "coelho") for (const l of [-1, 1]) add(new THREE.CylinderGeometry(.018, .022, .16, 6), corpo, l * .035, .36, -.12);
+  if (k === "hamster") for (const l of [-1, 1]) add(new THREE.SphereGeometry(.025, 8, 6), escuro, l * .07, .25, -.04);
+  for (const l of [-1, 1]) add(new THREE.SphereGeometry(.014, 6, 4), "#1b1b2b", l * .035, hy + .02, hz);
+  if (k === "gato" || k === "gatogalactico" || k === "cachorro") { const r = add(new THREE.CylinderGeometry(.015, .02, .16, 6), corpo, 0, .2, .2); r.rotation.x = -.7; }
+  if (k === "gatogalactico") { const brilho = new THREE.Mesh(new THREE.SphereGeometry(.2, 12, 10), new THREE.MeshBasicMaterial({ color: "#b07bff", transparent: true, opacity: .2, blending: THREE.AdditiveBlending, depthWrite: false })); brilho.position.y = .16; g.add(brilho); }
+  return g;
+}
 function temArremesso(n, k) { const a = ARREMESSOS.find(x => x.k === k); return !!a && (a.preco === 0 || (((G.inv || {})[n] || {}).arremessos || []).includes(k)); }
 function arremessoDe(n) { const k = ((G.inv || {})[n] || {}).arremesso; return temArremesso(n, k) ? k : "bola"; }
 function desenharArremesso2D(c, k, x, y, giro) {
@@ -1726,7 +1798,7 @@ function eliminarA(p) {
 function fimRodadaA(forcado) {
   const ph = A.ph, atir = ph.atir;
   const sobrev = aVivos().filter(p => p !== atir && !mesmoTime(p, atir) && !ph.atingidos.has(p) && p.modo === "casa");
-  sobrev.forEach(p => aGanhar(p, A.cfg.mSobreviver, "sobreviver"));
+  sobrev.forEach(p => { aGanhar(p, A.cfg.mSobreviver, "sobreviver"); poderPet(p, "sobreviver"); });
   for (const p of aVivos()) { if (p !== atir && p.modo !== "casa") { p.alvo = { ...p.home }; p.modo = "voltando"; } p.ctrl = false; }
   A.st.rodadas++; aEvento("rodada", { atirador: atir.nome, sobreviveram: sobrev.length });
   aMsg(`${forcado ? "Tempo da bola acabou. " : ""}${sobrev.length} ${sobrev.length === 1 ? "sobreviveu" : "sobreviveram"} (+${fmtM(A.cfg.mSobreviver)} moedas). ${atir.nome} vai perguntar.`);
@@ -1741,6 +1813,7 @@ async function terminarA(v) {
   ganhadores.filter(p => p.humano && !p.remoto).forEach(p => { G.vitorias = G.vitorias || {}; G.vitorias[p.nome] = (G.vitorias[p.nome] || 0) + 1; });
   A.balls = [];
   aEvento("fim", { vencedor: A.fim.titulo });
+  A.P.filter(p => p.humano).forEach(p => poderPet(p, "fim"));   // Cofrinho do hamster (também para quem joga online)
   A.P.filter(p => p.humano && !p.remoto).forEach(p => fimDePartidaMissao(p.nome, p.moedas, ganhadores.includes(p)));
   A.P.filter(p => p.humano && !p.remoto).forEach(guardarGanhos);   // no online, cada um soma no próprio celular
   G.historico = (G.historico || []).slice(-99);
@@ -2018,6 +2091,7 @@ function desenharBoneco2(c, p, ph) {
   if (isVez) { c.strokeStyle = "#ffd23f"; c.lineWidth = 5; c.beginPath(); c.arc(x, y - 6, 44, 0, Math.PI * 2); c.stroke(); }
   if (p.humano && p.i === A.cel) { c.fillStyle = "rgba(255,210,63,.18)"; c.beginPath(); c.ellipse(x, y + 26, 34, 12, 0, 0, Math.PI * 2); c.fill(); }
   c.fillStyle = "rgba(0,0,0,.28)"; c.beginPath(); c.ellipse(x, y + 26, 22, 7, 0, 0, Math.PI * 2); c.fill();
+  if (p.pet) desenharPet2D(c, p.pet, p.i === -1 ? x + 30 : x - 30, p.i === -1 ? y + 22 : y + 18, performance.now() / 1000 + p.i);   // na tela inicial fica do lado direito
   if (p.ficha) desenharPersonagem2D(c, p.ficha, x, y, anda);
   else {
   c.strokeStyle = "#1b1b2b"; c.lineWidth = 6; c.lineCap = "round";
@@ -2896,6 +2970,7 @@ function montarBonecos3D() {
   }
 }
 function montarExtras3D(p, g, pernaE, pernaD, bracoE, bracoD, corpoMat) {
+  { const pg = p.pet && pet3D(p.pet); if (pg) { pg.position.set(-.5, 0, .15); g.add(pg); } }
   {
     const tag = etiqueta({ nome: nomeComSelo(p), vidas: "" }, timeDe(p) ? timeDe(p).cor : undefined); tag.position.y = 1.95; g.add(tag);
     const perg = etiqueta({ nome: "?", vidas: "" }, "#ffd23f"); perg.scale.set(.9, .34, 1); perg.position.y = 2.35; perg.visible = false; g.add(perg);
@@ -3436,7 +3511,7 @@ acoes.pegarMissao = el => {
 TELAS.loja = () => {
   const nome = perfil(), moedas = G.banco[nome] || 0, tem = invVidas(nome), preco = G.cfg.preco;
   const pode = moedas >= preco;
-  depoisFn = () => { desenharPrevSkins(); animarPrevGestos(); };
+  depoisFn = () => { desenharPrevSkins(); animarPrevGestos(); desenharPrevPets(); };
   const cadeado = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="10.5" width="12" height="9" rx="2" fill="#0b1b33"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="#0b1b33" stroke-width="2.2"/></svg>`;
   const coracao = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2z" fill="#ffffff" stroke="#0b1b33" stroke-width="1.6"/><path d="M12 11v5M9.5 13.5h5" stroke="#ff4d6d" stroke-width="2.2" stroke-linecap="round"/></svg>`;
   return `
@@ -3481,6 +3556,28 @@ TELAS.loja = () => {
         ${x.limitada && !tem && naVenda(x) ? `<span class="sk-prazo">⏳ ${faltaParaAcabar(x)}</span>` : ""}
         <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarAvatar" data-k="${x.k}" ${usando || (!tem && !podeA) ? "disabled" : ""}>${rotulo}</button>
       </div>`; }).join("")}
+    </div>
+    <h2 class="lb-secao">Pets</h2>
+    <p class="lb-sub" style="margin-top:-6px">Andam do lado do seu bonequinho na partida e cada um tem um poder pequeno.</p>
+    <div class="fd-grid">
+      <div class="fd-tile pet-ovo">
+        <span class="em-art" aria-hidden="true">🥚</span>
+        <b>Ovo surpresa</b>
+        <span class="pet-poder">Sai um pet normal que você ainda não tem.</span>
+        ${(() => { const falta = PETS.filter(x => !x.limitada && !temPet(nome, x.k)), pode = moedas >= PRECO_OVO;
+          return `<button class="lb-comprar lb-comprar-p" data-a="chocarOvo" ${!falta.length || !pode ? "disabled" : ""}>${!falta.length ? "Você tem todos" : G.lojaConf === "ovo" ? "Confirmar?" : pode ? `<span class="lb-coin" aria-hidden="true">$</span>${PRECO_OVO}` : `$ ${PRECO_OVO}`}</button>`; })()}
+      </div>
+      ${PETS.filter(x => naVenda(x) || temPet(nome, x.k)).sort((a, b) => !!b.limitada - !!a.limitada).map(x => {
+        const tem = temPet(nome, x.k), usando = petDe(nome) === x.k, podeP = moedas >= x.preco;
+        const rotulo = usando ? "Tirar" : tem ? "Usar" : G.lojaConf === "pet:" + x.k ? "Confirmar?" : podeP ? `<span class="lb-coin" aria-hidden="true">$</span>${x.preco}` : `$ ${x.preco}`;
+        return `<div class="fd-tile${tem ? "" : " fd-travado"}${x.limitada ? " sk-limitada" : ""}"${usando ? ' aria-current="true"' : ""}>
+          ${x.limitada ? `<i class="sk-selo">Edição limitada</i>` : ""}
+          <canvas class="pet-prev" data-pet="${x.k}" aria-label="${esc(x.nome)}"></canvas>
+          <b>${esc(x.nome)}</b>
+          <span class="pet-poder">${esc(x.poder)}</span>
+          ${x.limitada && !tem && naVenda(x) ? `<span class="sk-prazo">⏳ ${faltaParaAcabar(x)}</span>` : ""}
+          <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarPet" data-k="${x.k}" ${!tem && !podeP ? "disabled" : ""}>${rotulo}</button>
+        </div>`; }).join("")}
     </div>
     <h2 class="lb-secao">Arremessos</h2>
     <p class="lb-sub" style="margin-top:-6px">O que você joga quando acerta a palavra. Funciona igual à bola, só muda o jeito.</p>
@@ -3622,6 +3719,7 @@ function animarLobby() {
   const nome = perfil();
   const boneco = vestir({ i: -1, nome: "", humano: true, cor: A_CORES[0], pele: A_PELE[0], vidas: 0, x: 0, y: 0, passo: 0, flash: 0 }, skinDe(nome));
   boneco.ficha = typeof personagemDe === "function" ? personagemDe(nome) : null;
+  boneco.pet = petDe(nome);
   const quadro = ts => {
     const cv = $("lb-canvas");
     if (!cv || G.tela !== "lobby" || $("app").hidden) { lbRaf = null; return; }
@@ -4113,6 +4211,41 @@ acoes.comprarPacote = el => {
   toast(`${nome} comprou o ${p.pc.nome}! ${p.pc.emoji}`);
   const y = window.scrollY; render(); window.scrollTo(0, y);
 };
+acoes.comprarPet = el => {
+  const k = el.dataset.k, nome = perfil(), x = petInfo(k); if (!x) return;
+  G.inv = G.inv || {}; G.inv[nome] = G.inv[nome] || { vidas: 0 };
+  const volta = (txt) => { salvarPlacar(); const y = window.scrollY; render(); window.scrollTo(0, y); if (txt) toast(txt); };
+  if (temPet(nome, k)) { if (petDe(nome) === k) { G.inv[nome].pet = null; volta(`${x.nome} ficou em casa`); } else { G.inv[nome].pet = k; volta(`${x.nome} ${x.icone} agora anda com você!`); } return; }
+  if (!naVenda(x)) { toast("Esse pet de edição limitada já acabou"); return; }
+  if ((G.banco[nome] || 0) < x.preco) return;
+  if (G.lojaConf !== "pet:" + k) { pedirConfirmacao("pet:" + k); return; }
+  clearTimeout(lojaConfT); G.lojaConf = false;
+  G.banco[nome] = Math.round(((G.banco[nome] || 0) - x.preco) * 10) / 10;
+  darPet(nome, k); G.inv[nome].pet = k;
+  if (typeof sfxJogar === "function") sfxJogar();
+  volta(`${nome} adotou ${x.nome} ${x.icone}!`);
+};
+acoes.chocarOvo = () => {
+  const nome = perfil(), falta = PETS.filter(x => !x.limitada && !temPet(nome, x.k));
+  if (!falta.length || (G.banco[nome] || 0) < PRECO_OVO) return;
+  if (G.lojaConf !== "ovo") { pedirConfirmacao("ovo"); return; }
+  clearTimeout(lojaConfT); G.lojaConf = false;
+  const x = falta[Math.floor(Math.random() * falta.length)];
+  G.banco[nome] = Math.round(((G.banco[nome] || 0) - PRECO_OVO) * 10) / 10;
+  darPet(nome, x.k); G.inv[nome].pet = x.k; salvarPlacar();
+  const y = window.scrollY; render(); window.scrollTo(0, y);
+  if (typeof mostrarPresente === "function") mostrarPresente(nome, `o pet ${x.nome} ${x.icone} no Ovo surpresa`);
+  else toast(`🥚 Saiu ${x.nome} ${x.icone}!`);
+};
+/* desenho dos pets na loja */
+function desenharPrevPets() {
+  document.querySelectorAll("canvas.pet-prev").forEach(cv => {
+    const w = cv.clientWidth; if (!w) return; const dpr = window.devicePixelRatio || 1, h = Math.round(w * .6);
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); cv.style.height = h + "px";
+    const c = cv.getContext("2d"), k = cv.height / 50; c.setTransform(k, 0, 0, k, (cv.width - 60 * k) / 2, 0); c.clearRect(0, 0, 60, 50);
+    desenharPet2D(c, cv.dataset.pet, 30, 30, 0);
+  });
+}
 acoes.comprarArremesso = el => {
   const k = el.dataset.k, nome = perfil(), a = arremessoInfo(k);
   const usar = () => { G.inv = G.inv || {}; G.inv[nome] = G.inv[nome] || { vidas: 0 }; G.inv[nome].arremesso = k; salvarPlacar(); };
@@ -5073,12 +5206,12 @@ document.addEventListener("click", e => {
 /* skins limitadas: o ADM pode mudar prazo e preço neste aparelho (G.admLim) */
 SKINS.forEach(s => { if (s.limitada) { s.ateOriginal = s.ate; s.precoOriginal = s.preco; } });
 FUNDOS_LIM.forEach(f => { f.ateOriginal = f.ate; f.precoOriginal = f.preco; });
-[...EMOJIS, ...GESTOS, ...AV_ESPECIAIS, ...ARREMESSOS].forEach(e => { if (e.limitada) { e.ateOriginal = e.ate; e.precoOriginal = e.preco; } });
-const todasLimitadas = () => [...SKINS.filter(s => s.limitada), ...FUNDOS_LIM, ...EMOJIS.filter(e => e.limitada), ...GESTOS.filter(g => g.limitada), ...AV_ESPECIAIS.filter(x => x.limitada), ...ARREMESSOS.filter(a => a.limitada)];
+[...EMOJIS, ...GESTOS, ...AV_ESPECIAIS, ...ARREMESSOS, ...PETS].forEach(e => { if (e.limitada) { e.ateOriginal = e.ate; e.precoOriginal = e.preco; } });
+const todasLimitadas = () => [...SKINS.filter(s => s.limitada), ...FUNDOS_LIM, ...EMOJIS.filter(e => e.limitada), ...GESTOS.filter(g => g.limitada), ...AV_ESPECIAIS.filter(x => x.limitada), ...ARREMESSOS.filter(a => a.limitada), ...PETS.filter(x => x.limitada)];
 /* cada item limitado tem sua chave (tipo + nome), porque "galactico" existe como fundo, emoji, gesto... */
 const chaveLim = x => (x.tipo || "skin") + "-" + x.k;
 const limInfo = k => todasLimitadas().find(x => chaveLim(x) === k);
-const temLim = (j, x) => (x.tipo === "fundo" ? temFundo(j, x.k) : x.tipo === "emoji" ? temEmoji(j, x.k) : x.tipo === "gesto" ? temGesto(j, x.k) : x.tipo === "avatar" ? temAvatar(j, x.k) : x.tipo === "arremesso" ? temArremesso(j, x.k) : temSkin(j, x.k));
+const temLim = (j, x) => (x.tipo === "fundo" ? temFundo(j, x.k) : x.tipo === "emoji" ? temEmoji(j, x.k) : x.tipo === "gesto" ? temGesto(j, x.k) : x.tipo === "avatar" ? temAvatar(j, x.k) : x.tipo === "arremesso" ? temArremesso(j, x.k) : x.tipo === "pet" ? temPet(j, x.k) : temSkin(j, x.k));
 function aplicarLimitadas() {
   const volta = {}; voltasAtivas().forEach(v => { COLECOES[v.col].chaves.forEach(k => { if (!volta[k] || Date.parse(v.ate) > Date.parse(volta[k])) volta[k] = v.ate; }); volta["pacote-" + COLECOES[v.col].pacote] = v.ate; });
   todasLimitadas().forEach(s => { const o = (G.admLim || {})[chaveLim(s)] || {}; s.ate = o.ate || s.ateOriginal; const vk = volta[chaveLim(s)]; if (vk && Date.parse(vk) > Date.parse(s.ate)) s.ate = vk; s.preco = o.preco || s.precoOriginal; if (s.tipo === "fundo") PRECO_FUNDO[s.k] = s.preco; });
@@ -5125,6 +5258,7 @@ TELAS.adm = () => {
     <h3>Fundos</h3><div class="chips">${FUNDOS.map(([k, t]) => chipItem(temFundo(n, k), k === "basico", "fundo", k, esc(t))).join("")}</div>
     <h3>Emojis</h3><div class="chips">${EMOJIS.map(e => chipItem(temEmoji(n, e.k), e.preco === 0, "emoji", e.k, e.e)).join("")}</div>
     <h3>Gestos</h3><div class="chips">${GESTOS.map(g => chipItem(temGesto(n, g.k), g.preco === 0, "gesto", g.k, g.icone + " " + esc(g.nome))).join("")}</div>
+    <h3>Pets</h3><div class="chips">${PETS.map(x => chipItem(temPet(n, x.k), false, "pet", x.k, x.icone + " " + esc(x.nome))).join("")}</div>
     <h3>Arremessos</h3><div class="chips">${ARREMESSOS.map(a => chipItem(temArremesso(n, a.k), a.preco === 0, "arremesso", a.k, a.icone + " " + esc(a.nome))).join("")}</div>
     <h3>Fotos de perfil</h3><div class="chips">${AV_ESPECIAIS.map(x => chipItem(temAvatar(n, x.k), false, "avatar", x.k, x.icone + " " + esc(x.nome))).join("")}</div>
     <p class="dim" style="font-size:14px">Toque para dar ou tirar. Verde = tem.</p>`;
@@ -5215,7 +5349,7 @@ Object.assign(acoes, {
   admItem(el) {
     const n = ADM.jog, k = el.dataset.k, t = el.dataset.t;
     G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 };
-    const lista = { skin: "skins", fundo: "fundos", emoji: "emojis", gesto: "gestos", avatar: "avatares", arremesso: "arremessos" }[t];
+    const lista = { skin: "skins", fundo: "fundos", emoji: "emojis", gesto: "gestos", avatar: "avatares", arremesso: "arremessos", pet: "pets" }[t];
     const atual = G.inv[n][lista] || [];
     if (el.getAttribute("aria-pressed") === "true") {
       G.inv[n][lista] = atual.filter(x => x !== k);
@@ -5432,20 +5566,20 @@ async function hashPresente(c) {
 function nomePremio(p) {
   if (p.moedas) return Math.round(p.moedas) + " moedas";
   const [tipo, k] = String(p.item || "").split(":");
-  const x = tipo === "skin" ? SKINS.find(i => i.k === k) : tipo === "emoji" ? emojiInfo(k) : tipo === "gesto" ? gestoInfo(k) : tipo === "arremesso" ? ARREMESSOS.find(i => i.k === k) : tipo === "avatar" ? avEspecial(k) : null;
+  const x = tipo === "skin" ? SKINS.find(i => i.k === k) : tipo === "emoji" ? emojiInfo(k) : tipo === "gesto" ? gestoInfo(k) : tipo === "arremesso" ? ARREMESSOS.find(i => i.k === k) : tipo === "avatar" ? avEspecial(k) : tipo === "pet" ? petInfo(k) : null;
   if (tipo === "fundo") { const f = FUNDOS.find(([fk]) => fk === k); return f ? "o fundo " + f[1] : ""; }
   if (!x) return "";
-  return { skin: "a skin ", emoji: "o emoji " + (x.e || "") + " ", gesto: "o gesto " + (x.icone || "") + " ", arremesso: "o arremesso " + (x.icone || "") + " ", avatar: "a foto " }[tipo] + x.nome;
+  return { skin: "a skin ", emoji: "o emoji " + (x.e || "") + " ", gesto: "o gesto " + (x.icone || "") + " ", arremesso: "o arremesso " + (x.icone || "") + " ", avatar: "a foto ", pet: "o pet " + (x.icone || "") + " " }[tipo] + x.nome;
 }
 function darPremio(nome, p) {
   G.inv = G.inv || {}; G.inv[nome] = G.inv[nome] || { vidas: 0 };
   const txt = nomePremio(p); if (!txt) return null;
   if (p.moedas) { const v = Math.round(+p.moedas); if (!(v >= 1 && v <= 5000)) return null; G.banco[nome] = Math.round(((G.banco[nome] || 0) + v) * 10) / 10; return { txt }; }
   const [tipo, k] = String(p.item).split(":");
-  const tem = { skin: () => temSkin(nome, k), emoji: () => temEmoji(nome, k), gesto: () => temGesto(nome, k), arremesso: () => temArremesso(nome, k), fundo: () => temFundo(nome, k), avatar: () => temAvatar(nome, k) }[tipo];
+  const tem = { skin: () => temSkin(nome, k), emoji: () => temEmoji(nome, k), gesto: () => temGesto(nome, k), arremesso: () => temArremesso(nome, k), fundo: () => temFundo(nome, k), avatar: () => temAvatar(nome, k), pet: () => temPet(nome, k) }[tipo];
   if (tem()) return { txt, jaTem: true };
   ({ skin: () => darSkin(nome, k), emoji: () => darEmoji(nome, k), gesto: () => darGesto(nome, k), fundo: () => darFundo(nome, k),
-    arremesso: () => { G.inv[nome].arremessos = [...(G.inv[nome].arremessos || []), k]; }, avatar: () => { G.inv[nome].avatares = [...(G.inv[nome].avatares || []), k]; } })[tipo]();
+    arremesso: () => { G.inv[nome].arremessos = [...(G.inv[nome].arremessos || []), k]; }, avatar: () => { G.inv[nome].avatares = [...(G.inv[nome].avatares || []), k]; }, pet: () => darPet(nome, k) })[tipo]();
   return { txt };
 }
 function mostrarPresente(nome, txt) {
@@ -5498,7 +5632,8 @@ function opcoesPremio() {
     + grupo("Gestos", GESTOS.filter(x => x.preco > 0).map(x => op("gesto:" + x.k, x.icone + " " + x.nome)))
     + grupo("Arremessos", ARREMESSOS.filter(x => x.preco > 0).map(x => op("arremesso:" + x.k, x.icone + " " + x.nome)))
     + grupo("Fundos", FUNDOS.filter(([k]) => k !== "basico").map(([k, t]) => op("fundo:" + k, t)))
-    + grupo("Fotos de perfil", AV_ESPECIAIS.map(x => op("avatar:" + x.k, x.icone + " " + x.nome)));
+    + grupo("Fotos de perfil", AV_ESPECIAIS.map(x => op("avatar:" + x.k, x.icone + " " + x.nome)))
+    + grupo("Pets", PETS.map(x => op("pet:" + x.k, x.icone + " " + x.nome)));
 }
 function admEventosHTML() {
   if (!(chaveGitHub() && PODE_PUBLICAR_DIRETO)) return `<h3>Eventos para todo mundo</h3><p>Para publicar daqui, abra o jogo pelo site e guarde a chave do GitHub na aba <b>Aviso</b>. Também dá para pedir ao Claude, por exemplo: "começa um evento de moedas em dobro até domingo".</p>`;
