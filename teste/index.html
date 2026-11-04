@@ -516,7 +516,15 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .ed-usada { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .ed-usada > span { font-weight: 800; }
 .ed-2d { display: block; width: 100%; height: 100%; }
-.sk-limitada { position: relative; background: radial-gradient(circle at 30% 20%, #6c3fd1 0%, #2b1a6b 45%, #0b0b2a 100%) !important; border-color: #ffd23f !important; box-shadow: 0 0 0 2px rgba(255,210,63,.35), 0 0 22px rgba(155,81,224,.55); }
+/* edições limitadas: cartão preto com uma borda de luz colorida girando em volta */
+@property --luz-ang { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+.sk-limitada, .dest-item { position: relative; background: radial-gradient(circle at 50% 0%, #1d1830 0%, #08070d 60%, #000 100%) !important; border-color: transparent !important; box-shadow: 0 0 18px rgba(255,210,63,.35), 0 0 34px rgba(255,77,210,.2); }
+.sk-limitada::after, .dest-item::after { content: ""; position: absolute; inset: -3px; border-radius: inherit; padding: 3px; pointer-events: none; z-index: 1;
+  background: conic-gradient(from var(--luz-ang), #ffd23f, #ff7a2a, #ff4dd2, #7c5cff, #4dd2ff, #7dff9a, #ffd23f);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  filter: drop-shadow(0 0 5px rgba(255,230,140,.85)); animation: luzGira 3.2s linear infinite; }
+@keyframes luzGira { to { --luz-ang: 360deg; } }
+@media (prefers-reduced-motion: reduce) { .sk-limitada::after, .dest-item::after { animation: none; } }
 .sk-limitada::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background-image: radial-gradient(1.5px 1.5px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 78% 12%, #fff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 88% 52%, #ffe9a8 50%, transparent 51%), radial-gradient(1px 1px at 22% 62%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 55% 30%, #cfe3ff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 40% 85%, #fff 50%, transparent 51%); }
 .sk-selo.sk-selo-heroi { background: #ff4d6d; color: #fff; }
 .sk-selo { font-style: normal; font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; background: #ffd23f; color: #1b0f45; border-radius: 6px; padding: 2px 7px; justify-self: center; }

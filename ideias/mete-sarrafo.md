@@ -156,4 +156,5 @@ Parte **Pets** na loja. O pet anda do lado do bonequinho na tela inicial, na par
 ## Loja em abas (4/nov, pedido do Andre: "a loja tá muito bagunçada")
 
 A loja agora tem abas no topo, que ficam presas ao rolar: ⭐ Destaques, 👕 Skins, 🐾 Pets, 🏀 Arremessos, 🕺 Gestos, 😎 Emojis, 🖼️ Fundos e 🙂 Fotos. Aparece uma parte de cada vez. Uma bolinha vermelha na aba mostra que ali tem edição limitada que a pessoa ainda não tem. Em **Destaques**: as coleções limitadas à venda (uma linha por coleção, com os ícones do que falta e o botão "Ver pacote"), os pacotes, o Cantinho Secreto e a vida extra. O código de presente e as faixas de evento continuam no topo.
+- **Visual das edições limitadas na loja** (pedido do Andre, 4/nov): cartão preto com uma borda de luz colorida (dourado, laranja, rosa, roxo, azul e verde) girando em volta. Vale para todos os itens limitados (skins, pets, emojis, gestos, fundos, fotos, arremessos), para os pacotes e para as linhas das coleções em Destaques.
 
