@@ -149,4 +149,11 @@ Parte **Pets** na loja. O pet anda do lado do bonequinho na tela inicial, na par
   - Os pets limitados (Gatinho de Gelo, Cachorrinho de Fogo, Coelho Gelo e Fogo) mantêm o próprio tema.
   - Na loja, o pet já aparece combinando com a skin que a pessoa está usando.
 - **Pets das coleções do espaço** (pedido do Andre, 4/nov): Cachorrinho Astronauta 🐶 (Espaço Sideral: capacete de vidro e a Terra no peito; Gravidade zero: +5% de velocidade e +3 moedas no fim), Gatinho Buraco Negro 🐱 (Buraco Negro: escuro com disco de luz girando; Sugador: +0,5 por letra certa e +1 por rodada em que escapa) e Coelho Galáctico 🐰 (Galáctica: roxo com estrelas; Estrela da sorte: +1 por rodada em que escapa e +5% de velocidade). Preço 300. Entram no conjunto (pacote) de cada coleção, mas **não aparecem na loja**: essas coleções já saíram, então os pets só voltam quando o ADM usa "Volta das limitadas" naquela coleção (aí aparecem na loja e no pacote). O ADM também pode dar pelo painel (Itens) ou como presente.
+- **Mais pets** (pedido do Andre, 4/nov):
+  - Normais (também saem no Ovo surpresa): Tartaruga 🐢 100 (Devagar e sempre: +2 moedas no fim), Passarinho 🐦 150 (voa do lado; Canto da sorte: +0,5 por letra certa), Pinguim 🐧 180 (Deslizada: +6% de velocidade).
+  - Heróis (originais, com fantasia própria, 350 cada, não saem no Ovo): Super Cão 🦸 (capa e máscara; Super faro: +0,5 por letra certa e +2 no fim), Gato Ninja 🥷 (capuz e faixa; Sombra: +1 por rodada em que escapa e +4% de velocidade), Coelho Relâmpago ⚡ (raio no peito; Turbo: +8% de velocidade e +1 por rodada), Hamster Blindado 🛡️ (armadura com visor; Cofre blindado: +5 no fim).
+
+## Loja em abas (4/nov, pedido do Andre: "a loja tá muito bagunçada")
+
+A loja agora tem abas no topo, que ficam presas ao rolar: ⭐ Destaques, 👕 Skins, 🐾 Pets, 🏀 Arremessos, 🕺 Gestos, 😎 Emojis, 🖼️ Fundos e 🙂 Fotos. Aparece uma parte de cada vez. Uma bolinha vermelha na aba mostra que ali tem edição limitada que a pessoa ainda não tem. Em **Destaques**: as coleções limitadas à venda (uma linha por coleção, com os ícones do que falta e o botão "Ver pacote"), os pacotes, o Cantinho Secreto e a vida extra. O código de presente e as faixas de evento continuam no topo.
 

@@ -270,6 +270,19 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .pacote.sk-limitada.pacote-gelofogo { background: linear-gradient(100deg, transparent 48%, rgba(255,255,255,.8) 49.5% 50.5%, transparent 52%), linear-gradient(90deg, #0b2a55 0%, #3d8fe6 45%, #d9381e 55%, #3a0a05 100%) !important; border-color: #ffffff !important; box-shadow: -6px 0 20px rgba(127,208,255,.55), 6px 0 20px rgba(255,100,30,.55); }
 .pacote.sk-limitada.pacote-sideral { background: radial-gradient(circle at 88% 18%, #ffe0a8 0 4%, transparent 4.5%), radial-gradient(circle at 10% 100%, #3d8fe6 0 16%, rgba(127,211,255,.4) 17.5%, transparent 21%), radial-gradient(ellipse 60% 50% at 70% 30%, rgba(255,110,200,.3) 0%, transparent 70%), linear-gradient(180deg, #050a24 0%, #13235a 100%) !important; border-color: #7fd3ff !important; box-shadow: 0 0 0 2px rgba(127,211,255,.35), 0 0 24px rgba(255,122,217,.45); }
 .pacote.sk-limitada.pacote-buraconegro { background: radial-gradient(circle at 80% 30%, #000 0 8%, rgba(255,160,70,.9) 9%, rgba(176,123,255,.6) 14%, transparent 24%), radial-gradient(circle at 20% 80%, #3a1a6e 0%, #0b0716 70%) !important; border-color: #ff9a3c !important; box-shadow: 0 0 0 2px rgba(255,154,60,.35), 0 0 24px rgba(176,123,255,.55); }
+.loja-abas { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: flex; gap: 6px; overflow-x: auto; padding: 8px 2px; margin: 0 -2px; background: inherit; scrollbar-width: none; }
+.loja-abas::-webkit-scrollbar { display: none; }
+.loja-aba { position: relative; flex: none; font: 800 14px var(--body, inherit); padding: 9px 13px; border-radius: 999px; border: 2px solid #0b1b33; background: rgba(11,27,51,.75); color: #fff; cursor: pointer; box-shadow: 0 3px 0 #0b1b33; }
+.loja-aba[aria-pressed="true"] { background: #ffd23f; color: #0b1b33; }
+.loja-ponto { position: absolute; top: -3px; right: -3px; width: 11px; height: 11px; border-radius: 50%; background: #ff4d6d; border: 2px solid #0b1b33; }
+.loja-sec { display: grid; gap: 12px; }
+.dest-lista { display: grid; gap: 8px; }
+.dest-item { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: linear-gradient(90deg, rgba(91,44,181,.85), rgba(11,27,51,.85)); border: 2px solid #ffd23f; border-radius: 14px; padding: 8px 10px; color: #fff; cursor: pointer; }
+.dest-ics { font-size: 18px; letter-spacing: 2px; margin-top: 2px; }
+.dest-ver { flex: none; font-weight: 800; font-size: 13px; background: #ffd23f; color: #0b1b33; border-radius: 999px; padding: 4px 10px; }
+.dest-txt { flex: 1; min-width: 0; display: grid; } .dest-txt b { font-size: 15px; } .dest-txt small { font-size: 12px; color: #ffd23f; }
+.dest-preco { flex: none; display: flex; align-items: center; gap: 4px; font-family: var(--display); font-size: 16px; }
+.dest-preco .lb-coin { width: 22px; height: 22px; font-size: 12px; }
 .pet-poder { font-size: 12px; line-height: 1.3; color: #c9d6ea; text-align: center; }
 canvas.pet-prev { width: 100%; display: block; border-radius: 12px; background: radial-gradient(circle at 50% 70%, rgba(255,255,255,.12), transparent 70%); }
 .cantinho { display: grid; gap: 8px; border: 3px solid #ffd23f; border-radius: 18px; padding: 14px 12px; color: #fff; margin-top: 4px;
@@ -1670,6 +1683,14 @@ const PETS = [
   { k: "gato", nome: "Gatinho", icone: "🐱", preco: 150, poder: "Sortudo: +1 moeda cada vez que escapa da bola numa rodada", sobreviver: 1 },
   { k: "coelho", nome: "Coelho", icone: "🐰", preco: 200, poder: "Pulinho: corre um pouco mais rápido (+8%)", vel: 1.08 },
   { k: "hamster", nome: "Hamster", icone: "🐹", preco: 120, poder: "Cofrinho: +3 moedas no fim de cada partida", fim: 3 },
+  { k: "tartaruga", nome: "Tartaruga", icone: "🐢", preco: 100, poder: "Devagar e sempre: +2 moedas no fim de cada partida", fim: 2 },
+  { k: "passarinho", nome: "Passarinho", icone: "🐦", preco: 150, poder: "Canto da sorte: +0,5 moeda a cada letra certa", acerto: .5 },
+  { k: "pinguim", nome: "Pinguim", icone: "🐧", preco: 180, poder: "Deslizada: corre um pouco mais rápido (+6%)", vel: 1.06 },
+  // heróis (criados para o jogo, originais): fantasia própria e poder um pouco maior
+  { k: "supercao", base: "cachorro", heroi: true, nome: "Super Cão", icone: "🦸", preco: 350, poder: "Super faro: +0,5 moeda a cada letra certa e +2 moedas no fim", acerto: .5, fim: 2 },
+  { k: "gatoninja", base: "gato", heroi: true, nome: "Gato Ninja", icone: "🥷", preco: 350, poder: "Sombra: +1 moeda por rodada em que escapa e corre 4% mais rápido", sobreviver: 1, vel: 1.04 },
+  { k: "coelhoraio", base: "coelho", heroi: true, nome: "Coelho Relâmpago", icone: "⚡", preco: 350, poder: "Turbo: corre 8% mais rápido e +1 moeda por rodada em que escapa", vel: 1.08, sobreviver: 1 },
+  { k: "hamsterblindado", base: "hamster", heroi: true, nome: "Hamster Blindado", icone: "🛡️", preco: 350, poder: "Cofre blindado: +5 moedas no fim de cada partida", fim: 5 },
   // edição limitada: só dá para comprar até "ate"; quem comprou fica com ele
   { k: "gatogelo", base: "gato", nome: "Gatinho de Gelo", icone: "🧊", preco: 300, tipo: "pet", limitada: true, ate: "2026-11-10T23:59:59-03:00",
     poder: "Escorregão: +1 moeda por rodada em que escapa e corre um pouco mais rápido (+5%)", sobreviver: 1, vel: 1.05 },
@@ -1702,17 +1723,18 @@ const PET_TEMA = { gatogelo: "gelo", caofogo: "fogo", coelhogelofogo: "gelofogo"
 const SKIN_TEMA = { gelo: "gelo", fogo: "fogo", gelofogo: "gelofogo", galactica: "espaco", buraconegro: "espaco", sideral: "espaco" };
 const SKIN_ENFEITE = { rei: "coroa", colecionador: "coroa", cowboy: "chapeu", chef: "chef", pirata: "tapa", ninja: "faixa", relampago: "faixa", bone: "bone" };
 const CORES_TEMA = { gelo: ["#9fdcff", "#3d8fe6"], fogo: ["#e2462b", "#8a1f0f"], gelofogo: ["#9fdcff", "#3d8fe6"], espaco: ["#4b2a9e", "#24104f"], sideral: ["#e9eef5", "#13235a"], buraconegro: ["#1a1530", "#0b0716"] };
-const CORES_PET = { cachorro: ["#b5793f", "#6b4423"], gato: ["#f4a23a", "#c46a14"], coelho: ["#f4f1ec", "#d6cfc4"], hamster: ["#e2b36b", "#a8743a"] };
+const CORES_PET = { cachorro: ["#b5793f", "#6b4423"], gato: ["#f4a23a", "#c46a14"], coelho: ["#f4f1ec", "#d6cfc4"], hamster: ["#e2b36b", "#a8743a"], tartaruga: ["#4f9d3a", "#2e6b22"], passarinho: ["#ffd23f", "#e09a00"], pinguim: ["#2b2d42", "#14151f"] };
+const PET_TRAJE = { supercao: "capa", gatoninja: "ninja", coelhoraio: "raio", hamsterblindado: "armadura" };
 function visualPet(k, skin) {
   const pet = petInfo(k); if (!pet) return null;
-  const base = pet.base || k, tema = PET_TEMA[k] || SKIN_TEMA[skin] || null, enfeite = tema ? null : SKIN_ENFEITE[skin] || null;
+  const base = pet.base || k, traje = PET_TRAJE[k] || null, tema = traje ? null : PET_TEMA[k] || SKIN_TEMA[skin] || null, enfeite = tema || traje ? null : SKIN_ENFEITE[skin] || null;
   const [corpo, escuro] = CORES_TEMA[tema] || CORES_PET[base];
-  return { base, tema, enfeite, corpo, escuro };
+  return { base, tema, enfeite, traje, corpo, escuro };
 }
 function desenharPet2D(c, k, x, y, t, skin) {
   const v = visualPet(k, skin); if (!v) return;
-  const { tema, enfeite, corpo, escuro } = v; k = v.base;
-  const pul = Math.abs(Math.sin(t * 5)) * 3, px = x, py = y - pul;
+  const { tema, enfeite, traje, corpo, escuro } = v; k = v.base;
+  const voa = k === "passarinho", pul = voa ? 9 + Math.sin(t * 4) * 3 : Math.abs(Math.sin(t * 5)) * 3, px = x, py = y - pul;
   c.save();
   c.fillStyle = "rgba(0,0,0,.25)"; c.beginPath(); c.ellipse(x, y + 9, 10, 3, 0, 0, Math.PI * 2); c.fill();
   // rabo
@@ -1721,9 +1743,28 @@ function desenharPet2D(c, k, x, y, t, skin) {
   if (k === "gato") { c.beginPath(); c.moveTo(px + 8, py + 3); c.quadraticCurveTo(px + 16, py, px + 13 + Math.sin(t * 3) * 2, py - 8); c.stroke(); }
   if (k === "coelho") { c.fillStyle = "#ffffff"; c.beginPath(); c.arc(px + 9, py + 3, 3, 0, Math.PI * 2); c.fill(); }
   // corpo e cabeça
-  c.fillStyle = corpo; c.beginPath(); c.ellipse(px + 2, py + 3, k === "hamster" ? 9 : 8, k === "hamster" ? 7.5 : 5.5, 0, 0, Math.PI * 2); c.fill();
-  if (k !== "hamster") { c.beginPath(); c.arc(px - 6, py - 3, 6, 0, Math.PI * 2); c.fill(); }
-  const hx = k === "hamster" ? px - 1 : px - 6, hy = k === "hamster" ? py : py - 3;
+  let hx = k === "hamster" ? px - 1 : px - 6, hy = k === "hamster" ? py : py - 3;
+  if (k === "tartaruga") {   // casco com desenho, cabeça e patinhas
+    c.fillStyle = "#8fcf6a"; [[-6, 7], [7, 7]].forEach(([a, b]) => { c.beginPath(); c.ellipse(px + a, py + b, 2.5, 2, 0, 0, Math.PI * 2); c.fill(); });
+    c.beginPath(); c.arc(px - 11, py + 1, 4, 0, Math.PI * 2); c.fill();
+    c.fillStyle = corpo; c.beginPath(); c.ellipse(px, py + 2, 10, 7, 0, Math.PI, 0); c.lineTo(px + 10, py + 4); c.lineTo(px - 10, py + 4); c.closePath(); c.fill();
+    c.strokeStyle = escuro; c.lineWidth = .9; c.beginPath(); c.moveTo(px - 4, py - 4); c.lineTo(px + 4, py - 4); c.moveTo(px - 7, py + 1); c.lineTo(px - 3, py - 4); c.moveTo(px + 7, py + 1); c.lineTo(px + 3, py - 4); c.moveTo(px - 2, py + 3); c.lineTo(px + 2, py + 3); c.stroke();
+    hx = px - 11; hy = py + 1;
+  } else if (k === "passarinho") {   // voa do lado, batendo as asinhas
+    c.fillStyle = corpo; c.beginPath(); c.ellipse(px + 1, py + 2, 6.5, 5.5, 0, 0, Math.PI * 2); c.fill(); c.beginPath(); c.arc(px - 4, py - 3, 4.5, 0, Math.PI * 2); c.fill();
+    const asa = Math.sin(t * 22) * 3; c.fillStyle = escuro; c.beginPath(); c.ellipse(px + 2, py + 1 - asa, 4.5, 2, -.5, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.moveTo(px + 6, py + 2); c.lineTo(px + 11, py); c.lineTo(px + 10, py + 4); c.closePath(); c.fill();
+    hx = px - 4; hy = py - 3;
+  } else if (k === "pinguim") {   // de pé, balançando
+    const bal = Math.sin(t * 6) * .12; c.save(); c.translate(px, py + 8); c.rotate(bal); c.translate(-px, -(py + 8));
+    c.fillStyle = "#ff9a1f"; c.beginPath(); c.ellipse(px - 3, py + 8, 2.5, 1.2, 0, 0, Math.PI * 2); c.ellipse(px + 3, py + 8, 2.5, 1.2, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = corpo; c.beginPath(); c.ellipse(px, py, 7, 9, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = "#ffffff"; c.beginPath(); c.ellipse(px, py + 2, 4.5, 6, 0, 0, Math.PI * 2); c.fill();
+    c.restore(); hx = px; hy = py - 4;
+  } else {
+    c.fillStyle = corpo; c.beginPath(); c.ellipse(px + 2, py + 3, k === "hamster" ? 9 : 8, k === "hamster" ? 7.5 : 5.5, 0, 0, Math.PI * 2); c.fill();
+    if (k !== "hamster") { c.beginPath(); c.arc(px - 6, py - 3, 6, 0, Math.PI * 2); c.fill(); }
+  }
   // orelhas
   c.fillStyle = escuro;
   if (k === "cachorro") { c.beginPath(); c.ellipse(hx - 5, hy, 2.4, 4.5, .3, 0, Math.PI * 2); c.ellipse(hx + 4, hy - 1, 2.4, 4.5, -.3, 0, Math.PI * 2); c.fill(); }
@@ -1732,7 +1773,8 @@ function desenharPet2D(c, k, x, y, t, skin) {
   if (k === "hamster") { c.beginPath(); c.arc(hx - 5, hy - 6, 2.2, 0, Math.PI * 2); c.arc(hx + 4, hy - 6, 2.2, 0, Math.PI * 2); c.fill(); c.fillStyle = "#fff4dc"; c.beginPath(); c.ellipse(hx, hy + 3, 5, 3.5, 0, 0, Math.PI * 2); c.fill(); }
   // rosto
   c.fillStyle = "#1b1b2b"; c.beginPath(); c.arc(hx - 2, hy - 1, 1, 0, Math.PI * 2); c.arc(hx + 2, hy - 1, 1, 0, Math.PI * 2); c.fill();
-  c.fillStyle = k === "cachorro" ? "#1b1b2b" : "#ff8fab"; c.beginPath(); c.arc(hx, hy + 1.3, .9, 0, Math.PI * 2); c.fill();
+  if (k === "passarinho" || k === "pinguim") { c.fillStyle = "#ff9a1f"; c.beginPath(); c.moveTo(hx - 1.6, hy + .6); c.lineTo(hx + 1.6, hy + .6); c.lineTo(hx, hy + 3); c.closePath(); c.fill(); }
+  else { c.fillStyle = k === "cachorro" || k === "tartaruga" ? "#1b1b2b" : "#ff8fab"; c.beginPath(); c.arc(hx, hy + 1.3, .9, 0, Math.PI * 2); c.fill(); }
   // tema da skin (ou do próprio pet)
   if (tema === "gelofogo") { c.save(); c.beginPath(); c.rect(px + 2, py - 20, 20, 30); c.clip(); c.fillStyle = "#e2462b"; c.beginPath(); c.ellipse(px + 2, py + 3, 8, 5.5, 0, 0, Math.PI * 2); c.fill(); c.restore(); }
   if (tema === "gelo" || tema === "gelofogo") {
@@ -1770,17 +1812,57 @@ function desenharPet2D(c, k, x, y, t, skin) {
   if (enfeite === "chef") { c.fillStyle = "#ffffff"; c.beginPath(); c.arc(hx - 2, topo - 3, 2.6, 0, Math.PI * 2); c.arc(hx + 2, topo - 3, 2.6, 0, Math.PI * 2); c.arc(hx, topo - 5, 2.8, 0, Math.PI * 2); c.fill(); c.fillRect(hx - 3.5, topo - 2, 7, 3); }
   if (enfeite === "tapa") { c.fillStyle = "#1b1b2b"; c.beginPath(); c.arc(hx + 2, hy - 1, 1.8, 0, Math.PI * 2); c.fill(); c.strokeStyle = "#1b1b2b"; c.lineWidth = .7; c.beginPath(); c.moveTo(hx - 5, hy - 3); c.lineTo(hx + 5, hy - 2); c.stroke(); }
   if (enfeite === "faixa") { c.fillStyle = "#e63946"; c.fillRect(hx - 5.5, hy - 4, 11, 2); c.beginPath(); c.moveTo(hx + 5, hy - 4); c.lineTo(hx + 9, hy - 6); c.lineTo(hx + 8.5, hy - 2.5); c.closePath(); c.fill(); }
+  // fantasia dos pets heróis
+  if (traje === "capa") {
+    const bal = Math.sin(t * 6) * 1.5; c.fillStyle = "#e63946"; c.beginPath(); c.moveTo(px - 2, py - 3); c.lineTo(px + 12 + bal, py + 2); c.lineTo(px + 9 + bal, py + 9); c.lineTo(px - 1, py + 4); c.closePath(); c.fill();
+    c.fillStyle = "#ffd23f"; c.beginPath(); c.arc(px + 2, py + 3, 2, 0, Math.PI * 2); c.fill();
+    c.fillStyle = "#1d3fd8"; c.fillRect(hx - 5, hy - 2.5, 10, 2.6); c.fillStyle = "#ffffff"; c.fillRect(hx - 3, hy - 2, 1.6, 1.4); c.fillRect(hx + 1.4, hy - 2, 1.6, 1.4);
+  }
+  if (traje === "ninja") {
+    c.fillStyle = "#1b1b2b"; c.beginPath(); c.arc(hx, hy - 1, 6.3, Math.PI * .95, Math.PI * 2.05); c.fill(); c.fillRect(hx - 6, hy + .5, 12, 3.2);
+    c.fillStyle = "#ffffff"; c.beginPath(); c.arc(hx - 2, hy - 1, 1.1, 0, Math.PI * 2); c.arc(hx + 2, hy - 1, 1.1, 0, Math.PI * 2); c.fill();
+    c.fillStyle = "#e63946"; c.fillRect(hx - 6, hy - 3.2, 12, 1.6); c.beginPath(); c.moveTo(hx + 5.5, hy - 3); c.lineTo(hx + 10, hy - 5 + Math.sin(t * 9)); c.lineTo(hx + 9.5, hy - 1.5); c.closePath(); c.fill();
+  }
+  if (traje === "raio") {
+    c.fillStyle = "#ffd23f"; c.fillRect(hx - 5.5, hy - 4, 11, 1.8);
+    c.beginPath(); c.moveTo(px + 3, py - 2); c.lineTo(px, py + 3); c.lineTo(px + 2.5, py + 3); c.lineTo(px + .5, py + 8); c.lineTo(px + 5, py + 2); c.lineTo(px + 2.5, py + 2); c.closePath(); c.fill();
+    c.save(); c.globalCompositeOperation = "lighter"; c.strokeStyle = `rgba(255,240,140,${.5 + .5 * Math.sin(t * 20)})`; c.lineWidth = 1; c.beginPath(); c.moveTo(px + 10, py - 4); c.lineTo(px + 13, py); c.lineTo(px + 11, py + 1); c.lineTo(px + 14, py + 5); c.stroke(); c.restore();
+  }
+  if (traje === "armadura") {
+    c.fillStyle = "#adb5bd"; c.beginPath(); c.ellipse(px + 2, py + 3, 9.5, 8, 0, Math.PI * 1.05, Math.PI * 1.95); c.fill();
+    c.fillStyle = "#6c757d"; c.fillRect(px - 6, py + 2, 16, 2);
+    c.fillStyle = "#1b1b2b"; c.fillRect(hx - 4.5, hy - 2.5, 9, 3); c.fillStyle = "#2bd9ff"; c.fillRect(hx - 3.5, hy - 2, 7, 1.8);
+  }
   if (enfeite === "bone") { c.fillStyle = "#2f80ed"; c.beginPath(); c.arc(hx, topo + 2, 5, Math.PI, 0); c.fill(); c.fillRect(hx - 8, topo + 1, 5, 1.6); }
   c.restore();
 }
 function pet3D(k, skin) {
   const v = visualPet(k, skin); if (!v) return null;
-  const { tema, enfeite, corpo, escuro } = v; k = v.base;
+  const { tema, enfeite, traje, corpo, escuro } = v; k = v.base;
   const m = cor => new THREE.MeshLambertMaterial({ color: cor });
   const g = new THREE.Group(), add = (geo, cor, x, y, z) => { const o = new THREE.Mesh(geo, m(cor)); o.position.set(x, y, z); g.add(o); return o; };
-  const b = add(new THREE.SphereGeometry(.12, 14, 10), corpo, 0, .12, .04); b.scale.set(1, .8, k === "hamster" ? 1 : 1.4);
-  if (k !== "hamster") add(new THREE.SphereGeometry(.09, 14, 10), corpo, 0, .22, -.12);
-  const hy = k === "hamster" ? .16 : .22, hz = k === "hamster" ? -.1 : -.19, topo = k === "hamster" ? .25 : .3, hcz = k === "hamster" ? -.02 : -.12;
+  let hy = k === "hamster" ? .16 : .22, hz = k === "hamster" ? -.1 : -.19, topo = k === "hamster" ? .25 : .3, hcz = k === "hamster" ? -.02 : -.12;
+  if (k === "tartaruga") {
+    const casco = add(new THREE.SphereGeometry(.14, 14, 10, 0, Math.PI * 2, 0, Math.PI / 2), corpo, 0, .04, .03); casco.scale.set(1, .8, 1.2);
+    add(new THREE.SphereGeometry(.06, 10, 8), "#8fcf6a", 0, .08, -.17);
+    for (const [a, b2] of [[-.1, -.08], [.1, -.08], [-.1, .14], [.1, .14]]) add(new THREE.SphereGeometry(.035, 8, 6), "#8fcf6a", a, .03, b2);
+    hy = .1; hz = -.22; topo = .15; hcz = -.17;
+  } else if (k === "passarinho") {
+    add(new THREE.SphereGeometry(.08, 12, 10), corpo, 0, .55, 0); add(new THREE.SphereGeometry(.06, 12, 10), corpo, 0, .62, -.07);
+    const bico = add(new THREE.ConeGeometry(.02, .05, 6), "#ff9a1f", 0, .61, -.14); bico.rotation.x = -Math.PI / 2;
+    const asas = new THREE.Group(); asas.userData.gira = 6; asas.position.set(0, .56, 0); g.add(asas);
+    for (const l of [-1, 1]) { const a = new THREE.Mesh(new THREE.SphereGeometry(.05, 8, 6), m(escuro)); a.scale.set(1, .3, .7); a.position.x = l * .08; asas.add(a); }
+    hy = .63; hz = -.12; topo = .69; hcz = -.07;
+  } else if (k === "pinguim") {
+    const cp = add(new THREE.SphereGeometry(.1, 14, 10), corpo, 0, .16, 0); cp.scale.set(1, 1.6, 1);
+    const bar = add(new THREE.SphereGeometry(.07, 12, 10), "#ffffff", 0, .14, -.04); bar.scale.set(1, 1.6, 1);
+    const bico = add(new THREE.ConeGeometry(.02, .05, 6), "#ff9a1f", 0, .26, -.11); bico.rotation.x = -Math.PI / 2;
+    for (const l of [-1, 1]) add(new THREE.SphereGeometry(.03, 8, 6), "#ff9a1f", l * .04, .01, -.03).scale.set(1, .4, 1.5);
+    hy = .26; hz = -.09; topo = .33; hcz = 0;
+  } else {
+    const b = add(new THREE.SphereGeometry(.12, 14, 10), corpo, 0, .12, .04); b.scale.set(1, .8, k === "hamster" ? 1 : 1.4);
+    if (k !== "hamster") add(new THREE.SphereGeometry(.09, 14, 10), corpo, 0, .22, -.12);
+  }
   if (k === "cachorro") for (const l of [-1, 1]) add(new THREE.SphereGeometry(.035, 8, 6), escuro, l * .08, .22, -.12).scale.set(.6, 1.5, .6);
   if (k === "gato") for (const l of [-1, 1]) add(new THREE.ConeGeometry(.03, .07, 4), corpo, l * .05, .31, -.12);
   if (k === "coelho") for (const l of [-1, 1]) add(new THREE.CylinderGeometry(.018, .022, .16, 6), corpo, l * .035, .36, -.12);
@@ -1803,6 +1885,11 @@ function pet3D(k, skin) {
   if (enfeite === "chef") { add(new THREE.SphereGeometry(.05, 10, 8), "#ffffff", 0, topo + .03, hcz); add(new THREE.CylinderGeometry(.04, .04, .04, 10), "#ffffff", 0, topo - .005, hcz); }
   if (enfeite === "tapa") add(new THREE.CylinderGeometry(.022, .022, .01, 10), "#1b1b2b", .035, hy + .02, hz - .005).rotation.x = Math.PI / 2;
   if (enfeite === "faixa") add(new THREE.TorusGeometry(.085, .012, 6, 18), "#e63946", 0, hy + .04, hcz).rotation.x = Math.PI / 2;
+  if (traje === "capa") { const capa = new THREE.Mesh(new THREE.PlaneGeometry(.2, .2), new THREE.MeshLambertMaterial({ color: "#e63946", side: THREE.DoubleSide })); capa.position.set(0, .17, .2); capa.rotation.x = .7; g.add(capa);
+    add(new THREE.TorusGeometry(.085, .015, 6, 18), "#1d3fd8", 0, hy + .02, hcz).rotation.x = Math.PI / 2; }
+  if (traje === "ninja") { add(new THREE.SphereGeometry(.095, 12, 10, 0, Math.PI * 2, 0, Math.PI / 2), "#1b1b2b", 0, hy + .005, hcz); add(new THREE.TorusGeometry(.09, .012, 6, 18), "#e63946", 0, hy + .03, hcz).rotation.x = Math.PI / 2; }
+  if (traje === "raio") { add(new THREE.TorusGeometry(.085, .012, 6, 18), "#ffd23f", 0, hy + .04, hcz).rotation.x = Math.PI / 2; add(new THREE.BoxGeometry(.03, .08, .02), "#ffd23f", 0, .12, -.12).rotation.z = .4; }
+  if (traje === "armadura") { const arm = add(new THREE.SphereGeometry(.135, 14, 10, 0, Math.PI * 2, 0, Math.PI / 2), "#adb5bd", 0, .12, .03); arm.scale.set(1, .8, 1); add(new THREE.BoxGeometry(.1, .025, .02), "#2bd9ff", 0, hy + .02, hz - .01); }
   if (enfeite === "bone") add(new THREE.SphereGeometry(.07, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), "#2f80ed", 0, topo - .04, hcz);
   return g;
 }
@@ -3590,6 +3677,35 @@ acoes.pegarMissao = el => {
   pr.pegou.push(m.id);
   darRecompensa(nome, m.premio, `🎯 Missão cumprida! +${m.premio} moedas`);
 };
+/* ---------- Loja em abas: uma parte de cada vez ---------- */
+const ABAS_LOJA = [["destaques", "⭐ Destaques"], ["skins", "👕 Skins"], ["pets", "🐾 Pets"], ["arremessos", "🏀 Arremessos"], ["gestos", "🕺 Gestos"], ["emojis", "😎 Emojis"], ["fundos", "🖼️ Fundos"], ["fotos", "🙂 Fotos"]];
+const ABA_DO_TIPO = { skin: "skins", pet: "pets", arremesso: "arremessos", gesto: "gestos", emoji: "emojis", fundo: "fundos", avatar: "fotos" };
+const abaLoja = () => ABAS_LOJA.some(([k]) => k === G.lojaAba) ? G.lojaAba : "destaques";
+const secOculta = k => abaLoja() === k ? "" : " hidden";
+const limitadasNovas = nome => todasLimitadas().filter(x => naVenda(x) && !temLim(nome, x));
+function abasLojaHTML(nome) {
+  const novas = new Set(limitadasNovas(nome).map(x => ABA_DO_TIPO[x.tipo || "skin"]));
+  return `<nav class="loja-abas" aria-label="Partes da loja">${ABAS_LOJA.map(([k, t]) => `<button type="button" class="loja-aba" data-a="lojaAba" data-aba="${k}" aria-pressed="${abaLoja() === k}">${t}${novas.has(k) ? '<i class="loja-ponto" aria-label="tem edição limitada"></i>' : ""}</button>`).join("")}</nav>`;
+}
+/* Destaques: as coleções limitadas à venda que a pessoa ainda não completou (uma linha por coleção), com atalho para o pacote */
+function limitadasDestaqueHTML(nome) {
+  const lim = limitadasNovas(nome); if (!lim.length) return "";
+  const ic = x => x.tipo === "emoji" ? x.e : x.tipo === "fundo" ? "🖼️" : x.tipo === "gesto" || x.tipo === "avatar" || x.tipo === "arremesso" || x.tipo === "pet" ? x.icone : "👕";
+  const grupos = new Map();
+  lim.forEach(x => {
+    const col = Object.entries(COLECOES).find(([, c]) => c.chaves.includes(chaveLim(x)));
+    const id = col ? col[0] : chaveLim(x), g = grupos.get(id) || { id, nome: col ? "Coleção " + col[1].nome : x.nome, pacote: col ? col[1].pacote : null, itens: [], ate: x.ate };
+    g.itens.push(x); if (Date.parse(x.ate) < Date.parse(g.ate)) g.ate = x.ate; grupos.set(id, g);
+  });
+  const lista = [...grupos.values()].sort((a, b) => Date.parse(a.ate) - Date.parse(b.ate));
+  return `<h2 class="lb-secao">Edições limitadas</h2>
+    <div class="dest-lista">${lista.map(g => { const pc = g.pacote && PACOTES.find(p2 => p2.id === g.pacote), pInfo = pc && pacoteInfo(nome, pc.id);
+      return `<button type="button" class="dest-item" ${pInfo && pInfo.aVenda ? `data-a="verPacote" data-p="${pc.id}"` : `data-a="lojaAba" data-aba="${ABA_DO_TIPO[g.itens[0].tipo || "skin"]}"`}>
+      <span class="dest-txt"><b>${esc(g.nome)}</b><small>⏳ ${esc(faltaParaAcabar({ ate: g.ate }))} · faltam ${g.itens.length} ${g.itens.length === 1 ? "item" : "itens"}</small><span class="dest-ics" aria-hidden="true">${g.itens.map(ic).join(" ")}</span></span>
+      <span class="dest-ver">${pInfo && pInfo.aVenda ? "Ver pacote" : "Ver"} ›</span></button>`; }).join("")}</div>`;
+}
+acoes.verPacote = el => { const c = document.querySelector(".pacote-" + el.dataset.p); if (c) c.scrollIntoView({ behavior: "smooth", block: "center" }); };
+acoes.lojaAba = el => { G.lojaAba = el.dataset.aba; G.lojaConf = false; render(); const n = document.querySelector(".loja-abas"); if (n) n.scrollIntoView({ block: "start" }); };
 TELAS.loja = () => {
   const nome = perfil(), moedas = G.banco[nome] || 0, tem = invVidas(nome), preco = G.cfg.preco;
   const pode = moedas >= preco;
@@ -3604,6 +3720,9 @@ TELAS.loja = () => {
     </div>
     <h1 class="lb-title">Loja</h1>
     ${typeof lojaEventosHTML === "function" ? lojaEventosHTML() : ""}
+    ${abasLojaHTML(nome)}
+    <div class="loja-sec" data-sec="destaques"${secOculta("destaques")}>
+    ${limitadasDestaqueHTML(nome)}
     ${pacoteHTML(nome, moedas)}
     ${cantinhoHTML(nome, moedas)}
     <div class="lb-oferta">
@@ -3615,6 +3734,8 @@ TELAS.loja = () => {
       </div>
       <button class="lb-comprar" data-a="comprarLoja" ${pode ? "" : "disabled"}>${pode ? (G.lojaConf === "vida" ? "Confirmar?" : `<span class="lb-coin" aria-hidden="true">$</span>${preco}`) : `Faltam ${fmtM(preco - moedas)}`}</button>
     </div>
+    </div>
+    <div class="loja-sec" data-sec="skins"${secOculta("skins")}>
     <h2 class="lb-secao">Skins</h2>
     <div class="fd-grid">${SKINS.filter(s => !s.secreto && (naVenda(s) || temSkin(nome, s.k))).sort((a, b) => !!b.limitada - !!a.limitada).map(s => {
       const tem = temSkin(nome, s.k), usando = skinDe(nome) === s.k, podeS = moedas >= s.preco;
@@ -3627,6 +3748,8 @@ TELAS.loja = () => {
         <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarSkin" data-s="${s.k}" ${usando || (!tem && !podeS) ? "disabled" : ""}>${rotulo}</button>
       </div>`; }).join("")}
     </div>
+    </div>
+    <div class="loja-sec" data-sec="fotos"${secOculta("fotos")}>
     <h2 class="lb-secao">Fotos de perfil</h2>
     <div class="fd-grid">${AV_ESPECIAIS.filter(x => naVenda(x) || temAvatar(nome, x.k)).map(x => {
       const tem = temAvatar(nome, x.k), usando = avatarDe(nome).i === x.k, podeA = moedas >= x.preco;
@@ -3639,6 +3762,8 @@ TELAS.loja = () => {
         <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarAvatar" data-k="${x.k}" ${usando || (!tem && !podeA) ? "disabled" : ""}>${rotulo}</button>
       </div>`; }).join("")}
     </div>
+    </div>
+    <div class="loja-sec" data-sec="pets"${secOculta("pets")}>
     <h2 class="lb-secao">Pets</h2>
     <p class="lb-sub" style="margin-top:-6px">Andam do lado do seu bonequinho na partida e cada um tem um poder pequeno.</p>
     <div class="fd-grid">
@@ -3646,14 +3771,14 @@ TELAS.loja = () => {
         <span class="em-art" aria-hidden="true">🥚</span>
         <b>Ovo surpresa</b>
         <span class="pet-poder">Sai um pet normal que você ainda não tem.</span>
-        ${(() => { const falta = PETS.filter(x => !x.limitada && !temPet(nome, x.k)), pode = moedas >= PRECO_OVO;
+        ${(() => { const falta = PETS.filter(x => !x.limitada && !x.heroi && !temPet(nome, x.k)), pode = moedas >= PRECO_OVO;
           return `<button class="lb-comprar lb-comprar-p" data-a="chocarOvo" ${!falta.length || !pode ? "disabled" : ""}>${!falta.length ? "Você tem todos" : G.lojaConf === "ovo" ? "Confirmar?" : pode ? `<span class="lb-coin" aria-hidden="true">$</span>${PRECO_OVO}` : `$ ${PRECO_OVO}`}</button>`; })()}
       </div>
       ${PETS.filter(x => naVenda(x) || temPet(nome, x.k)).sort((a, b) => !!b.limitada - !!a.limitada).map(x => {
         const tem = temPet(nome, x.k), usando = petDe(nome) === x.k, podeP = moedas >= x.preco;
         const rotulo = usando ? "Tirar" : tem ? "Usar" : G.lojaConf === "pet:" + x.k ? "Confirmar?" : podeP ? `<span class="lb-coin" aria-hidden="true">$</span>${x.preco}` : `$ ${x.preco}`;
         return `<div class="fd-tile${tem ? "" : " fd-travado"}${x.limitada ? " sk-limitada" : ""}"${usando ? ' aria-current="true"' : ""}>
-          ${x.limitada ? `<i class="sk-selo">Edição limitada</i>` : ""}
+          ${x.limitada ? `<i class="sk-selo">Edição limitada</i>` : x.heroi ? `<i class="sk-selo sk-selo-heroi">⚡ Herói</i>` : ""}
           <canvas class="pet-prev" data-pet="${x.k}" aria-label="${esc(x.nome)}"></canvas>
           <b>${esc(x.nome)}</b>
           <span class="pet-poder">${esc(x.poder)}</span>
@@ -3661,6 +3786,8 @@ TELAS.loja = () => {
           <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarPet" data-k="${x.k}" ${!tem && !podeP ? "disabled" : ""}>${rotulo}</button>
         </div>`; }).join("")}
     </div>
+    </div>
+    <div class="loja-sec" data-sec="arremessos"${secOculta("arremessos")}>
     <h2 class="lb-secao">Arremessos</h2>
     <p class="lb-sub" style="margin-top:-6px">O que você joga quando acerta a palavra. Funciona igual à bola, só muda o jeito.</p>
     <div class="fd-grid">${ARREMESSOS.filter(a => !a.secreto && (naVenda(a) || temArremesso(nome, a.k))).sort((a, b) => !!b.limitada - !!a.limitada).map(a => {
@@ -3674,6 +3801,8 @@ TELAS.loja = () => {
         <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarArremesso" data-k="${a.k}" ${usando || (!tem && !podeA) ? "disabled" : ""}>${rotulo}</button>
       </div>`; }).join("")}
     </div>
+    </div>
+    <div class="loja-sec" data-sec="gestos"${secOculta("gestos")}>
     <h2 class="lb-secao">Gestos</h2>
     <p class="lb-sub" style="margin-top:-6px">Dancinhas para o seu bonequinho fazer durante a partida.</p>
     <div class="fd-grid">${GESTOS.filter(g => naVenda(g) || temGesto(nome, g.k)).sort((a, b) => !!b.limitada - !!a.limitada).map(g => {
@@ -3687,6 +3816,8 @@ TELAS.loja = () => {
         <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarGesto" data-g="${g.k}" ${tem || !podeG ? "disabled" : ""} aria-label="${tem ? "Você tem" : "Comprar"} o gesto ${esc(g.nome)}">${rotulo}</button>
       </div>`; }).join("")}
     </div>
+    </div>
+    <div class="loja-sec" data-sec="emojis"${secOculta("emojis")}>
     <h2 class="lb-secao">Emojis</h2>
     <p class="lb-sub" style="margin-top:-6px">Para mandar durante a partida. Aparecem em cima do seu bonequinho.</p>
     <div class="fd-grid">${EMOJIS.filter(e => !e.secreto && (naVenda(e) || temEmoji(nome, e.k))).sort((a, b) => !!b.limitada - !!a.limitada).map(e => {
@@ -3700,6 +3831,8 @@ TELAS.loja = () => {
         <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarEmoji" data-e="${e.k}" ${tem || !podeE ? "disabled" : ""} aria-label="${tem ? "Você tem" : "Comprar"} o emoji ${esc(e.nome)}">${rotulo}</button>
       </div>`; }).join("")}
     </div>
+    </div>
+    <div class="loja-sec" data-sec="fundos"${secOculta("fundos")}>
     <h2 class="lb-secao">Fundos</h2>
     <div class="fd-grid">${FUNDOS.filter(([k]) => k !== "basico" && (fundoNaVenda(k) || temFundo(nome, k))).sort((a, b) => !!fundoLim(b[0]) - !!fundoLim(a[0])).map(([k, t]) => {
       const tem = temFundo(nome, k), usando = fundoAtual() === k, pr = PRECO_FUNDO[k], podeF = moedas >= pr, lim = fundoLim(k);
@@ -3711,6 +3844,7 @@ TELAS.loja = () => {
         ${lim && !tem && naVenda(lim) ? `<span class="sk-prazo">⏳ ${faltaParaAcabar(lim)}</span>` : ""}
         <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarFundo" data-f="${k}" ${usando || (!tem && !podeF) ? "disabled" : ""}>${rotulo}</button>
       </div>`; }).join("")}
+    </div>
     </div>
   </section>`;
 };
@@ -4310,7 +4444,7 @@ acoes.comprarPet = el => {
   volta(`${nome} adotou ${x.nome} ${x.icone}!`);
 };
 acoes.chocarOvo = () => {
-  const nome = perfil(), falta = PETS.filter(x => !x.limitada && !temPet(nome, x.k));
+  const nome = perfil(), falta = PETS.filter(x => !x.limitada && !x.heroi && !temPet(nome, x.k));
   if (!falta.length || (G.banco[nome] || 0) < PRECO_OVO) return;
   if (G.lojaConf !== "ovo") { pedirConfirmacao("ovo"); return; }
   clearTimeout(lojaConfT); G.lojaConf = false;
