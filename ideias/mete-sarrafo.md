@@ -134,10 +134,12 @@ Parte **Pets** na loja. O pet anda do lado do bonequinho na tela inicial, na par
 | Gatinho 🐱 | 150 | Sortudo: +1 moeda cada vez que escapa da bola numa rodada |
 | Coelho 🐰 | 200 | Pulinho: corre 8% mais rápido |
 | Hamster 🐹 | 120 | Cofrinho: +3 moedas no fim de cada partida |
-| Gatinho Galáctico (edição limitada, até 11/11) | 300 | Estrela da sorte: +1 moeda por rodada em que escapa e corre 5% mais rápido |
+| Gatinho de Gelo 🧊 (edição limitada, até 10/11) | 300 | Escorregão: +1 moeda por rodada em que escapa e corre 5% mais rápido |
+| Cachorrinho de Fogo 🔥 (edição limitada, até 10/11) | 300 | Brasa: +0,5 moeda a cada letra certa e +3 moedas no fim da partida |
+| Coelho Gelo e Fogo ☯️ (edição limitada, até 10/11) | 300 | Equilíbrio: +0,5 moeda a cada letra certa e +1 moeda por rodada em que escapa |
 
 - **Ovo surpresa** (100 moedas): sai um pet normal que o jogador ainda não tem (nunca o limitado). Quem já tem todos não consegue comprar.
 - Os poderes valem nas partidas de bonequinhos (no mesmo celular e no online). Na bola de verdade o pet não aparece.
-- O pet limitado conta para o selo de colecionador. O ADM pode dar ou tirar pets (aba Itens) e usar pet como presente (código ou presente para todos).
+- O Andre pediu para tirar o Gatinho Galáctico e colocar pets das coleções Gelo, Fogo e Gelo e Fogo (mesmo prazo das coleções; entram também na "Volta das limitadas"). Os pets limitados contam para o selo de colecionador. O ADM pode dar ou tirar pets (aba Itens) e usar pet como presente (código ou presente para todos).
 - Preços e poderes são um começo para o Andre ajustar.
 

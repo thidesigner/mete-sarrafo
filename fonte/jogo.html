@@ -1397,9 +1397,9 @@ const COLECOES = {
   galactico: { nome: "Galáctica", chaves: ["skin-galactica", "fundo-galactico", "emoji-galactico", "gesto-galactico", "avatar-galactico"], pacote: "galactico" },
   buraconegro: { nome: "Buraco Negro", chaves: ["skin-buraconegro", "fundo-buraconegro", "emoji-buraconegro", "gesto-buraconegro", "avatar-buraconegro", "arremesso-buraconegro"], pacote: "buraconegro" },
   sideral: { nome: "Espaço Sideral", chaves: ["skin-sideral", "fundo-sideral", "emoji-sideral", "gesto-sideral", "avatar-sideral", "arremesso-sideral"], pacote: "sideral" },
-  gelo: { nome: "Gelo", chaves: ["skin-gelo", "fundo-gelo", "emoji-gelo", "gesto-gelo", "avatar-gelo", "arremesso-gelo"], pacote: "gelo" },
-  fogo: { nome: "Fogo", chaves: ["skin-fogo", "fundo-fogo", "emoji-labareda", "gesto-fogo", "avatar-fogo", "arremesso-fogo"], pacote: "fogo" },
-  gelofogo: { nome: "Gelo e Fogo", chaves: ["skin-gelofogo", "fundo-gelofogo", "emoji-gelofogo", "gesto-gelofogo", "avatar-gelofogo", "arremesso-gelofogo"], pacote: "gelofogo" },
+  gelo: { nome: "Gelo", chaves: ["skin-gelo", "fundo-gelo", "emoji-gelo", "gesto-gelo", "avatar-gelo", "arremesso-gelo", "pet-gatogelo"], pacote: "gelo" },
+  fogo: { nome: "Fogo", chaves: ["skin-fogo", "fundo-fogo", "emoji-labareda", "gesto-fogo", "avatar-fogo", "arremesso-fogo", "pet-caofogo"], pacote: "fogo" },
+  gelofogo: { nome: "Gelo e Fogo", chaves: ["skin-gelofogo", "fundo-gelofogo", "emoji-gelofogo", "gesto-gelofogo", "avatar-gelofogo", "arremesso-gelofogo", "pet-coelhogelofogo"], pacote: "gelofogo" },
 };
 const EVT_NO_SITE = location.protocol.startsWith("http") && !/claude|claudeusercontent/.test(location.hostname);
 const PROMO_ALVOS = { tudo: "Toda a loja", skin: "Skins", emoji: "Emojis", gesto: "Gestos", arremesso: "Arremessos", fundo: "Fundos", avatar: "Fotos de perfil" };
@@ -1661,8 +1661,12 @@ const PETS = [
   { k: "coelho", nome: "Coelho", icone: "🐰", preco: 200, poder: "Pulinho: corre um pouco mais rápido (+8%)", vel: 1.08 },
   { k: "hamster", nome: "Hamster", icone: "🐹", preco: 120, poder: "Cofrinho: +3 moedas no fim de cada partida", fim: 3 },
   // edição limitada: só dá para comprar até "ate"; quem comprou fica com ele
-  { k: "gatogalactico", nome: "Gatinho Galáctico", icone: "🐱", preco: 300, tipo: "pet", limitada: true, ate: "2026-11-11T23:59:59-03:00",
-    poder: "Estrela da sorte: +1 moeda por rodada em que escapa e corre um pouco mais rápido (+5%)", sobreviver: 1, vel: 1.05 },
+  { k: "gatogelo", base: "gato", nome: "Gatinho de Gelo", icone: "🧊", preco: 300, tipo: "pet", limitada: true, ate: "2026-11-10T23:59:59-03:00",
+    poder: "Escorregão: +1 moeda por rodada em que escapa e corre um pouco mais rápido (+5%)", sobreviver: 1, vel: 1.05 },
+  { k: "caofogo", base: "cachorro", nome: "Cachorrinho de Fogo", icone: "🔥", preco: 300, tipo: "pet", limitada: true, ate: "2026-11-10T23:59:59-03:00",
+    poder: "Brasa: +0,5 moeda a cada letra certa e +3 moedas no fim da partida", acerto: .5, fim: 3 },
+  { k: "coelhogelofogo", base: "coelho", nome: "Coelho Gelo e Fogo", icone: "☯️", preco: 300, tipo: "pet", limitada: true, ate: "2026-11-10T23:59:59-03:00",
+    poder: "Equilíbrio: +0,5 moeda a cada letra certa e +1 moeda por rodada em que escapa", acerto: .5, sobreviver: 1 },
 ];
 PETS.forEach(x => { x.tipo = "pet"; });
 const PRECO_OVO = 100;
@@ -1677,15 +1681,16 @@ function poderPet(p, quando) {
 }
 function desenharPet2D(c, k, x, y, t) {
   const pet = petInfo(k); if (!pet) return;
+  const tema = k; k = pet.base || k;
   const pul = Math.abs(Math.sin(t * 5)) * 3, px = x, py = y - pul;
   c.save();
   c.fillStyle = "rgba(0,0,0,.25)"; c.beginPath(); c.ellipse(x, y + 9, 10, 3, 0, 0, Math.PI * 2); c.fill();
-  const corpo = { cachorro: "#b5793f", gato: "#f4a23a", coelho: "#f4f1ec", hamster: "#e2b36b", gatogalactico: "#4b2a9e" }[k];
-  const escuro = { cachorro: "#6b4423", gato: "#c46a14", coelho: "#d6cfc4", hamster: "#a8743a", gatogalactico: "#24104f" }[k];
+  const corpo = { cachorro: "#b5793f", gato: "#f4a23a", coelho: "#f4f1ec", hamster: "#e2b36b", gatogelo: "#9fdcff", caofogo: "#e2462b", coelhogelofogo: "#9fdcff" }[tema];
+  const escuro = { cachorro: "#6b4423", gato: "#c46a14", coelho: "#d6cfc4", hamster: "#a8743a", gatogelo: "#3d8fe6", caofogo: "#8a1f0f", coelhogelofogo: "#3d8fe6" }[tema];
   // rabo
   c.strokeStyle = corpo; c.lineWidth = k === "coelho" || k === "hamster" ? 0 : 3; c.lineCap = "round";
   if (k === "cachorro") { c.beginPath(); c.moveTo(px + 8, py + 2); c.lineTo(px + 13 + Math.sin(t * 14) * 3, py - 4); c.stroke(); }
-  if (k === "gato" || k === "gatogalactico") { c.beginPath(); c.moveTo(px + 8, py + 3); c.quadraticCurveTo(px + 16, py, px + 13 + Math.sin(t * 3) * 2, py - 8); c.stroke(); }
+  if (k === "gato") { c.beginPath(); c.moveTo(px + 8, py + 3); c.quadraticCurveTo(px + 16, py, px + 13 + Math.sin(t * 3) * 2, py - 8); c.stroke(); }
   if (k === "coelho") { c.fillStyle = "#ffffff"; c.beginPath(); c.arc(px + 9, py + 3, 3, 0, Math.PI * 2); c.fill(); }
   // corpo e cabeça
   c.fillStyle = corpo; c.beginPath(); c.ellipse(px + 2, py + 3, k === "hamster" ? 9 : 8, k === "hamster" ? 7.5 : 5.5, 0, 0, Math.PI * 2); c.fill();
@@ -1694,34 +1699,51 @@ function desenharPet2D(c, k, x, y, t) {
   // orelhas
   c.fillStyle = escuro;
   if (k === "cachorro") { c.beginPath(); c.ellipse(hx - 5, hy, 2.4, 4.5, .3, 0, Math.PI * 2); c.ellipse(hx + 4, hy - 1, 2.4, 4.5, -.3, 0, Math.PI * 2); c.fill(); }
-  if (k === "gato" || k === "gatogalactico") { c.fillStyle = corpo; c.beginPath(); c.moveTo(hx - 5.5, hy - 2); c.lineTo(hx - 4, hy - 9); c.lineTo(hx - 1, hy - 4); c.moveTo(hx + 5.5, hy - 2); c.lineTo(hx + 4, hy - 9); c.lineTo(hx + 1, hy - 4); c.fill(); }
+  if (k === "gato") { c.fillStyle = corpo; c.beginPath(); c.moveTo(hx - 5.5, hy - 2); c.lineTo(hx - 4, hy - 9); c.lineTo(hx - 1, hy - 4); c.moveTo(hx + 5.5, hy - 2); c.lineTo(hx + 4, hy - 9); c.lineTo(hx + 1, hy - 4); c.fill(); }
   if (k === "coelho") { c.fillStyle = corpo; c.beginPath(); c.ellipse(hx - 2.5, hy - 10, 2, 6, -.15, 0, Math.PI * 2); c.ellipse(hx + 2.5, hy - 10, 2, 6, .15, 0, Math.PI * 2); c.fill(); c.fillStyle = "#ffb3c7"; c.beginPath(); c.ellipse(hx - 2.5, hy - 10, 1, 4, -.15, 0, Math.PI * 2); c.ellipse(hx + 2.5, hy - 10, 1, 4, .15, 0, Math.PI * 2); c.fill(); }
   if (k === "hamster") { c.beginPath(); c.arc(hx - 5, hy - 6, 2.2, 0, Math.PI * 2); c.arc(hx + 4, hy - 6, 2.2, 0, Math.PI * 2); c.fill(); c.fillStyle = "#fff4dc"; c.beginPath(); c.ellipse(hx, hy + 3, 5, 3.5, 0, 0, Math.PI * 2); c.fill(); }
   // rosto
   c.fillStyle = "#1b1b2b"; c.beginPath(); c.arc(hx - 2, hy - 1, 1, 0, Math.PI * 2); c.arc(hx + 2, hy - 1, 1, 0, Math.PI * 2); c.fill();
   c.fillStyle = k === "cachorro" ? "#1b1b2b" : "#ff8fab"; c.beginPath(); c.arc(hx, hy + 1.3, .9, 0, Math.PI * 2); c.fill();
-  if (k === "gatogalactico") {   // estrelinhas no pelo e brilho
-    c.fillStyle = "#ffffff"; [[1, 2], [5, 4], [-6, -6], [-2, 5]].forEach(([a, b], i) => { c.globalAlpha = .5 + .5 * Math.sin(t * 4 + i); c.beginPath(); c.arc(px + a, py + b, .9, 0, Math.PI * 2); c.fill(); });
-    c.globalAlpha = 1; c.globalCompositeOperation = "lighter"; const g = c.createRadialGradient(px, py, 2, px, py, 16); g.addColorStop(0, "rgba(176,123,255,.35)"); g.addColorStop(1, "rgba(176,123,255,0)"); c.fillStyle = g; c.beginPath(); c.arc(px, py, 16, 0, Math.PI * 2); c.fill();
+  if (tema === "coelhogelofogo") {   // metade fogo (lado direito do corpo)
+    c.save(); c.beginPath(); c.rect(px + 2, py - 20, 20, 30); c.clip(); c.fillStyle = "#e2462b"; c.beginPath(); c.ellipse(px + 2, py + 3, 8, 5.5, 0, 0, Math.PI * 2); c.fill(); c.restore();
+  }
+  if (tema === "gatogelo" || tema === "coelhogelofogo") {   // flocos e brilho de gelo
+    c.strokeStyle = "rgba(255,255,255,.95)"; c.lineWidth = .8;
+    [[-3, 4], [4, 1]].forEach(([a, b], i) => { if (tema === "coelhogelofogo" && a > 0) return; const fx = px + a, fy = py + b, r = 2; c.beginPath(); for (let j = 0; j < 6; j++) { const aa = j * Math.PI / 3 + t; c.moveTo(fx, fy); c.lineTo(fx + Math.cos(aa) * r, fy + Math.sin(aa) * r); } c.stroke(); });
+    c.save(); c.globalCompositeOperation = "lighter"; const g = c.createRadialGradient(px, py, 2, px, py, 15); g.addColorStop(0, "rgba(140,210,255,.35)"); g.addColorStop(1, "rgba(140,210,255,0)"); c.fillStyle = g; c.beginPath(); c.arc(px, py, 15, 0, Math.PI * 2); c.fill(); c.restore();
+  }
+  if (tema === "caofogo" || tema === "coelhogelofogo") {   // chaminhas em cima e faíscas
+    const cx0 = tema === "caofogo" ? hx : px + 6, cy0 = tema === "caofogo" ? hy - 6 : py - 2;
+    c.save(); c.globalCompositeOperation = "lighter";
+    for (let j = 0; j < 3; j++) { const fx = cx0 - 3 + j * 3, h = 5 + Math.sin(t * 14 + j * 2) * 1.5, g = c.createLinearGradient(fx, cy0, fx, cy0 - h); g.addColorStop(0, "rgba(255,90,30,.95)"); g.addColorStop(1, "rgba(255,230,107,.9)");
+      c.fillStyle = g; c.beginPath(); c.moveTo(fx - 1.6, cy0); c.quadraticCurveTo(fx, cy0 - h * 1.6, fx + 1.6, cy0); c.fill(); }
+    const f = (t * .9) % 1; c.fillStyle = `rgba(255,170,40,${1 - f})`; c.beginPath(); c.arc(cx0 + 4, cy0 - 4 - f * 10, 1, 0, Math.PI * 2); c.fill();
+    c.restore();
   }
   c.restore();
 }
 function pet3D(k) {
   const pet = petInfo(k); if (!pet) return null;
-  const corpo = { cachorro: "#b5793f", gato: "#f4a23a", coelho: "#f4f1ec", hamster: "#e2b36b", gatogalactico: "#4b2a9e" }[k];
-  const escuro = { cachorro: "#6b4423", gato: "#c46a14", coelho: "#d6cfc4", hamster: "#a8743a", gatogalactico: "#24104f" }[k];
+  const tema = k; k = pet.base || k;
+  const corpo = { cachorro: "#b5793f", gato: "#f4a23a", coelho: "#f4f1ec", hamster: "#e2b36b", gatogelo: "#9fdcff", caofogo: "#e2462b", coelhogelofogo: "#9fdcff" }[tema];
+  const escuro = { cachorro: "#6b4423", gato: "#c46a14", coelho: "#d6cfc4", hamster: "#a8743a", gatogelo: "#3d8fe6", caofogo: "#8a1f0f", coelhogelofogo: "#3d8fe6" }[tema];
   const m = cor => new THREE.MeshLambertMaterial({ color: cor });
   const g = new THREE.Group(), add = (geo, cor, x, y, z) => { const o = new THREE.Mesh(geo, m(cor)); o.position.set(x, y, z); g.add(o); return o; };
   const b = add(new THREE.SphereGeometry(.12, 14, 10), corpo, 0, .12, .04); b.scale.set(1, .8, k === "hamster" ? 1 : 1.4);
   const cab = k === "hamster" ? null : add(new THREE.SphereGeometry(.09, 14, 10), corpo, 0, .22, -.12);
   const hy = k === "hamster" ? .16 : .22, hz = k === "hamster" ? -.1 : -.19;
   if (k === "cachorro") for (const l of [-1, 1]) add(new THREE.SphereGeometry(.035, 8, 6), escuro, l * .08, .22, -.12).scale.set(.6, 1.5, .6);
-  if (k === "gato" || k === "gatogalactico") for (const l of [-1, 1]) add(new THREE.ConeGeometry(.03, .07, 4), corpo, l * .05, .31, -.12);
+  if (k === "gato") for (const l of [-1, 1]) add(new THREE.ConeGeometry(.03, .07, 4), corpo, l * .05, .31, -.12);
   if (k === "coelho") for (const l of [-1, 1]) add(new THREE.CylinderGeometry(.018, .022, .16, 6), corpo, l * .035, .36, -.12);
   if (k === "hamster") for (const l of [-1, 1]) add(new THREE.SphereGeometry(.025, 8, 6), escuro, l * .07, .25, -.04);
   for (const l of [-1, 1]) add(new THREE.SphereGeometry(.014, 6, 4), "#1b1b2b", l * .035, hy + .02, hz);
-  if (k === "gato" || k === "gatogalactico" || k === "cachorro") { const r = add(new THREE.CylinderGeometry(.015, .02, .16, 6), corpo, 0, .2, .2); r.rotation.x = -.7; }
-  if (k === "gatogalactico") { const brilho = new THREE.Mesh(new THREE.SphereGeometry(.2, 12, 10), new THREE.MeshBasicMaterial({ color: "#b07bff", transparent: true, opacity: .2, blending: THREE.AdditiveBlending, depthWrite: false })); brilho.position.y = .16; g.add(brilho); }
+  if (k === "gato" || k === "cachorro") { const r = add(new THREE.CylinderGeometry(.015, .02, .16, 6), corpo, 0, .2, .2); r.rotation.x = -.7; }
+  const luz = (cor, op) => new THREE.MeshBasicMaterial({ color: cor, transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false });
+  if (tema === "coelhogelofogo") { const meia = add(new THREE.SphereGeometry(.121, 14, 10, 0, Math.PI), "#e2462b", 0, .12, .04); meia.scale.set(1, .8, 1.4); }
+  if (tema === "gatogelo" || tema === "coelhogelofogo") { const b2 = new THREE.Mesh(new THREE.SphereGeometry(.2, 12, 10), luz("#8fd2ff", .2)); b2.position.y = .16; g.add(b2); }
+  if (tema === "caofogo" || tema === "coelhogelofogo") { const orb = new THREE.Group(); orb.userData.gira = 2; orb.position.y = .3; g.add(orb);
+    for (let j = 0; j < 3; j++) { const a = j / 3 * Math.PI * 2, f = new THREE.Mesh(new THREE.ConeGeometry(.025, .08, 6), luz(j % 2 ? "#ffb347" : "#ff5a1f", .95)); f.position.set(Math.cos(a) * .08, 0, Math.sin(a) * .08 - .1); orb.add(f); } }
   return g;
 }
 function temArremesso(n, k) { const a = ARREMESSOS.find(x => x.k === k); return !!a && (a.preco === 0 || (((G.inv || {})[n] || {}).arremessos || []).includes(k)); }
