@@ -529,6 +529,8 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .sk-selo.sk-selo-heroi { background: #ff4d6d; color: #fff; }
 .sk-selo { font-style: normal; font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; background: #ffd23f; color: #1b0f45; border-radius: 6px; padding: 2px 7px; justify-self: center; }
 .sk-neon-info { font-size: 12px; font-weight: 800; color: #9fe6ff; text-align: center; text-shadow: 0 0 8px rgba(110,231,255,.8); }
+.lb-comprar.sk-neon-btn { font-size: 15px; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 4px; padding-left: 6px; padding-right: 6px; }
+.lb-comprar.sk-neon-btn .lb-coin { width: 22px; height: 22px; font-size: 12px; }
 .lb-comprar.sk-neon-btn { background: #0a0a12; color: #9fe6ff; border-color: #6ee7ff; box-shadow: 0 0 10px rgba(110,231,255,.6), 0 4px 0 #0b1b33; }
 .sk-prazo { font-size: 13px; font-weight: 700; color: #ffd23f; text-align: center; }
 .sk-heroi { font-style: normal; font-size: 10px; background: #ff4d6d; color: #fff; border-radius: 6px; padding: 1px 6px; white-space: nowrap; flex: none; }
@@ -1376,14 +1378,14 @@ const SKINS = [
   { k: "gelo", nome: "Gelo", preco: 700, camisa: "#5fb3e6", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
   { k: "fogo", nome: "Fogo", preco: 700, camisa: "#d9381e", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
   { k: "gelofogo", nome: "Gelo e Fogo", preco: 700, camisa: "#d9381e", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
-  // versão Neon de cada limitada: vem junto com a skin original (quem tem a original troca entre normal e Neon de graça);
-  // roupa preta com contorno de luz e os mesmos enfeites e efeitos da original (base). Não é vendida separada.
-  { k: "galacticaneon", base: "galactica", neon: "#c08bff", nome: "Galáctica Neon", camisa: "#0a0a12", variante: true },
-  { k: "buraconegroneon", base: "buraconegro", neon: "#ff9a3c", nome: "Buraco Negro Neon", camisa: "#050409", pele: "#120f22", variante: true },
-  { k: "sideralneon", base: "sideral", neon: "#7fd3ff", nome: "Espaço Sideral Neon", camisa: "#0a0a12", variante: true },
-  { k: "geloneon", base: "gelo", neon: "#6ee7ff", nome: "Gelo Neon", camisa: "#0a0a12", variante: true },
-  { k: "fogoneon", base: "fogo", neon: "#ff6a2a", nome: "Fogo Neon", camisa: "#0a0a12", variante: true },
-  { k: "gelofogoneon", base: "gelofogo", neon: "#6ee7ff", neon2: "#ff6a2a", nome: "Gelo e Fogo Neon", camisa: "#0a0a12", variante: true },
+  // versão Neon de cada limitada: compra extra (200) no quadro da skin original, só para quem já tem a original e enquanto ela estiver à venda;
+  // roupa preta com contorno de luz e os mesmos enfeites e efeitos da original (base). Depois de comprar, troca entre normal e Neon.
+  { k: "galacticaneon", base: "galactica", neon: "#c08bff", nome: "Galáctica Neon", camisa: "#0a0a12", preco: 200, variante: true },
+  { k: "buraconegroneon", base: "buraconegro", neon: "#ff9a3c", nome: "Buraco Negro Neon", camisa: "#050409", pele: "#120f22", preco: 200, variante: true },
+  { k: "sideralneon", base: "sideral", neon: "#7fd3ff", nome: "Espaço Sideral Neon", camisa: "#0a0a12", preco: 200, variante: true },
+  { k: "geloneon", base: "gelo", neon: "#6ee7ff", nome: "Gelo Neon", camisa: "#0a0a12", preco: 200, variante: true },
+  { k: "fogoneon", base: "fogo", neon: "#ff6a2a", nome: "Fogo Neon", camisa: "#0a0a12", preco: 200, variante: true },
+  { k: "gelofogoneon", base: "gelofogo", neon: "#6ee7ff", neon2: "#ff6a2a", nome: "Gelo e Fogo Neon", camisa: "#0a0a12", preco: 200, variante: true },
   { k: "colecionador", nome: "Rei Dourado", preco: 400, camisa: "#d9a21b", secreto: true },
 ];
 /* Skin limitada ainda à venda? Depois do prazo some da loja para quem não tem. */
@@ -3779,9 +3781,10 @@ TELAS.loja = () => {
         <canvas class="sk-prev" data-skin="${s.k}" aria-label="Bonequinho com a skin ${esc(s.nome)}"></canvas>
         <b>${esc(s.nome)}</b>
         ${s.limitada && !tem && naVenda(s) ? `<span class="sk-prazo">⏳ ${faltaParaAcabar(s)}</span>` : ""}
-        ${neon && !tem ? `<span class="sk-neon-info">✨ Vem com a versão Neon</span>` : ""}
+        ${neon && !tem && naVenda(s) ? `<span class="sk-neon-info">✨ Depois dá para comprar a versão Neon</span>` : ""}
         <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarSkin" data-s="${s.k}" ${usando || (!tem && !podeS) ? "disabled" : ""}>${usandoNeon ? "Usar normal" : rotulo}</button>
-        ${neon && tem ? `<button class="lb-comprar lb-comprar-p sk-neon-btn" data-a="comprarSkin" data-s="${neon.k}" ${usandoNeon ? "disabled" : ""}>${usandoNeon ? "✨ Usando Neon" : "✨ Usar Neon"}</button>` : ""}
+        ${neon && tem && temSkin(nome, neon.k) ? `<button class="lb-comprar lb-comprar-p sk-neon-btn" data-a="comprarSkin" data-s="${neon.k}" ${usandoNeon ? "disabled" : ""}>${usandoNeon ? "✨ Usando Neon" : "✨ Usar Neon"}</button>`
+          : neon && tem && naVenda(s) ? `<button class="lb-comprar lb-comprar-p sk-neon-btn" data-a="comprarSkin" data-s="${neon.k}" ${moedas >= neon.preco ? "" : "disabled"}>${G.lojaConf === "skin:" + neon.k ? "Confirmar?" : `Neon <span class="lb-coin" aria-hidden="true">$</span>${neon.preco}`}</button>` : ""}
       </div>`; }).join("")}
     </div>
     </div>
@@ -4364,7 +4367,7 @@ Object.assign(acoes, {
 if (typeof TELAS_COM_MUSICA !== "undefined") TELAS_COM_MUSICA.push("cadeado", "ajustes");
 
 /* ================= Inventário (vida extra, fundos e skins da loja) ================= */
-function temSkin(n, k) { const sv = SKINS.find(x => x.k === k); if (sv && sv.variante) return temSkin(n, sv.base); return k === "classico" || (((G.inv || {})[n] || {}).skins || []).includes(k); }
+function temSkin(n, k) { return k === "classico" || (((G.inv || {})[n] || {}).skins || []).includes(k); }
 function skinDe(n) { const s = ((G.inv || {})[n] || {}).skin; return SKINS.some(x => x.k === s) && temSkin(n, s) ? s : "classico"; }
 function darSkin(n, k) { G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 }; G.inv[n].skins = G.inv[n].skins || []; if (!G.inv[n].skins.includes(k)) G.inv[n].skins.push(k); }
 function usarSkin(n, k) { G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 }; G.inv[n].skin = k; }
@@ -4855,6 +4858,10 @@ function pedirConfirmacao(chave) {
 acoes.comprarSkin = el => {
   const k = el.dataset.s, nome = perfil(), s = skinInfo(k);
   if (temSkin(nome, k)) { usarSkin(nome, k); salvarPlacar(); const y = window.scrollY; render(); window.scrollTo(0, y); toast(`Agora você está de ${s.nome}`); return; }
+  if (s.variante) {   // versão Neon: precisa ter a original e ela ainda estar à venda
+    if (!temSkin(nome, s.base)) { toast(`Primeiro compre a skin ${skinInfo(s.base).nome}`); return; }
+    if (!naVenda(skinInfo(s.base))) { toast("A versão Neon só dá para comprar enquanto a coleção estiver na loja"); return; }
+  }
   if (!naVenda(s)) { toast("Essa edição limitada já acabou"); return; }
   if (soColecionador(s, nome)) return;
   if ((G.banco[nome] || 0) < s.preco) return;
