@@ -528,6 +528,8 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .sk-limitada::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background-image: radial-gradient(1.5px 1.5px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 78% 12%, #fff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 88% 52%, #ffe9a8 50%, transparent 51%), radial-gradient(1px 1px at 22% 62%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 55% 30%, #cfe3ff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 40% 85%, #fff 50%, transparent 51%); }
 .sk-selo.sk-selo-heroi { background: #ff4d6d; color: #fff; }
 .sk-selo { font-style: normal; font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; background: #ffd23f; color: #1b0f45; border-radius: 6px; padding: 2px 7px; justify-self: center; }
+.sk-neon-info { font-size: 12px; font-weight: 800; color: #9fe6ff; text-align: center; text-shadow: 0 0 8px rgba(110,231,255,.8); }
+.lb-comprar.sk-neon-btn { background: #0a0a12; color: #9fe6ff; border-color: #6ee7ff; box-shadow: 0 0 10px rgba(110,231,255,.6), 0 4px 0 #0b1b33; }
 .sk-prazo { font-size: 13px; font-weight: 700; color: #ffd23f; text-align: center; }
 .sk-heroi { font-style: normal; font-size: 10px; background: #ff4d6d; color: #fff; border-radius: 6px; padding: 1px 6px; white-space: nowrap; flex: none; }
 .sk-prev { display: block; width: 100%; aspect-ratio: 1.3; max-width: 100%; border-radius: 9px; border: 2px solid #0b1b33; background: radial-gradient(circle at 50% 75%, #2a6fd6, #133a68 75%); }
@@ -1374,13 +1376,14 @@ const SKINS = [
   { k: "gelo", nome: "Gelo", preco: 700, camisa: "#5fb3e6", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
   { k: "fogo", nome: "Fogo", preco: 700, camisa: "#d9381e", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
   { k: "gelofogo", nome: "Gelo e Fogo", preco: 700, camisa: "#d9381e", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
-  // versão Neon de cada limitada: roupa preta com contorno de luz; mesmos enfeites e efeitos da original (base), mesmo prazo
-  { k: "galacticaneon", base: "galactica", neon: "#c08bff", nome: "Galáctica Neon", preco: 600, camisa: "#0a0a12", limitada: true, ate: "2026-11-03T23:59:59-03:00" },
-  { k: "buraconegroneon", base: "buraconegro", neon: "#ff9a3c", nome: "Buraco Negro Neon", preco: 700, camisa: "#050409", pele: "#120f22", limitada: true, ate: "2026-11-03T23:59:59-03:00" },
-  { k: "sideralneon", base: "sideral", neon: "#7fd3ff", nome: "Espaço Sideral Neon", preco: 550, camisa: "#0a0a12", limitada: true, ate: "2026-11-02T12:00:00-03:00" },
-  { k: "geloneon", base: "gelo", neon: "#6ee7ff", nome: "Gelo Neon", preco: 800, camisa: "#0a0a12", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
-  { k: "fogoneon", base: "fogo", neon: "#ff6a2a", nome: "Fogo Neon", preco: 800, camisa: "#0a0a12", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
-  { k: "gelofogoneon", base: "gelofogo", neon: "#6ee7ff", neon2: "#ff6a2a", nome: "Gelo e Fogo Neon", preco: 800, camisa: "#0a0a12", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
+  // versão Neon de cada limitada: vem junto com a skin original (quem tem a original troca entre normal e Neon de graça);
+  // roupa preta com contorno de luz e os mesmos enfeites e efeitos da original (base). Não é vendida separada.
+  { k: "galacticaneon", base: "galactica", neon: "#c08bff", nome: "Galáctica Neon", camisa: "#0a0a12", variante: true },
+  { k: "buraconegroneon", base: "buraconegro", neon: "#ff9a3c", nome: "Buraco Negro Neon", camisa: "#050409", pele: "#120f22", variante: true },
+  { k: "sideralneon", base: "sideral", neon: "#7fd3ff", nome: "Espaço Sideral Neon", camisa: "#0a0a12", variante: true },
+  { k: "geloneon", base: "gelo", neon: "#6ee7ff", nome: "Gelo Neon", camisa: "#0a0a12", variante: true },
+  { k: "fogoneon", base: "fogo", neon: "#ff6a2a", nome: "Fogo Neon", camisa: "#0a0a12", variante: true },
+  { k: "gelofogoneon", base: "gelofogo", neon: "#6ee7ff", neon2: "#ff6a2a", nome: "Gelo e Fogo Neon", camisa: "#0a0a12", variante: true },
   { k: "colecionador", nome: "Rei Dourado", preco: 400, camisa: "#d9a21b", secreto: true },
 ];
 /* Skin limitada ainda à venda? Depois do prazo some da loja para quem não tem. */
@@ -1432,12 +1435,12 @@ function fimDePartidaMissao(nome, moedas, venceu) { contarMissao(nome, "jogar");
 const EVT = { eventos: [], promos: [], presentes: [], brindes: [], voltas: [], vidas: [] };
 /* coleções limitadas que o ADM pode trazer de volta para a loja (chaves "tipo-k" de chaveLim e o pacote) */
 const COLECOES = {
-  galactico: { nome: "Galáctica", chaves: ["skin-galacticaneon", "skin-galactica", "fundo-galactico", "emoji-galactico", "gesto-galactico", "avatar-galactico", "pet-coelhogalactico"], pacote: "galactico" },
-  buraconegro: { nome: "Buraco Negro", chaves: ["skin-buraconegroneon", "skin-buraconegro", "fundo-buraconegro", "emoji-buraconegro", "gesto-buraconegro", "avatar-buraconegro", "arremesso-buraconegro", "pet-gatoburaconegro"], pacote: "buraconegro" },
-  sideral: { nome: "Espaço Sideral", chaves: ["skin-sideralneon", "skin-sideral", "fundo-sideral", "emoji-sideral", "gesto-sideral", "avatar-sideral", "arremesso-sideral", "pet-caosideral"], pacote: "sideral" },
-  gelo: { nome: "Gelo", chaves: ["skin-geloneon", "skin-gelo", "fundo-gelo", "emoji-gelo", "gesto-gelo", "avatar-gelo", "arremesso-gelo", "pet-gatogelo"], pacote: "gelo" },
-  fogo: { nome: "Fogo", chaves: ["skin-fogoneon", "skin-fogo", "fundo-fogo", "emoji-labareda", "gesto-fogo", "avatar-fogo", "arremesso-fogo", "pet-caofogo"], pacote: "fogo" },
-  gelofogo: { nome: "Gelo e Fogo", chaves: ["skin-gelofogoneon", "skin-gelofogo", "fundo-gelofogo", "emoji-gelofogo", "gesto-gelofogo", "avatar-gelofogo", "arremesso-gelofogo", "pet-coelhogelofogo"], pacote: "gelofogo" },
+  galactico: { nome: "Galáctica", chaves: ["skin-galactica", "fundo-galactico", "emoji-galactico", "gesto-galactico", "avatar-galactico", "pet-coelhogalactico"], pacote: "galactico" },
+  buraconegro: { nome: "Buraco Negro", chaves: ["skin-buraconegro", "fundo-buraconegro", "emoji-buraconegro", "gesto-buraconegro", "avatar-buraconegro", "arremesso-buraconegro", "pet-gatoburaconegro"], pacote: "buraconegro" },
+  sideral: { nome: "Espaço Sideral", chaves: ["skin-sideral", "fundo-sideral", "emoji-sideral", "gesto-sideral", "avatar-sideral", "arremesso-sideral", "pet-caosideral"], pacote: "sideral" },
+  gelo: { nome: "Gelo", chaves: ["skin-gelo", "fundo-gelo", "emoji-gelo", "gesto-gelo", "avatar-gelo", "arremesso-gelo", "pet-gatogelo"], pacote: "gelo" },
+  fogo: { nome: "Fogo", chaves: ["skin-fogo", "fundo-fogo", "emoji-labareda", "gesto-fogo", "avatar-fogo", "arremesso-fogo", "pet-caofogo"], pacote: "fogo" },
+  gelofogo: { nome: "Gelo e Fogo", chaves: ["skin-gelofogo", "fundo-gelofogo", "emoji-gelofogo", "gesto-gelofogo", "avatar-gelofogo", "arremesso-gelofogo", "pet-coelhogelofogo"], pacote: "gelofogo" },
 };
 const EVT_NO_SITE = location.protocol.startsWith("http") && !/claude|claudeusercontent/.test(location.hostname);
 const PROMO_ALVOS = { tudo: "Toda a loja", skin: "Skins", emoji: "Emojis", gesto: "Gestos", arremesso: "Arremessos", fundo: "Fundos", avatar: "Fotos de perfil" };
@@ -3768,15 +3771,17 @@ TELAS.loja = () => {
     </div>
     <div class="loja-sec" data-sec="skins"${secOculta("skins")}>
     <h2 class="lb-secao">Skins</h2>
-    <div class="fd-grid">${SKINS.filter(s => !s.secreto && (naVenda(s) || temSkin(nome, s.k))).sort((a, b) => !!b.limitada - !!a.limitada).map(s => {
-      const tem = temSkin(nome, s.k), usando = skinDe(nome) === s.k, podeS = moedas >= s.preco;
+    <div class="fd-grid">${SKINS.filter(s => !s.secreto && !s.variante && (naVenda(s) || temSkin(nome, s.k))).sort((a, b) => !!b.limitada - !!a.limitada).map(s => {
+      const tem = temSkin(nome, s.k), usando = skinDe(nome) === s.k, podeS = moedas >= s.preco, neon = SKINS.find(v => v.variante && v.base === s.k), usandoNeon = !!neon && skinDe(nome) === neon.k;
       const rotulo = usando ? "Usando" : tem ? "Usar" : G.lojaConf === "skin:" + s.k ? "Confirmar?" : podeS ? `<span class="lb-coin" aria-hidden="true">$</span>${s.preco}` : `$ ${s.preco}`;
       return `<div class="fd-tile${tem ? "" : " fd-travado"}${s.limitada ? " sk-limitada" : ""}"${usando ? ' aria-current="true"' : ""}>
         ${s.limitada ? `<i class="sk-selo">Edição limitada</i>` : s.heroi ? `<i class="sk-selo sk-selo-heroi">⚡ Herói</i>` : ""}
         <canvas class="sk-prev" data-skin="${s.k}" aria-label="Bonequinho com a skin ${esc(s.nome)}"></canvas>
         <b>${esc(s.nome)}</b>
         ${s.limitada && !tem && naVenda(s) ? `<span class="sk-prazo">⏳ ${faltaParaAcabar(s)}</span>` : ""}
-        <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarSkin" data-s="${s.k}" ${usando || (!tem && !podeS) ? "disabled" : ""}>${rotulo}</button>
+        ${neon && !tem ? `<span class="sk-neon-info">✨ Vem com a versão Neon</span>` : ""}
+        <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarSkin" data-s="${s.k}" ${usando || (!tem && !podeS) ? "disabled" : ""}>${usandoNeon ? "Usar normal" : rotulo}</button>
+        ${neon && tem ? `<button class="lb-comprar lb-comprar-p sk-neon-btn" data-a="comprarSkin" data-s="${neon.k}" ${usandoNeon ? "disabled" : ""}>${usandoNeon ? "✨ Usando Neon" : "✨ Usar Neon"}</button>` : ""}
       </div>`; }).join("")}
     </div>
     </div>
@@ -4359,7 +4364,7 @@ Object.assign(acoes, {
 if (typeof TELAS_COM_MUSICA !== "undefined") TELAS_COM_MUSICA.push("cadeado", "ajustes");
 
 /* ================= Inventário (vida extra, fundos e skins da loja) ================= */
-function temSkin(n, k) { return k === "classico" || (((G.inv || {})[n] || {}).skins || []).includes(k); }
+function temSkin(n, k) { const sv = SKINS.find(x => x.k === k); if (sv && sv.variante) return temSkin(n, sv.base); return k === "classico" || (((G.inv || {})[n] || {}).skins || []).includes(k); }
 function skinDe(n) { const s = ((G.inv || {})[n] || {}).skin; return SKINS.some(x => x.k === s) && temSkin(n, s) ? s : "classico"; }
 function darSkin(n, k) { G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 }; G.inv[n].skins = G.inv[n].skins || []; if (!G.inv[n].skins.includes(k)) G.inv[n].skins.push(k); }
 function usarSkin(n, k) { G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 }; G.inv[n].skin = k; }
@@ -5503,7 +5508,7 @@ TELAS.adm = () => {
     <h3>Jogador</h3>${escolherJog}
     <h3>Vidas extras</h3>
     <div class="stepper"><button class="btn ghost" type="button" data-a="admVida" data-v="-1" aria-label="Menos uma vida">−</button><b>${invVidas(n)}</b><button class="btn ghost" type="button" data-a="admVida" data-v="1" aria-label="Mais uma vida">+</button></div>
-    <h3>Skins</h3><div class="chips">${SKINS.map(s => chipItem(temSkin(n, s.k), s.preco === 0, "skin", s.k, esc(s.nome) + (s.limitada ? " ⭐" : ""))).join("")}</div>
+    <h3>Skins</h3><div class="chips">${SKINS.filter(s => !s.variante).map(s => chipItem(temSkin(n, s.k), s.preco === 0, "skin", s.k, esc(s.nome) + (s.limitada ? " ⭐" : ""))).join("")}</div>
     <h3>Fundos</h3><div class="chips">${FUNDOS.map(([k, t]) => chipItem(temFundo(n, k), k === "basico", "fundo", k, esc(t))).join("")}</div>
     <h3>Emojis</h3><div class="chips">${EMOJIS.map(e => chipItem(temEmoji(n, e.k), e.preco === 0, "emoji", e.k, e.e)).join("")}</div>
     <h3>Gestos</h3><div class="chips">${GESTOS.map(g => chipItem(temGesto(n, g.k), g.preco === 0, "gesto", g.k, g.icone + " " + esc(g.nome))).join("")}</div>
