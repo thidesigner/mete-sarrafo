@@ -142,4 +142,10 @@ Parte **Pets** na loja. O pet anda do lado do bonequinho na tela inicial, na par
 - Os poderes valem nas partidas de bonequinhos (no mesmo celular e no online). Na bola de verdade o pet não aparece.
 - O Andre pediu para tirar o Gatinho Galáctico e colocar pets das coleções Gelo, Fogo e Gelo e Fogo (mesmo prazo das coleções; entram também na "Volta das limitadas"). Os pets limitados contam para o selo de colecionador. O ADM pode dar ou tirar pets (aba Itens) e usar pet como presente (código ou presente para todos).
 - Preços e poderes são um começo para o Andre ajustar.
+- **Pet combina com a skin** (pedido do Andre, 4/nov): o visual do pet muda conforme a skin de quem usa; o poder continua igual.
+  - Skin Gelo: pet azul-gelo com flocos e brilho. Skin Fogo: pet vermelho com chaminhas. Skin Gelo e Fogo: metade de cada.
+  - Skins Galáctica, Buraco Negro e Espaço Sideral: pet roxo com estrelinhas.
+  - Skins normais ganham um enfeite igual ao do bonequinho: Rei e Rei Dourado (coroa), Caubói (chapéu), Cozinheiro (chapéu de chef), Pirata (tapa-olho), Ninja e Ninja Relâmpago (faixa vermelha), Boné (boné).
+  - Os pets limitados (Gatinho de Gelo, Cachorrinho de Fogo, Coelho Gelo e Fogo) mantêm o próprio tema.
+  - Na loja, o pet já aparece combinando com a skin que a pessoa está usando.
 
