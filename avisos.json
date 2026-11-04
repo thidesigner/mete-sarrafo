@@ -1,13 +1,12 @@
 {
   "avisos": [],
-  "eventos": [],
-  "promos": [
+  "presentes": [
     {
-      "id": "pmvzxcuc5",
-      "alvo": "tudo",
-      "desc": 20,
-      "de": "2026-11-03T00:03:24.779Z",
-      "ate": "2026-11-04T00:03:24.779Z"
+      "id": "gmw220lpt",
+      "h": "ec9e0379f9c62b28ff2e7a5aae3ac73039c868bb3557dbefcb4372427f1204fe",
+      "item": "skin:sideral",
+      "de": "2026-11-04T11:49:24.594Z",
+      "ate": "2026-11-11T11:49:24.594Z"
     }
   ]
 }
