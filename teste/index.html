@@ -1404,9 +1404,9 @@ function fimDePartidaMissao(nome, moedas, venceu) { contarMissao(nome, "jogar");
 const EVT = { eventos: [], promos: [], presentes: [], brindes: [], voltas: [], vidas: [] };
 /* coleções limitadas que o ADM pode trazer de volta para a loja (chaves "tipo-k" de chaveLim e o pacote) */
 const COLECOES = {
-  galactico: { nome: "Galáctica", chaves: ["skin-galactica", "fundo-galactico", "emoji-galactico", "gesto-galactico", "avatar-galactico"], pacote: "galactico" },
-  buraconegro: { nome: "Buraco Negro", chaves: ["skin-buraconegro", "fundo-buraconegro", "emoji-buraconegro", "gesto-buraconegro", "avatar-buraconegro", "arremesso-buraconegro"], pacote: "buraconegro" },
-  sideral: { nome: "Espaço Sideral", chaves: ["skin-sideral", "fundo-sideral", "emoji-sideral", "gesto-sideral", "avatar-sideral", "arremesso-sideral"], pacote: "sideral" },
+  galactico: { nome: "Galáctica", chaves: ["skin-galactica", "fundo-galactico", "emoji-galactico", "gesto-galactico", "avatar-galactico", "pet-coelhogalactico"], pacote: "galactico" },
+  buraconegro: { nome: "Buraco Negro", chaves: ["skin-buraconegro", "fundo-buraconegro", "emoji-buraconegro", "gesto-buraconegro", "avatar-buraconegro", "arremesso-buraconegro", "pet-gatoburaconegro"], pacote: "buraconegro" },
+  sideral: { nome: "Espaço Sideral", chaves: ["skin-sideral", "fundo-sideral", "emoji-sideral", "gesto-sideral", "avatar-sideral", "arremesso-sideral", "pet-caosideral"], pacote: "sideral" },
   gelo: { nome: "Gelo", chaves: ["skin-gelo", "fundo-gelo", "emoji-gelo", "gesto-gelo", "avatar-gelo", "arremesso-gelo", "pet-gatogelo"], pacote: "gelo" },
   fogo: { nome: "Fogo", chaves: ["skin-fogo", "fundo-fogo", "emoji-labareda", "gesto-fogo", "avatar-fogo", "arremesso-fogo", "pet-caofogo"], pacote: "fogo" },
   gelofogo: { nome: "Gelo e Fogo", chaves: ["skin-gelofogo", "fundo-gelofogo", "emoji-gelofogo", "gesto-gelofogo", "avatar-gelofogo", "arremesso-gelofogo", "pet-coelhogelofogo"], pacote: "gelofogo" },
@@ -1675,6 +1675,13 @@ const PETS = [
     poder: "Escorregão: +1 moeda por rodada em que escapa e corre um pouco mais rápido (+5%)", sobreviver: 1, vel: 1.05 },
   { k: "caofogo", base: "cachorro", nome: "Cachorrinho de Fogo", icone: "🔥", preco: 300, tipo: "pet", limitada: true, ate: "2026-11-10T23:59:59-03:00",
     poder: "Brasa: +0,5 moeda a cada letra certa e +3 moedas no fim da partida", acerto: .5, fim: 3 },
+  // pets das coleções que já saíram da loja: ficam fora da venda e só voltam quando o ADM usa "Volta das limitadas"
+  { k: "caosideral", base: "cachorro", nome: "Cachorrinho Astronauta", icone: "🧑‍🚀", preco: 300, tipo: "pet", limitada: true, ate: "2026-11-02T12:00:00-03:00",
+    poder: "Gravidade zero: corre um pouco mais rápido (+5%) e +3 moedas no fim da partida", vel: 1.05, fim: 3 },
+  { k: "gatoburaconegro", base: "gato", nome: "Gatinho Buraco Negro", icone: "🕳️", preco: 300, tipo: "pet", limitada: true, ate: "2026-11-02T12:00:00-03:00",
+    poder: "Sugador: +0,5 moeda a cada letra certa e +1 moeda por rodada em que escapa", acerto: .5, sobreviver: 1 },
+  { k: "coelhogalactico", base: "coelho", nome: "Coelho Galáctico", icone: "🌌", preco: 300, tipo: "pet", limitada: true, ate: "2026-11-02T12:00:00-03:00",
+    poder: "Estrela da sorte: +1 moeda por rodada em que escapa e corre um pouco mais rápido (+5%)", sobreviver: 1, vel: 1.05 },
   { k: "coelhogelofogo", base: "coelho", nome: "Coelho Gelo e Fogo", icone: "☯️", preco: 300, tipo: "pet", limitada: true, ate: "2026-11-10T23:59:59-03:00",
     poder: "Equilíbrio: +0,5 moeda a cada letra certa e +1 moeda por rodada em que escapa", acerto: .5, sobreviver: 1 },
 ];
@@ -1691,10 +1698,10 @@ function poderPet(p, quando) {
 }
 /* O pet combina com a skin: pets limitados têm o próprio tema; os outros pegam o tema da skin (cores e efeitos)
    ou um enfeite igual ao do bonequinho. Só muda o visual, o poder continua o mesmo. */
-const PET_TEMA = { gatogelo: "gelo", caofogo: "fogo", coelhogelofogo: "gelofogo" };
+const PET_TEMA = { gatogelo: "gelo", caofogo: "fogo", coelhogelofogo: "gelofogo", caosideral: "sideral", gatoburaconegro: "buraconegro", coelhogalactico: "espaco" };
 const SKIN_TEMA = { gelo: "gelo", fogo: "fogo", gelofogo: "gelofogo", galactica: "espaco", buraconegro: "espaco", sideral: "espaco" };
 const SKIN_ENFEITE = { rei: "coroa", colecionador: "coroa", cowboy: "chapeu", chef: "chef", pirata: "tapa", ninja: "faixa", relampago: "faixa", bone: "bone" };
-const CORES_TEMA = { gelo: ["#9fdcff", "#3d8fe6"], fogo: ["#e2462b", "#8a1f0f"], gelofogo: ["#9fdcff", "#3d8fe6"], espaco: ["#4b2a9e", "#24104f"] };
+const CORES_TEMA = { gelo: ["#9fdcff", "#3d8fe6"], fogo: ["#e2462b", "#8a1f0f"], gelofogo: ["#9fdcff", "#3d8fe6"], espaco: ["#4b2a9e", "#24104f"], sideral: ["#e9eef5", "#13235a"], buraconegro: ["#1a1530", "#0b0716"] };
 const CORES_PET = { cachorro: ["#b5793f", "#6b4423"], gato: ["#f4a23a", "#c46a14"], coelho: ["#f4f1ec", "#d6cfc4"], hamster: ["#e2b36b", "#a8743a"] };
 function visualPet(k, skin) {
   const pet = petInfo(k); if (!pet) return null;
@@ -1745,6 +1752,17 @@ function desenharPet2D(c, k, x, y, t, skin) {
     c.fillStyle = "#ffffff"; [[1, 2], [5, 4], [-6, -6], [-2, 5]].forEach(([a, b], i) => { c.globalAlpha = .5 + .5 * Math.sin(t * 4 + i); c.beginPath(); c.arc(px + a, py + b, .9, 0, Math.PI * 2); c.fill(); });
     c.globalAlpha = 1; c.save(); c.globalCompositeOperation = "lighter"; const g = c.createRadialGradient(px, py, 2, px, py, 16); g.addColorStop(0, "rgba(176,123,255,.35)"); g.addColorStop(1, "rgba(176,123,255,0)"); c.fillStyle = g; c.beginPath(); c.arc(px, py, 16, 0, Math.PI * 2); c.fill(); c.restore();
   }
+  if (tema === "sideral") {   // capacete de vidro e a Terra no peito
+    c.fillStyle = "rgba(170,220,255,.35)"; c.beginPath(); c.arc(hx, hy, 8, 0, Math.PI * 2); c.fill(); c.strokeStyle = "#9fd8ff"; c.lineWidth = 1.2; c.stroke();
+    c.strokeStyle = "rgba(255,255,255,.8)"; c.lineWidth = .9; c.beginPath(); c.arc(hx, hy, 6, Math.PI * 1.1, Math.PI * 1.45); c.stroke();
+    c.fillStyle = "#3d8fe6"; c.beginPath(); c.arc(px + 3, py + 3, 2.6, 0, Math.PI * 2); c.fill(); c.fillStyle = "#4cc96a"; c.beginPath(); c.arc(px + 2.3, py + 2.5, 1, 0, Math.PI * 2); c.fill();
+  }
+  if (tema === "buraconegro") {   // disco de luz girando em volta
+    c.save(); c.globalCompositeOperation = "lighter";
+    for (let j = 0; j < 2; j++) { c.strokeStyle = j ? "rgba(190,120,255,.9)" : "rgba(255,150,60,.95)"; c.lineWidth = 1.6 - j * .5; c.beginPath(); c.ellipse(px, py + 1, 15 - j * 3, 4 - j, -.15, 0, Math.PI * 2); c.stroke(); }
+    c.fillStyle = "rgba(214,184,255,.95)"; c.beginPath(); c.arc(hx - 2, hy - 1, 1.2, 0, Math.PI * 2); c.arc(hx + 2, hy - 1, 1.2, 0, Math.PI * 2); c.fill();
+    c.restore();
+  }
   // enfeite igual ao do bonequinho
   const topo = hy - (k === "hamster" ? 7 : 6);
   if (enfeite === "coroa") { c.fillStyle = "#ffd23f"; c.beginPath(); c.moveTo(hx - 4, topo + 1); c.lineTo(hx - 4.5, topo - 4); c.lineTo(hx - 2, topo - 1.5); c.lineTo(hx, topo - 5); c.lineTo(hx + 2, topo - 1.5); c.lineTo(hx + 4.5, topo - 4); c.lineTo(hx + 4, topo + 1); c.closePath(); c.fill(); }
@@ -1776,6 +1794,10 @@ function pet3D(k, skin) {
     for (let j = 0; j < 4; j++) { const s2 = new THREE.Mesh(new THREE.SphereGeometry(.012, 6, 4), new THREE.MeshBasicMaterial({ color: "#ffffff" })); s2.position.set(-.06 + j * .04, .16 + (j % 2) * .05, -.02 + (j % 3) * .04); g.add(s2); } }
   if (tema === "fogo" || tema === "gelofogo") { const orb = new THREE.Group(); orb.userData.gira = 2; orb.position.y = .3; g.add(orb);
     for (let j = 0; j < 3; j++) { const a = j / 3 * Math.PI * 2, f = new THREE.Mesh(new THREE.ConeGeometry(.025, .08, 6), luz(j % 2 ? "#ffb347" : "#ff5a1f", .95)); f.position.set(Math.cos(a) * .08, 0, Math.sin(a) * .08 - .1); orb.add(f); } }
+  if (tema === "sideral") { const cap = new THREE.Mesh(new THREE.SphereGeometry(.12, 14, 10), new THREE.MeshLambertMaterial({ color: "#aee0ff", transparent: true, opacity: .35, depthWrite: false })); cap.position.set(0, hy, hcz); g.add(cap);
+    add(new THREE.SphereGeometry(.03, 10, 8), "#3d8fe6", 0, .13, -.06); }
+  if (tema === "buraconegro") { const anel = new THREE.Group(); anel.userData.gira = 2.4; anel.position.y = .14; anel.rotation.x = .25; g.add(anel);
+    [["#ff8a2a", .2], ["#c08bff", .16]].forEach(([cor, r]) => { const t2 = new THREE.Mesh(new THREE.TorusGeometry(r, .012, 6, 28), luz(cor, .95)); t2.rotation.x = Math.PI / 2; anel.add(t2); }); }
   if (enfeite === "coroa") { const cr = add(new THREE.CylinderGeometry(.05, .05, .04, 8, 1, true), "#ffd23f", 0, topo, hcz); cr.material.side = THREE.DoubleSide; }
   if (enfeite === "chapeu") { add(new THREE.CylinderGeometry(.1, .1, .01, 14), "#6b4423", 0, topo - .01, hcz); add(new THREE.CylinderGeometry(.045, .055, .06, 12), "#6b4423", 0, topo + .02, hcz); }
   if (enfeite === "chef") { add(new THREE.SphereGeometry(.05, 10, 8), "#ffffff", 0, topo + .03, hcz); add(new THREE.CylinderGeometry(.04, .04, .04, 10), "#ffffff", 0, topo - .005, hcz); }
@@ -4220,6 +4242,8 @@ const ITEM_PACOTE = {
   emoji: (k, ic) => ({ icone: ic, nome: "Emoji", preco: () => emojiInfo(k).preco, tem: n => temEmoji(n, k), dar: n => darEmoji(n, k) }),
   gesto: (k, ic) => ({ icone: ic, nome: "Gesto", preco: () => gestoInfo(k).preco, tem: n => temGesto(n, k), dar: n => darGesto(n, k) }),
   foto: (k, ic) => ({ icone: ic, nome: "Foto", preco: () => avEspecial(k).preco, tem: n => temAvatar(n, k), dar: n => { G.inv[n].avatares = [...(G.inv[n].avatares || []), k]; }, usar: n => { G.inv[n].avatar = { ...avatarDe(n), i: k }; } }),
+  // o pet só entra no pacote enquanto ele mesmo estiver à venda (os do espaço só voltam pela "Volta das limitadas")
+  pet: (k, ic) => { const x = petInfo(k); return x && naVenda(x) ? [{ icone: ic, nome: "Pet", preco: () => x.preco, tem: n => temPet(n, k), dar: n => darPet(n, k), usar: n => { G.inv[n].pet = k; } }] : []; },
   arremesso: (k, ic) => ({ icone: ic, nome: "Arremesso", preco: () => arremessoInfo(k).preco, tem: n => temArremesso(n, k), dar: n => { G.inv[n].arremessos = [...(G.inv[n].arremessos || []), k]; }, usar: n => { G.inv[n].arremesso = k; } }),
 };
 const PACOTES = [
@@ -4230,11 +4254,11 @@ const PACOTES = [
   { id: "fogo", nome: "Pacote Fogo", emoji: "🔥", desconto: .25, ate: "2026-11-10T23:59:59-03:00",
     itens: () => [ITEM_PACOTE.skin("fogo"), ITEM_PACOTE.fundo("fogo", "🌄"), ITEM_PACOTE.emoji("labareda", "🌋"), ITEM_PACOTE.gesto("fogo", "💥"), ITEM_PACOTE.foto("fogo", "🔥"), ITEM_PACOTE.arremesso("fogo", "☄️")] },
   { id: "sideral", nome: "Pacote Espaço Sideral", emoji: "🌍", desconto: .1, ate: "2026-11-02T12:00:00-03:00",
-    itens: () => [ITEM_PACOTE.skin("sideral"), ITEM_PACOTE.fundo("sideral", "🪐"), ITEM_PACOTE.emoji("sideral", "🌠"), ITEM_PACOTE.gesto("sideral", "🛸"), ITEM_PACOTE.foto("sideral", "🧑‍🚀"), ITEM_PACOTE.arremesso("sideral", "☄️")] },
+    itens: () => [ITEM_PACOTE.skin("sideral"), ITEM_PACOTE.fundo("sideral", "🪐"), ITEM_PACOTE.emoji("sideral", "🌠"), ITEM_PACOTE.gesto("sideral", "🛸"), ITEM_PACOTE.foto("sideral", "🧑‍🚀"), ITEM_PACOTE.arremesso("sideral", "☄️"), ...ITEM_PACOTE.pet("caosideral", "🐶")] },
   { id: "buraconegro", nome: "Pacote Buraco Negro", emoji: "🕳️", desconto: .25, ate: "2026-11-07T23:59:59-03:00",
-    itens: () => [ITEM_PACOTE.skin("buraconegro"), ITEM_PACOTE.fundo("buraconegro"), ITEM_PACOTE.emoji("buraconegro", "🕳️"), ITEM_PACOTE.gesto("buraconegro", "🌑"), ITEM_PACOTE.foto("buraconegro", "⚫"), ITEM_PACOTE.arremesso("buraconegro", "🌀")] },
+    itens: () => [ITEM_PACOTE.skin("buraconegro"), ITEM_PACOTE.fundo("buraconegro"), ITEM_PACOTE.emoji("buraconegro", "🕳️"), ITEM_PACOTE.gesto("buraconegro", "🌑"), ITEM_PACOTE.foto("buraconegro", "⚫"), ITEM_PACOTE.arremesso("buraconegro", "🌀"), ...ITEM_PACOTE.pet("gatoburaconegro", "🐱")] },
   { id: "galactico", nome: "Pacote Galáctico", emoji: "🚀", desconto: .25, ate: "2026-11-06T23:59:59-03:00",
-    itens: () => [ITEM_PACOTE.skin("galactica"), ITEM_PACOTE.fundo("galactico"), ITEM_PACOTE.emoji("galactico", "🌌"), ITEM_PACOTE.gesto("galactico", "🚀"), ITEM_PACOTE.foto("galactico", "🪐")] },
+    itens: () => [ITEM_PACOTE.skin("galactica"), ITEM_PACOTE.fundo("galactico"), ITEM_PACOTE.emoji("galactico", "🌌"), ITEM_PACOTE.gesto("galactico", "🚀"), ITEM_PACOTE.foto("galactico", "🪐"), ...ITEM_PACOTE.pet("coelhogalactico", "🐰")] },
 ];
 const pacoteDe = id => PACOTES.find(x => x.id === id) || PACOTES[0];
 /* o preço é só do que ainda falta, com desconto; some quando acaba o prazo ou quando já tem tudo */
