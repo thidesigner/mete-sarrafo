@@ -1367,16 +1367,16 @@ const SKINS = [
   { k: "dragao", nome: "Dragão Guerreiro", preco: 300, camisa: "#1b7a3a", heroi: true },
   { k: "turbo", nome: "Turbo Blindado", preco: 350, camisa: "#8d99ae", heroi: true },
   // edição limitada: só dá para comprar até a data "ate" (horário de Brasília). Quem comprou fica com ela para sempre.
-  { k: "galactica", nome: "Galáctica", preco: 500, camisa: "#2b1a6b", limitada: true, ate: "2026-11-06T23:59:59-03:00" },
-  { k: "buraconegro", nome: "Buraco Negro", preco: 600, camisa: "#0b0a16", pele: "#120f22", limitada: true, ate: "2026-11-07T23:59:59-03:00" },
+  { k: "galactica", nome: "Galáctica", preco: 500, camisa: "#2b1a6b", limitada: true, ate: "2026-11-03T23:59:59-03:00" },
+  { k: "buraconegro", nome: "Buraco Negro", preco: 600, camisa: "#0b0a16", pele: "#120f22", limitada: true, ate: "2026-11-03T23:59:59-03:00" },
   { k: "sideral", nome: "Espaço Sideral", preco: 450, camisa: "#13235a", limitada: true, ate: "2026-11-02T12:00:00-03:00" },
   // cantinho secreto: só quem tem algum item de edição limitada consegue comprar (não acaba)
   { k: "gelo", nome: "Gelo", preco: 700, camisa: "#5fb3e6", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
   { k: "fogo", nome: "Fogo", preco: 700, camisa: "#d9381e", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
   { k: "gelofogo", nome: "Gelo e Fogo", preco: 700, camisa: "#d9381e", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
   // versão Neon de cada limitada: roupa preta com contorno de luz; mesmos enfeites e efeitos da original (base), mesmo prazo
-  { k: "galacticaneon", base: "galactica", neon: "#c08bff", nome: "Galáctica Neon", preco: 600, camisa: "#0a0a12", limitada: true, ate: "2026-11-06T23:59:59-03:00" },
-  { k: "buraconegroneon", base: "buraconegro", neon: "#ff9a3c", nome: "Buraco Negro Neon", preco: 700, camisa: "#050409", pele: "#120f22", limitada: true, ate: "2026-11-07T23:59:59-03:00" },
+  { k: "galacticaneon", base: "galactica", neon: "#c08bff", nome: "Galáctica Neon", preco: 600, camisa: "#0a0a12", limitada: true, ate: "2026-11-03T23:59:59-03:00" },
+  { k: "buraconegroneon", base: "buraconegro", neon: "#ff9a3c", nome: "Buraco Negro Neon", preco: 700, camisa: "#050409", pele: "#120f22", limitada: true, ate: "2026-11-03T23:59:59-03:00" },
   { k: "sideralneon", base: "sideral", neon: "#7fd3ff", nome: "Espaço Sideral Neon", preco: 550, camisa: "#0a0a12", limitada: true, ate: "2026-11-02T12:00:00-03:00" },
   { k: "geloneon", base: "gelo", neon: "#6ee7ff", nome: "Gelo Neon", preco: 800, camisa: "#0a0a12", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
   { k: "fogoneon", base: "fogo", neon: "#ff6a2a", nome: "Fogo Neon", preco: 800, camisa: "#0a0a12", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
@@ -1686,7 +1686,7 @@ const ARREMESSOS = [
   { k: "pizza", nome: "Pizza", icone: "🍕", preco: 120, cor: "#ffcf5c" },
   { k: "abobora", nome: "Abóbora", icone: "🎃", preco: 150, cor: "#ff8a1f" },
   { k: "estrela", nome: "Estrela", icone: "⭐", preco: 150, cor: "#ffe9a8" },
-  { k: "buraconegro", nome: "Mini Buraco Negro", icone: "🌑", preco: 200, cor: "#b07bff", tipo: "arremesso", limitada: true, ate: "2026-11-07T23:59:59-03:00" },
+  { k: "buraconegro", nome: "Mini Buraco Negro", icone: "🌑", preco: 200, cor: "#b07bff", tipo: "arremesso", limitada: true, ate: "2026-11-03T23:59:59-03:00" },
   { k: "moedaouro", nome: "Moeda de Ouro", icone: "🪙", preco: 150, cor: "#ffd23f", secreto: true },
   { k: "sideral", nome: "Cometa", icone: "☄️", preco: 200, cor: "#7fd3ff", tipo: "arremesso", limitada: true, ate: "2026-11-02T12:00:00-03:00" },
   { k: "gelo", nome: "Bola de Neve", icone: "❄️", preco: 200, cor: "#e6f7ff", tipo: "arremesso", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
@@ -3902,8 +3902,8 @@ const AV_ICONES = ["🐶", "🐱", "🦊", "🐼", "🐸", "🦁", "🐯", "🐵
   "⚽", "🏀", "🎮", "🚀", "⭐", "🔥", "⚡", "👑", "🤖", "👽", "🍕", "🌈"];
 const AV_CORES = ["#e4572e", "#2f80ed", "#37d99a", "#ffd23f", "#9b51e0", "#ff4d6d", "#0b1b33", "#f4a261"];
 /* fotos de perfil especiais (compradas na loja); a de edição limitada só vende até "ate" */
-const AV_ESPECIAIS = [{ k: "galactico", icone: "🪐", nome: "Galáctico", tipo: "avatar", limitada: true, preco: 200, ate: "2026-11-06T23:59:59-03:00" },
-  { k: "buraconegro", icone: "🕳️", nome: "Buraco Negro", tipo: "avatar", limitada: true, preco: 200, ate: "2026-11-07T23:59:59-03:00" },
+const AV_ESPECIAIS = [{ k: "galactico", icone: "🪐", nome: "Galáctico", tipo: "avatar", limitada: true, preco: 200, ate: "2026-11-03T23:59:59-03:00" },
+  { k: "buraconegro", icone: "🕳️", nome: "Buraco Negro", tipo: "avatar", limitada: true, preco: 200, ate: "2026-11-03T23:59:59-03:00" },
   { k: "sideral", icone: "🧑‍🚀", nome: "Espaço Sideral", tipo: "avatar", limitada: true, preco: 200, ate: "2026-11-02T12:00:00-03:00" },
   { k: "gelo", icone: "❄️", nome: "Gelo", tipo: "avatar", preco: 200, limitada: true, ate: "2026-11-10T23:59:59-03:00" },
   { k: "fogo", icone: "🔥", nome: "Fogo", tipo: "avatar", preco: 200, limitada: true, ate: "2026-11-10T23:59:59-03:00" },
@@ -4254,8 +4254,8 @@ acoes.som = el => { _acaoSom(el); atualizarSomArena(); if (G.som !== false) { mu
 const FUNDOS = [["basico", "Básico"], ["ceu", "Céu"], ["quadra", "Quadra"], ["floresta", "Floresta"], ["por", "Pôr do sol"], ["doce", "Doce"], ["noite", "Noite estrelada"], ["vulcao", "Vulcão"], ["galactico", "Galáctico"], ["buraconegro", "Buraco Negro"], ["sideral", "Espaço Sideral"], ["gelo", "Gelo"], ["fogo", "Fogo"], ["gelofogo", "Gelo e Fogo"]];
 const PRECO_FUNDO = { basico: 0, ceu: 50, quadra: 50, floresta: 75, por: 100, doce: 100, noite: 150, vulcao: 200, galactico: 300, buraconegro: 300, sideral: 300, gelo: 300, fogo: 300, gelofogo: 300 };
 /* fundos de edição limitada: só dá para comprar até "ate" (horário de Brasília); quem comprou fica com ele */
-const FUNDOS_LIM = [{ k: "galactico", nome: "Galáctico", tipo: "fundo", limitada: true, preco: 300, ate: "2026-11-06T23:59:59-03:00" },
-  { k: "buraconegro", nome: "Buraco Negro", tipo: "fundo", limitada: true, preco: 300, ate: "2026-11-07T23:59:59-03:00" },
+const FUNDOS_LIM = [{ k: "galactico", nome: "Galáctico", tipo: "fundo", limitada: true, preco: 300, ate: "2026-11-03T23:59:59-03:00" },
+  { k: "buraconegro", nome: "Buraco Negro", tipo: "fundo", limitada: true, preco: 300, ate: "2026-11-03T23:59:59-03:00" },
   { k: "sideral", nome: "Espaço Sideral", tipo: "fundo", limitada: true, preco: 300, ate: "2026-11-02T12:00:00-03:00" },
   { k: "gelo", nome: "Gelo", tipo: "fundo", preco: 300, limitada: true, ate: "2026-11-10T23:59:59-03:00" },
   { k: "fogo", nome: "Fogo", tipo: "fundo", preco: 300, limitada: true, ate: "2026-11-10T23:59:59-03:00" },
@@ -4389,8 +4389,8 @@ const EMOJIS = [
   { k: "coroa", e: "👑", nome: "Coroa", preco: 100 },
   { k: "trofeu", e: "🏆", nome: "Troféu", preco: 120 },
   // edição limitada: só dá para comprar até "ate" (horário de Brasília); quem comprou fica com ele
-  { k: "galactico", e: "🌌", nome: "Galáctico", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-06T23:59:59-03:00" },
-  { k: "buraconegro", e: "🕳️", nome: "Buraco Negro", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-07T23:59:59-03:00" },
+  { k: "galactico", e: "🌌", nome: "Galáctico", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-03T23:59:59-03:00" },
+  { k: "buraconegro", e: "🕳️", nome: "Buraco Negro", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-03T23:59:59-03:00" },
   { k: "diamante", e: "💎", nome: "Diamante", preco: 120, secreto: true },
   { k: "sideral", e: "🌠", nome: "Estrela Cadente", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-02T12:00:00-03:00" },
   { k: "gelo", e: "🧊", nome: "Congelou", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
@@ -4420,9 +4420,9 @@ const PACOTES = [
     itens: () => [ITEM_PACOTE.skin("fogo"), ITEM_PACOTE.fundo("fogo", "🌄"), ITEM_PACOTE.emoji("labareda", "🌋"), ITEM_PACOTE.gesto("fogo", "💥"), ITEM_PACOTE.foto("fogo", "🔥"), ITEM_PACOTE.arremesso("fogo", "☄️")] },
   { id: "sideral", nome: "Pacote Espaço Sideral", emoji: "🌍", desconto: .1, ate: "2026-11-02T12:00:00-03:00",
     itens: () => [ITEM_PACOTE.skin("sideral"), ITEM_PACOTE.fundo("sideral", "🪐"), ITEM_PACOTE.emoji("sideral", "🌠"), ITEM_PACOTE.gesto("sideral", "🛸"), ITEM_PACOTE.foto("sideral", "🧑‍🚀"), ITEM_PACOTE.arremesso("sideral", "☄️"), ...ITEM_PACOTE.pet("caosideral", "🐶")] },
-  { id: "buraconegro", nome: "Pacote Buraco Negro", emoji: "🕳️", desconto: .25, ate: "2026-11-07T23:59:59-03:00",
+  { id: "buraconegro", nome: "Pacote Buraco Negro", emoji: "🕳️", desconto: .25, ate: "2026-11-03T23:59:59-03:00",
     itens: () => [ITEM_PACOTE.skin("buraconegro"), ITEM_PACOTE.fundo("buraconegro"), ITEM_PACOTE.emoji("buraconegro", "🕳️"), ITEM_PACOTE.gesto("buraconegro", "🌑"), ITEM_PACOTE.foto("buraconegro", "⚫"), ITEM_PACOTE.arremesso("buraconegro", "🌀"), ...ITEM_PACOTE.pet("gatoburaconegro", "🐱")] },
-  { id: "galactico", nome: "Pacote Galáctico", emoji: "🚀", desconto: .25, ate: "2026-11-06T23:59:59-03:00",
+  { id: "galactico", nome: "Pacote Galáctico", emoji: "🚀", desconto: .25, ate: "2026-11-03T23:59:59-03:00",
     itens: () => [ITEM_PACOTE.skin("galactica"), ITEM_PACOTE.fundo("galactico"), ITEM_PACOTE.emoji("galactico", "🌌"), ITEM_PACOTE.gesto("galactico", "🚀"), ITEM_PACOTE.foto("galactico", "🪐"), ...ITEM_PACOTE.pet("coelhogalactico", "🐰")] },
 ];
 const pacoteDe = id => PACOTES.find(x => x.id === id) || PACOTES[0];
@@ -4648,7 +4648,7 @@ const GESTOS = [
   { k: "piao", icone: "🌪️", nome: "Pião", preco: 150, dura: 1.6, som: [[60, 96, 0, .8, "square"]] },
   { k: "mortal", icone: "🤸", nome: "Mortal", preco: 200, dura: 1.3, som: [[60, 84, 0, .35, "sine"], [84, 84, .45, .1, "square"], [88, 88, .55, .3, "square"]] },
   // edição limitada: só dá para comprar até "ate" (horário de Brasília); quem comprou fica com ele
-  { k: "buraconegro", icone: "🌑", nome: "Sugado", preco: 250, dura: 2.2, tipo: "gesto", limitada: true, ate: "2026-11-07T23:59:59-03:00",
+  { k: "buraconegro", icone: "🌑", nome: "Sugado", preco: 250, dura: 2.2, tipo: "gesto", limitada: true, ate: "2026-11-03T23:59:59-03:00",
     som: [[84, 36, 0, 1, "sawtooth"], [36, 36, 1, .15, "sine"], [40, 90, 1.2, .5, "sine"], [96, 96, 1.7, .25, "triangle"]] },
   { k: "gelo", icone: "🥶", nome: "Congelar", preco: 250, dura: 2.2, tipo: "gesto", limitada: true, ate: "2026-11-10T23:59:59-03:00",
     som: [[96, 96, 0, .06, "sine"], [100, 100, .08, .06, "sine"], [91, 79, .2, .5, "triangle"], [60, 40, 1.45, .3, "square"], [96, 96, 1.6, .05, "sine"], [91, 91, 1.68, .05, "sine"]] },
@@ -4658,7 +4658,7 @@ const GESTOS = [
     som: [[96, 96, 0, .08, "sine"], [45, 60, .3, .25, "sawtooth"], [100, 100, .65, .08, "sine"], [48, 64, .95, .25, "sawtooth"], [84, 96, 1.4, .4, "triangle"]] },
   { k: "sideral", icone: "🛸", nome: "Disco Voador", preco: 250, dura: 2.4, tipo: "gesto", limitada: true, ate: "2026-11-02T12:00:00-03:00",
     som: [[72, 76, 0, .3, "sine"], [76, 72, .3, .3, "sine"], [72, 76, .6, .3, "sine"], [76, 72, .9, .3, "sine"], [79, 91, 1.3, .5, "triangle"], [91, 60, 1.8, .5, "sine"]] },
-  { k: "galactico", icone: "🚀", nome: "Galáctico", preco: 250, dura: 2.4, tipo: "gesto", limitada: true, ate: "2026-11-06T23:59:59-03:00",
+  { k: "galactico", icone: "🚀", nome: "Galáctico", preco: 250, dura: 2.4, tipo: "gesto", limitada: true, ate: "2026-11-03T23:59:59-03:00",
     som: [[48, 72, 0, .9, "sine"], [84, 84, .8, .1, "triangle"], [88, 88, .95, .1, "triangle"], [91, 91, 1.1, .1, "triangle"], [96, 96, 1.25, .35, "triangle"], [72, 55, 1.7, .6, "sine"]] },
 ];
 const gestoInfo = k => GESTOS.find(g => g.k === k) || null;
