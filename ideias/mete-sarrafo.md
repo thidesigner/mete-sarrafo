@@ -117,3 +117,10 @@ Nas partidas de bonequinhos (no mesmo celular e no online), cada robô sorteia u
 - **Heróis** (criados para o jogo, originais): Capitã Cometa 300 (máscara roxa, capa vermelha balançando e cometa no peito), Dragão Guerreiro 300 (capacete com chifres dourados, escamas e asas batendo), Turbo Blindado 350 (armadura com visor brilhando, ombreiras, reator no peito e jatos nos pés).
 - Aparecem na loja, na tela inicial, de cima e no 3D; os robôs também podem sortear essas skins. Preços para o Andre ajustar.
 
+## Mais eventos do ADM (4/nov, pedido do pai)
+
+Na aba **Eventos** do Painel de ADM e na Central de Eventos:
+- **Presente para todos:** o ADM escolhe moedas ou um item; todo mundo que abrir o jogo enquanto valer ganha uma vez, sem código (aparece a janela "🎁 Presente!"). Quem já tem o item não ganha outro.
+- **Volta das limitadas:** uma coleção limitada que já acabou (Galáctica, Buraco Negro, Espaço Sideral, Gelo, Fogo ou Gelo e Fogo) volta para a loja por um tempo, com o pacote. Aparece uma faixa verde "🔁 A coleção … voltou para a loja!" e a contagem regressiva.
+- **Vida extra grátis:** enquanto valer, cada partida começa com +1 ou +2 vidas para todo mundo (bonequinhos, online e bola de verdade). Faixa "❤️ Evento: +1 vida em cada partida!".
+

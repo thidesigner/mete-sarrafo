@@ -297,6 +297,8 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .aviso-tag { justify-self: center; background: #ffd23f; color: #0b1b33; border-radius: 8px; padding: 3px 10px; font-weight: 800; }
 .aviso-caixa .lb-jogar { min-height: 56px; font-size: 24px; }
 .evt-faixa { display: block; width: 100%; background: linear-gradient(90deg, #7c3aed, #ff7ad9); color: #fff; border: 2px solid #0b1b33; border-radius: 10px; padding: 7px 10px; font-weight: 800; font-size: 15px; text-align: center; }
+.evt-faixa.evt-vida { background: linear-gradient(90deg, #e63946, #ff7ad9); }
+.evt-faixa.evt-volta { background: linear-gradient(90deg, #1f9d6b, #2bd9ff); color: #0b1b33; }
 .evt-faixa.evt-promo { background: linear-gradient(90deg, #ff8a1f, #ffd23f); color: #0b1b33; }
 button.evt-faixa { cursor: pointer; font-family: inherit; }
 .evt-faixa.evt-contagem { background: linear-gradient(90deg, #e63946, #ff8a1f); }
@@ -709,7 +711,7 @@ function htmlTimes(jogadores) {
 function comecarPartida() {
   const c = G.cfg;
   const comTime = G.timeTam && G.nomes.length >= G.timeTam * 2 ? sortearTimes(G.nomes.map(nome => ({ nome, humano: true })), G.timeTam, false) : null;
-  G.j = G.nomes.map((nome, i) => ({ i, nome, vidas: c.vidas, vivo: true, moedas: 0, guardado: G.banco[nome] || 0, ganho: 0, compradas: 0, saiuEm: null, time: comTime ? comTime.find(o => o.nome === nome).time : null }));
+  G.j = G.nomes.map((nome, i) => ({ i, nome, vidas: c.vidas + vidaExtraEvento(), vivo: true, moedas: 0, guardado: G.banco[nome] || 0, ganho: 0, compradas: 0, saiuEm: null, time: comTime ? comTime.find(o => o.nome === nome).time : null }));
   G.comTimes = !!comTime;
   G.p = { inicio: agora(), palavras: 0, acertos: 0, erros: 0, timeouts: 0, votos: 0, votosOk: 0, arremessos: 0, acertosBola: 0, rodadas: 0, compras: 0, dicas: 0, moedas: {}, eventos: [] };
   G.perg = null; ir("sorteio");
@@ -1397,12 +1399,23 @@ const missaoPronta = (m, pr) => (pr[m.tipo] || 0) >= m.alvo && !pr.pegou.include
 function temAlgoPraPegar(nome) { if (!nome) return false; const pr = progressoMissoes(nome); return presenteDe(nome).pode || missoesDoDia().some(m => missaoPronta(m, pr)); }
 function fimDePartidaMissao(nome, moedas, venceu) { contarMissao(nome, "jogar"); contarMissao(nome, "moedas", Math.max(0, moedas || 0)); if (venceu) contarMissao(nome, "vencer"); }
 /* Eventos do ADM: chegam pelo avisos.json junto com os avisos (só no site): moedas em dobro, promoção na loja e códigos de presente */
-const EVT = { eventos: [], promos: [], presentes: [] };
+const EVT = { eventos: [], promos: [], presentes: [], brindes: [], voltas: [], vidas: [] };
+/* coleções limitadas que o ADM pode trazer de volta para a loja (chaves "tipo-k" de chaveLim e o pacote) */
+const COLECOES = {
+  galactico: { nome: "Galáctica", chaves: ["skin-galactica", "fundo-galactico", "emoji-galactico", "gesto-galactico", "avatar-galactico"], pacote: "galactico" },
+  buraconegro: { nome: "Buraco Negro", chaves: ["skin-buraconegro", "fundo-buraconegro", "emoji-buraconegro", "gesto-buraconegro", "avatar-buraconegro", "arremesso-buraconegro"], pacote: "buraconegro" },
+  sideral: { nome: "Espaço Sideral", chaves: ["skin-sideral", "fundo-sideral", "emoji-sideral", "gesto-sideral", "avatar-sideral", "arremesso-sideral"], pacote: "sideral" },
+  gelo: { nome: "Gelo", chaves: ["skin-gelo", "fundo-gelo", "emoji-gelo", "gesto-gelo", "avatar-gelo", "arremesso-gelo"], pacote: "gelo" },
+  fogo: { nome: "Fogo", chaves: ["skin-fogo", "fundo-fogo", "emoji-labareda", "gesto-fogo", "avatar-fogo", "arremesso-fogo"], pacote: "fogo" },
+  gelofogo: { nome: "Gelo e Fogo", chaves: ["skin-gelofogo", "fundo-gelofogo", "emoji-gelofogo", "gesto-gelofogo", "avatar-gelofogo", "arremesso-gelofogo"], pacote: "gelofogo" },
+};
 const EVT_NO_SITE = location.protocol.startsWith("http") && !/claude|claudeusercontent/.test(location.hostname);
 const PROMO_ALVOS = { tudo: "Toda a loja", skin: "Skins", emoji: "Emojis", gesto: "Gestos", arremesso: "Arremessos", fundo: "Fundos", avatar: "Fotos de perfil" };
 const evtValido = e => !!e && typeof e === "object" && typeof e.id === "string" && (!e.ate || Date.now() <= Date.parse(e.ate)) && (!e.de || Date.now() >= Date.parse(e.de));
 const eventoMoedas = () => EVT.eventos.filter(e => evtValido(e) && (e.mult === 2 || e.mult === 3)).sort((a, b) => b.mult - a.mult)[0] || null;
 const multMoedas = () => { const e = eventoMoedas(); return e ? e.mult : 1; };
+const voltasAtivas = () => EVT.voltas.filter(v => evtValido(v) && COLECOES[v.col]);
+const vidaExtraEvento = () => Math.max(0, ...EVT.vidas.filter(v => evtValido(v) && [1, 2].includes(v.extra)).map(v => v.extra));
 const promoAtiva = () => EVT.promos.filter(x => evtValido(x) && PROMO_ALVOS[x.alvo] && [10, 20, 30, 50].includes(x.desc)).slice(-1)[0] || null;
 const comEvento = v => v > 0 ? Math.round(v * multMoedas() * 10) / 10 : v;
 function faltaParaAcabar(s) {
@@ -1516,7 +1529,7 @@ function comecarArena() {
   lista = sortearTimes(lista, s.time || 0, true);
   A.times = !!s.time;
   const n = lista.length;
-  A.cfg = { ...G.cfg };
+  A.cfg = { ...G.cfg }; A.cfg.vidas += vidaExtraEvento();   // evento do ADM: vida extra para todo mundo
   A.P = lista.map((o, i) => {
     const a = -Math.PI / 2 + i * 2 * Math.PI / n;
     const home = { x: AC + AH * Math.cos(a), y: AC + AH * Math.sin(a) };
@@ -5077,7 +5090,9 @@ const chaveLim = x => (x.tipo || "skin") + "-" + x.k;
 const limInfo = k => todasLimitadas().find(x => chaveLim(x) === k);
 const temLim = (j, x) => (x.tipo === "fundo" ? temFundo(j, x.k) : x.tipo === "emoji" ? temEmoji(j, x.k) : x.tipo === "gesto" ? temGesto(j, x.k) : x.tipo === "avatar" ? temAvatar(j, x.k) : x.tipo === "arremesso" ? temArremesso(j, x.k) : temSkin(j, x.k));
 function aplicarLimitadas() {
-  todasLimitadas().forEach(s => { const o = (G.admLim || {})[chaveLim(s)] || {}; s.ate = o.ate || s.ateOriginal; s.preco = o.preco || s.precoOriginal; if (s.tipo === "fundo") PRECO_FUNDO[s.k] = s.preco; });
+  const volta = {}; voltasAtivas().forEach(v => { COLECOES[v.col].chaves.forEach(k => { if (!volta[k] || Date.parse(v.ate) > Date.parse(volta[k])) volta[k] = v.ate; }); volta["pacote-" + COLECOES[v.col].pacote] = v.ate; });
+  todasLimitadas().forEach(s => { const o = (G.admLim || {})[chaveLim(s)] || {}; s.ate = o.ate || s.ateOriginal; const vk = volta[chaveLim(s)]; if (vk && Date.parse(vk) > Date.parse(s.ate)) s.ate = vk; s.preco = o.preco || s.precoOriginal; if (s.tipo === "fundo") PRECO_FUNDO[s.k] = s.preco; });
+  PACOTES.forEach(pc => { if (!pc.ateOriginal) pc.ateOriginal = pc.ate; const vk = volta["pacote-" + pc.id]; pc.ate = vk && Date.parse(vk) > Date.parse(pc.ateOriginal) ? vk : pc.ateOriginal; });
   aplicarPromo();
 }
 /* promoção do ADM: baixa o preço do que estiver na promoção (x.promo guarda o preço sem desconto) */
@@ -5315,6 +5330,7 @@ async function buscarAvisos() {
     const lst = (v, n) => Array.isArray(v) ? v.filter(x => x && typeof x === "object").slice(0, n) : [];
     const antes = JSON.stringify([eventoMoedas(), promoAtiva()]);
     EVT.eventos = lst(d.eventos, 10); EVT.promos = lst(d.promos, 10); EVT.presentes = lst(d.presentes, 50);
+    EVT.brindes = lst(d.brindes, 10); EVT.voltas = lst(d.voltas, 10); EVT.vidas = lst(d.vidas, 10);
     aplicarLimitadas();
     if (antes !== JSON.stringify([eventoMoedas(), promoAtiva()]) && G.tela === "loja" && !$("app").hidden && !(document.activeElement && document.activeElement.id === "pres-cod")) { const y = window.scrollY; render(); window.scrollTo(0, y); }
   } catch { return; }
@@ -5338,6 +5354,7 @@ function avisoFaixa() {
 acoes.verAviso = () => { const a = avisosAtivos().slice(-1)[0]; if (a) mostrarAviso(a); };
 if (location.protocol.startsWith("http") && !/claude|claudeusercontent/.test(location.hostname)) {
   setTimeout(buscarAvisos, 1500); setInterval(() => { if (!document.hidden) buscarAvisos(); }, 60000);
+  setInterval(() => { if (!document.hidden && typeof entregarBrindes === "function") entregarBrindes(); }, 4000);
 }
 
 /* aba "Aviso" no Painel de ADM: monta o arquivo novo para colar no GitHub */
@@ -5370,13 +5387,13 @@ async function gravarSite(muda, msg) {
   if (!r.ok) throw new Error("Não consegui ler os avisos (" + r.status + ").");
   const atual = await r.json(); let dados = {};
   try { dados = JSON.parse(deBase64(atual.content)) || {}; } catch {}
-  ["avisos", "eventos", "promos", "presentes"].forEach(k => { if (!Array.isArray(dados[k])) dados[k] = []; });
+  ["avisos", "eventos", "promos", "presentes", "brindes", "voltas", "vidas"].forEach(k => { if (!Array.isArray(dados[k])) dados[k] = []; });
   const novo = muda(dados), limpo = { avisos: novo.avisos || [] };
-  ["eventos", "promos", "presentes"].forEach(k => { const v = (novo[k] || []).filter(x => !x.ate || Date.now() <= Date.parse(x.ate)); if (v.length) limpo[k] = v; });
+  ["eventos", "promos", "presentes", "brindes", "voltas", "vidas"].forEach(k => { const v = (novo[k] || []).filter(x => !x.ate || Date.now() <= Date.parse(x.ate)); if (v.length) limpo[k] = v; });
   const w = await fetch(REPO_API, { method: "PUT", headers: { ...cabecalhos(), "Content-Type": "application/json" },
     body: JSON.stringify({ message: msg, content: paraBase64(JSON.stringify(limpo, null, 2) + "\n"), sha: atual.sha, branch: "main" }) });
   if (!w.ok) throw new Error("O GitHub não aceitou (" + w.status + "). Tente de novo.");
-  AVISOS.lista = limpo.avisos; EVT.eventos = limpo.eventos || []; EVT.promos = limpo.promos || []; EVT.presentes = limpo.presentes || [];
+  AVISOS.lista = limpo.avisos; EVT.eventos = limpo.eventos || []; EVT.promos = limpo.promos || []; EVT.presentes = limpo.presentes || []; EVT.brindes = limpo.brindes || []; EVT.voltas = limpo.voltas || []; EVT.vidas = limpo.vidas || [];
   aplicarLimitadas();
 }
 const gravarAvisos = (montar, msg) => gravarSite(d => ({ ...d, avisos: montar(d.avisos) }), msg);
@@ -5470,9 +5487,18 @@ function lojaEventosHTML() {
     ${ev ? `<div class="evt-faixa">🎉 <b>Evento:</b> moedas x${ev.mult} nas partidas até ${brDataHora(Date.parse(ev.ate))}</div>` : ""}
     ${EVT_NO_SITE ? `<form class="presente-form" data-a="usarPresente" autocomplete="off"><input id="pres-cod" maxlength="12" placeholder="🎁 Código de presente" aria-label="Código de presente" autocapitalize="characters" spellcheck="false"><button class="btn small" type="submit">Usar</button></form>` : ""}`;
 }
+function entregarBrindes() {
+  if (G.tela !== "lobby" || $("app").hidden || ($("aviso-adm") && !$("aviso-adm").hidden)) return;
+  const nome = perfil(); if (!nome) return;
+  G.brindesRecebidos = G.brindesRecebidos || {}; const ja = G.brindesRecebidos[nome] = G.brindesRecebidos[nome] || [];
+  const b = EVT.brindes.find(x => evtValido(x) && !ja.includes(x.id)); if (!b) return;
+  ja.push(b.id); G.brindesRecebidos[nome] = ja.slice(-50);
+  const r = darPremio(nome, b); salvarPlacar();
+  if (r && !r.jaTem) { const y = window.scrollY; render(); window.scrollTo(0, y); mostrarPresente(nome, r.txt); }
+}
 function eventoFaixa() {
-  const pr = promoAtiva(), ev = eventoMoedas();
-  return `${ev ? `<div class="evt-faixa">🎉 Evento: moedas x${ev.mult} nas partidas!</div>` : ""}${pr ? `<button type="button" class="evt-faixa evt-promo" data-a="loja">🏷️ Promoção: ${PROMO_ALVOS[pr.alvo]} ${pr.desc}% off na loja!</button>` : ""}`;
+  const pr = promoAtiva(), ev = eventoMoedas(), vida = vidaExtraEvento(), voltas = voltasAtivas();
+  return `${vida ? `<div class="evt-faixa evt-vida">❤️ Evento: +${vida} ${vida === 1 ? "vida" : "vidas"} em cada partida!</div>` : ""}${voltas.map(v => `<button type="button" class="evt-faixa evt-volta" data-a="loja">🔁 A coleção ${esc(COLECOES[v.col].nome)} voltou para a loja!</button>`).join("")}${ev ? `<div class="evt-faixa">🎉 Evento: moedas x${ev.mult} nas partidas!</div>` : ""}${pr ? `<button type="button" class="evt-faixa evt-promo" data-a="loja">🏷️ Promoção: ${PROMO_ALVOS[pr.alvo]} ${pr.desc}% off na loja!</button>` : ""}`;
 }
 function opcoesPremio() {
   const op = (v, t) => `<option value="${v}">${esc(t)}</option>`, grupo = (t, l) => l.length ? `<optgroup label="${t}">${l.join("")}</optgroup>` : "";
@@ -5501,6 +5527,24 @@ function admEventosHTML() {
     <label for="adm-pr-desc">Desconto</label><select id="adm-pr-desc">${[10, 20, 30, 50].map(v => `<option value="${v}" ${v === 20 ? "selected" : ""}>${v}%</option>`).join("")}</select>
     <label for="adm-pr-h">Vale por</label>${dur("adm-pr-h", 24)}
     <button type="button" class="btn" data-a="admCriarPromo" ${ocupado}>${pr ? "Trocar a promoção" : "Começar a promoção"}</button>
+    <h3>🎁 Presente para todos</h3>
+    ${EVT.brindes.filter(evtValido).map(x => `<div class="adm-lim"><p>🎁 ${esc(nomePremio(x))} para todos · até ${brDataHora(Date.parse(x.ate))}</p><button type="button" class="lb-pill" data-a="admApagarBrinde" data-id="${esc(x.id)}" ${ocupado}>Encerrar este presente</button></div>`).join("")}
+    <p class="dim" style="font-size:14px">Todo mundo que abrir o jogo enquanto valer ganha uma vez, sem código.</p>
+    <label for="adm-br-premio">Presente</label><select id="adm-br-premio">${opcoesPremio()}</select>
+    <label for="adm-br-h">Vale por</label>${dur("adm-br-h", 72, [[720, "30 dias"]])}
+    <button type="button" class="btn" data-a="admCriarBrinde" ${ocupado}>Dar para todo mundo</button>
+    <h3>🔁 Volta das limitadas</h3>
+    ${voltasAtivas().map(v => `<div class="adm-lim"><p>🔁 ${esc(COLECOES[v.col].nome)} de volta na loja até ${brDataHora(Date.parse(v.ate))}</p><button type="button" class="lb-pill" data-a="admApagarVolta" data-id="${esc(v.id)}" ${ocupado}>Tirar da loja de novo</button></div>`).join("")}
+    <p class="dim" style="font-size:14px">Traz de volta para a loja, por um tempo, uma coleção limitada que já acabou (com o pacote).</p>
+    <label for="adm-vt-col">Coleção</label><select id="adm-vt-col">${Object.entries(COLECOES).map(([k, c]) => `<option value="${k}">${esc(c.nome)}</option>`).join("")}</select>
+    <label for="adm-vt-h">Vale por</label>${dur("adm-vt-h", 24)}
+    <button type="button" class="btn" data-a="admCriarVolta" ${ocupado}>Trazer de volta</button>
+    <h3>❤️ Vida extra grátis</h3>
+    ${vidaExtraEvento() ? `<p>Valendo: <b>+${vidaExtraEvento()} ${vidaExtraEvento() === 1 ? "vida" : "vidas"}</b> em cada partida até ${brDataHora(Math.max(...EVT.vidas.filter(evtValido).map(v => Date.parse(v.ate))))}</p><button type="button" class="lb-pill" data-a="admEncerrarEvt" data-tipo="vidas" ${ocupado}>Encerrar</button>` : ""}
+    <p class="dim" style="font-size:14px">Cada partida começa com mais vidas para todo mundo.</p>
+    <label for="adm-vd-n">Vidas a mais</label><select id="adm-vd-n"><option value="1">+1 vida</option><option value="2">+2 vidas</option></select>
+    <label for="adm-vd-h">Vale por</label>${dur("adm-vd-h", 24)}
+    <button type="button" class="btn" data-a="admCriarVida" ${ocupado}>${vidaExtraEvento() ? "Trocar o evento" : "Começar o evento"}</button>
     <h3>🎁 Código de presente</h3>
     <p class="dim" style="font-size:14px">Quem digitar o código na loja ganha o presente (uma vez por jogador). De 4 a 12 letras ou números.</p>
     <input id="adm-pres-cod" maxlength="12" placeholder="Ex.: FESTA" aria-label="Código de presente" autocapitalize="characters" autocomplete="off" spellcheck="false">
@@ -5536,7 +5580,22 @@ Object.assign(acoes, {
     publicarEvt(d => ({ ...d, presentes: [...d.presentes.filter(x => evtValido(x) && x.h !== h).slice(-29), { id, h, ...premio, ...t }] }), "Código de presente", `Código ${c} criado: vale ${nomePremio(premio)}. 🎁`);
   },
   admApagarPresente(el) { const id = el.dataset.id; publicarEvt(d => ({ ...d, presentes: d.presentes.filter(x => x.id !== id) }), "Apaga código de presente", "Código apagado."); },
-  admEncerrarEvt(el) { const k = el.dataset.tipo === "promos" ? "promos" : "eventos"; publicarEvt(d => ({ ...d, [k]: [] }), k === "promos" ? "Encerra a promoção" : "Encerra o evento de moedas", k === "promos" ? "Promoção encerrada." : "Evento encerrado."); },
+  admEncerrarEvt(el) { const k = ["promos", "vidas"].includes(el.dataset.tipo) ? el.dataset.tipo : "eventos"; publicarEvt(d => ({ ...d, [k]: [] }), { promos: "Encerra a promoção", vidas: "Encerra a vida extra" }[k] || "Encerra o evento de moedas", { promos: "Promoção encerrada.", vidas: "Vida extra encerrada." }[k] || "Evento encerrado."); },
+  admCriarBrinde() {
+    const [tipo, v] = String(($("adm-br-premio") || {}).value).split(":"), premio = tipo === "moedas" ? { moedas: +v } : { item: tipo + ":" + v };
+    if (!nomePremio(premio)) return; const t = periodo("adm-br-h");
+    publicarEvt(d => ({ ...d, brindes: [...d.brindes.filter(evtValido).slice(-9), { id: "b" + Date.now().toString(36), ...premio, ...t }] }), "Presente para todos", `Presente publicado: todo mundo ganha ${nomePremio(premio)}. 🎁`);
+  },
+  admApagarBrinde(el) { const id = el.dataset.id; publicarEvt(d => ({ ...d, brindes: d.brindes.filter(x => x.id !== id) }), "Encerra presente para todos", "Presente encerrado."); },
+  admCriarVolta() {
+    const col = COLECOES[($("adm-vt-col") || {}).value] ? $("adm-vt-col").value : null; if (!col) return; const t = periodo("adm-vt-h");
+    publicarEvt(d => ({ ...d, voltas: [...d.voltas.filter(x => evtValido(x) && x.col !== col).slice(-9), { id: "v" + Date.now().toString(36), col, ...t }] }), "Volta das limitadas", `A coleção ${COLECOES[col].nome} voltou para a loja. 🔁`);
+  },
+  admApagarVolta(el) { const id = el.dataset.id; publicarEvt(d => ({ ...d, voltas: d.voltas.filter(x => x.id !== id) }), "Encerra volta das limitadas", "A coleção saiu da loja de novo."); },
+  admCriarVida() {
+    const extra = +($("adm-vd-n") || {}).value === 2 ? 2 : 1, t = periodo("adm-vd-h");
+    publicarEvt(d => ({ ...d, vidas: [{ id: "h" + Date.now().toString(36), extra, ...t }] }), "Vida extra grátis", `Evento publicado: +${extra} ${extra === 1 ? "vida" : "vidas"} em cada partida. ❤️`);
+  },
 });
 acoes.admLimparAvisos = () => { ADM.avisoJSON = JSON.stringify({ avisos: [] }, null, 2); ADM.avisoTexto = ""; const y = window.scrollY; render(); window.scrollTo(0, y); };
 </script>
