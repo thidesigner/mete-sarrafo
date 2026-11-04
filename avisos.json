@@ -1,5 +1,12 @@
 {
-  "avisos": [],
+  "avisos": [
+    {
+      "id": "amw2223ab",
+      "texto": "ADM:eu criei um codigo quem quiser saber me encontre",
+      "de": "2026-11-04T11:50:34.019Z",
+      "ate": "2026-11-05T11:50:34.019Z"
+    }
+  ],
   "presentes": [
     {
       "id": "gmw220lpt",
