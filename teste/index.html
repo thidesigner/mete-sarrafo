@@ -1374,6 +1374,13 @@ const SKINS = [
   { k: "gelo", nome: "Gelo", preco: 700, camisa: "#5fb3e6", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
   { k: "fogo", nome: "Fogo", preco: 700, camisa: "#d9381e", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
   { k: "gelofogo", nome: "Gelo e Fogo", preco: 700, camisa: "#d9381e", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
+  // versão Neon de cada limitada: roupa preta com contorno de luz; mesmos enfeites e efeitos da original (base), mesmo prazo
+  { k: "galacticaneon", base: "galactica", neon: "#c08bff", nome: "Galáctica Neon", preco: 600, camisa: "#0a0a12", limitada: true, ate: "2026-11-06T23:59:59-03:00" },
+  { k: "buraconegroneon", base: "buraconegro", neon: "#ff9a3c", nome: "Buraco Negro Neon", preco: 700, camisa: "#050409", pele: "#120f22", limitada: true, ate: "2026-11-07T23:59:59-03:00" },
+  { k: "sideralneon", base: "sideral", neon: "#7fd3ff", nome: "Espaço Sideral Neon", preco: 550, camisa: "#0a0a12", limitada: true, ate: "2026-11-02T12:00:00-03:00" },
+  { k: "geloneon", base: "gelo", neon: "#6ee7ff", nome: "Gelo Neon", preco: 800, camisa: "#0a0a12", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
+  { k: "fogoneon", base: "fogo", neon: "#ff6a2a", nome: "Fogo Neon", preco: 800, camisa: "#0a0a12", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
+  { k: "gelofogoneon", base: "gelofogo", neon: "#6ee7ff", neon2: "#ff6a2a", nome: "Gelo e Fogo Neon", preco: 800, camisa: "#0a0a12", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
   { k: "colecionador", nome: "Rei Dourado", preco: 400, camisa: "#d9a21b", secreto: true },
 ];
 /* Skin limitada ainda à venda? Depois do prazo some da loja para quem não tem. */
@@ -1425,12 +1432,12 @@ function fimDePartidaMissao(nome, moedas, venceu) { contarMissao(nome, "jogar");
 const EVT = { eventos: [], promos: [], presentes: [], brindes: [], voltas: [], vidas: [] };
 /* coleções limitadas que o ADM pode trazer de volta para a loja (chaves "tipo-k" de chaveLim e o pacote) */
 const COLECOES = {
-  galactico: { nome: "Galáctica", chaves: ["skin-galactica", "fundo-galactico", "emoji-galactico", "gesto-galactico", "avatar-galactico", "pet-coelhogalactico"], pacote: "galactico" },
-  buraconegro: { nome: "Buraco Negro", chaves: ["skin-buraconegro", "fundo-buraconegro", "emoji-buraconegro", "gesto-buraconegro", "avatar-buraconegro", "arremesso-buraconegro", "pet-gatoburaconegro"], pacote: "buraconegro" },
-  sideral: { nome: "Espaço Sideral", chaves: ["skin-sideral", "fundo-sideral", "emoji-sideral", "gesto-sideral", "avatar-sideral", "arremesso-sideral", "pet-caosideral"], pacote: "sideral" },
-  gelo: { nome: "Gelo", chaves: ["skin-gelo", "fundo-gelo", "emoji-gelo", "gesto-gelo", "avatar-gelo", "arremesso-gelo", "pet-gatogelo"], pacote: "gelo" },
-  fogo: { nome: "Fogo", chaves: ["skin-fogo", "fundo-fogo", "emoji-labareda", "gesto-fogo", "avatar-fogo", "arremesso-fogo", "pet-caofogo"], pacote: "fogo" },
-  gelofogo: { nome: "Gelo e Fogo", chaves: ["skin-gelofogo", "fundo-gelofogo", "emoji-gelofogo", "gesto-gelofogo", "avatar-gelofogo", "arremesso-gelofogo", "pet-coelhogelofogo"], pacote: "gelofogo" },
+  galactico: { nome: "Galáctica", chaves: ["skin-galacticaneon", "skin-galactica", "fundo-galactico", "emoji-galactico", "gesto-galactico", "avatar-galactico", "pet-coelhogalactico"], pacote: "galactico" },
+  buraconegro: { nome: "Buraco Negro", chaves: ["skin-buraconegroneon", "skin-buraconegro", "fundo-buraconegro", "emoji-buraconegro", "gesto-buraconegro", "avatar-buraconegro", "arremesso-buraconegro", "pet-gatoburaconegro"], pacote: "buraconegro" },
+  sideral: { nome: "Espaço Sideral", chaves: ["skin-sideralneon", "skin-sideral", "fundo-sideral", "emoji-sideral", "gesto-sideral", "avatar-sideral", "arremesso-sideral", "pet-caosideral"], pacote: "sideral" },
+  gelo: { nome: "Gelo", chaves: ["skin-geloneon", "skin-gelo", "fundo-gelo", "emoji-gelo", "gesto-gelo", "avatar-gelo", "arremesso-gelo", "pet-gatogelo"], pacote: "gelo" },
+  fogo: { nome: "Fogo", chaves: ["skin-fogoneon", "skin-fogo", "fundo-fogo", "emoji-labareda", "gesto-fogo", "avatar-fogo", "arremesso-fogo", "pet-caofogo"], pacote: "fogo" },
+  gelofogo: { nome: "Gelo e Fogo", chaves: ["skin-gelofogoneon", "skin-gelofogo", "fundo-gelofogo", "emoji-gelofogo", "gesto-gelofogo", "avatar-gelofogo", "arremesso-gelofogo", "pet-coelhogelofogo"], pacote: "gelofogo" },
 };
 const EVT_NO_SITE = location.protocol.startsWith("http") && !/claude|claudeusercontent/.test(location.hostname);
 const PROMO_ALVOS = { tudo: "Toda a loja", skin: "Skins", emoji: "Emojis", gesto: "Gestos", arremesso: "Arremessos", fundo: "Fundos", avatar: "Fotos de perfil" };
@@ -1454,6 +1461,8 @@ function vestirRobos(lista) {
   const pool = SKINS.filter(x => x.k !== "classico" && !x.secreto), usadas = new Set();
   lista.filter(p => !p.humano).forEach(p => { const livres = pool.filter(x => !usadas.has(x.k)), x = (livres.length ? livres : pool)[Math.floor(Math.random() * (livres.length || pool.length))]; usadas.add(x.k); vestir(p, x.k); });
 }
+/* skin "base" (a original de uma versão Neon) para enfeites, efeitos e pets */
+const skinBase = k => { const s = SKINS.find(x => x.k === k); return s && s.base ? s.base : k; };
 function vestir(p, k) { const s = skinInfo(k); p.skin = s.k; if (s.camisa) p.cor = s.camisa; if (s.pele) p.pele = s.pele; return p; }
 const AW = 1000, AC = 500, AH = 380, A_VEL = 230, A_BOLA = 700, A_RAIO = 44, A_MAXBOLA = 25;
 const aRnd = (a, b) => a + Math.random() * (b - a);
@@ -1735,7 +1744,7 @@ const CORES_PET = { cachorro: ["#b5793f", "#6b4423"], gato: ["#f4a23a", "#c46a14
 const PET_TRAJE = { supercao: "capa", gatoninja: "ninja", coelhoraio: "raio", hamsterblindado: "armadura" };
 function visualPet(k, skin) {
   const pet = petInfo(k); if (!pet) return null;
-  const base = pet.base || k, traje = PET_TRAJE[k] || null, tema = traje ? null : PET_TEMA[k] || SKIN_TEMA[skin] || null, enfeite = tema || traje ? null : SKIN_ENFEITE[skin] || null;
+  const base = pet.base || k, traje = PET_TRAJE[k] || null, tema = traje ? null : PET_TEMA[k] || SKIN_TEMA[skinBase(skin)] || null, enfeite = tema || traje ? null : SKIN_ENFEITE[skinBase(skin)] || null;
   const [corpo, escuro] = CORES_TEMA[tema] || CORES_PET[base];
   return { base, tema, enfeite, traje, corpo, escuro };
 }
@@ -2194,7 +2203,7 @@ function torcidaCima(c, animada) {
   }
 }
 /* efeito especial da skin Buraco Negro: a bolada abre um mini buraco negro que suga as faíscas */
-const atiradorBuracoNegro = () => !!(A.ph && A.ph.atir && A.ph.atir.skin === "buraconegro");
+const atiradorBuracoNegro = () => !!(A.ph && A.ph.atir && skinBase(A.ph.atir.skin) === "buraconegro");
 CIMA.buracos = [];
 function buracosCima(c) {
   const dt = 1 / 60;
@@ -2210,10 +2219,10 @@ function buracosCima(c) {
 }
 /* Gelo contra Fogo: quando Gelo acerta Fogo (ou o contrário), ou quem usa Gelo e Fogo acerta alguém, sai um choque de vapor, cristais e chamas */
 function choqueGeloFogo(fx) {
-  const at = A.ph && A.ph.atir; if (!at || !["gelo", "fogo", "gelofogo"].includes(at.skin)) return false;
-  if (at.skin === "gelofogo") return true;
+  const at = A.ph && A.ph.atir, sa = at && skinBase(at.skin); if (!at || !["gelo", "fogo", "gelofogo"].includes(sa)) return false;
+  if (sa === "gelofogo") return true;
   let alvo = null, dm = 1e9; for (const p of A.P) { if (p === at) continue; const d = Math.hypot(p.x - fx.x, p.y - fx.y); if (d < dm) { dm = d; alvo = p; } }
-  return !!alvo && dm < 120 && alvo.skin === (at.skin === "gelo" ? "fogo" : "gelo");
+  return !!alvo && dm < 120 && skinBase(alvo.skin) === (sa === "gelo" ? "fogo" : "gelo");
 }
 CIMA.choques = [];
 function choquesCima(c) {
@@ -2280,7 +2289,17 @@ function desenharBoneco2(c, p, ph) {
     c.fillStyle = p.pele; c.beginPath(); c.arc(x, y - 34, 15, 0, Math.PI * 2); c.fill();
     c.fillStyle = "#1b1b2b"; c.beginPath(); c.arc(x - 5, y - 36, 2.4, 0, Math.PI * 2); c.arc(x + 5, y - 36, 2.4, 0, Math.PI * 2); c.fill();
     c.strokeStyle = "#1b1b2b"; c.lineWidth = 2; c.beginPath(); c.arc(x, y - 31, 5, .2, Math.PI - .2); c.stroke();
-    if (p.skin && p.skin !== "classico") desenharAcessorio2D(c, p.skin, x, y);
+    const sn = p.skin && SKINS.find(z => z.k === p.skin);
+    if (sn && sn.neon) {   // versão Neon: contorno de luz em volta do corpo, braços, pernas e cabeça
+      c.save(); c.lineCap = "round"; c.shadowBlur = 10;
+      const linha = (cor, fn) => { c.strokeStyle = cor; c.shadowColor = cor; c.beginPath(); fn(); c.stroke(); };
+      const esq = sn.neon, dir = sn.neon2 || sn.neon;
+      c.lineWidth = 1.8;
+      linha(esq, () => { c.moveTo(x - 7, y + 6); c.lineTo(x - 7 + anda * .6, y + 24); c.moveTo(x - 14, y - 10); c.lineTo(x - 20, y + 4 - anda * .5); c.moveTo(x, y - 20); c.lineTo(x - 7, y - 20); c.arcTo(x - 15, y - 20, x - 15, y - 12, 8); c.lineTo(x - 15, y + 2); c.arcTo(x - 15, y + 10, x - 7, y + 10, 8); c.lineTo(x, y + 10); c.moveTo(x, y - 49); c.arc(x, y - 34, 15, -Math.PI / 2, Math.PI / 2, true); });
+      linha(dir, () => { c.moveTo(x + 7, y + 6); c.lineTo(x + 7 - anda * .6, y + 24); c.moveTo(x + 14, y - 10); c.lineTo(x + 20, y + 4 + anda * .5); c.moveTo(x, y - 20); c.lineTo(x + 7, y - 20); c.arcTo(x + 15, y - 20, x + 15, y - 12, 8); c.lineTo(x + 15, y + 2); c.arcTo(x + 15, y + 10, x + 7, y + 10, 8); c.lineTo(x, y + 10); c.moveTo(x, y - 49); c.arc(x, y - 34, 15, -Math.PI / 2, Math.PI / 2); });
+      c.restore();
+    }
+    if (p.skin && p.skin !== "classico") desenharAcessorio2D(c, skinBase(p.skin), x, y);
   } else {
     c.fillStyle = "#c8d3e0"; c.beginPath(); c.roundRect ? c.roundRect(x - 14, y - 48, 28, 26, 6) : c.rect(x - 14, y - 48, 28, 26); c.fill();
     c.fillStyle = "#2bb5c9"; c.fillRect(x - 9, y - 40, 6, 6); c.fillRect(x + 3, y - 40, 6, 6);
@@ -2870,7 +2889,7 @@ function explosaoEstrelas() {
 }
 function mostrarFim() {
   const v = A.fim.vencedor;
-  if ((A.fim.ganhadores || [v]).some(p => p.skin === "buraconegro")) explosaoEstrelas();
+  if ((A.fim.ganhadores || [v]).some(p => skinBase(p.skin) === "buraconegro")) explosaoEstrelas();
   const ord = [...A.P].sort((a, b) => (b.vivo - a.vivo) || ((b.saiuEm || 0) - (a.saiuEm || 0)));
   const pessoas = A.P.filter(p => p.humano).map(p => p.nome);
   abrirOv(`
@@ -3133,7 +3152,7 @@ function montarBonecos3D() {
       const olho = new THREE.Mesh(new THREE.SphereGeometry(.03, 8, 6), escuro);
       const o1 = olho.clone(); o1.position.set(-.07, .03, -.18); const o2 = olho.clone(); o2.position.set(.07, .03, -.18);
       cabeca.add(o1, o2);
-      acessorio3D(cabeca, p.skin);
+      acessorio3D(cabeca, skinBase(p.skin));
     } else {
       cabeca = new THREE.Mesh(new THREE.BoxGeometry(.36, .32, .32), new THREE.MeshLambertMaterial({ color: "#c8d3e0" }));
       const visor = new THREE.Mesh(new THREE.BoxGeometry(.26, .08, .02), new THREE.MeshBasicMaterial({ color: "#2bb5c9" })); visor.position.set(0, .02, -.17);
@@ -3143,6 +3162,10 @@ function montarBonecos3D() {
     }
     cabeca.position.y = 1.28;
     g.add(pernaE, pernaD, corpo, bracoE, bracoD, cabeca);
+    { const sn = p.skin && SKINS.find(z => z.k === p.skin);   // versão Neon: brilho em volta de cada parte
+      if (sn && sn.neon) [[pernaE, sn.neon], [bracoE, sn.neon], [pernaD, sn.neon2 || sn.neon], [bracoD, sn.neon2 || sn.neon], [corpo, sn.neon], [cabeca, sn.neon2 || sn.neon]].forEach(([parte, cor]) => {
+        const casca = new THREE.Mesh(parte.geometry, new THREE.MeshBasicMaterial({ color: cor, side: THREE.BackSide, transparent: true, opacity: .55, blending: THREE.AdditiveBlending, depthWrite: false }));
+        casca.scale.setScalar(1.12); parte.add(casca); }); }
     montarExtras3D(p, g, pernaE, pernaD, bracoE, bracoD, corpoMat);
   }
 }
@@ -6416,7 +6439,7 @@ function renderActOnline() {
 /* ---------- Fim de partida online ---------- */
 function mostrarFimOnline() {
   const v = A.fim.vencedor, me = A.P[ON.myIdx];
-  if ((A.fim.ganhadores || [v]).some(p => p.skin === "buraconegro")) explosaoEstrelas();
+  if ((A.fim.ganhadores || [v]).some(p => skinBase(p.skin) === "buraconegro")) explosaoEstrelas();
   const ord = [...A.P].sort((a, b) => (b.vivo - a.vivo) || (b.moedas - a.moedas));
   let nota = 0;
   const desenhar = enviado => abrirOv(`
