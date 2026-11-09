@@ -2658,6 +2658,36 @@ function desenharAcessorio2D(c, skin, x, y) {
         c.fillStyle = "#ffd23f"; c.beginPath(); c.arc(x, y - 6, 6, Math.PI / 2, Math.PI * 1.5); c.fill(); c.fillStyle = "#dfe6f5"; c.beginPath(); c.arc(x, y - 6, 6, -Math.PI / 2, Math.PI / 2); c.fill();
         c.save(); c.strokeStyle = "rgba(255,190,80,.8)"; c.lineWidth = 1.3; c.shadowColor = "#ffb347"; c.shadowBlur = 6; c.beginPath(); c.roundRect ? c.roundRect(x - 15, y - 20, 30, 30, 8) : c.rect(x - 15, y - 20, 30, 30); c.stroke(); c.restore();
       }
+      // ---- mais detalhes (melhoria) ----
+      const lua2 = (cx, cy, r) => { c.beginPath(); c.arc(cx, cy, r, -Math.PI / 2, Math.PI / 2); c.arc(cx - r * .45, cy, r * .8, Math.PI / 2, -Math.PI / 2, true); c.closePath(); c.fill(); };
+      const sol2 = (cx, cy, r, gira) => { c.save(); c.globalCompositeOperation = "lighter"; const g = c.createRadialGradient(cx, cy, 0, cx, cy, r * 2.4); g.addColorStop(0, "rgba(255,220,90,.7)"); g.addColorStop(1, "rgba(255,220,90,0)"); c.fillStyle = g; c.beginPath(); c.arc(cx, cy, r * 2.4, 0, Math.PI * 2); c.fill(); c.restore();
+        c.fillStyle = "#ffd23f"; c.beginPath(); c.arc(cx, cy, r, 0, Math.PI * 2); c.fill(); c.strokeStyle = "#ffe98a"; c.lineWidth = 1.2; c.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4 + gira; c.moveTo(cx + Math.cos(a) * (r + 1.5), cy + Math.sin(a) * (r + 1.5)); c.lineTo(cx + Math.cos(a) * (r + 4), cy + Math.sin(a) * (r + 4)); } c.stroke(); };
+      const estrela = (sx, sy, r, al) => { c.fillStyle = `rgba(255,255,255,${al})`; c.beginPath(); for (let j = 0; j < 8; j++) { const rr = j % 2 ? r * .3 : r, aa = j * Math.PI / 4; c.lineTo(sx + Math.cos(aa) * rr, sy + Math.sin(aa) * rr); } c.closePath(); c.fill(); };
+      // chão: raios de luz (Sol), névoa prateada com estrelinhas (Lua), anel escuro com borda de ouro (Eclipse)
+      c.save(); c.globalCompositeOperation = "lighter";
+      if (skin === "sol") { for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2 + t * .4, r2 = 26 + 5 * Math.sin(t * 5 + i); c.strokeStyle = `rgba(255,${200 + (i % 2) * 40},80,.7)`; c.lineWidth = 2; c.beginPath(); c.moveTo(x + Math.cos(a) * 15, y + 25 + Math.sin(a) * 4.5); c.lineTo(x + Math.cos(a) * r2, y + 25 + Math.sin(a) * r2 * .3); c.stroke(); } }
+      if (skin === "lua") { const g = c.createRadialGradient(x, y + 25, 4, x, y + 25, 30); g.addColorStop(0, "rgba(190,210,255,.45)"); g.addColorStop(1, "rgba(190,210,255,0)"); c.fillStyle = g; c.beginPath(); c.ellipse(x, y + 25, 30, 9, 0, 0, Math.PI * 2); c.fill();
+        for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2 - t * .5; estrela(x + Math.cos(a) * 24, y + 25 + Math.sin(a) * 7, 2.6, .5 + .5 * Math.sin(t * 5 + i)); } }
+      c.restore();
+      if (skin === "eclipse") { c.fillStyle = "rgba(5,4,10,.55)"; c.beginPath(); c.ellipse(x, y + 25, 27, 8, 0, 0, Math.PI * 2); c.fill();
+        c.save(); c.globalCompositeOperation = "lighter"; c.strokeStyle = `rgba(255,190,80,${.7 + .3 * Math.sin(t * 4)})`; c.lineWidth = 2; c.shadowColor = "#ffb347"; c.shadowBlur = 8; c.beginPath(); c.ellipse(x, y + 25, 27, 8, 0, 0, Math.PI * 2); c.stroke(); c.restore(); }
+      // roupa: listras de ouro (Sol), crateras e estrelinhas (Lua), contas de luz (Eclipse)
+      if (skin === "sol") { c.strokeStyle = "rgba(255,240,170,.85)"; c.lineWidth = 1.3; c.beginPath(); c.moveTo(x - 14, y + 4); c.lineTo(x + 14, y + 4); c.moveTo(x - 14, y + 7); c.lineTo(x + 14, y + 7); c.stroke(); }
+      if (skin === "lua") { c.fillStyle = "rgba(120,140,200,.55)"; [[-8, 2, 2.2], [9, -12, 1.8], [6, 5, 1.4], [-10, -10, 1.3]].forEach(([a, b, r]) => { c.beginPath(); c.arc(x + a, y + b, r, 0, Math.PI * 2); c.fill(); }); }
+      if (skin === "eclipse") { c.save(); c.globalCompositeOperation = "lighter"; for (let i = 0; i < 5; i++) { const al = .5 + .5 * Math.sin(t * 4 + i * 1.3); c.fillStyle = `rgba(255,200,100,${al})`; c.beginPath(); c.arc(x - 10 + i * 5, y + 6, 1.3, 0, Math.PI * 2); c.fill(); } c.restore(); }
+      // mãos: solzinho (Sol), estrela (Lua), um sol e uma lua (Eclipse)
+      const flut = Math.sin(t * 3) * 1.5;
+      if (skin === "sol") { sol2(x - 21, y + 3 + flut, 3.5, t * 2); sol2(x + 21, y + 3 - flut, 3.5, -t * 2); }
+      if (skin === "lua") { c.save(); c.shadowColor = "#bcd2ff"; c.shadowBlur = 8; estrela(x - 21, y + 3 + flut, 5, 1); c.fillStyle = "#f4f6ff"; lua2(x + 22, y + 3 - flut, 5); c.restore(); }
+      if (skin === "eclipse") { sol2(x - 21, y + 3 + flut, 3.5, t * 2); c.save(); c.shadowColor = "#bcd2ff"; c.shadowBlur = 8; c.fillStyle = "#f4f6ff"; lua2(x + 22, y + 3 - flut, 5); c.restore(); }
+      // céu: reflexo de luz (Sol), estrela cadente (Lua), sol e lua girando e se encontrando (Eclipse)
+      if (skin === "sol") { const f = (t * .5) % 1; c.save(); c.globalCompositeOperation = "lighter"; c.fillStyle = `rgba(255,250,220,${.8 * Math.sin(Math.PI * f)})`; c.translate(hx - 8, hy - 8); c.rotate(.6); c.beginPath(); c.ellipse(0, 0, 9, 1.4, 0, 0, Math.PI * 2); c.ellipse(0, 0, 1.4, 6, 0, 0, Math.PI * 2); c.fill(); c.restore(); }
+      if (skin === "lua") { const f = (t * .4) % 1; if (f < .45) { const q = f / .45, sx = x + 34 - q * 60, sy = y - 70 + q * 26; c.save(); c.globalCompositeOperation = "lighter"; const g = c.createLinearGradient(sx, sy, sx + 16, sy - 7); g.addColorStop(0, `rgba(255,255,255,${1 - q})`); g.addColorStop(1, "rgba(255,255,255,0)"); c.strokeStyle = g; c.lineWidth = 2; c.beginPath(); c.moveTo(sx, sy); c.lineTo(sx + 16, sy - 7); c.stroke(); c.restore(); estrela(sx, sy, 2.5, 1 - q); } }
+      if (skin === "eclipse") { const a = t * 1.3; sol2(hx + Math.cos(a) * 30, hy - 6 + Math.sin(a) * 8, 3, t); c.save(); c.fillStyle = "#e6ecf8"; c.shadowColor = "#bcd2ff"; c.shadowBlur = 6; c.beginPath(); c.arc(hx + Math.cos(a + Math.PI) * 30, hy - 6 + Math.sin(a + Math.PI) * 8, 3, 0, Math.PI * 2); c.fill(); c.restore(); }
+      // olhos brilhando
+      c.save(); c.globalCompositeOperation = "lighter"; const corOlho = skin === "sol" ? "255,210,80" : skin === "lua" ? "170,200,255" : "255,170,60";
+      [hx - 5, hx + 5].forEach(ox => { const g = c.createRadialGradient(ox, hy - 2, 0, ox, hy - 2, 5); g.addColorStop(0, `rgba(${corOlho},.9)`); g.addColorStop(1, `rgba(${corOlho},0)`); c.fillStyle = g; c.beginPath(); c.arc(ox, hy - 2, 5, 0, Math.PI * 2); c.fill(); });
+      c.restore();
       break;
     }
     case "gelo": case "fogo": case "gelofogo": {
@@ -3498,6 +3528,28 @@ function acessorio3D(cabeca, skin) {
         for (let k = 0; k < 7; k++) { const a = k / 7 * Math.PI * 2, m = new THREE.Mesh(new THREE.OctahedronGeometry(.03), new THREE.MeshBasicMaterial({ color: "#ffffff" })); m.position.set(Math.cos(a) * .5, (k % 2 ? .15 : -.05), Math.sin(a) * .5); orb.add(m); }
       }
       const peito = new THREE.Mesh(new THREE.CircleGeometry(.06, 20), new THREE.MeshBasicMaterial({ color: skin === "lua" ? "#dfe6f5" : "#ffd23f", side: THREE.DoubleSide })); peito.position.set(0, -.45, -.142); peito.rotation.y = Math.PI; cabeca.add(peito);
+      // ---- mais detalhes (melhoria) ----
+      const corS = skin === "sol" ? "#ffcf4a" : skin === "lua" ? "#c9d8ff" : "#ffb347";
+      // chão: anel de luz com raios (Sol), estrelinhas (Lua), disco escuro com borda de ouro (Eclipse)
+      const chao = new THREE.Group(); chao.position.y = -1.22; chao.userData.gira = skin === "lua" ? -.5 : .6; cabeca.add(chao);
+      if (skin === "eclipse") { const d = new THREE.Mesh(new THREE.CircleGeometry(.48, 32), new THREE.MeshBasicMaterial({ color: "#05040a", transparent: true, opacity: .6, depthWrite: false })); d.rotation.x = -Math.PI / 2; d.position.y = .005; chao.add(d); }
+      const disco = new THREE.Mesh(new THREE.RingGeometry(skin === "eclipse" ? .44 : .3, .5, 32), luz(corS, skin === "eclipse" ? .9 : .35)); disco.rotation.x = -Math.PI / 2; disco.position.y = .01; chao.add(disco);
+      for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2;
+        const m = skin === "lua" ? new THREE.Mesh(new THREE.OctahedronGeometry(.035), new THREE.MeshBasicMaterial({ color: "#ffffff" })) : new THREE.Mesh(new THREE.BoxGeometry(.02, .02, skin === "sol" ? .22 : .12), luz(corS, .9));
+        m.position.set(Math.cos(a) * (skin === "sol" ? .62 : .55), .04, Math.sin(a) * (skin === "sol" ? .62 : .55)); m.rotation.y = -a + Math.PI / 2; chao.add(m); }
+      // ombros: raios (Sol), luazinhas (Lua), um de cada (Eclipse)
+      [[-1, skin === "lua" ? "lua" : "sol"], [1, skin === "sol" ? "sol" : "lua"]].forEach(([lado, tipo]) => {
+        if (tipo === "sol") { const sb = new THREE.Mesh(new THREE.SphereGeometry(.05, 12, 10), new THREE.MeshBasicMaterial({ color: "#ffd23f" })); sb.position.set(lado * .22, -.24, 0); cabeca.add(sb);
+          const r = new THREE.Group(); r.position.copy(sb.position); r.userData.gira = 2; cabeca.add(r);
+          for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2, c2 = new THREE.Mesh(new THREE.ConeGeometry(.012, .05, 4), luz("#ffe98a", .95)); c2.position.set(Math.cos(a) * .08, Math.sin(a) * .08, 0); c2.rotation.z = a - Math.PI / 2; r.add(c2); } }
+        else { const lu = new THREE.Mesh(new THREE.TorusGeometry(.05, .02, 8, 16, Math.PI * 1.3), new THREE.MeshBasicMaterial({ color: "#f4f6ff" })); lu.position.set(lado * .22, -.22, 0); lu.rotation.z = lado > 0 ? -.6 : 2.5; cabeca.add(lu); } });
+      // céu: sol e lua girando em volta (Eclipse), estrelas e brilho a mais
+      if (skin === "eclipse") { const orb = new THREE.Group(); orb.userData.gira = 1.3; orb.position.y = .05; cabeca.add(orb);
+        const sb = new THREE.Mesh(new THREE.SphereGeometry(.06, 12, 10), new THREE.MeshBasicMaterial({ color: "#ffd23f" })); sb.position.set(.42, 0, 0); orb.add(sb); const sg = new THREE.Mesh(new THREE.SphereGeometry(.11, 10, 8), luz("#ffcc55", .35)); sg.position.copy(sb.position); orb.add(sg);
+        const lb = new THREE.Mesh(new THREE.SphereGeometry(.055, 12, 10), new THREE.MeshBasicMaterial({ color: "#e6ecf8" })); lb.position.set(-.42, 0, 0); orb.add(lb); }
+      if (skin === "sol") { const orb = new THREE.Group(); orb.userData.gira = -1; orb.position.y = -.3; cabeca.add(orb);
+        for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2, m = new THREE.Mesh(new THREE.SphereGeometry(.03, 8, 6), luz(k % 2 ? "#fff3a0" : "#ffb627", 1)); m.position.set(Math.cos(a) * .45, (k % 2 ? .2 : -.1), Math.sin(a) * .45); orb.add(m); } }
+      if (skin === "lua") cabeca.add(new THREE.Mesh(new THREE.SphereGeometry(.52, 16, 12), luz("#7f9cff", .06)));
       break;
     }
     case "gelo": case "fogo": case "gelofogo": {

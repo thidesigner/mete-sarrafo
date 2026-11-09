@@ -114,6 +114,7 @@ Três coleções de **edição limitada**, à venda até **10/11 às 23h59** (Br
 - **Eclipse:** skin 700 (anel de luz dourada em volta da cabeça, meio sol e meio lua no peito), fundo Eclipse 300, emoji Eclipse 🌗 150, gesto Eclipse 🌑 250, foto Eclipse 200, arremesso Anel de Eclipse 200, pet Cachorrinho Eclipse 300.
 - Cada um tem versão **Neon** (200, para quem tem a skin) e pacote com os 7 itens por 1.575 (em vez de 2.100, 25% de desconto).
 - **Sol contra Lua (efeito especial):** quando o Sol acerta a Lua (ou o contrário), acontece um eclipse na bolada: disco escuro com coroa de luz dourada. Quem usa Eclipse faz isso em qualquer um que acertar. Funciona de cima, no 3D e no online.
+- **Skins melhoradas (9/nov):** chão com raios de luz (Sol), névoa prateada com estrelinhas (Lua) ou disco escuro com borda de ouro (Eclipse); solzinhos, estrela ou lua flutuando nas mãos; olhos brilhando; listras de ouro, crateras ou contas de luz na roupa; reflexo de luz (Sol), estrela cadente (Lua) e sol e lua girando em volta (Eclipse). No 3D: anel no chão, enfeites nos ombros e sol e lua girando no Eclipse.
 - Preço e prazo foram escolhidos pelo Claude (o Andre não disse); dá para mudar.
 
 ## Robôs com skins (3/nov, ideia do Andre)
