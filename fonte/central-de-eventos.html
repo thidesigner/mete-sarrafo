@@ -102,7 +102,7 @@ Neste repositório: git pull origin main; leia CLAUDE.md (seção "Avisos do ADM
 - acao "promo": troque a lista promos por [{id: "p"+base36, alvo (tudo, skin, emoji, gesto, arremesso, fundo ou avatar), desc (10, 20, 30 ou 50), de, ate}].
 - acao "presente": normalize o código (maiúsculas, só A-Z e 0-9, 4 a 12). h = sha256 hex de "mete-sarrafo-presente:"+CODIGO (calcule com node). Remova presente com o mesmo h e acrescente {id: "g"+base36, h, de, ate} mais "moedas" (1 a 5000) ou "item" ("tipo:chave" que exista em fonte/jogo.html). NUNCA escreva o texto do código em arquivo, commit ou resposta.
 - acao "brinde": acrescente em brindes {id: "b"+base36, de, ate} mais "moedas" (1 a 5000) ou "item" ("tipo:chave" que exista em fonte/jogo.html). Todo mundo que abrir o jogo ganha uma vez.
-- acao "volta": em voltas, troque o item da mesma coleção por {id: "v"+base36, col (galactico, buraconegro, sideral, gelo, fogo ou gelofogo), de, ate}.
+- acao "volta": em voltas, troque o item da mesma coleção por {id: "v"+base36, col (galactico, buraconegro, sideral, gelo, fogo, gelofogo, sol, lua ou eclipse), de, ate}.
 - acao "vida": troque a lista vidas por [{id: "h"+base36, extra (1 ou 2), de, ate}].
 - acao "encerrar": esvazie a lista indicada em "lista" (avisos, eventos, promos, presentes, brindes, voltas ou vidas).
 Se o pedido for inválido, não mude nada. Grave avisos.json com 2 espaços e quebra de linha no fim, valide com node, não mexa em outros arquivos, faça commit "Evento pela Central de Eventos: <acao>" e git push origin main (tente até 4 vezes se a rede falhar).
@@ -114,7 +114,7 @@ const PREMIOS = [["moedas:50", "50 moedas"], ["moedas:100", "100 moedas"], ["moe
   ["skin:cristal", "🔑 Skin Cristal Secreto (só com código)"], ["skin:bone", "Skin Boné"], ["skin:pirata", "Skin Pirata"], ["skin:dino", "Skin Dinossauro"], ["skin:cometa", "Skin Capitã Cometa"], ["skin:turbo", "Skin Turbo Blindado"],
   ["emoji:coroa", "Emoji 👑 Coroa"], ["emoji:trofeu", "Emoji 🏆 Troféu"], ["gesto:mortal", "Gesto 🤸 Mortal"], ["arremesso:pizza", "Arremesso 🍕 Pizza"], ["fundo:noite", "Fundo Noite estrelada"]];
 const LISTAS = { avisos: "Todos os avisos", eventos: "Evento de moedas", promos: "Promoção", presentes: "Todos os códigos de presente", brindes: "Presentes para todos", voltas: "Volta das limitadas", vidas: "Vida extra" };
-const COLECOES = { galactico: "Galáctica", buraconegro: "Buraco Negro", sideral: "Espaço Sideral", gelo: "Gelo", fogo: "Fogo", gelofogo: "Gelo e Fogo" };
+const COLECOES = { galactico: "Galáctica", buraconegro: "Buraco Negro", sideral: "Espaço Sideral", gelo: "Gelo", fogo: "Fogo", gelofogo: "Gelo e Fogo", sol: "Sol", lua: "Lua", eclipse: "Eclipse" };
 const $ = id => document.getElementById(id);
 const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const brHora = ms => { const d = new Date(ms - 3 * 3600000); return `${d.getUTCDate()}/${d.getUTCMonth() + 1} às ${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`; };

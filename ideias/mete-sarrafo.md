@@ -105,6 +105,15 @@ Três coleções de **edição limitada**, à venda até **10/11 às 23h59** (Br
 - **Pacotes:** Pacote Gelo, Pacote Fogo e Pacote Gelo e Fogo, cada um com os 6 itens por 1.350 (em vez de 1.800, 25% de desconto). Quem já tem algum paga só o que falta.
 - **3/nov:** o Andre pediu as 3 skins mais caras e mais bonitas: agora custam **700** cada (os outros itens continuam iguais). Ganharam brilho em volta (aura), chão congelado ou em chamas em volta dos pés, cristal ou chama nas mãos, olhos brilhando e, no 3D, ombreiras de cristal ou chama e um anel no chão. Melhoradas de novo: pingentes de gelo na barra da roupa, rachaduras de lava brilhando no peito, neve caindo em volta (Gelo), fumacinha saindo da cabeça (Fogo) e raios estalando entre os dois lados (Gelo e Fogo). O conjunto também ficou melhor: gesto Congelar com flocos girando e um clarão ao quebrar, Explosão com foguinho embaixo dos pés e fumaça, Duelo com raio ligando as bolinhas e um clarão no meio; arremessos com brilhinho (gelo) e fumaça (fogo); emojis com balão colorido e flocos ou chamas girando; fundos com pingentes de gelo, lua, rios de lava e fumaça; fotos e pacotes com brilho pulsando.
 - **Gelo contra Fogo (efeito especial):** quando quem usa a skin Gelo acerta quem usa a skin Fogo (ou o contrário), sai um choque de vapor, cristais e chamas voando, com som de "tsss". Quem usa a skin Gelo e Fogo faz o choque em qualquer um que acertar. Funciona de cima, no 3D e no online.
+
+### Sol, Lua e Eclipse (limitadas até 16/11)
+
+- O Andre pediu 3 conjuntos que combinam entre si. Escolheu **Sol ☀️, Lua 🌙 e Eclipse 🌑**.
+- **Sol:** skin 700 (coroa de raios dourados girando, sol no peito, faíscas subindo), fundo Sol 300 (céu azul com sol forte), emoji Solzão 🌞 150, gesto Raio de Sol ✨ 250, foto Sol 200, arremesso Bola de Sol 200, pet Gatinho do Sol 300.
+- **Lua:** skin 700 (lua crescente na cabeça, estrelas piscando em volta), fundo Lua 300 (noite com lua cheia), emoji Boa Noite 🌛 150, gesto Flutuar na Lua 🌙 250, foto Lua 200, arremesso Pedra da Lua 200, pet Coelho da Lua 300 (corre 6% mais rápido).
+- **Eclipse:** skin 700 (anel de luz dourada em volta da cabeça, meio sol e meio lua no peito), fundo Eclipse 300, emoji Eclipse 🌗 150, gesto Eclipse 🌑 250, foto Eclipse 200, arremesso Anel de Eclipse 200, pet Cachorrinho Eclipse 300.
+- Cada um tem versão **Neon** (200, para quem tem a skin) e pacote com os 7 itens por 1.575 (em vez de 2.100, 25% de desconto).
+- **Sol contra Lua (efeito especial):** quando o Sol acerta a Lua (ou o contrário), acontece um eclipse na bolada: disco escuro com coroa de luz dourada. Quem usa Eclipse faz isso em qualquer um que acertar. Funciona de cima, no 3D e no online.
 - Preço e prazo foram escolhidos pelo Claude (o Andre não disse); dá para mudar.
 
 ## Robôs com skins (3/nov, ideia do Andre)
@@ -121,7 +130,7 @@ Nas partidas de bonequinhos (no mesmo celular e no online), cada robô sorteia u
 
 Na aba **Eventos** do Painel de ADM e na Central de Eventos:
 - **Presente para todos:** o ADM escolhe moedas ou um item; todo mundo que abrir o jogo enquanto valer ganha uma vez, sem código (aparece a janela "🎁 Presente!"). Quem já tem o item não ganha outro.
-- **Volta das limitadas:** uma coleção limitada que já acabou (Galáctica, Buraco Negro, Espaço Sideral, Gelo, Fogo ou Gelo e Fogo) volta para a loja por um tempo, com o pacote. Aparece uma faixa verde "🔁 A coleção … voltou para a loja!" e a contagem regressiva.
+- **Volta das limitadas:** uma coleção limitada que já acabou (Galáctica, Buraco Negro, Espaço Sideral, Gelo, Fogo, Gelo e Fogo, Sol, Lua ou Eclipse) volta para a loja por um tempo, com o pacote. Aparece uma faixa verde "🔁 A coleção … voltou para a loja!" e a contagem regressiva.
 - **Vida extra grátis:** enquanto valer, cada partida começa com +1 ou +2 vidas para todo mundo (bonequinhos, online e bola de verdade). Faixa "❤️ Evento: +1 vida em cada partida!".
 
 ## Pets (4/nov, ideia do Andre)
