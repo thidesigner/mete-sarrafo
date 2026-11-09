@@ -115,6 +115,7 @@ Três coleções de **edição limitada**, à venda até **10/11 às 23h59** (Br
 - Cada um tem versão **Neon** (200, para quem tem a skin) e pacote com os 7 itens por 1.575 (em vez de 2.100, 25% de desconto).
 - **Sol contra Lua (efeito especial):** quando o Sol acerta a Lua (ou o contrário), acontece um eclipse na bolada: disco escuro com coroa de luz dourada. Quem usa Eclipse faz isso em qualquer um que acertar. Funciona de cima, no 3D e no online.
 - **Skins melhoradas (9/nov):** chão com raios de luz (Sol), névoa prateada com estrelinhas (Lua) ou disco escuro com borda de ouro (Eclipse); solzinhos, estrela ou lua flutuando nas mãos; olhos brilhando; listras de ouro, crateras ou contas de luz na roupa; reflexo de luz (Sol), estrela cadente (Lua) e sol e lua girando em volta (Eclipse). No 3D: anel no chão, enfeites nos ombros e sol e lua girando no Eclipse.
+- **Correção (9/nov):** as skins Sol, Lua e Eclipse **não mudam** a cor dos pets normais (antes ficavam escuros e com um anel no rosto). Só os pets da coleção têm o visual do Sol, da Lua e do Eclipse. O anel do Cachorrinho Eclipse virou uma auréola em cima da cabeça.
 - Preço e prazo foram escolhidos pelo Claude (o Andre não disse); dá para mudar.
 
 ## Robôs com skins (3/nov, ideia do Andre)

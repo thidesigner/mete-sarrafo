@@ -1791,9 +1791,9 @@ function poderPet(p, quando) {
 /* O pet combina com a skin: pets limitados têm o próprio tema; os outros pegam o tema da skin (cores e efeitos)
    ou um enfeite igual ao do bonequinho. Só muda o visual, o poder continua o mesmo. */
 const PET_TEMA = { gatogelo: "gelo", caofogo: "fogo", coelhogelofogo: "gelofogo", caosideral: "sideral", gatoburaconegro: "buraconegro", coelhogalactico: "espaco", gatosol: "sol", coelholua: "lua", caoeclipse: "eclipse" };
-const SKIN_TEMA = { gelo: "gelo", fogo: "fogo", gelofogo: "gelofogo", galactica: "espaco", buraconegro: "espaco", sideral: "espaco", sol: "sol", lua: "lua", eclipse: "eclipse" };
+const SKIN_TEMA = { gelo: "gelo", fogo: "fogo", gelofogo: "gelofogo", galactica: "espaco", buraconegro: "espaco", sideral: "espaco" };
 const SKIN_ENFEITE = { rei: "coroa", colecionador: "coroa", cowboy: "chapeu", chef: "chef", pirata: "tapa", ninja: "faixa", relampago: "faixa", bone: "bone" };
-const CORES_TEMA = { gelo: ["#9fdcff", "#3d8fe6"], fogo: ["#e2462b", "#8a1f0f"], gelofogo: ["#9fdcff", "#3d8fe6"], espaco: ["#4b2a9e", "#24104f"], sideral: ["#e9eef5", "#13235a"], buraconegro: ["#1a1530", "#0b0716"], sol: ["#ffc93c", "#e08a00"], lua: ["#c9d3ea", "#5a6a9a"], eclipse: ["#1b1830", "#0b0a16"] };
+const CORES_TEMA = { gelo: ["#9fdcff", "#3d8fe6"], fogo: ["#e2462b", "#8a1f0f"], gelofogo: ["#9fdcff", "#3d8fe6"], espaco: ["#4b2a9e", "#24104f"], sideral: ["#e9eef5", "#13235a"], buraconegro: ["#1a1530", "#0b0716"], sol: ["#ffc93c", "#e08a00"], lua: ["#c9d3ea", "#5a6a9a"], eclipse: ["#4a4270", "#2a2445"] };
 const CORES_PET = { cachorro: ["#b5793f", "#6b4423"], gato: ["#f4a23a", "#c46a14"], coelho: ["#f4f1ec", "#d6cfc4"], hamster: ["#e2b36b", "#a8743a"], tartaruga: ["#4f9d3a", "#2e6b22"], passarinho: ["#ffd23f", "#e09a00"], pinguim: ["#2b2d42", "#14151f"] };
 const PET_TRAJE = { supercao: "capa", gatoninja: "ninja", coelhoraio: "raio", hamsterblindado: "armadura" };
 function visualPet(k, skin) {
@@ -1885,7 +1885,7 @@ function desenharPet2D(c, k, x, y, t, skin) {
     c.fillStyle = "#ffffff"; [[4, 3], [-7, -2], [9, -1]].forEach(([a, b], i) => { c.globalAlpha = .5 + .5 * Math.sin(t * 4 + i); c.beginPath(); c.arc(px + a, py + b, .9, 0, Math.PI * 2); c.fill(); }); c.globalAlpha = 1;
   }
   if (tema === "eclipse") {   // anel dourado em volta
-    c.save(); c.globalCompositeOperation = "lighter"; c.strokeStyle = "rgba(255,190,80,.95)"; c.lineWidth = 1.6; c.shadowColor = "#ffb347"; c.shadowBlur = 6; c.beginPath(); c.arc(hx, hy, 8.5, 0, Math.PI * 2); c.stroke(); c.restore();
+    c.save(); c.globalCompositeOperation = "lighter"; c.strokeStyle = "rgba(255,190,80,.95)"; c.lineWidth = 1.6; c.shadowColor = "#ffb347"; c.shadowBlur = 6; c.beginPath(); c.ellipse(hx, hy - 11, 6, 2, 0, 0, Math.PI * 2); c.stroke(); c.restore();
   }
   // enfeite igual ao do bonequinho
   const topo = hy - (k === "hamster" ? 7 : 6);
