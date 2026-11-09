@@ -2496,9 +2496,8 @@ function desenharBoneco2(c, p, ph) {
     c.fillStyle = "#f4f7fb"; c.beginPath(); c.arc(x + 30, y - 58, 16, 0, Math.PI * 2); c.fill();
     c.fillStyle = "#0f3057"; c.font = "24px Bungee, sans-serif"; c.fillText("?", x + 30, y - 57);
   }
-  if (isAtir && !A.balls.length) {
-    c.fillStyle = "#ff8a1f"; c.strokeStyle = "#2a1300"; c.lineWidth = 3;
-    c.beginPath(); c.arc(x + 24, y - 12, 12, 0, Math.PI * 2); c.fill(); c.stroke();
+  if (isAtir && !A.balls.length) {   // na mão: o arremesso que o jogador está usando
+    c.save(); c.translate(x + 24, y - 12); c.scale(.85, .85); desenharArremesso2D(c, p.arremesso || "bola", 0, 0, 0); c.restore();
   }
 }
 
@@ -4324,6 +4323,7 @@ function animarLobby() {
   const boneco = vestir({ i: -1, nome: "", humano: true, cor: A_CORES[0], pele: A_PELE[0], vidas: 0, x: 0, y: 0, passo: 0, flash: 0 }, skinDe(nome));
   boneco.ficha = typeof personagemDe === "function" ? personagemDe(nome) : null;
   boneco.pet = petDe(nome);
+  const arrLobby = arremessoDe(nome);
   const quadro = ts => {
     const cv = $("lb-canvas");
     if (!cv || G.tela !== "lobby" || $("app").hidden) { lbRaf = null; return; }
@@ -4347,11 +4347,9 @@ function animarLobby() {
     c.save(); c.translate(100, 120); c.scale(1.95, 1.95); c.translate(-100, -120);
     desenharBoneco2(c, boneco, {});
     c.restore();
-    // bola quicando ao lado
+    // arremesso equipado pulando no ar, do lado esquerdo (embaixo fica o botão da skin e à direita o pet)
     const q = Math.abs(Math.sin(lbT * 3));
-    c.fillStyle = "rgba(0,0,0,.25)"; c.beginPath(); c.ellipse(152, 170, 8 - q * 3, 3, 0, 0, Math.PI * 2); c.fill();
-    c.fillStyle = "#ff8a1f"; c.strokeStyle = "#2a1300"; c.lineWidth = 2;
-    c.beginPath(); c.arc(152, 160 - q * 34, 9, 0, Math.PI * 2); c.fill(); c.stroke();
+    c.save(); c.translate(40, 104 - q * 24); c.scale(.85, .85); desenharArremesso2D(c, arrLobby, 0, 0, lbT * 3); c.restore();
     lbRaf = requestAnimationFrame(quadro);
   };
   if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) lbRaf = requestAnimationFrame(quadro);
