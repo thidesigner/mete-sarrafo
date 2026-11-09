@@ -1387,6 +1387,8 @@ const SKINS = [
   { k: "fogoneon", base: "fogo", neon: "#ff6a2a", nome: "Fogo Neon", camisa: "#0a0a12", preco: 200, variante: true },
   { k: "gelofogoneon", base: "gelofogo", neon: "#6ee7ff", neon2: "#ff6a2a", nome: "Gelo e Fogo Neon", camisa: "#0a0a12", preco: 200, variante: true },
   { k: "colecionador", nome: "Rei Dourado", preco: 400, camisa: "#d9a21b", secreto: true },
+  // skin de código: não aparece na loja e não é vendida; só se ganha com um código de presente criado pelo ADM
+  { k: "cristal", nome: "Cristal Secreto", preco: 0, camisa: "#5fd3f0", codigo: true },
 ];
 /* Skin limitada ainda à venda? Depois do prazo some da loja para quem não tem. */
 const naVenda = s => !s.ate || Date.now() <= Date.parse(s.ate);
@@ -1463,7 +1465,7 @@ const skinInfo = k => SKINS.find(s => s.k === k) || SKINS[0];
 /* Robôs vestem skins do jogo: cada um sorteia uma (sem repetir, se der) a cada partida e fica igual a um jogador */
 const roboVestido = p => !p.humano && !!p.skin && p.skin !== "classico";
 function vestirRobos(lista) {
-  const pool = SKINS.filter(x => x.k !== "classico" && !x.secreto), usadas = new Set();
+  const pool = SKINS.filter(x => x.k !== "classico" && !x.secreto && !x.codigo), usadas = new Set();
   lista.filter(p => !p.humano).forEach(p => { const livres = pool.filter(x => !usadas.has(x.k)), x = (livres.length ? livres : pool)[Math.floor(Math.random() * (livres.length || pool.length))]; usadas.add(x.k); vestir(p, x.k); });
 }
 /* skin "base" (a original de uma versão Neon) para enfeites, efeitos e pets */
@@ -2584,6 +2586,21 @@ function desenharAcessorio2D(c, skin, x, y) {
       c.restore();
       break;
     }
+    case "cristal": {
+      const t = performance.now() / 1000;
+      // facetas brilhando na roupa
+      c.strokeStyle = "rgba(255,255,255,.75)"; c.lineWidth = 1; c.beginPath();
+      c.moveTo(x - 15, y - 12); c.lineTo(x - 4, y - 20); c.lineTo(x + 6, y - 6); c.lineTo(x - 6, y + 10); c.moveTo(x + 15, y - 14); c.lineTo(x + 6, y - 6); c.lineTo(x + 15, y + 4); c.moveTo(x - 4, y - 20); c.lineTo(x - 15, y + 2); c.stroke();
+      // diamante flutuando e girando em cima da cabeça
+      const dy = hy - 24 + Math.sin(t * 2) * 2, larg = Math.abs(Math.cos(t * 1.6)) * 9 + 2;
+      c.save(); c.globalCompositeOperation = "lighter"; const g = c.createRadialGradient(hx, dy, 1, hx, dy, 16); g.addColorStop(0, "rgba(160,240,255,.6)"); g.addColorStop(1, "rgba(160,240,255,0)"); c.fillStyle = g; c.beginPath(); c.arc(hx, dy, 16, 0, Math.PI * 2); c.fill(); c.restore();
+      const dg = c.createLinearGradient(hx - larg, dy - 8, hx + larg, dy + 8); dg.addColorStop(0, "#ffffff"); dg.addColorStop(.5, "#7fe7ff"); dg.addColorStop(1, "#3d8fe6");
+      c.fillStyle = dg; c.strokeStyle = "#ffffff"; c.lineWidth = 1; c.beginPath(); c.moveTo(hx - larg, dy - 3); c.lineTo(hx - larg * .5, dy - 8); c.lineTo(hx + larg * .5, dy - 8); c.lineTo(hx + larg, dy - 3); c.lineTo(hx, dy + 9); c.closePath(); c.fill(); c.stroke();
+      // brilhinhos em volta
+      for (let i = 0; i < 6; i++) { const a = t * 1.3 + i * 1.05, sx = x + Math.cos(a) * 26, sy = y - 18 + Math.sin(a) * 20, br = .5 + .5 * Math.sin(t * 5 + i * 2);
+        c.fillStyle = `rgba(220,250,255,${br})`; c.beginPath(); for (let j = 0; j < 8; j++) { const rr = j % 2 ? 1 : 3.2 * br + .5, aa = j * Math.PI / 4; c.lineTo(sx + Math.cos(aa) * rr, sy + Math.sin(aa) * rr); } c.closePath(); c.fill(); }
+      break;
+    }
     case "colecionador": {
       const t = performance.now() / 1000;
       // medalha grande no peito, com fita
@@ -3317,6 +3334,15 @@ function acessorio3D(cabeca, skin) {
         [["#7fd0ff", 0], ["#ff7a2a", Math.PI]].forEach(([cor, r0]) => { const m = new THREE.Mesh(new THREE.TorusGeometry(.5, .015, 6, 30, Math.PI), luz(cor, .9)); m.rotation.x = Math.PI / 2; m.rotation.z = r0; anel.add(m); }); }
       break;
     }
+    case "cristal": {
+      const brilho = (cor, op) => new THREE.MeshBasicMaterial({ color: cor, transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false });
+      const orb = new THREE.Group(); orb.position.y = .5; orb.userData.gira = 1.6; cabeca.add(orb);
+      const dia = new THREE.Mesh(new THREE.OctahedronGeometry(.11), new THREE.MeshLambertMaterial({ color: "#8fe9ff", emissive: "#2a7fa8" })); dia.scale.set(1, 1.3, 1); orb.add(dia);
+      orb.add(new THREE.Mesh(new THREE.SphereGeometry(.2, 12, 10), brilho("#a0f0ff", .25)));
+      const giro = new THREE.Group(); giro.position.y = -.3; giro.userData.gira = -1.1; cabeca.add(giro);
+      for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2, m = new THREE.Mesh(new THREE.OctahedronGeometry(.035), new THREE.MeshBasicMaterial({ color: "#e6fbff" })); m.position.set(Math.cos(a) * .48, (k % 2 ? .12 : -.08), Math.sin(a) * .48); giro.add(m); }
+      break;
+    }
     case "colecionador": {
       const ouro = cor => new THREE.MeshBasicMaterial({ color: cor });
       add(new THREE.CylinderGeometry(.16, .16, .1, 12, 1, true), "#ffd23f", 0, .22, 0, { side: THREE.DoubleSide });
@@ -3773,7 +3799,7 @@ TELAS.loja = () => {
     </div>
     <div class="loja-sec" data-sec="skins"${secOculta("skins")}>
     <h2 class="lb-secao">Skins</h2>
-    <div class="fd-grid">${SKINS.filter(s => !s.secreto && !s.variante && (naVenda(s) || temSkin(nome, s.k))).sort((a, b) => !!b.limitada - !!a.limitada).map(s => {
+    <div class="fd-grid">${SKINS.filter(s => !s.secreto && !s.variante && (!s.codigo || temSkin(nome, s.k)) && (naVenda(s) || temSkin(nome, s.k))).sort((a, b) => !!b.limitada - !!a.limitada).map(s => {
       const tem = temSkin(nome, s.k), usando = skinDe(nome) === s.k, podeS = moedas >= s.preco, neon = SKINS.find(v => v.variante && v.base === s.k), usandoNeon = !!neon && skinDe(nome) === neon.k;
       const rotulo = usando ? "Usando" : tem ? "Usar" : G.lojaConf === "skin:" + s.k ? "Confirmar?" : podeS ? `<span class="lb-coin" aria-hidden="true">$</span>${s.preco}` : `$ ${s.preco}`;
       return `<div class="fd-tile${tem ? "" : " fd-travado"}${s.limitada ? " sk-limitada" : ""}"${usando ? ' aria-current="true"' : ""}>
@@ -4858,6 +4884,7 @@ function pedirConfirmacao(chave) {
 acoes.comprarSkin = el => {
   const k = el.dataset.s, nome = perfil(), s = skinInfo(k);
   if (temSkin(nome, k)) { usarSkin(nome, k); salvarPlacar(); const y = window.scrollY; render(); window.scrollTo(0, y); toast(`Agora você está de ${s.nome}`); return; }
+  if (s.codigo) { toast("Essa skin só se ganha com um código de presente"); return; }
   if (s.variante) {   // versão Neon: precisa ter a original e ela ainda estar à venda
     if (!temSkin(nome, s.base)) { toast(`Primeiro compre a skin ${skinInfo(s.base).nome}`); return; }
     if (!naVenda(skinInfo(s.base))) { toast("A versão Neon só dá para comprar enquanto a coleção estiver na loja"); return; }
@@ -5888,7 +5915,7 @@ function eventoFaixa() {
 function opcoesPremio() {
   const op = (v, t) => `<option value="${v}">${esc(t)}</option>`, grupo = (t, l) => l.length ? `<optgroup label="${t}">${l.join("")}</optgroup>` : "";
   return grupo("Moedas", [50, 100, 200, 500, 1000].map(v => op("moedas:" + v, v + " moedas")))
-    + grupo("Skins", SKINS.filter(x => x.preco > 0).map(x => op("skin:" + x.k, x.nome)))
+    + grupo("Skins", SKINS.filter(x => x.preco > 0 || x.codigo).map(x => op("skin:" + x.k, x.codigo ? "🔑 " + x.nome + " (só com código)" : x.nome)))
     + grupo("Emojis", EMOJIS.filter(x => x.preco > 0).map(x => op("emoji:" + x.k, x.e + " " + x.nome)))
     + grupo("Gestos", GESTOS.filter(x => x.preco > 0).map(x => op("gesto:" + x.k, x.icone + " " + x.nome)))
     + grupo("Arremessos", ARREMESSOS.filter(x => x.preco > 0).map(x => op("arremesso:" + x.k, x.icone + " " + x.nome)))
