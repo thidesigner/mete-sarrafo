@@ -270,6 +270,21 @@ button.lb-pill { cursor: pointer; padding-left: 12px; }
 .pacote.sk-limitada.pacote-gelofogo { background: linear-gradient(100deg, transparent 48%, rgba(255,255,255,.8) 49.5% 50.5%, transparent 52%), linear-gradient(90deg, #0b2a55 0%, #3d8fe6 45%, #d9381e 55%, #3a0a05 100%) !important; border-color: #ffffff !important; box-shadow: -6px 0 20px rgba(127,208,255,.55), 6px 0 20px rgba(255,100,30,.55); }
 .pacote.sk-limitada.pacote-sideral { background: radial-gradient(circle at 88% 18%, #ffe0a8 0 4%, transparent 4.5%), radial-gradient(circle at 10% 100%, #3d8fe6 0 16%, rgba(127,211,255,.4) 17.5%, transparent 21%), radial-gradient(ellipse 60% 50% at 70% 30%, rgba(255,110,200,.3) 0%, transparent 70%), linear-gradient(180deg, #050a24 0%, #13235a 100%) !important; border-color: #7fd3ff !important; box-shadow: 0 0 0 2px rgba(127,211,255,.35), 0 0 24px rgba(255,122,217,.45); }
 .pacote.sk-limitada.pacote-buraconegro { background: radial-gradient(circle at 80% 30%, #000 0 8%, rgba(255,160,70,.9) 9%, rgba(176,123,255,.6) 14%, transparent 24%), radial-gradient(circle at 20% 80%, #3a1a6e 0%, #0b0716 70%) !important; border-color: #ff9a3c !important; box-shadow: 0 0 0 2px rgba(255,154,60,.35), 0 0 24px rgba(176,123,255,.55); }
+.loja-abas { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: flex; gap: 6px; overflow-x: auto; padding: 8px 2px; margin: 0 -2px; background: inherit; scrollbar-width: none; }
+.loja-abas::-webkit-scrollbar { display: none; }
+.loja-aba { position: relative; flex: none; font: 800 14px var(--body, inherit); padding: 9px 13px; border-radius: 999px; border: 2px solid #0b1b33; background: rgba(11,27,51,.75); color: #fff; cursor: pointer; box-shadow: 0 3px 0 #0b1b33; }
+.loja-aba[aria-pressed="true"] { background: #ffd23f; color: #0b1b33; }
+.loja-ponto { position: absolute; top: -3px; right: -3px; width: 11px; height: 11px; border-radius: 50%; background: #ff4d6d; border: 2px solid #0b1b33; }
+.loja-sec { display: grid; gap: 12px; }
+.dest-lista { display: grid; gap: 8px; }
+.dest-item { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: linear-gradient(90deg, rgba(91,44,181,.85), rgba(11,27,51,.85)); border: 2px solid #ffd23f; border-radius: 14px; padding: 8px 10px; color: #fff; cursor: pointer; }
+.dest-ics { font-size: 18px; letter-spacing: 2px; margin-top: 2px; }
+.dest-ver { flex: none; font-weight: 800; font-size: 13px; background: #ffd23f; color: #0b1b33; border-radius: 999px; padding: 4px 10px; }
+.dest-txt { flex: 1; min-width: 0; display: grid; } .dest-txt b { font-size: 15px; } .dest-txt small { font-size: 12px; color: #ffd23f; }
+.dest-preco { flex: none; display: flex; align-items: center; gap: 4px; font-family: var(--display); font-size: 16px; }
+.dest-preco .lb-coin { width: 22px; height: 22px; font-size: 12px; }
+.pet-poder { font-size: 12px; line-height: 1.3; color: #c9d6ea; text-align: center; }
+canvas.pet-prev { width: 100%; display: block; border-radius: 12px; background: radial-gradient(circle at 50% 70%, rgba(255,255,255,.12), transparent 70%); }
 .cantinho { display: grid; gap: 8px; border: 3px solid #ffd23f; border-radius: 18px; padding: 14px 12px; color: #fff; margin-top: 4px;
   background: radial-gradient(ellipse 80% 40% at 50% 0, rgba(255,210,63,.28), transparent 70%), linear-gradient(180deg, #33240a 0%, #140e03 100%); box-shadow: 0 0 0 2px rgba(255,210,63,.3), 0 0 24px rgba(255,210,63,.4); }
 .cantinho .lb-secao { margin: 0; text-align: center; color: #ffd23f; }
@@ -326,6 +341,7 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .time-pick button { flex: 1; min-width: 64px; }
 .mini .tponto { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: middle; border: 1px solid #0b1b33; }
 .explosao { position: absolute; inset: 0; pointer-events: none; z-index: 8; display: grid; place-items: center; overflow: hidden; }
+.explosao.ex-cristal .ex-buraco { background: conic-gradient(from 0deg, #ff9ad5, #ffe27a, #8affc8, #8fd2ff, #c9a2ff, #ff9ad5); clip-path: polygon(50% 0, 100% 40%, 50% 100%, 0 40%); }
 .explosao .ex-buraco { position: absolute; width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle, #000 0 45%, #ffd66b 50%, #ff7ad9 62%, #6ec6ff 72%, transparent 76%); animation: exBuraco 2.4s ease-out forwards; }
 .explosao b { position: absolute; font-size: 22px; text-shadow: 0 0 8px currentColor; animation: exEstrela 1.8s ease-out forwards; opacity: 0; }
 @keyframes exBuraco { 0% { transform: scale(0) rotate(0); } 25% { transform: scale(1.6) rotate(180deg); } 100% { transform: scale(0) rotate(720deg); } }
@@ -501,10 +517,22 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .ed-usada { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .ed-usada > span { font-weight: 800; }
 .ed-2d { display: block; width: 100%; height: 100%; }
-.sk-limitada { position: relative; background: radial-gradient(circle at 30% 20%, #6c3fd1 0%, #2b1a6b 45%, #0b0b2a 100%) !important; border-color: #ffd23f !important; box-shadow: 0 0 0 2px rgba(255,210,63,.35), 0 0 22px rgba(155,81,224,.55); }
+/* edições limitadas: cartão preto com uma borda de luz colorida girando em volta */
+@property --luz-ang { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+.sk-limitada, .dest-item { position: relative; background: radial-gradient(circle at 50% 0%, #1d1830 0%, #08070d 60%, #000 100%) !important; border-color: transparent !important; box-shadow: 0 0 18px rgba(255,210,63,.35), 0 0 34px rgba(255,77,210,.2); }
+.sk-limitada::after, .dest-item::after { content: ""; position: absolute; inset: -3px; border-radius: inherit; padding: 3px; pointer-events: none; z-index: 1;
+  background: conic-gradient(from var(--luz-ang), #ffd23f, #ff7a2a, #ff4dd2, #7c5cff, #4dd2ff, #7dff9a, #ffd23f);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  filter: drop-shadow(0 0 5px rgba(255,230,140,.85)); animation: luzGira 3.2s linear infinite; }
+@keyframes luzGira { to { --luz-ang: 360deg; } }
+@media (prefers-reduced-motion: reduce) { .sk-limitada::after, .dest-item::after { animation: none; } }
 .sk-limitada::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background-image: radial-gradient(1.5px 1.5px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 78% 12%, #fff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 88% 52%, #ffe9a8 50%, transparent 51%), radial-gradient(1px 1px at 22% 62%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 55% 30%, #cfe3ff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 40% 85%, #fff 50%, transparent 51%); }
 .sk-selo.sk-selo-heroi { background: #ff4d6d; color: #fff; }
 .sk-selo { font-style: normal; font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; background: #ffd23f; color: #1b0f45; border-radius: 6px; padding: 2px 7px; justify-self: center; }
+.sk-neon-info { font-size: 12px; font-weight: 800; color: #9fe6ff; text-align: center; text-shadow: 0 0 8px rgba(110,231,255,.8); }
+.lb-comprar.sk-neon-btn { font-size: 15px; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 4px; padding-left: 6px; padding-right: 6px; }
+.lb-comprar.sk-neon-btn .lb-coin { width: 22px; height: 22px; font-size: 12px; }
+.lb-comprar.sk-neon-btn { background: #0a0a12; color: #9fe6ff; border-color: #6ee7ff; box-shadow: 0 0 10px rgba(110,231,255,.6), 0 4px 0 #0b1b33; }
 .sk-prazo { font-size: 13px; font-weight: 700; color: #ffd23f; text-align: center; }
 .sk-heroi { font-style: normal; font-size: 10px; background: #ff4d6d; color: #fff; border-radius: 6px; padding: 1px 6px; white-space: nowrap; flex: none; }
 .sk-prev { display: block; width: 100%; aspect-ratio: 1.3; max-width: 100%; border-radius: 9px; border: 2px solid #0b1b33; background: radial-gradient(circle at 50% 75%, #2a6fd6, #133a68 75%); }
@@ -1343,14 +1371,24 @@ const SKINS = [
   { k: "dragao", nome: "Dragão Guerreiro", preco: 300, camisa: "#1b7a3a", heroi: true },
   { k: "turbo", nome: "Turbo Blindado", preco: 350, camisa: "#8d99ae", heroi: true },
   // edição limitada: só dá para comprar até a data "ate" (horário de Brasília). Quem comprou fica com ela para sempre.
-  { k: "galactica", nome: "Galáctica", preco: 500, camisa: "#2b1a6b", limitada: true, ate: "2026-11-06T23:59:59-03:00" },
-  { k: "buraconegro", nome: "Buraco Negro", preco: 600, camisa: "#0b0a16", pele: "#120f22", limitada: true, ate: "2026-11-07T23:59:59-03:00" },
+  { k: "galactica", nome: "Galáctica", preco: 500, camisa: "#2b1a6b", limitada: true, ate: "2026-11-03T23:59:59-03:00" },
+  { k: "buraconegro", nome: "Buraco Negro", preco: 600, camisa: "#0b0a16", pele: "#120f22", limitada: true, ate: "2026-11-03T23:59:59-03:00" },
   { k: "sideral", nome: "Espaço Sideral", preco: 450, camisa: "#13235a", limitada: true, ate: "2026-11-02T12:00:00-03:00" },
   // cantinho secreto: só quem tem algum item de edição limitada consegue comprar (não acaba)
   { k: "gelo", nome: "Gelo", preco: 700, camisa: "#5fb3e6", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
   { k: "fogo", nome: "Fogo", preco: 700, camisa: "#d9381e", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
   { k: "gelofogo", nome: "Gelo e Fogo", preco: 700, camisa: "#d9381e", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
+  // versão Neon de cada limitada: compra extra (200) no quadro da skin original, só para quem já tem a original e enquanto ela estiver à venda;
+  // roupa preta com contorno de luz e os mesmos enfeites e efeitos da original (base). Depois de comprar, troca entre normal e Neon.
+  { k: "galacticaneon", base: "galactica", neon: "#c08bff", nome: "Galáctica Neon", camisa: "#0a0a12", preco: 200, variante: true },
+  { k: "buraconegroneon", base: "buraconegro", neon: "#ff9a3c", nome: "Buraco Negro Neon", camisa: "#050409", pele: "#120f22", preco: 200, variante: true },
+  { k: "sideralneon", base: "sideral", neon: "#7fd3ff", nome: "Espaço Sideral Neon", camisa: "#0a0a12", preco: 200, variante: true },
+  { k: "geloneon", base: "gelo", neon: "#6ee7ff", nome: "Gelo Neon", camisa: "#0a0a12", preco: 200, variante: true },
+  { k: "fogoneon", base: "fogo", neon: "#ff6a2a", nome: "Fogo Neon", camisa: "#0a0a12", preco: 200, variante: true },
+  { k: "gelofogoneon", base: "gelofogo", neon: "#6ee7ff", neon2: "#ff6a2a", nome: "Gelo e Fogo Neon", camisa: "#0a0a12", preco: 200, variante: true },
   { k: "colecionador", nome: "Rei Dourado", preco: 400, camisa: "#d9a21b", secreto: true },
+  // skin de código: não aparece na loja e não é vendida; só se ganha com um código de presente criado pelo ADM
+  { k: "cristal", nome: "Cristal Secreto", preco: 0, camisa: "#5fd3f0", codigo: true },
 ];
 /* Skin limitada ainda à venda? Depois do prazo some da loja para quem não tem. */
 const naVenda = s => !s.ate || Date.now() <= Date.parse(s.ate);
@@ -1401,12 +1439,12 @@ function fimDePartidaMissao(nome, moedas, venceu) { contarMissao(nome, "jogar");
 const EVT = { eventos: [], promos: [], presentes: [], brindes: [], voltas: [], vidas: [] };
 /* coleções limitadas que o ADM pode trazer de volta para a loja (chaves "tipo-k" de chaveLim e o pacote) */
 const COLECOES = {
-  galactico: { nome: "Galáctica", chaves: ["skin-galactica", "fundo-galactico", "emoji-galactico", "gesto-galactico", "avatar-galactico"], pacote: "galactico" },
-  buraconegro: { nome: "Buraco Negro", chaves: ["skin-buraconegro", "fundo-buraconegro", "emoji-buraconegro", "gesto-buraconegro", "avatar-buraconegro", "arremesso-buraconegro"], pacote: "buraconegro" },
-  sideral: { nome: "Espaço Sideral", chaves: ["skin-sideral", "fundo-sideral", "emoji-sideral", "gesto-sideral", "avatar-sideral", "arremesso-sideral"], pacote: "sideral" },
-  gelo: { nome: "Gelo", chaves: ["skin-gelo", "fundo-gelo", "emoji-gelo", "gesto-gelo", "avatar-gelo", "arremesso-gelo"], pacote: "gelo" },
-  fogo: { nome: "Fogo", chaves: ["skin-fogo", "fundo-fogo", "emoji-labareda", "gesto-fogo", "avatar-fogo", "arremesso-fogo"], pacote: "fogo" },
-  gelofogo: { nome: "Gelo e Fogo", chaves: ["skin-gelofogo", "fundo-gelofogo", "emoji-gelofogo", "gesto-gelofogo", "avatar-gelofogo", "arremesso-gelofogo"], pacote: "gelofogo" },
+  galactico: { nome: "Galáctica", chaves: ["skin-galactica", "fundo-galactico", "emoji-galactico", "gesto-galactico", "avatar-galactico", "pet-coelhogalactico"], pacote: "galactico" },
+  buraconegro: { nome: "Buraco Negro", chaves: ["skin-buraconegro", "fundo-buraconegro", "emoji-buraconegro", "gesto-buraconegro", "avatar-buraconegro", "arremesso-buraconegro", "pet-gatoburaconegro"], pacote: "buraconegro" },
+  sideral: { nome: "Espaço Sideral", chaves: ["skin-sideral", "fundo-sideral", "emoji-sideral", "gesto-sideral", "avatar-sideral", "arremesso-sideral", "pet-caosideral"], pacote: "sideral" },
+  gelo: { nome: "Gelo", chaves: ["skin-gelo", "fundo-gelo", "emoji-gelo", "gesto-gelo", "avatar-gelo", "arremesso-gelo", "pet-gatogelo"], pacote: "gelo" },
+  fogo: { nome: "Fogo", chaves: ["skin-fogo", "fundo-fogo", "emoji-labareda", "gesto-fogo", "avatar-fogo", "arremesso-fogo", "pet-caofogo"], pacote: "fogo" },
+  gelofogo: { nome: "Gelo e Fogo", chaves: ["skin-gelofogo", "fundo-gelofogo", "emoji-gelofogo", "gesto-gelofogo", "avatar-gelofogo", "arremesso-gelofogo", "pet-coelhogelofogo"], pacote: "gelofogo" },
 };
 const EVT_NO_SITE = location.protocol.startsWith("http") && !/claude|claudeusercontent/.test(location.hostname);
 const PROMO_ALVOS = { tudo: "Toda a loja", skin: "Skins", emoji: "Emojis", gesto: "Gestos", arremesso: "Arremessos", fundo: "Fundos", avatar: "Fotos de perfil" };
@@ -1427,9 +1465,11 @@ const skinInfo = k => SKINS.find(s => s.k === k) || SKINS[0];
 /* Robôs vestem skins do jogo: cada um sorteia uma (sem repetir, se der) a cada partida e fica igual a um jogador */
 const roboVestido = p => !p.humano && !!p.skin && p.skin !== "classico";
 function vestirRobos(lista) {
-  const pool = SKINS.filter(x => x.k !== "classico" && !x.secreto), usadas = new Set();
+  const pool = SKINS.filter(x => x.k !== "classico" && !x.secreto && !x.codigo), usadas = new Set();
   lista.filter(p => !p.humano).forEach(p => { const livres = pool.filter(x => !usadas.has(x.k)), x = (livres.length ? livres : pool)[Math.floor(Math.random() * (livres.length || pool.length))]; usadas.add(x.k); vestir(p, x.k); });
 }
+/* skin "base" (a original de uma versão Neon) para enfeites, efeitos e pets */
+const skinBase = k => { const s = SKINS.find(x => x.k === k); return s && s.base ? s.base : k; };
 function vestir(p, k) { const s = skinInfo(k); p.skin = s.k; if (s.camisa) p.cor = s.camisa; if (s.pele) p.pele = s.pele; return p; }
 const AW = 1000, AC = 500, AH = 380, A_VEL = 230, A_BOLA = 700, A_RAIO = 44, A_MAXBOLA = 25;
 const aRnd = (a, b) => a + Math.random() * (b - a);
@@ -1538,7 +1578,7 @@ function comecarArena() {
       flash: 0, passo: 0, ctrl: false, tocou: false, saiuEm: null, time: o.time };
   });
   vestirRobos(A.P);
-  A.P.forEach(p => { if (p.humano) { vestir(p, skinDe(p.nome)); const f = personagemDe(p.nome); if (f) p.ficha = f; p.arremesso = arremessoDe(p.nome); p.selo = nivelSelo(p.nome); } });
+  A.P.forEach(p => { if (p.humano) { vestir(p, skinDe(p.nome)); const f = personagemDe(p.nome); if (f) p.ficha = f; p.arremesso = arremessoDe(p.nome); p.selo = nivelSelo(p.nome); p.pet = petDe(p.nome); const pt = petInfo(p.pet); if (pt && pt.vel) p.vel *= pt.vel; } });
   A.cel = Math.max(0, A.P.findIndex(p => p.nome === s.dono));
   A.balls = []; A.fx = []; A.t = 0; A.fim = null; A.ptr = null; A.inicio = Date.now();
   A.st = { palavras: 0, acertos: 0, erros: 0, timeouts: 0, votos: 0, votosOk: 0, arremessos: 0, acertosBola: 0, rodadas: 0, compras: 0, moedas: {}, eventos: [] };
@@ -1595,7 +1635,7 @@ function chanceA(ph, p) {
 function chuteA(p, certo, chute, timeout) {
   const ph = A.ph, perg = ph.perg;
   if (certo) {
-    aGanhar(p, A.cfg.mAcerto, "acerto"); A.st.acertos++;
+    aGanhar(p, A.cfg.mAcerto, "acerto"); poderPet(p, "acerto"); A.st.acertos++;
     aEvento("acerto", { quem: p.nome }); aFx(p.x, p.y - 60, "ACERTOU!", "#37d99a");
     bip(1100, .2); vibrar(80);
     aMsg(`${p.nome} acertou: ${ph.palavra}! Pega a bola!`);
@@ -1653,7 +1693,7 @@ const ARREMESSOS = [
   { k: "pizza", nome: "Pizza", icone: "🍕", preco: 120, cor: "#ffcf5c" },
   { k: "abobora", nome: "Abóbora", icone: "🎃", preco: 150, cor: "#ff8a1f" },
   { k: "estrela", nome: "Estrela", icone: "⭐", preco: 150, cor: "#ffe9a8" },
-  { k: "buraconegro", nome: "Mini Buraco Negro", icone: "🌑", preco: 200, cor: "#b07bff", tipo: "arremesso", limitada: true, ate: "2026-11-07T23:59:59-03:00" },
+  { k: "buraconegro", nome: "Mini Buraco Negro", icone: "🌑", preco: 200, cor: "#b07bff", tipo: "arremesso", limitada: true, ate: "2026-11-03T23:59:59-03:00" },
   { k: "moedaouro", nome: "Moeda de Ouro", icone: "🪙", preco: 150, cor: "#ffd23f", secreto: true },
   { k: "sideral", nome: "Cometa", icone: "☄️", preco: 200, cor: "#7fd3ff", tipo: "arremesso", limitada: true, ate: "2026-11-02T12:00:00-03:00" },
   { k: "gelo", nome: "Bola de Neve", icone: "❄️", preco: 200, cor: "#e6f7ff", tipo: "arremesso", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
@@ -1661,6 +1701,222 @@ const ARREMESSOS = [
   { k: "gelofogo", nome: "Cometa Gelo e Fogo", icone: "☯️", preco: 200, cor: "#ffffff", tipo: "arremesso", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
 ];
 const arremessoInfo = k => ARREMESSOS.find(a => a.k === k) || ARREMESSOS[0];
+/* ---------- Pets: andam ao lado do bonequinho e têm um poder pequeno ---------- */
+const PETS = [
+  { k: "cachorro", nome: "Cachorrinho", icone: "🐶", preco: 150, poder: "Farejador: +0,5 moeda a cada letra certa", acerto: .5 },
+  { k: "gato", nome: "Gatinho", icone: "🐱", preco: 150, poder: "Sortudo: +1 moeda cada vez que escapa da bola numa rodada", sobreviver: 1 },
+  { k: "coelho", nome: "Coelho", icone: "🐰", preco: 200, poder: "Pulinho: corre um pouco mais rápido (+8%)", vel: 1.08 },
+  { k: "hamster", nome: "Hamster", icone: "🐹", preco: 120, poder: "Cofrinho: +3 moedas no fim de cada partida", fim: 3 },
+  { k: "tartaruga", nome: "Tartaruga", icone: "🐢", preco: 100, poder: "Devagar e sempre: +2 moedas no fim de cada partida", fim: 2 },
+  { k: "passarinho", nome: "Passarinho", icone: "🐦", preco: 150, poder: "Canto da sorte: +0,5 moeda a cada letra certa", acerto: .5 },
+  { k: "pinguim", nome: "Pinguim", icone: "🐧", preco: 180, poder: "Deslizada: corre um pouco mais rápido (+6%)", vel: 1.06 },
+  // heróis (criados para o jogo, originais): fantasia própria e poder um pouco maior
+  { k: "supercao", base: "cachorro", heroi: true, nome: "Super Cão", icone: "🦸", preco: 350, poder: "Super faro: +0,5 moeda a cada letra certa e +2 moedas no fim", acerto: .5, fim: 2 },
+  { k: "gatoninja", base: "gato", heroi: true, nome: "Gato Ninja", icone: "🥷", preco: 350, poder: "Sombra: +1 moeda por rodada em que escapa e corre 4% mais rápido", sobreviver: 1, vel: 1.04 },
+  { k: "coelhoraio", base: "coelho", heroi: true, nome: "Coelho Relâmpago", icone: "⚡", preco: 350, poder: "Turbo: corre 8% mais rápido e +1 moeda por rodada em que escapa", vel: 1.08, sobreviver: 1 },
+  { k: "hamsterblindado", base: "hamster", heroi: true, nome: "Hamster Blindado", icone: "🛡️", preco: 350, poder: "Cofre blindado: +5 moedas no fim de cada partida", fim: 5 },
+  // edição limitada: só dá para comprar até "ate"; quem comprou fica com ele
+  { k: "gatogelo", base: "gato", nome: "Gatinho de Gelo", icone: "🧊", preco: 300, tipo: "pet", limitada: true, ate: "2026-11-10T23:59:59-03:00",
+    poder: "Escorregão: +1 moeda por rodada em que escapa e corre um pouco mais rápido (+5%)", sobreviver: 1, vel: 1.05 },
+  { k: "caofogo", base: "cachorro", nome: "Cachorrinho de Fogo", icone: "🔥", preco: 300, tipo: "pet", limitada: true, ate: "2026-11-10T23:59:59-03:00",
+    poder: "Brasa: +0,5 moeda a cada letra certa e +3 moedas no fim da partida", acerto: .5, fim: 3 },
+  // pets das coleções que já saíram da loja: ficam fora da venda e só voltam quando o ADM usa "Volta das limitadas"
+  { k: "caosideral", base: "cachorro", nome: "Cachorrinho Astronauta", icone: "🧑‍🚀", preco: 300, tipo: "pet", limitada: true, ate: "2026-11-02T12:00:00-03:00",
+    poder: "Gravidade zero: corre um pouco mais rápido (+5%) e +3 moedas no fim da partida", vel: 1.05, fim: 3 },
+  { k: "gatoburaconegro", base: "gato", nome: "Gatinho Buraco Negro", icone: "🕳️", preco: 300, tipo: "pet", limitada: true, ate: "2026-11-02T12:00:00-03:00",
+    poder: "Sugador: +0,5 moeda a cada letra certa e +1 moeda por rodada em que escapa", acerto: .5, sobreviver: 1 },
+  { k: "coelhogalactico", base: "coelho", nome: "Coelho Galáctico", icone: "🌌", preco: 300, tipo: "pet", limitada: true, ate: "2026-11-02T12:00:00-03:00",
+    poder: "Estrela da sorte: +1 moeda por rodada em que escapa e corre um pouco mais rápido (+5%)", sobreviver: 1, vel: 1.05 },
+  { k: "coelhogelofogo", base: "coelho", nome: "Coelho Gelo e Fogo", icone: "☯️", preco: 300, tipo: "pet", limitada: true, ate: "2026-11-10T23:59:59-03:00",
+    poder: "Equilíbrio: +0,5 moeda a cada letra certa e +1 moeda por rodada em que escapa", acerto: .5, sobreviver: 1 },
+];
+PETS.forEach(x => { x.tipo = "pet"; });
+const PRECO_OVO = 100;
+const petInfo = k => PETS.find(x => x.k === k) || null;
+function temPet(n, k) { return !!petInfo(k) && (((G.inv || {})[n] || {}).pets || []).includes(k); }
+function petDe(n) { const k = ((G.inv || {})[n] || {}).pet; return temPet(n, k) ? k : null; }
+function darPet(n, k) { G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 }; G.inv[n].pets = G.inv[n].pets || []; if (!G.inv[n].pets.includes(k)) G.inv[n].pets.push(k); }
+/* poder do pet na partida (só jogadores humanos; robôs não têm pet) */
+function poderPet(p, quando) {
+  const x = p && p.humano && petInfo(p.pet); if (!x || !x[quando]) return;
+  if (quando === "acerto" || quando === "sobreviver" || quando === "fim") aGanhar(p, x[quando], "pet");
+}
+/* O pet combina com a skin: pets limitados têm o próprio tema; os outros pegam o tema da skin (cores e efeitos)
+   ou um enfeite igual ao do bonequinho. Só muda o visual, o poder continua o mesmo. */
+const PET_TEMA = { gatogelo: "gelo", caofogo: "fogo", coelhogelofogo: "gelofogo", caosideral: "sideral", gatoburaconegro: "buraconegro", coelhogalactico: "espaco" };
+const SKIN_TEMA = { gelo: "gelo", fogo: "fogo", gelofogo: "gelofogo", galactica: "espaco", buraconegro: "espaco", sideral: "espaco" };
+const SKIN_ENFEITE = { rei: "coroa", colecionador: "coroa", cowboy: "chapeu", chef: "chef", pirata: "tapa", ninja: "faixa", relampago: "faixa", bone: "bone" };
+const CORES_TEMA = { gelo: ["#9fdcff", "#3d8fe6"], fogo: ["#e2462b", "#8a1f0f"], gelofogo: ["#9fdcff", "#3d8fe6"], espaco: ["#4b2a9e", "#24104f"], sideral: ["#e9eef5", "#13235a"], buraconegro: ["#1a1530", "#0b0716"] };
+const CORES_PET = { cachorro: ["#b5793f", "#6b4423"], gato: ["#f4a23a", "#c46a14"], coelho: ["#f4f1ec", "#d6cfc4"], hamster: ["#e2b36b", "#a8743a"], tartaruga: ["#4f9d3a", "#2e6b22"], passarinho: ["#ffd23f", "#e09a00"], pinguim: ["#2b2d42", "#14151f"] };
+const PET_TRAJE = { supercao: "capa", gatoninja: "ninja", coelhoraio: "raio", hamsterblindado: "armadura" };
+function visualPet(k, skin) {
+  const pet = petInfo(k); if (!pet) return null;
+  const base = pet.base || k, traje = PET_TRAJE[k] || null, tema = traje ? null : PET_TEMA[k] || SKIN_TEMA[skinBase(skin)] || null, enfeite = tema || traje ? null : SKIN_ENFEITE[skinBase(skin)] || null;
+  const [corpo, escuro] = CORES_TEMA[tema] || CORES_PET[base];
+  return { base, tema, enfeite, traje, corpo, escuro };
+}
+function desenharPet2D(c, k, x, y, t, skin) {
+  const v = visualPet(k, skin); if (!v) return;
+  const { tema, enfeite, traje, corpo, escuro } = v; k = v.base;
+  const voa = k === "passarinho", pul = voa ? 9 + Math.sin(t * 4) * 3 : Math.abs(Math.sin(t * 5)) * 3, px = x, py = y - pul;
+  c.save();
+  c.fillStyle = "rgba(0,0,0,.25)"; c.beginPath(); c.ellipse(x, y + 9, 10, 3, 0, 0, Math.PI * 2); c.fill();
+  // rabo
+  c.strokeStyle = corpo; c.lineWidth = 3; c.lineCap = "round";
+  if (k === "cachorro") { c.beginPath(); c.moveTo(px + 8, py + 2); c.lineTo(px + 13 + Math.sin(t * 14) * 3, py - 4); c.stroke(); }
+  if (k === "gato") { c.beginPath(); c.moveTo(px + 8, py + 3); c.quadraticCurveTo(px + 16, py, px + 13 + Math.sin(t * 3) * 2, py - 8); c.stroke(); }
+  if (k === "coelho") { c.fillStyle = "#ffffff"; c.beginPath(); c.arc(px + 9, py + 3, 3, 0, Math.PI * 2); c.fill(); }
+  // corpo e cabeça
+  let hx = k === "hamster" ? px - 1 : px - 6, hy = k === "hamster" ? py : py - 3;
+  if (k === "tartaruga") {   // casco com desenho, cabeça e patinhas
+    c.fillStyle = "#8fcf6a"; [[-6, 7], [7, 7]].forEach(([a, b]) => { c.beginPath(); c.ellipse(px + a, py + b, 2.5, 2, 0, 0, Math.PI * 2); c.fill(); });
+    c.beginPath(); c.arc(px - 11, py + 1, 4, 0, Math.PI * 2); c.fill();
+    c.fillStyle = corpo; c.beginPath(); c.ellipse(px, py + 2, 10, 7, 0, Math.PI, 0); c.lineTo(px + 10, py + 4); c.lineTo(px - 10, py + 4); c.closePath(); c.fill();
+    c.strokeStyle = escuro; c.lineWidth = .9; c.beginPath(); c.moveTo(px - 4, py - 4); c.lineTo(px + 4, py - 4); c.moveTo(px - 7, py + 1); c.lineTo(px - 3, py - 4); c.moveTo(px + 7, py + 1); c.lineTo(px + 3, py - 4); c.moveTo(px - 2, py + 3); c.lineTo(px + 2, py + 3); c.stroke();
+    hx = px - 11; hy = py + 1;
+  } else if (k === "passarinho") {   // voa do lado, batendo as asinhas
+    c.fillStyle = corpo; c.beginPath(); c.ellipse(px + 1, py + 2, 6.5, 5.5, 0, 0, Math.PI * 2); c.fill(); c.beginPath(); c.arc(px - 4, py - 3, 4.5, 0, Math.PI * 2); c.fill();
+    const asa = Math.sin(t * 22) * 3; c.fillStyle = escuro; c.beginPath(); c.ellipse(px + 2, py + 1 - asa, 4.5, 2, -.5, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.moveTo(px + 6, py + 2); c.lineTo(px + 11, py); c.lineTo(px + 10, py + 4); c.closePath(); c.fill();
+    hx = px - 4; hy = py - 3;
+  } else if (k === "pinguim") {   // de pé, balançando
+    const bal = Math.sin(t * 6) * .12; c.save(); c.translate(px, py + 8); c.rotate(bal); c.translate(-px, -(py + 8));
+    c.fillStyle = "#ff9a1f"; c.beginPath(); c.ellipse(px - 3, py + 8, 2.5, 1.2, 0, 0, Math.PI * 2); c.ellipse(px + 3, py + 8, 2.5, 1.2, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = corpo; c.beginPath(); c.ellipse(px, py, 7, 9, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = "#ffffff"; c.beginPath(); c.ellipse(px, py + 2, 4.5, 6, 0, 0, Math.PI * 2); c.fill();
+    c.restore(); hx = px; hy = py - 4;
+  } else {
+    c.fillStyle = corpo; c.beginPath(); c.ellipse(px + 2, py + 3, k === "hamster" ? 9 : 8, k === "hamster" ? 7.5 : 5.5, 0, 0, Math.PI * 2); c.fill();
+    if (k !== "hamster") { c.beginPath(); c.arc(px - 6, py - 3, 6, 0, Math.PI * 2); c.fill(); }
+  }
+  // orelhas
+  c.fillStyle = escuro;
+  if (k === "cachorro") { c.beginPath(); c.ellipse(hx - 5, hy, 2.4, 4.5, .3, 0, Math.PI * 2); c.ellipse(hx + 4, hy - 1, 2.4, 4.5, -.3, 0, Math.PI * 2); c.fill(); }
+  if (k === "gato") { c.fillStyle = corpo; c.beginPath(); c.moveTo(hx - 5.5, hy - 2); c.lineTo(hx - 4, hy - 9); c.lineTo(hx - 1, hy - 4); c.moveTo(hx + 5.5, hy - 2); c.lineTo(hx + 4, hy - 9); c.lineTo(hx + 1, hy - 4); c.fill(); }
+  if (k === "coelho") { c.fillStyle = corpo; c.beginPath(); c.ellipse(hx - 2.5, hy - 10, 2, 6, -.15, 0, Math.PI * 2); c.ellipse(hx + 2.5, hy - 10, 2, 6, .15, 0, Math.PI * 2); c.fill(); c.fillStyle = "#ffb3c7"; c.beginPath(); c.ellipse(hx - 2.5, hy - 10, 1, 4, -.15, 0, Math.PI * 2); c.ellipse(hx + 2.5, hy - 10, 1, 4, .15, 0, Math.PI * 2); c.fill(); }
+  if (k === "hamster") { c.beginPath(); c.arc(hx - 5, hy - 6, 2.2, 0, Math.PI * 2); c.arc(hx + 4, hy - 6, 2.2, 0, Math.PI * 2); c.fill(); c.fillStyle = "#fff4dc"; c.beginPath(); c.ellipse(hx, hy + 3, 5, 3.5, 0, 0, Math.PI * 2); c.fill(); }
+  // rosto
+  c.fillStyle = "#1b1b2b"; c.beginPath(); c.arc(hx - 2, hy - 1, 1, 0, Math.PI * 2); c.arc(hx + 2, hy - 1, 1, 0, Math.PI * 2); c.fill();
+  if (k === "passarinho" || k === "pinguim") { c.fillStyle = "#ff9a1f"; c.beginPath(); c.moveTo(hx - 1.6, hy + .6); c.lineTo(hx + 1.6, hy + .6); c.lineTo(hx, hy + 3); c.closePath(); c.fill(); }
+  else { c.fillStyle = k === "cachorro" || k === "tartaruga" ? "#1b1b2b" : "#ff8fab"; c.beginPath(); c.arc(hx, hy + 1.3, .9, 0, Math.PI * 2); c.fill(); }
+  // tema da skin (ou do próprio pet)
+  if (tema === "gelofogo") { c.save(); c.beginPath(); c.rect(px + 2, py - 20, 20, 30); c.clip(); c.fillStyle = "#e2462b"; c.beginPath(); c.ellipse(px + 2, py + 3, 8, 5.5, 0, 0, Math.PI * 2); c.fill(); c.restore(); }
+  if (tema === "gelo" || tema === "gelofogo") {
+    c.strokeStyle = "rgba(255,255,255,.95)"; c.lineWidth = .8;
+    [[-3, 4], [4, 1]].forEach(([a, b]) => { if (tema === "gelofogo" && a > 0) return; const fx = px + a, fy = py + b, r = 2; c.beginPath(); for (let j = 0; j < 6; j++) { const aa = j * Math.PI / 3 + t; c.moveTo(fx, fy); c.lineTo(fx + Math.cos(aa) * r, fy + Math.sin(aa) * r); } c.stroke(); });
+    c.save(); c.globalCompositeOperation = "lighter"; const g = c.createRadialGradient(px, py, 2, px, py, 15); g.addColorStop(0, "rgba(140,210,255,.35)"); g.addColorStop(1, "rgba(140,210,255,0)"); c.fillStyle = g; c.beginPath(); c.arc(px, py, 15, 0, Math.PI * 2); c.fill(); c.restore();
+  }
+  if (tema === "fogo" || tema === "gelofogo") {
+    const cx0 = tema === "fogo" ? hx : px + 6, cy0 = tema === "fogo" ? hy - 6 : py - 2;
+    c.save(); c.globalCompositeOperation = "lighter";
+    for (let j = 0; j < 3; j++) { const fx = cx0 - 3 + j * 3, h = 5 + Math.sin(t * 14 + j * 2) * 1.5, g = c.createLinearGradient(fx, cy0, fx, cy0 - h); g.addColorStop(0, "rgba(255,90,30,.95)"); g.addColorStop(1, "rgba(255,230,107,.9)");
+      c.fillStyle = g; c.beginPath(); c.moveTo(fx - 1.6, cy0); c.quadraticCurveTo(fx, cy0 - h * 1.6, fx + 1.6, cy0); c.fill(); }
+    const f = (t * .9) % 1; c.fillStyle = `rgba(255,170,40,${1 - f})`; c.beginPath(); c.arc(cx0 + 4, cy0 - 4 - f * 10, 1, 0, Math.PI * 2); c.fill();
+    c.restore();
+  }
+  if (tema === "espaco") {
+    c.fillStyle = "#ffffff"; [[1, 2], [5, 4], [-6, -6], [-2, 5]].forEach(([a, b], i) => { c.globalAlpha = .5 + .5 * Math.sin(t * 4 + i); c.beginPath(); c.arc(px + a, py + b, .9, 0, Math.PI * 2); c.fill(); });
+    c.globalAlpha = 1; c.save(); c.globalCompositeOperation = "lighter"; const g = c.createRadialGradient(px, py, 2, px, py, 16); g.addColorStop(0, "rgba(176,123,255,.35)"); g.addColorStop(1, "rgba(176,123,255,0)"); c.fillStyle = g; c.beginPath(); c.arc(px, py, 16, 0, Math.PI * 2); c.fill(); c.restore();
+  }
+  if (tema === "sideral") {   // capacete de vidro e a Terra no peito
+    c.fillStyle = "rgba(170,220,255,.35)"; c.beginPath(); c.arc(hx, hy, 8, 0, Math.PI * 2); c.fill(); c.strokeStyle = "#9fd8ff"; c.lineWidth = 1.2; c.stroke();
+    c.strokeStyle = "rgba(255,255,255,.8)"; c.lineWidth = .9; c.beginPath(); c.arc(hx, hy, 6, Math.PI * 1.1, Math.PI * 1.45); c.stroke();
+    c.fillStyle = "#3d8fe6"; c.beginPath(); c.arc(px + 3, py + 3, 2.6, 0, Math.PI * 2); c.fill(); c.fillStyle = "#4cc96a"; c.beginPath(); c.arc(px + 2.3, py + 2.5, 1, 0, Math.PI * 2); c.fill();
+  }
+  if (tema === "buraconegro") {   // disco de luz girando em volta
+    c.save(); c.globalCompositeOperation = "lighter";
+    for (let j = 0; j < 2; j++) { c.strokeStyle = j ? "rgba(190,120,255,.9)" : "rgba(255,150,60,.95)"; c.lineWidth = 1.6 - j * .5; c.beginPath(); c.ellipse(px, py + 1, 15 - j * 3, 4 - j, -.15, 0, Math.PI * 2); c.stroke(); }
+    c.fillStyle = "rgba(214,184,255,.95)"; c.beginPath(); c.arc(hx - 2, hy - 1, 1.2, 0, Math.PI * 2); c.arc(hx + 2, hy - 1, 1.2, 0, Math.PI * 2); c.fill();
+    c.restore();
+  }
+  // enfeite igual ao do bonequinho
+  const topo = hy - (k === "hamster" ? 7 : 6);
+  if (enfeite === "coroa") { c.fillStyle = "#ffd23f"; c.beginPath(); c.moveTo(hx - 4, topo + 1); c.lineTo(hx - 4.5, topo - 4); c.lineTo(hx - 2, topo - 1.5); c.lineTo(hx, topo - 5); c.lineTo(hx + 2, topo - 1.5); c.lineTo(hx + 4.5, topo - 4); c.lineTo(hx + 4, topo + 1); c.closePath(); c.fill(); }
+  if (enfeite === "chapeu") { c.fillStyle = "#6b4423"; c.beginPath(); c.ellipse(hx, topo + 1, 7, 1.8, 0, 0, Math.PI * 2); c.fill(); c.fillRect(hx - 3.5, topo - 4, 7, 5); c.fillStyle = "#e9c46a"; c.fillRect(hx - 3.5, topo - .5, 7, 1.2); }
+  if (enfeite === "chef") { c.fillStyle = "#ffffff"; c.beginPath(); c.arc(hx - 2, topo - 3, 2.6, 0, Math.PI * 2); c.arc(hx + 2, topo - 3, 2.6, 0, Math.PI * 2); c.arc(hx, topo - 5, 2.8, 0, Math.PI * 2); c.fill(); c.fillRect(hx - 3.5, topo - 2, 7, 3); }
+  if (enfeite === "tapa") { c.fillStyle = "#1b1b2b"; c.beginPath(); c.arc(hx + 2, hy - 1, 1.8, 0, Math.PI * 2); c.fill(); c.strokeStyle = "#1b1b2b"; c.lineWidth = .7; c.beginPath(); c.moveTo(hx - 5, hy - 3); c.lineTo(hx + 5, hy - 2); c.stroke(); }
+  if (enfeite === "faixa") { c.fillStyle = "#e63946"; c.fillRect(hx - 5.5, hy - 4, 11, 2); c.beginPath(); c.moveTo(hx + 5, hy - 4); c.lineTo(hx + 9, hy - 6); c.lineTo(hx + 8.5, hy - 2.5); c.closePath(); c.fill(); }
+  // fantasia dos pets heróis
+  if (traje === "capa") {
+    const bal = Math.sin(t * 6) * 1.5; c.fillStyle = "#e63946"; c.beginPath(); c.moveTo(px - 2, py - 3); c.lineTo(px + 12 + bal, py + 2); c.lineTo(px + 9 + bal, py + 9); c.lineTo(px - 1, py + 4); c.closePath(); c.fill();
+    c.fillStyle = "#ffd23f"; c.beginPath(); c.arc(px + 2, py + 3, 2, 0, Math.PI * 2); c.fill();
+    c.fillStyle = "#1d3fd8"; c.fillRect(hx - 5, hy - 2.5, 10, 2.6); c.fillStyle = "#ffffff"; c.fillRect(hx - 3, hy - 2, 1.6, 1.4); c.fillRect(hx + 1.4, hy - 2, 1.6, 1.4);
+  }
+  if (traje === "ninja") {
+    c.fillStyle = "#1b1b2b"; c.beginPath(); c.arc(hx, hy - 1, 6.3, Math.PI * .95, Math.PI * 2.05); c.fill(); c.fillRect(hx - 6, hy + .5, 12, 3.2);
+    c.fillStyle = "#ffffff"; c.beginPath(); c.arc(hx - 2, hy - 1, 1.1, 0, Math.PI * 2); c.arc(hx + 2, hy - 1, 1.1, 0, Math.PI * 2); c.fill();
+    c.fillStyle = "#e63946"; c.fillRect(hx - 6, hy - 3.2, 12, 1.6); c.beginPath(); c.moveTo(hx + 5.5, hy - 3); c.lineTo(hx + 10, hy - 5 + Math.sin(t * 9)); c.lineTo(hx + 9.5, hy - 1.5); c.closePath(); c.fill();
+  }
+  if (traje === "raio") {
+    c.fillStyle = "#ffd23f"; c.fillRect(hx - 5.5, hy - 4, 11, 1.8);
+    c.beginPath(); c.moveTo(px + 3, py - 2); c.lineTo(px, py + 3); c.lineTo(px + 2.5, py + 3); c.lineTo(px + .5, py + 8); c.lineTo(px + 5, py + 2); c.lineTo(px + 2.5, py + 2); c.closePath(); c.fill();
+    c.save(); c.globalCompositeOperation = "lighter"; c.strokeStyle = `rgba(255,240,140,${.5 + .5 * Math.sin(t * 20)})`; c.lineWidth = 1; c.beginPath(); c.moveTo(px + 10, py - 4); c.lineTo(px + 13, py); c.lineTo(px + 11, py + 1); c.lineTo(px + 14, py + 5); c.stroke(); c.restore();
+  }
+  if (traje === "armadura") {
+    c.fillStyle = "#adb5bd"; c.beginPath(); c.ellipse(px + 2, py + 3, 9.5, 8, 0, Math.PI * 1.05, Math.PI * 1.95); c.fill();
+    c.fillStyle = "#6c757d"; c.fillRect(px - 6, py + 2, 16, 2);
+    c.fillStyle = "#1b1b2b"; c.fillRect(hx - 4.5, hy - 2.5, 9, 3); c.fillStyle = "#2bd9ff"; c.fillRect(hx - 3.5, hy - 2, 7, 1.8);
+  }
+  if (enfeite === "bone") { c.fillStyle = "#2f80ed"; c.beginPath(); c.arc(hx, topo + 2, 5, Math.PI, 0); c.fill(); c.fillRect(hx - 8, topo + 1, 5, 1.6); }
+  c.restore();
+}
+function pet3D(k, skin) {
+  const v = visualPet(k, skin); if (!v) return null;
+  const { tema, enfeite, traje, corpo, escuro } = v; k = v.base;
+  const m = cor => new THREE.MeshLambertMaterial({ color: cor });
+  const g = new THREE.Group(), add = (geo, cor, x, y, z) => { const o = new THREE.Mesh(geo, m(cor)); o.position.set(x, y, z); g.add(o); return o; };
+  let hy = k === "hamster" ? .16 : .22, hz = k === "hamster" ? -.1 : -.19, topo = k === "hamster" ? .25 : .3, hcz = k === "hamster" ? -.02 : -.12;
+  if (k === "tartaruga") {
+    const casco = add(new THREE.SphereGeometry(.14, 14, 10, 0, Math.PI * 2, 0, Math.PI / 2), corpo, 0, .04, .03); casco.scale.set(1, .8, 1.2);
+    add(new THREE.SphereGeometry(.06, 10, 8), "#8fcf6a", 0, .08, -.17);
+    for (const [a, b2] of [[-.1, -.08], [.1, -.08], [-.1, .14], [.1, .14]]) add(new THREE.SphereGeometry(.035, 8, 6), "#8fcf6a", a, .03, b2);
+    hy = .1; hz = -.22; topo = .15; hcz = -.17;
+  } else if (k === "passarinho") {
+    add(new THREE.SphereGeometry(.08, 12, 10), corpo, 0, .55, 0); add(new THREE.SphereGeometry(.06, 12, 10), corpo, 0, .62, -.07);
+    const bico = add(new THREE.ConeGeometry(.02, .05, 6), "#ff9a1f", 0, .61, -.14); bico.rotation.x = -Math.PI / 2;
+    const asas = new THREE.Group(); asas.userData.gira = 6; asas.position.set(0, .56, 0); g.add(asas);
+    for (const l of [-1, 1]) { const a = new THREE.Mesh(new THREE.SphereGeometry(.05, 8, 6), m(escuro)); a.scale.set(1, .3, .7); a.position.x = l * .08; asas.add(a); }
+    hy = .63; hz = -.12; topo = .69; hcz = -.07;
+  } else if (k === "pinguim") {
+    const cp = add(new THREE.SphereGeometry(.1, 14, 10), corpo, 0, .16, 0); cp.scale.set(1, 1.6, 1);
+    const bar = add(new THREE.SphereGeometry(.07, 12, 10), "#ffffff", 0, .14, -.04); bar.scale.set(1, 1.6, 1);
+    const bico = add(new THREE.ConeGeometry(.02, .05, 6), "#ff9a1f", 0, .26, -.11); bico.rotation.x = -Math.PI / 2;
+    for (const l of [-1, 1]) add(new THREE.SphereGeometry(.03, 8, 6), "#ff9a1f", l * .04, .01, -.03).scale.set(1, .4, 1.5);
+    hy = .26; hz = -.09; topo = .33; hcz = 0;
+  } else {
+    const b = add(new THREE.SphereGeometry(.12, 14, 10), corpo, 0, .12, .04); b.scale.set(1, .8, k === "hamster" ? 1 : 1.4);
+    if (k !== "hamster") add(new THREE.SphereGeometry(.09, 14, 10), corpo, 0, .22, -.12);
+  }
+  if (k === "cachorro") for (const l of [-1, 1]) add(new THREE.SphereGeometry(.035, 8, 6), escuro, l * .08, .22, -.12).scale.set(.6, 1.5, .6);
+  if (k === "gato") for (const l of [-1, 1]) add(new THREE.ConeGeometry(.03, .07, 4), corpo, l * .05, .31, -.12);
+  if (k === "coelho") for (const l of [-1, 1]) add(new THREE.CylinderGeometry(.018, .022, .16, 6), corpo, l * .035, .36, -.12);
+  if (k === "hamster") for (const l of [-1, 1]) add(new THREE.SphereGeometry(.025, 8, 6), escuro, l * .07, .25, -.04);
+  for (const l of [-1, 1]) add(new THREE.SphereGeometry(.014, 6, 4), "#1b1b2b", l * .035, hy + .02, hz);
+  if (k === "gato" || k === "cachorro") { const r = add(new THREE.CylinderGeometry(.015, .02, .16, 6), corpo, 0, .2, .2); r.rotation.x = -.7; }
+  const luz = (cor, op) => new THREE.MeshBasicMaterial({ color: cor, transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false });
+  if (tema === "gelofogo") { const meia = add(new THREE.SphereGeometry(.121, 14, 10, 0, Math.PI), "#e2462b", 0, .12, .04); meia.scale.set(1, .8, 1.4); }
+  if (tema === "gelo" || tema === "gelofogo") { const b2 = new THREE.Mesh(new THREE.SphereGeometry(.2, 12, 10), luz("#8fd2ff", .2)); b2.position.y = .16; g.add(b2); }
+  if (tema === "espaco") { const b2 = new THREE.Mesh(new THREE.SphereGeometry(.2, 12, 10), luz("#b07bff", .22)); b2.position.y = .16; g.add(b2);
+    for (let j = 0; j < 4; j++) { const s2 = new THREE.Mesh(new THREE.SphereGeometry(.012, 6, 4), new THREE.MeshBasicMaterial({ color: "#ffffff" })); s2.position.set(-.06 + j * .04, .16 + (j % 2) * .05, -.02 + (j % 3) * .04); g.add(s2); } }
+  if (tema === "fogo" || tema === "gelofogo") { const orb = new THREE.Group(); orb.userData.gira = 2; orb.position.y = .3; g.add(orb);
+    for (let j = 0; j < 3; j++) { const a = j / 3 * Math.PI * 2, f = new THREE.Mesh(new THREE.ConeGeometry(.025, .08, 6), luz(j % 2 ? "#ffb347" : "#ff5a1f", .95)); f.position.set(Math.cos(a) * .08, 0, Math.sin(a) * .08 - .1); orb.add(f); } }
+  if (tema === "sideral") { const cap = new THREE.Mesh(new THREE.SphereGeometry(.12, 14, 10), new THREE.MeshLambertMaterial({ color: "#aee0ff", transparent: true, opacity: .35, depthWrite: false })); cap.position.set(0, hy, hcz); g.add(cap);
+    add(new THREE.SphereGeometry(.03, 10, 8), "#3d8fe6", 0, .13, -.06); }
+  if (tema === "buraconegro") { const anel = new THREE.Group(); anel.userData.gira = 2.4; anel.position.y = .14; anel.rotation.x = .25; g.add(anel);
+    [["#ff8a2a", .2], ["#c08bff", .16]].forEach(([cor, r]) => { const t2 = new THREE.Mesh(new THREE.TorusGeometry(r, .012, 6, 28), luz(cor, .95)); t2.rotation.x = Math.PI / 2; anel.add(t2); }); }
+  if (enfeite === "coroa") { const cr = add(new THREE.CylinderGeometry(.05, .05, .04, 8, 1, true), "#ffd23f", 0, topo, hcz); cr.material.side = THREE.DoubleSide; }
+  if (enfeite === "chapeu") { add(new THREE.CylinderGeometry(.1, .1, .01, 14), "#6b4423", 0, topo - .01, hcz); add(new THREE.CylinderGeometry(.045, .055, .06, 12), "#6b4423", 0, topo + .02, hcz); }
+  if (enfeite === "chef") { add(new THREE.SphereGeometry(.05, 10, 8), "#ffffff", 0, topo + .03, hcz); add(new THREE.CylinderGeometry(.04, .04, .04, 10), "#ffffff", 0, topo - .005, hcz); }
+  if (enfeite === "tapa") add(new THREE.CylinderGeometry(.022, .022, .01, 10), "#1b1b2b", .035, hy + .02, hz - .005).rotation.x = Math.PI / 2;
+  if (enfeite === "faixa") add(new THREE.TorusGeometry(.085, .012, 6, 18), "#e63946", 0, hy + .04, hcz).rotation.x = Math.PI / 2;
+  if (traje === "capa") { const capa = new THREE.Mesh(new THREE.PlaneGeometry(.2, .2), new THREE.MeshLambertMaterial({ color: "#e63946", side: THREE.DoubleSide })); capa.position.set(0, .17, .2); capa.rotation.x = .7; g.add(capa);
+    add(new THREE.TorusGeometry(.085, .015, 6, 18), "#1d3fd8", 0, hy + .02, hcz).rotation.x = Math.PI / 2; }
+  if (traje === "ninja") { add(new THREE.SphereGeometry(.095, 12, 10, 0, Math.PI * 2, 0, Math.PI / 2), "#1b1b2b", 0, hy + .005, hcz); add(new THREE.TorusGeometry(.09, .012, 6, 18), "#e63946", 0, hy + .03, hcz).rotation.x = Math.PI / 2; }
+  if (traje === "raio") { add(new THREE.TorusGeometry(.085, .012, 6, 18), "#ffd23f", 0, hy + .04, hcz).rotation.x = Math.PI / 2; add(new THREE.BoxGeometry(.03, .08, .02), "#ffd23f", 0, .12, -.12).rotation.z = .4; }
+  if (traje === "armadura") { const arm = add(new THREE.SphereGeometry(.135, 14, 10, 0, Math.PI * 2, 0, Math.PI / 2), "#adb5bd", 0, .12, .03); arm.scale.set(1, .8, 1); add(new THREE.BoxGeometry(.1, .025, .02), "#2bd9ff", 0, hy + .02, hz - .01); }
+  if (enfeite === "bone") add(new THREE.SphereGeometry(.07, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), "#2f80ed", 0, topo - .04, hcz);
+  return g;
+}
 function temArremesso(n, k) { const a = ARREMESSOS.find(x => x.k === k); return !!a && (a.preco === 0 || (((G.inv || {})[n] || {}).arremessos || []).includes(k)); }
 function arremessoDe(n) { const k = ((G.inv || {})[n] || {}).arremesso; return temArremesso(n, k) ? k : "bola"; }
 function desenharArremesso2D(c, k, x, y, giro) {
@@ -1735,7 +1991,7 @@ function eliminarA(p) {
 function fimRodadaA(forcado) {
   const ph = A.ph, atir = ph.atir;
   const sobrev = aVivos().filter(p => p !== atir && !mesmoTime(p, atir) && !ph.atingidos.has(p) && p.modo === "casa");
-  sobrev.forEach(p => aGanhar(p, A.cfg.mSobreviver, "sobreviver"));
+  sobrev.forEach(p => { aGanhar(p, A.cfg.mSobreviver, "sobreviver"); poderPet(p, "sobreviver"); });
   for (const p of aVivos()) { if (p !== atir && p.modo !== "casa") { p.alvo = { ...p.home }; p.modo = "voltando"; } p.ctrl = false; }
   A.st.rodadas++; aEvento("rodada", { atirador: atir.nome, sobreviveram: sobrev.length });
   aMsg(`${forcado ? "Tempo da bola acabou. " : ""}${sobrev.length} ${sobrev.length === 1 ? "sobreviveu" : "sobreviveram"} (+${fmtM(A.cfg.mSobreviver)} moedas). ${atir.nome} vai perguntar.`);
@@ -1750,6 +2006,7 @@ async function terminarA(v) {
   ganhadores.filter(p => p.humano && !p.remoto).forEach(p => { G.vitorias = G.vitorias || {}; G.vitorias[p.nome] = (G.vitorias[p.nome] || 0) + 1; });
   A.balls = [];
   aEvento("fim", { vencedor: A.fim.titulo });
+  A.P.filter(p => p.humano).forEach(p => poderPet(p, "fim"));   // Cofrinho do hamster (também para quem joga online)
   A.P.filter(p => p.humano && !p.remoto).forEach(p => fimDePartidaMissao(p.nome, p.moedas, ganhadores.includes(p)));
   A.P.filter(p => p.humano && !p.remoto).forEach(guardarGanhos);   // no online, cada um soma no próprio celular
   G.historico = (G.historico || []).slice(-99);
@@ -1953,7 +2210,7 @@ function torcidaCima(c, animada) {
   }
 }
 /* efeito especial da skin Buraco Negro: a bolada abre um mini buraco negro que suga as faíscas */
-const atiradorBuracoNegro = () => !!(A.ph && A.ph.atir && A.ph.atir.skin === "buraconegro");
+const atiradorBuracoNegro = () => !!(A.ph && A.ph.atir && skinBase(A.ph.atir.skin) === "buraconegro");
 CIMA.buracos = [];
 function buracosCima(c) {
   const dt = 1 / 60;
@@ -1969,10 +2226,10 @@ function buracosCima(c) {
 }
 /* Gelo contra Fogo: quando Gelo acerta Fogo (ou o contrário), ou quem usa Gelo e Fogo acerta alguém, sai um choque de vapor, cristais e chamas */
 function choqueGeloFogo(fx) {
-  const at = A.ph && A.ph.atir; if (!at || !["gelo", "fogo", "gelofogo"].includes(at.skin)) return false;
-  if (at.skin === "gelofogo") return true;
+  const at = A.ph && A.ph.atir, sa = at && skinBase(at.skin); if (!at || !["gelo", "fogo", "gelofogo"].includes(sa)) return false;
+  if (sa === "gelofogo") return true;
   let alvo = null, dm = 1e9; for (const p of A.P) { if (p === at) continue; const d = Math.hypot(p.x - fx.x, p.y - fx.y); if (d < dm) { dm = d; alvo = p; } }
-  return !!alvo && dm < 120 && alvo.skin === (at.skin === "gelo" ? "fogo" : "gelo");
+  return !!alvo && dm < 120 && skinBase(alvo.skin) === (sa === "gelo" ? "fogo" : "gelo");
 }
 CIMA.choques = [];
 function choquesCima(c) {
@@ -1988,7 +2245,33 @@ function choquesCima(c) {
     return ch.t < 1.2;
   });
 }
+/* Cristal Secreto: quando quem usa é queimado (ou acerta alguém), o cristal se estilhaça em cacos de arco-íris */
+function cristalNaBolada(fx) {
+  const at = A.ph && A.ph.atir; if (at && skinBase(at.skin) === "cristal") return true;
+  let alvo = null, dm = 1e9; for (const p of A.P) { if (p === at) continue; const d = Math.hypot(p.x - fx.x, p.y - fx.y); if (d < dm) { dm = d; alvo = p; } }
+  return !!alvo && dm < 120 && skinBase(alvo.skin) === "cristal";
+}
+const CORES_CRISTAL = ["#ff9ad5", "#ffe27a", "#8affc8", "#8fd2ff", "#c9a2ff", "#ffffff"];
+CIMA.estilhacos = [];
+function estilhacosCima(c) {
+  CIMA.estilhacos = CIMA.estilhacos.filter(e => {
+    e.t += 1 / 60; const q = e.t / 1.3;
+    c.save(); c.globalCompositeOperation = "lighter";
+    c.strokeStyle = `rgba(200,240,255,${.8 * (1 - q)})`; c.lineWidth = 3; c.beginPath(); c.arc(e.x, e.y, 10 + q * 55, 0, Math.PI * 2); c.stroke();
+    CORES_CRISTAL.forEach((cor, i) => { c.strokeStyle = cor; c.globalAlpha = (1 - q) * .6; c.lineWidth = 2; c.beginPath(); c.arc(e.x, e.y, 6 + q * 45 + i * 2.5, -Math.PI * .9, -Math.PI * .1); c.stroke(); });
+    c.globalAlpha = 1;
+    e.p.forEach(pt => { const d = pt.v * q * 80, px = e.x + Math.cos(pt.a) * d, py = e.y + Math.sin(pt.a) * d + q * q * 28;
+      c.save(); c.translate(px, py); c.rotate(pt.a + q * 8); c.fillStyle = pt.cor; c.globalAlpha = 1 - q; c.beginPath(); c.moveTo(0, -5); c.lineTo(2.6, 0); c.lineTo(0, 5); c.lineTo(-2.6, 0); c.closePath(); c.fill(); c.restore(); });
+    c.restore();
+    return e.t < 1.3;
+  });
+}
 function faiscasCima(c) {
+  for (const f of A.fx) if (f.txt === "-1" && !f.faiscaCima && cristalNaBolada(f)) {
+    f.faiscaCima = true; somEmoji("cristal");
+    CIMA.estilhacos.push({ x: f.x, y: f.y - 22, t: 0, p: Array.from({ length: 20 }, (_, i) => ({ a: i / 20 * Math.PI * 2 + Math.random() * .3, v: .5 + Math.random() * .7, cor: CORES_CRISTAL[i % CORES_CRISTAL.length] })) });
+  }
+  estilhacosCima(c);
   for (const f of A.fx) if (f.txt === "-1" && !f.faiscaCima && choqueGeloFogo(f)) {
     f.faiscaCima = true; somEmoji("choque");
     CIMA.choques.push({ x: f.x, y: f.y - 20, t: 0, p: Array.from({ length: 18 }, (_, i) => ({ a: i / 18 * Math.PI * 2 + Math.random() * .3, v: .5 + Math.random() * .6, gelo: i % 2 === 0 })) });
@@ -2027,6 +2310,7 @@ function desenharBoneco2(c, p, ph) {
   if (isVez) { c.strokeStyle = "#ffd23f"; c.lineWidth = 5; c.beginPath(); c.arc(x, y - 6, 44, 0, Math.PI * 2); c.stroke(); }
   if (p.humano && p.i === A.cel) { c.fillStyle = "rgba(255,210,63,.18)"; c.beginPath(); c.ellipse(x, y + 26, 34, 12, 0, 0, Math.PI * 2); c.fill(); }
   c.fillStyle = "rgba(0,0,0,.28)"; c.beginPath(); c.ellipse(x, y + 26, 22, 7, 0, 0, Math.PI * 2); c.fill();
+  if (p.pet) desenharPet2D(c, p.pet, p.i === -1 ? x + 30 : x - 30, p.i === -1 ? y + 22 : y + 18, performance.now() / 1000 + p.i, p.skin);   // na tela inicial fica do lado direito
   if (p.ficha) desenharPersonagem2D(c, p.ficha, x, y, anda);
   else {
   c.strokeStyle = "#1b1b2b"; c.lineWidth = 6; c.lineCap = "round";
@@ -2038,7 +2322,17 @@ function desenharBoneco2(c, p, ph) {
     c.fillStyle = p.pele; c.beginPath(); c.arc(x, y - 34, 15, 0, Math.PI * 2); c.fill();
     c.fillStyle = "#1b1b2b"; c.beginPath(); c.arc(x - 5, y - 36, 2.4, 0, Math.PI * 2); c.arc(x + 5, y - 36, 2.4, 0, Math.PI * 2); c.fill();
     c.strokeStyle = "#1b1b2b"; c.lineWidth = 2; c.beginPath(); c.arc(x, y - 31, 5, .2, Math.PI - .2); c.stroke();
-    if (p.skin && p.skin !== "classico") desenharAcessorio2D(c, p.skin, x, y);
+    const sn = p.skin && SKINS.find(z => z.k === p.skin);
+    if (sn && sn.neon) {   // versão Neon: contorno de luz em volta do corpo, braços, pernas e cabeça
+      c.save(); c.lineCap = "round"; c.shadowBlur = 10;
+      const linha = (cor, fn) => { c.strokeStyle = cor; c.shadowColor = cor; c.beginPath(); fn(); c.stroke(); };
+      const esq = sn.neon, dir = sn.neon2 || sn.neon;
+      c.lineWidth = 1.8;
+      linha(esq, () => { c.moveTo(x - 7, y + 6); c.lineTo(x - 7 + anda * .6, y + 24); c.moveTo(x - 14, y - 10); c.lineTo(x - 20, y + 4 - anda * .5); c.moveTo(x, y - 20); c.lineTo(x - 7, y - 20); c.arcTo(x - 15, y - 20, x - 15, y - 12, 8); c.lineTo(x - 15, y + 2); c.arcTo(x - 15, y + 10, x - 7, y + 10, 8); c.lineTo(x, y + 10); c.moveTo(x, y - 49); c.arc(x, y - 34, 15, -Math.PI / 2, Math.PI / 2, true); });
+      linha(dir, () => { c.moveTo(x + 7, y + 6); c.lineTo(x + 7 - anda * .6, y + 24); c.moveTo(x + 14, y - 10); c.lineTo(x + 20, y + 4 + anda * .5); c.moveTo(x, y - 20); c.lineTo(x + 7, y - 20); c.arcTo(x + 15, y - 20, x + 15, y - 12, 8); c.lineTo(x + 15, y + 2); c.arcTo(x + 15, y + 10, x + 7, y + 10, 8); c.lineTo(x, y + 10); c.moveTo(x, y - 49); c.arc(x, y - 34, 15, -Math.PI / 2, Math.PI / 2); });
+      c.restore();
+    }
+    if (p.skin && p.skin !== "classico") desenharAcessorio2D(c, skinBase(p.skin), x, y);
   } else {
     c.fillStyle = "#c8d3e0"; c.beginPath(); c.roundRect ? c.roundRect(x - 14, y - 48, 28, 26, 6) : c.rect(x - 14, y - 48, 28, 26); c.fill();
     c.fillStyle = "#2bb5c9"; c.fillRect(x - 9, y - 40, 6, 6); c.fillRect(x + 3, y - 40, 6, 6);
@@ -2316,6 +2610,37 @@ function desenharAcessorio2D(c, skin, x, y) {
       c.save(); c.globalCompositeOperation = "lighter";
       [[hx - 5, meio ? "120,210,255" : gelo ? "120,210,255" : "255,170,40"], [hx + 5, meio ? "255,170,40" : gelo ? "120,210,255" : "255,170,40"]].forEach(([ox, cor]) => { const g = c.createRadialGradient(ox, hy - 2, 0, ox, hy - 2, 5); g.addColorStop(0, `rgba(${cor},.9)`); g.addColorStop(1, `rgba(${cor},0)`); c.fillStyle = g; c.beginPath(); c.arc(ox, hy - 2, 5, 0, Math.PI * 2); c.fill(); });
       c.restore();
+      break;
+    }
+    case "cristal": {
+      const t = performance.now() / 1000;
+      // brilho de arco-íris passando pela roupa (dentro do corpo)
+      c.save(); c.beginPath(); c.roundRect ? c.roundRect(x - 15, y - 20, 30, 30, 8) : c.rect(x - 15, y - 20, 30, 30); c.clip();
+      const fx = x - 30 + ((t * 22) % 70), arco = c.createLinearGradient(fx - 10, y - 20, fx + 10, y + 10);
+      ["rgba(255,120,200,0)", "rgba(255,120,200,.55)", "rgba(255,230,120,.55)", "rgba(120,255,200,.55)", "rgba(120,180,255,.55)", "rgba(120,180,255,0)"].forEach((cc, i, l) => arco.addColorStop(i / (l.length - 1), cc));
+      c.fillStyle = arco; c.fillRect(x - 15, y - 20, 30, 30);
+      const bg = c.createLinearGradient(x, y - 20, x, y + 10); bg.addColorStop(0, "rgba(255,255,255,.35)"); bg.addColorStop(.5, "rgba(255,255,255,0)"); c.fillStyle = bg; c.fillRect(x - 15, y - 20, 30, 30);
+      c.restore();
+      // facetas brilhando na roupa
+      c.strokeStyle = "rgba(255,255,255,.75)"; c.lineWidth = 1; c.beginPath();
+      c.moveTo(x - 15, y - 12); c.lineTo(x - 4, y - 20); c.lineTo(x + 6, y - 6); c.lineTo(x - 6, y + 10); c.moveTo(x + 15, y - 14); c.lineTo(x + 6, y - 6); c.lineTo(x + 15, y + 4); c.moveTo(x - 4, y - 20); c.lineTo(x - 15, y + 2); c.stroke();
+      // cristais nos ombros e coroa de cristais
+      const cristal = (cx, cy, h, w, ang) => { c.save(); c.translate(cx, cy); c.rotate(ang); const gg = c.createLinearGradient(-w, -h, w, 0); gg.addColorStop(0, "#ffffff"); gg.addColorStop(.5, "#a8f0ff"); gg.addColorStop(1, "#4fb6e8");
+        c.fillStyle = gg; c.strokeStyle = "rgba(255,255,255,.9)"; c.lineWidth = .8; c.beginPath(); c.moveTo(-w, 0); c.lineTo(-w * .6, -h * .7); c.lineTo(0, -h); c.lineTo(w * .6, -h * .7); c.lineTo(w, 0); c.closePath(); c.fill(); c.stroke();
+        c.beginPath(); c.moveTo(0, -h); c.lineTo(0, 0); c.stroke(); c.restore(); };
+      cristal(x - 15, y - 16, 10, 3.5, -.6); cristal(x - 12, y - 18, 7, 2.5, -.3); cristal(x + 15, y - 16, 10, 3.5, .6); cristal(x + 12, y - 18, 7, 2.5, .3);
+      [[-10, 8, -.45], [-5, 11, -.2], [0, 14, 0], [5, 11, .2], [10, 8, .45]].forEach(([dx, h, ang]) => cristal(hx + dx, hy - Math.sqrt(Math.max(0, 225 - dx * dx)) + 3, h, 2.6, ang));
+      // cristaizinhos coloridos girando em volta (refletindo arco-íris)
+      for (let i = 0; i < 5; i++) { const a = -t * 1.1 + i * 1.26, sx = x + Math.cos(a) * 32, sy = y - 10 + Math.sin(a) * 12, cor = ["#ff9ad5", "#ffe27a", "#8affc8", "#8fd2ff", "#c9a2ff"][i];
+        if (Math.sin(a) < 0) continue; c.save(); c.globalCompositeOperation = "lighter"; c.fillStyle = cor; c.beginPath(); c.moveTo(sx, sy - 5); c.lineTo(sx + 3, sy); c.lineTo(sx, sy + 5); c.lineTo(sx - 3, sy); c.closePath(); c.fill(); c.restore(); }
+      // diamante flutuando e girando em cima da cabeça
+      const dy = hy - 26 + Math.sin(t * 2) * 2, larg = Math.abs(Math.cos(t * 1.6)) * 7 + 2;
+      c.save(); c.globalCompositeOperation = "lighter"; const g = c.createRadialGradient(hx, dy, 1, hx, dy, 16); g.addColorStop(0, "rgba(160,240,255,.6)"); g.addColorStop(1, "rgba(160,240,255,0)"); c.fillStyle = g; c.beginPath(); c.arc(hx, dy, 16, 0, Math.PI * 2); c.fill(); c.restore();
+      const dg = c.createLinearGradient(hx - larg, dy - 8, hx + larg, dy + 8); dg.addColorStop(0, "#ffffff"); dg.addColorStop(.5, "#7fe7ff"); dg.addColorStop(1, "#3d8fe6");
+      c.fillStyle = dg; c.strokeStyle = "#ffffff"; c.lineWidth = 1; c.beginPath(); c.moveTo(hx - larg, dy - 3); c.lineTo(hx - larg * .5, dy - 8); c.lineTo(hx + larg * .5, dy - 8); c.lineTo(hx + larg, dy - 3); c.lineTo(hx, dy + 9); c.closePath(); c.fill(); c.stroke();
+      // brilhinhos em volta
+      for (let i = 0; i < 6; i++) { const a = t * 1.3 + i * 1.05, sx = x + Math.cos(a) * 26, sy = y - 18 + Math.sin(a) * 20, br = .5 + .5 * Math.sin(t * 5 + i * 2);
+        c.fillStyle = `rgba(220,250,255,${br})`; c.beginPath(); for (let j = 0; j < 8; j++) { const rr = j % 2 ? 1 : 3.2 * br + .5, aa = j * Math.PI / 4; c.lineTo(sx + Math.cos(aa) * rr, sy + Math.sin(aa) * rr); } c.closePath(); c.fill(); }
       break;
     }
     case "colecionador": {
@@ -2618,17 +2943,18 @@ function mostrarCompra(p) {
   });
 }
 /* vitória de quem usa a Buraco Negro: explosão de estrelas coloridas na tela */
-function explosaoEstrelas() {
+function explosaoEstrelas(tipo) {
   const caixa = document.querySelector("#a-game .stage-wrap"); if (!caixa) return;
-  const el = document.createElement("div"); el.className = "explosao"; el.setAttribute("aria-hidden", "true");
-  const cores = ["#ffd66b", "#ff8a2a", "#ff7ad9", "#6ec6ff", "#c08bff", "#ffffff"];
-  el.innerHTML = `<i class="ex-buraco"></i>` + Array.from({ length: 36 }, (_, i) => { const a = i / 36 * Math.PI * 2, d = 120 + (i % 4) * 40; return `<b style="--x:${Math.cos(a) * d}px;--y:${Math.sin(a) * d}px;color:${cores[i % cores.length]};animation-delay:${(i % 6) * .05}s">★</b>`; }).join("");
+  const el = document.createElement("div"); el.className = "explosao" + (tipo === "cristal" ? " ex-cristal" : ""); el.setAttribute("aria-hidden", "true");
+  const cores = tipo === "cristal" ? CORES_CRISTAL : ["#ffd66b", "#ff8a2a", "#ff7ad9", "#6ec6ff", "#c08bff", "#ffffff"];
+  el.innerHTML = `<i class="ex-buraco"></i>` + Array.from({ length: 36 }, (_, i) => { const a = i / 36 * Math.PI * 2, d = 120 + (i % 4) * 40; return `<b style="--x:${Math.cos(a) * d}px;--y:${Math.sin(a) * d}px;color:${cores[i % cores.length]};animation-delay:${(i % 6) * .05}s">${tipo === "cristal" ? "◆" : "★"}</b>`; }).join("");
   caixa.append(el); setTimeout(() => el.remove(), 2600);
   if (typeof tocarNotas === "function") tocarNotas([[40, 90, 0, .6, "sawtooth"], [84, 84, .55, .12, "square"], [88, 88, .67, .12, "square"], [91, 91, .79, .12, "square"], [96, 96, .91, .5, "square"]]);
 }
 function mostrarFim() {
   const v = A.fim.vencedor;
-  if ((A.fim.ganhadores || [v]).some(p => p.skin === "buraconegro")) explosaoEstrelas();
+  if ((A.fim.ganhadores || [v]).some(p => skinBase(p.skin) === "buraconegro")) explosaoEstrelas();
+  else if ((A.fim.ganhadores || [v]).some(p => skinBase(p.skin) === "cristal")) { explosaoEstrelas("cristal"); somEmoji("cristal"); }
   const ord = [...A.P].sort((a, b) => (b.vivo - a.vivo) || ((b.saiuEm || 0) - (a.saiuEm || 0)));
   const pessoas = A.P.filter(p => p.humano).map(p => p.nome);
   abrirOv(`
@@ -2832,6 +3158,14 @@ function texturaArremesso(k) {
   if (!TEX_ARR[k]) TEX_ARR[k] = texturaCanvas(128, 128, (c) => { c.font = "100px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(arremessoInfo(k).icone, 64, 70); });
   return TEX_ARR[k];
 }
+function cristal3D(x, z) {   // cacos de cristal coloridos e um anel de luz (usa a mesma animação do choque)
+  const g = new THREE.Group(); g.position.set(x, 1, z);
+  const anel = new THREE.Mesh(new THREE.TorusGeometry(.35, .03, 8, 32), new THREE.MeshBasicMaterial({ color: "#c8f2ff", transparent: true, opacity: .8, blending: THREE.AdditiveBlending, depthWrite: false })); anel.rotation.x = Math.PI / 2; g.add(anel);
+  const p = Array.from({ length: 18 }, (_, i) => { const m = new THREE.Mesh(new THREE.OctahedronGeometry(.07), new THREE.MeshBasicMaterial({ color: CORES_CRISTAL[i % CORES_CRISTAL.length] })); m.scale.set(.6, 1.3, .6); g.add(m);
+    const a = i / 18 * Math.PI * 2; return { m, v: new THREE.Vector3(Math.cos(a) * (2 + Math.random() * 2), 2.2 + Math.random() * 2.5, Math.sin(a) * (2 + Math.random() * 2)) }; });
+  F.scene.add(g); F.choques = F.choques || []; F.choques.push({ g, vapor: anel, p, t: 0 });
+  if (typeof somEmoji === "function") somEmoji("cristal");
+}
 function choque3D(x, z) {
   const g = new THREE.Group(); g.position.set(x, 1, z);
   const vapor = new THREE.Mesh(new THREE.SphereGeometry(.4, 14, 10), new THREE.MeshBasicMaterial({ color: "#ffffff", transparent: true, opacity: .6, depthWrite: false })); g.add(vapor);
@@ -2891,7 +3225,7 @@ function montarBonecos3D() {
       const olho = new THREE.Mesh(new THREE.SphereGeometry(.03, 8, 6), escuro);
       const o1 = olho.clone(); o1.position.set(-.07, .03, -.18); const o2 = olho.clone(); o2.position.set(.07, .03, -.18);
       cabeca.add(o1, o2);
-      acessorio3D(cabeca, p.skin);
+      acessorio3D(cabeca, skinBase(p.skin));
     } else {
       cabeca = new THREE.Mesh(new THREE.BoxGeometry(.36, .32, .32), new THREE.MeshLambertMaterial({ color: "#c8d3e0" }));
       const visor = new THREE.Mesh(new THREE.BoxGeometry(.26, .08, .02), new THREE.MeshBasicMaterial({ color: "#2bb5c9" })); visor.position.set(0, .02, -.17);
@@ -2901,10 +3235,15 @@ function montarBonecos3D() {
     }
     cabeca.position.y = 1.28;
     g.add(pernaE, pernaD, corpo, bracoE, bracoD, cabeca);
+    { const sn = p.skin && SKINS.find(z => z.k === p.skin);   // versão Neon: brilho em volta de cada parte
+      if (sn && sn.neon) [[pernaE, sn.neon], [bracoE, sn.neon], [pernaD, sn.neon2 || sn.neon], [bracoD, sn.neon2 || sn.neon], [corpo, sn.neon], [cabeca, sn.neon2 || sn.neon]].forEach(([parte, cor]) => {
+        const casca = new THREE.Mesh(parte.geometry, new THREE.MeshBasicMaterial({ color: cor, side: THREE.BackSide, transparent: true, opacity: .55, blending: THREE.AdditiveBlending, depthWrite: false }));
+        casca.scale.setScalar(1.12); parte.add(casca); }); }
     montarExtras3D(p, g, pernaE, pernaD, bracoE, bracoD, corpoMat);
   }
 }
 function montarExtras3D(p, g, pernaE, pernaD, bracoE, bracoD, corpoMat) {
+  { const pg = p.pet && pet3D(p.pet, p.skin); if (pg) { pg.position.set(-.5, 0, .15); g.add(pg); } }
   {
     const tag = etiqueta({ nome: nomeComSelo(p), vidas: "" }, timeDe(p) ? timeDe(p).cor : undefined); tag.position.y = 1.95; g.add(tag);
     const perg = etiqueta({ nome: "?", vidas: "" }, "#ffd23f"); perg.scale.set(.9, .34, 1); perg.position.y = 2.35; perg.visible = false; g.add(perg);
@@ -3044,6 +3383,20 @@ function acessorio3D(cabeca, skin) {
         if (!deGelo) { const n = new THREE.Mesh(new THREE.ConeGeometry(.03, .12, 6), luz("#ffe66b", .9)); n.position.set(lado * .2, -.26, 0); n.rotation.z = -lado * .5; cabeca.add(n); } });
       if (meio) { const anel = new THREE.Group(); anel.userData.gira = 1.4; anel.rotation.x = .25; anel.position.y = -.3; cabeca.add(anel);
         [["#7fd0ff", 0], ["#ff7a2a", Math.PI]].forEach(([cor, r0]) => { const m = new THREE.Mesh(new THREE.TorusGeometry(.5, .015, 6, 30, Math.PI), luz(cor, .9)); m.rotation.x = Math.PI / 2; m.rotation.z = r0; anel.add(m); }); }
+      break;
+    }
+    case "cristal": {
+      const brilho = (cor, op) => new THREE.MeshBasicMaterial({ color: cor, transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false });
+      const orb = new THREE.Group(); orb.position.y = .6; orb.userData.gira = 1.6; cabeca.add(orb);
+      const dia = new THREE.Mesh(new THREE.OctahedronGeometry(.11), new THREE.MeshLambertMaterial({ color: "#8fe9ff", emissive: "#2a7fa8" })); dia.scale.set(1, 1.3, 1); orb.add(dia);
+      orb.add(new THREE.Mesh(new THREE.SphereGeometry(.2, 12, 10), brilho("#a0f0ff", .25)));
+      const vidro = cor => new THREE.MeshLambertMaterial({ color: cor, emissive: "#1f6f94", transparent: true, opacity: .92 });
+      for (let k = 0; k < 7; k++) { const a = Math.PI + (k - 3) * .4, h = k === 3 ? .2 : k % 2 ? .12 : .15, m = new THREE.Mesh(new THREE.ConeGeometry(.03, h, 4), vidro(k % 2 ? "#e6fbff" : "#9fe8ff")); m.position.set(Math.sin(a) * .17, .17 + h / 2, Math.cos(a) * .17 - .03); m.rotation.z = -Math.sin(a) * .5; cabeca.add(m); }
+      for (const l of [-1, 1]) for (const [dx, h, inc] of [[.21, .2, .5], [.17, .13, .3]]) { const m = new THREE.Mesh(new THREE.ConeGeometry(.035, h, 4), vidro("#b8f2ff")); m.position.set(l * dx, -.24 + h / 2, 0); m.rotation.z = -l * inc; cabeca.add(m); }
+      const arco = new THREE.Group(); arco.position.y = -.35; arco.rotation.x = .3; arco.userData.gira = .9; cabeca.add(arco);
+      ["#ff9ad5", "#ffe27a", "#8affc8", "#8fd2ff", "#c9a2ff"].forEach((cor, k) => { const seg = new THREE.Mesh(new THREE.TorusGeometry(.52, .012, 6, 20, Math.PI * 2 / 5), brilho(cor, .85)); seg.rotation.x = Math.PI / 2; seg.rotation.z = k * Math.PI * 2 / 5; arco.add(seg); });
+      const giro = new THREE.Group(); giro.position.y = -.3; giro.userData.gira = -1.1; cabeca.add(giro);
+      for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2, m = new THREE.Mesh(new THREE.OctahedronGeometry(.035), new THREE.MeshBasicMaterial({ color: "#e6fbff" })); m.position.set(Math.cos(a) * .48, (k % 2 ? .12 : -.08), Math.sin(a) * .48); giro.add(m); }
       break;
     }
     case "colecionador": {
@@ -3255,7 +3608,7 @@ function desenhar3D() {
   // faíscas quando alguém leva bolada
   for (const fx of A.fx) if (fx.txt === "-1" && !fx.faisca3D) {
     fx.faisca3D = true;
-    if (atiradorBuracoNegro()) buraco3D(W3(fx.x), W3(fx.y)); else if (choqueGeloFogo(fx)) choque3D(W3(fx.x), W3(fx.y)); else soltarFaiscas(W3(fx.x), W3(fx.y), "#ff4d6d");
+    if (cristalNaBolada(fx)) cristal3D(W3(fx.x), W3(fx.y)); else if (atiradorBuracoNegro()) buraco3D(W3(fx.x), W3(fx.y)); else if (choqueGeloFogo(fx)) choque3D(W3(fx.x), W3(fx.y)); else soltarFaiscas(W3(fx.x), W3(fx.y), "#ff4d6d");
   }
   F.choques = (F.choques || []).filter(ch => {
     ch.t += 1 / 60; const q = ch.t / 1.2;
@@ -3442,10 +3795,39 @@ acoes.pegarMissao = el => {
   pr.pegou.push(m.id);
   darRecompensa(nome, m.premio, `🎯 Missão cumprida! +${m.premio} moedas`);
 };
+/* ---------- Loja em abas: uma parte de cada vez ---------- */
+const ABAS_LOJA = [["destaques", "⭐ Destaques"], ["skins", "👕 Skins"], ["pets", "🐾 Pets"], ["arremessos", "🏀 Arremessos"], ["gestos", "🕺 Gestos"], ["emojis", "😎 Emojis"], ["fundos", "🖼️ Fundos"], ["fotos", "🙂 Fotos"]];
+const ABA_DO_TIPO = { skin: "skins", pet: "pets", arremesso: "arremessos", gesto: "gestos", emoji: "emojis", fundo: "fundos", avatar: "fotos" };
+const abaLoja = () => ABAS_LOJA.some(([k]) => k === G.lojaAba) ? G.lojaAba : "destaques";
+const secOculta = k => abaLoja() === k ? "" : " hidden";
+const limitadasNovas = nome => todasLimitadas().filter(x => naVenda(x) && !temLim(nome, x));
+function abasLojaHTML(nome) {
+  const novas = new Set(limitadasNovas(nome).map(x => ABA_DO_TIPO[x.tipo || "skin"]));
+  return `<nav class="loja-abas" aria-label="Partes da loja">${ABAS_LOJA.map(([k, t]) => `<button type="button" class="loja-aba" data-a="lojaAba" data-aba="${k}" aria-pressed="${abaLoja() === k}">${t}${novas.has(k) ? '<i class="loja-ponto" aria-label="tem edição limitada"></i>' : ""}</button>`).join("")}</nav>`;
+}
+/* Destaques: as coleções limitadas à venda que a pessoa ainda não completou (uma linha por coleção), com atalho para o pacote */
+function limitadasDestaqueHTML(nome) {
+  const lim = limitadasNovas(nome); if (!lim.length) return "";
+  const ic = x => x.tipo === "emoji" ? x.e : x.tipo === "fundo" ? "🖼️" : x.tipo === "gesto" || x.tipo === "avatar" || x.tipo === "arremesso" || x.tipo === "pet" ? x.icone : "👕";
+  const grupos = new Map();
+  lim.forEach(x => {
+    const col = Object.entries(COLECOES).find(([, c]) => c.chaves.includes(chaveLim(x)));
+    const id = col ? col[0] : chaveLim(x), g = grupos.get(id) || { id, nome: col ? "Coleção " + col[1].nome : x.nome, pacote: col ? col[1].pacote : null, itens: [], ate: x.ate };
+    g.itens.push(x); if (Date.parse(x.ate) < Date.parse(g.ate)) g.ate = x.ate; grupos.set(id, g);
+  });
+  const lista = [...grupos.values()].sort((a, b) => Date.parse(a.ate) - Date.parse(b.ate));
+  return `<h2 class="lb-secao">Edições limitadas</h2>
+    <div class="dest-lista">${lista.map(g => { const pc = g.pacote && PACOTES.find(p2 => p2.id === g.pacote), pInfo = pc && pacoteInfo(nome, pc.id);
+      return `<button type="button" class="dest-item" ${pInfo && pInfo.aVenda ? `data-a="verPacote" data-p="${pc.id}"` : `data-a="lojaAba" data-aba="${ABA_DO_TIPO[g.itens[0].tipo || "skin"]}"`}>
+      <span class="dest-txt"><b>${esc(g.nome)}</b><small>⏳ ${esc(faltaParaAcabar({ ate: g.ate }))} · faltam ${g.itens.length} ${g.itens.length === 1 ? "item" : "itens"}</small><span class="dest-ics" aria-hidden="true">${g.itens.map(ic).join(" ")}</span></span>
+      <span class="dest-ver">${pInfo && pInfo.aVenda ? "Ver pacote" : "Ver"} ›</span></button>`; }).join("")}</div>`;
+}
+acoes.verPacote = el => { const c = document.querySelector(".pacote-" + el.dataset.p); if (c) c.scrollIntoView({ behavior: "smooth", block: "center" }); };
+acoes.lojaAba = el => { G.lojaAba = el.dataset.aba; G.lojaConf = false; render(); const n = document.querySelector(".loja-abas"); if (n) n.scrollIntoView({ block: "start" }); };
 TELAS.loja = () => {
   const nome = perfil(), moedas = G.banco[nome] || 0, tem = invVidas(nome), preco = G.cfg.preco;
   const pode = moedas >= preco;
-  depoisFn = () => { desenharPrevSkins(); animarPrevGestos(); };
+  depoisFn = () => { desenharPrevSkins(); animarPrevGestos(); desenharPrevPets(); };
   const cadeado = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="10.5" width="12" height="9" rx="2" fill="#0b1b33"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="#0b1b33" stroke-width="2.2"/></svg>`;
   const coracao = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2z" fill="#ffffff" stroke="#0b1b33" stroke-width="1.6"/><path d="M12 11v5M9.5 13.5h5" stroke="#ff4d6d" stroke-width="2.2" stroke-linecap="round"/></svg>`;
   return `
@@ -3456,6 +3838,9 @@ TELAS.loja = () => {
     </div>
     <h1 class="lb-title">Loja</h1>
     ${typeof lojaEventosHTML === "function" ? lojaEventosHTML() : ""}
+    ${abasLojaHTML(nome)}
+    <div class="loja-sec" data-sec="destaques"${secOculta("destaques")}>
+    ${limitadasDestaqueHTML(nome)}
     ${pacoteHTML(nome, moedas)}
     ${cantinhoHTML(nome, moedas)}
     <div class="lb-oferta">
@@ -3467,18 +3852,25 @@ TELAS.loja = () => {
       </div>
       <button class="lb-comprar" data-a="comprarLoja" ${pode ? "" : "disabled"}>${pode ? (G.lojaConf === "vida" ? "Confirmar?" : `<span class="lb-coin" aria-hidden="true">$</span>${preco}`) : `Faltam ${fmtM(preco - moedas)}`}</button>
     </div>
+    </div>
+    <div class="loja-sec" data-sec="skins"${secOculta("skins")}>
     <h2 class="lb-secao">Skins</h2>
-    <div class="fd-grid">${SKINS.filter(s => !s.secreto && (naVenda(s) || temSkin(nome, s.k))).sort((a, b) => !!b.limitada - !!a.limitada).map(s => {
-      const tem = temSkin(nome, s.k), usando = skinDe(nome) === s.k, podeS = moedas >= s.preco;
+    <div class="fd-grid">${SKINS.filter(s => !s.secreto && !s.variante && (!s.codigo || temSkin(nome, s.k)) && (naVenda(s) || temSkin(nome, s.k))).sort((a, b) => !!b.limitada - !!a.limitada).map(s => {
+      const tem = temSkin(nome, s.k), usando = skinDe(nome) === s.k, podeS = moedas >= s.preco, neon = SKINS.find(v => v.variante && v.base === s.k), usandoNeon = !!neon && skinDe(nome) === neon.k;
       const rotulo = usando ? "Usando" : tem ? "Usar" : G.lojaConf === "skin:" + s.k ? "Confirmar?" : podeS ? `<span class="lb-coin" aria-hidden="true">$</span>${s.preco}` : `$ ${s.preco}`;
       return `<div class="fd-tile${tem ? "" : " fd-travado"}${s.limitada ? " sk-limitada" : ""}"${usando ? ' aria-current="true"' : ""}>
         ${s.limitada ? `<i class="sk-selo">Edição limitada</i>` : s.heroi ? `<i class="sk-selo sk-selo-heroi">⚡ Herói</i>` : ""}
         <canvas class="sk-prev" data-skin="${s.k}" aria-label="Bonequinho com a skin ${esc(s.nome)}"></canvas>
         <b>${esc(s.nome)}</b>
         ${s.limitada && !tem && naVenda(s) ? `<span class="sk-prazo">⏳ ${faltaParaAcabar(s)}</span>` : ""}
-        <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarSkin" data-s="${s.k}" ${usando || (!tem && !podeS) ? "disabled" : ""}>${rotulo}</button>
+        ${neon && !tem && naVenda(s) ? `<span class="sk-neon-info">✨ Depois dá para comprar a versão Neon</span>` : ""}
+        <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarSkin" data-s="${s.k}" ${usando || (!tem && !podeS) ? "disabled" : ""}>${usandoNeon ? "Usar normal" : rotulo}</button>
+        ${neon && tem && temSkin(nome, neon.k) ? `<button class="lb-comprar lb-comprar-p sk-neon-btn" data-a="comprarSkin" data-s="${neon.k}" ${usandoNeon ? "disabled" : ""}>${usandoNeon ? "✨ Usando Neon" : "✨ Usar Neon"}</button>`
+          : neon && tem && naVenda(s) ? `<button class="lb-comprar lb-comprar-p sk-neon-btn" data-a="comprarSkin" data-s="${neon.k}" ${moedas >= neon.preco ? "" : "disabled"}>${G.lojaConf === "skin:" + neon.k ? "Confirmar?" : `Neon <span class="lb-coin" aria-hidden="true">$</span>${neon.preco}`}</button>` : ""}
       </div>`; }).join("")}
     </div>
+    </div>
+    <div class="loja-sec" data-sec="fotos"${secOculta("fotos")}>
     <h2 class="lb-secao">Fotos de perfil</h2>
     <div class="fd-grid">${AV_ESPECIAIS.filter(x => naVenda(x) || temAvatar(nome, x.k)).map(x => {
       const tem = temAvatar(nome, x.k), usando = avatarDe(nome).i === x.k, podeA = moedas >= x.preco;
@@ -3491,6 +3883,32 @@ TELAS.loja = () => {
         <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarAvatar" data-k="${x.k}" ${usando || (!tem && !podeA) ? "disabled" : ""}>${rotulo}</button>
       </div>`; }).join("")}
     </div>
+    </div>
+    <div class="loja-sec" data-sec="pets"${secOculta("pets")}>
+    <h2 class="lb-secao">Pets</h2>
+    <p class="lb-sub" style="margin-top:-6px">Andam do lado do seu bonequinho na partida e cada um tem um poder pequeno.</p>
+    <div class="fd-grid">
+      <div class="fd-tile pet-ovo">
+        <span class="em-art" aria-hidden="true">🥚</span>
+        <b>Ovo surpresa</b>
+        <span class="pet-poder">Sai um pet normal que você ainda não tem.</span>
+        ${(() => { const falta = PETS.filter(x => !x.limitada && !x.heroi && !temPet(nome, x.k)), pode = moedas >= PRECO_OVO;
+          return `<button class="lb-comprar lb-comprar-p" data-a="chocarOvo" ${!falta.length || !pode ? "disabled" : ""}>${!falta.length ? "Você tem todos" : G.lojaConf === "ovo" ? "Confirmar?" : pode ? `<span class="lb-coin" aria-hidden="true">$</span>${PRECO_OVO}` : `$ ${PRECO_OVO}`}</button>`; })()}
+      </div>
+      ${PETS.filter(x => naVenda(x) || temPet(nome, x.k)).sort((a, b) => !!b.limitada - !!a.limitada).map(x => {
+        const tem = temPet(nome, x.k), usando = petDe(nome) === x.k, podeP = moedas >= x.preco;
+        const rotulo = usando ? "Tirar" : tem ? "Usar" : G.lojaConf === "pet:" + x.k ? "Confirmar?" : podeP ? `<span class="lb-coin" aria-hidden="true">$</span>${x.preco}` : `$ ${x.preco}`;
+        return `<div class="fd-tile${tem ? "" : " fd-travado"}${x.limitada ? " sk-limitada" : ""}"${usando ? ' aria-current="true"' : ""}>
+          ${x.limitada ? `<i class="sk-selo">Edição limitada</i>` : x.heroi ? `<i class="sk-selo sk-selo-heroi">⚡ Herói</i>` : ""}
+          <canvas class="pet-prev" data-pet="${x.k}" aria-label="${esc(x.nome)}"></canvas>
+          <b>${esc(x.nome)}</b>
+          <span class="pet-poder">${esc(x.poder)}</span>
+          ${x.limitada && !tem && naVenda(x) ? `<span class="sk-prazo">⏳ ${faltaParaAcabar(x)}</span>` : ""}
+          <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarPet" data-k="${x.k}" ${!tem && !podeP ? "disabled" : ""}>${rotulo}</button>
+        </div>`; }).join("")}
+    </div>
+    </div>
+    <div class="loja-sec" data-sec="arremessos"${secOculta("arremessos")}>
     <h2 class="lb-secao">Arremessos</h2>
     <p class="lb-sub" style="margin-top:-6px">O que você joga quando acerta a palavra. Funciona igual à bola, só muda o jeito.</p>
     <div class="fd-grid">${ARREMESSOS.filter(a => !a.secreto && (naVenda(a) || temArremesso(nome, a.k))).sort((a, b) => !!b.limitada - !!a.limitada).map(a => {
@@ -3504,6 +3922,8 @@ TELAS.loja = () => {
         <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarArremesso" data-k="${a.k}" ${usando || (!tem && !podeA) ? "disabled" : ""}>${rotulo}</button>
       </div>`; }).join("")}
     </div>
+    </div>
+    <div class="loja-sec" data-sec="gestos"${secOculta("gestos")}>
     <h2 class="lb-secao">Gestos</h2>
     <p class="lb-sub" style="margin-top:-6px">Dancinhas para o seu bonequinho fazer durante a partida.</p>
     <div class="fd-grid">${GESTOS.filter(g => naVenda(g) || temGesto(nome, g.k)).sort((a, b) => !!b.limitada - !!a.limitada).map(g => {
@@ -3517,6 +3937,8 @@ TELAS.loja = () => {
         <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarGesto" data-g="${g.k}" ${tem || !podeG ? "disabled" : ""} aria-label="${tem ? "Você tem" : "Comprar"} o gesto ${esc(g.nome)}">${rotulo}</button>
       </div>`; }).join("")}
     </div>
+    </div>
+    <div class="loja-sec" data-sec="emojis"${secOculta("emojis")}>
     <h2 class="lb-secao">Emojis</h2>
     <p class="lb-sub" style="margin-top:-6px">Para mandar durante a partida. Aparecem em cima do seu bonequinho.</p>
     <div class="fd-grid">${EMOJIS.filter(e => !e.secreto && (naVenda(e) || temEmoji(nome, e.k))).sort((a, b) => !!b.limitada - !!a.limitada).map(e => {
@@ -3530,6 +3952,8 @@ TELAS.loja = () => {
         <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarEmoji" data-e="${e.k}" ${tem || !podeE ? "disabled" : ""} aria-label="${tem ? "Você tem" : "Comprar"} o emoji ${esc(e.nome)}">${rotulo}</button>
       </div>`; }).join("")}
     </div>
+    </div>
+    <div class="loja-sec" data-sec="fundos"${secOculta("fundos")}>
     <h2 class="lb-secao">Fundos</h2>
     <div class="fd-grid">${FUNDOS.filter(([k]) => k !== "basico" && (fundoNaVenda(k) || temFundo(nome, k))).sort((a, b) => !!fundoLim(b[0]) - !!fundoLim(a[0])).map(([k, t]) => {
       const tem = temFundo(nome, k), usando = fundoAtual() === k, pr = PRECO_FUNDO[k], podeF = moedas >= pr, lim = fundoLim(k);
@@ -3541,6 +3965,7 @@ TELAS.loja = () => {
         ${lim && !tem && naVenda(lim) ? `<span class="sk-prazo">⏳ ${faltaParaAcabar(lim)}</span>` : ""}
         <button class="lb-comprar lb-comprar-p${tem ? " lb-tenho-btn" : ""}" data-a="comprarFundo" data-f="${k}" ${usando || (!tem && !podeF) ? "disabled" : ""}>${rotulo}</button>
       </div>`; }).join("")}
+    </div>
     </div>
   </section>`;
 };
@@ -3567,8 +3992,8 @@ const AV_ICONES = ["🐶", "🐱", "🦊", "🐼", "🐸", "🦁", "🐯", "🐵
   "⚽", "🏀", "🎮", "🚀", "⭐", "🔥", "⚡", "👑", "🤖", "👽", "🍕", "🌈"];
 const AV_CORES = ["#e4572e", "#2f80ed", "#37d99a", "#ffd23f", "#9b51e0", "#ff4d6d", "#0b1b33", "#f4a261"];
 /* fotos de perfil especiais (compradas na loja); a de edição limitada só vende até "ate" */
-const AV_ESPECIAIS = [{ k: "galactico", icone: "🪐", nome: "Galáctico", tipo: "avatar", limitada: true, preco: 200, ate: "2026-11-06T23:59:59-03:00" },
-  { k: "buraconegro", icone: "🕳️", nome: "Buraco Negro", tipo: "avatar", limitada: true, preco: 200, ate: "2026-11-07T23:59:59-03:00" },
+const AV_ESPECIAIS = [{ k: "galactico", icone: "🪐", nome: "Galáctico", tipo: "avatar", limitada: true, preco: 200, ate: "2026-11-03T23:59:59-03:00" },
+  { k: "buraconegro", icone: "🕳️", nome: "Buraco Negro", tipo: "avatar", limitada: true, preco: 200, ate: "2026-11-03T23:59:59-03:00" },
   { k: "sideral", icone: "🧑‍🚀", nome: "Espaço Sideral", tipo: "avatar", limitada: true, preco: 200, ate: "2026-11-02T12:00:00-03:00" },
   { k: "gelo", icone: "❄️", nome: "Gelo", tipo: "avatar", preco: 200, limitada: true, ate: "2026-11-10T23:59:59-03:00" },
   { k: "fogo", icone: "🔥", nome: "Fogo", tipo: "avatar", preco: 200, limitada: true, ate: "2026-11-10T23:59:59-03:00" },
@@ -3631,6 +4056,7 @@ function animarLobby() {
   const nome = perfil();
   const boneco = vestir({ i: -1, nome: "", humano: true, cor: A_CORES[0], pele: A_PELE[0], vidas: 0, x: 0, y: 0, passo: 0, flash: 0 }, skinDe(nome));
   boneco.ficha = typeof personagemDe === "function" ? personagemDe(nome) : null;
+  boneco.pet = petDe(nome);
   const quadro = ts => {
     const cv = $("lb-canvas");
     if (!cv || G.tela !== "lobby" || $("app").hidden) { lbRaf = null; return; }
@@ -3918,8 +4344,8 @@ acoes.som = el => { _acaoSom(el); atualizarSomArena(); if (G.som !== false) { mu
 const FUNDOS = [["basico", "Básico"], ["ceu", "Céu"], ["quadra", "Quadra"], ["floresta", "Floresta"], ["por", "Pôr do sol"], ["doce", "Doce"], ["noite", "Noite estrelada"], ["vulcao", "Vulcão"], ["galactico", "Galáctico"], ["buraconegro", "Buraco Negro"], ["sideral", "Espaço Sideral"], ["gelo", "Gelo"], ["fogo", "Fogo"], ["gelofogo", "Gelo e Fogo"]];
 const PRECO_FUNDO = { basico: 0, ceu: 50, quadra: 50, floresta: 75, por: 100, doce: 100, noite: 150, vulcao: 200, galactico: 300, buraconegro: 300, sideral: 300, gelo: 300, fogo: 300, gelofogo: 300 };
 /* fundos de edição limitada: só dá para comprar até "ate" (horário de Brasília); quem comprou fica com ele */
-const FUNDOS_LIM = [{ k: "galactico", nome: "Galáctico", tipo: "fundo", limitada: true, preco: 300, ate: "2026-11-06T23:59:59-03:00" },
-  { k: "buraconegro", nome: "Buraco Negro", tipo: "fundo", limitada: true, preco: 300, ate: "2026-11-07T23:59:59-03:00" },
+const FUNDOS_LIM = [{ k: "galactico", nome: "Galáctico", tipo: "fundo", limitada: true, preco: 300, ate: "2026-11-03T23:59:59-03:00" },
+  { k: "buraconegro", nome: "Buraco Negro", tipo: "fundo", limitada: true, preco: 300, ate: "2026-11-03T23:59:59-03:00" },
   { k: "sideral", nome: "Espaço Sideral", tipo: "fundo", limitada: true, preco: 300, ate: "2026-11-02T12:00:00-03:00" },
   { k: "gelo", nome: "Gelo", tipo: "fundo", preco: 300, limitada: true, ate: "2026-11-10T23:59:59-03:00" },
   { k: "fogo", nome: "Fogo", tipo: "fundo", preco: 300, limitada: true, ate: "2026-11-10T23:59:59-03:00" },
@@ -4053,8 +4479,8 @@ const EMOJIS = [
   { k: "coroa", e: "👑", nome: "Coroa", preco: 100 },
   { k: "trofeu", e: "🏆", nome: "Troféu", preco: 120 },
   // edição limitada: só dá para comprar até "ate" (horário de Brasília); quem comprou fica com ele
-  { k: "galactico", e: "🌌", nome: "Galáctico", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-06T23:59:59-03:00" },
-  { k: "buraconegro", e: "🕳️", nome: "Buraco Negro", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-07T23:59:59-03:00" },
+  { k: "galactico", e: "🌌", nome: "Galáctico", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-03T23:59:59-03:00" },
+  { k: "buraconegro", e: "🕳️", nome: "Buraco Negro", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-03T23:59:59-03:00" },
   { k: "diamante", e: "💎", nome: "Diamante", preco: 120, secreto: true },
   { k: "sideral", e: "🌠", nome: "Estrela Cadente", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-02T12:00:00-03:00" },
   { k: "gelo", e: "🧊", nome: "Congelou", preco: 150, tipo: "emoji", limitada: true, ate: "2026-11-10T23:59:59-03:00" },
@@ -4071,6 +4497,8 @@ const ITEM_PACOTE = {
   emoji: (k, ic) => ({ icone: ic, nome: "Emoji", preco: () => emojiInfo(k).preco, tem: n => temEmoji(n, k), dar: n => darEmoji(n, k) }),
   gesto: (k, ic) => ({ icone: ic, nome: "Gesto", preco: () => gestoInfo(k).preco, tem: n => temGesto(n, k), dar: n => darGesto(n, k) }),
   foto: (k, ic) => ({ icone: ic, nome: "Foto", preco: () => avEspecial(k).preco, tem: n => temAvatar(n, k), dar: n => { G.inv[n].avatares = [...(G.inv[n].avatares || []), k]; }, usar: n => { G.inv[n].avatar = { ...avatarDe(n), i: k }; } }),
+  // o pet só entra no pacote enquanto ele mesmo estiver à venda (os do espaço só voltam pela "Volta das limitadas")
+  pet: (k, ic) => { const x = petInfo(k); return x && naVenda(x) ? [{ icone: ic, nome: "Pet", preco: () => x.preco, tem: n => temPet(n, k), dar: n => darPet(n, k), usar: n => { G.inv[n].pet = k; } }] : []; },
   arremesso: (k, ic) => ({ icone: ic, nome: "Arremesso", preco: () => arremessoInfo(k).preco, tem: n => temArremesso(n, k), dar: n => { G.inv[n].arremessos = [...(G.inv[n].arremessos || []), k]; }, usar: n => { G.inv[n].arremesso = k; } }),
 };
 const PACOTES = [
@@ -4081,11 +4509,11 @@ const PACOTES = [
   { id: "fogo", nome: "Pacote Fogo", emoji: "🔥", desconto: .25, ate: "2026-11-10T23:59:59-03:00",
     itens: () => [ITEM_PACOTE.skin("fogo"), ITEM_PACOTE.fundo("fogo", "🌄"), ITEM_PACOTE.emoji("labareda", "🌋"), ITEM_PACOTE.gesto("fogo", "💥"), ITEM_PACOTE.foto("fogo", "🔥"), ITEM_PACOTE.arremesso("fogo", "☄️")] },
   { id: "sideral", nome: "Pacote Espaço Sideral", emoji: "🌍", desconto: .1, ate: "2026-11-02T12:00:00-03:00",
-    itens: () => [ITEM_PACOTE.skin("sideral"), ITEM_PACOTE.fundo("sideral", "🪐"), ITEM_PACOTE.emoji("sideral", "🌠"), ITEM_PACOTE.gesto("sideral", "🛸"), ITEM_PACOTE.foto("sideral", "🧑‍🚀"), ITEM_PACOTE.arremesso("sideral", "☄️")] },
-  { id: "buraconegro", nome: "Pacote Buraco Negro", emoji: "🕳️", desconto: .25, ate: "2026-11-07T23:59:59-03:00",
-    itens: () => [ITEM_PACOTE.skin("buraconegro"), ITEM_PACOTE.fundo("buraconegro"), ITEM_PACOTE.emoji("buraconegro", "🕳️"), ITEM_PACOTE.gesto("buraconegro", "🌑"), ITEM_PACOTE.foto("buraconegro", "⚫"), ITEM_PACOTE.arremesso("buraconegro", "🌀")] },
-  { id: "galactico", nome: "Pacote Galáctico", emoji: "🚀", desconto: .25, ate: "2026-11-06T23:59:59-03:00",
-    itens: () => [ITEM_PACOTE.skin("galactica"), ITEM_PACOTE.fundo("galactico"), ITEM_PACOTE.emoji("galactico", "🌌"), ITEM_PACOTE.gesto("galactico", "🚀"), ITEM_PACOTE.foto("galactico", "🪐")] },
+    itens: () => [ITEM_PACOTE.skin("sideral"), ITEM_PACOTE.fundo("sideral", "🪐"), ITEM_PACOTE.emoji("sideral", "🌠"), ITEM_PACOTE.gesto("sideral", "🛸"), ITEM_PACOTE.foto("sideral", "🧑‍🚀"), ITEM_PACOTE.arremesso("sideral", "☄️"), ...ITEM_PACOTE.pet("caosideral", "🐶")] },
+  { id: "buraconegro", nome: "Pacote Buraco Negro", emoji: "🕳️", desconto: .25, ate: "2026-11-03T23:59:59-03:00",
+    itens: () => [ITEM_PACOTE.skin("buraconegro"), ITEM_PACOTE.fundo("buraconegro"), ITEM_PACOTE.emoji("buraconegro", "🕳️"), ITEM_PACOTE.gesto("buraconegro", "🌑"), ITEM_PACOTE.foto("buraconegro", "⚫"), ITEM_PACOTE.arremesso("buraconegro", "🌀"), ...ITEM_PACOTE.pet("gatoburaconegro", "🐱")] },
+  { id: "galactico", nome: "Pacote Galáctico", emoji: "🚀", desconto: .25, ate: "2026-11-03T23:59:59-03:00",
+    itens: () => [ITEM_PACOTE.skin("galactica"), ITEM_PACOTE.fundo("galactico"), ITEM_PACOTE.emoji("galactico", "🌌"), ITEM_PACOTE.gesto("galactico", "🚀"), ITEM_PACOTE.foto("galactico", "🪐"), ...ITEM_PACOTE.pet("coelhogalactico", "🐰")] },
 ];
 const pacoteDe = id => PACOTES.find(x => x.id === id) || PACOTES[0];
 /* o preço é só do que ainda falta, com desconto; some quando acaba o prazo ou quando já tem tudo */
@@ -4122,6 +4550,41 @@ acoes.comprarPacote = el => {
   toast(`${nome} comprou o ${p.pc.nome}! ${p.pc.emoji}`);
   const y = window.scrollY; render(); window.scrollTo(0, y);
 };
+acoes.comprarPet = el => {
+  const k = el.dataset.k, nome = perfil(), x = petInfo(k); if (!x) return;
+  G.inv = G.inv || {}; G.inv[nome] = G.inv[nome] || { vidas: 0 };
+  const volta = (txt) => { salvarPlacar(); const y = window.scrollY; render(); window.scrollTo(0, y); if (txt) toast(txt); };
+  if (temPet(nome, k)) { if (petDe(nome) === k) { G.inv[nome].pet = null; volta(`${x.nome} ficou em casa`); } else { G.inv[nome].pet = k; volta(`${x.nome} ${x.icone} agora anda com você!`); } return; }
+  if (!naVenda(x)) { toast("Esse pet de edição limitada já acabou"); return; }
+  if ((G.banco[nome] || 0) < x.preco) return;
+  if (G.lojaConf !== "pet:" + k) { pedirConfirmacao("pet:" + k); return; }
+  clearTimeout(lojaConfT); G.lojaConf = false;
+  G.banco[nome] = Math.round(((G.banco[nome] || 0) - x.preco) * 10) / 10;
+  darPet(nome, k); G.inv[nome].pet = k;
+  if (typeof sfxJogar === "function") sfxJogar();
+  volta(`${nome} adotou ${x.nome} ${x.icone}!`);
+};
+acoes.chocarOvo = () => {
+  const nome = perfil(), falta = PETS.filter(x => !x.limitada && !x.heroi && !temPet(nome, x.k));
+  if (!falta.length || (G.banco[nome] || 0) < PRECO_OVO) return;
+  if (G.lojaConf !== "ovo") { pedirConfirmacao("ovo"); return; }
+  clearTimeout(lojaConfT); G.lojaConf = false;
+  const x = falta[Math.floor(Math.random() * falta.length)];
+  G.banco[nome] = Math.round(((G.banco[nome] || 0) - PRECO_OVO) * 10) / 10;
+  darPet(nome, x.k); G.inv[nome].pet = x.k; salvarPlacar();
+  const y = window.scrollY; render(); window.scrollTo(0, y);
+  if (typeof mostrarPresente === "function") mostrarPresente(nome, `o pet ${x.nome} ${x.icone} no Ovo surpresa`);
+  else toast(`🥚 Saiu ${x.nome} ${x.icone}!`);
+};
+/* desenho dos pets na loja */
+function desenharPrevPets() {
+  document.querySelectorAll("canvas.pet-prev").forEach(cv => {
+    const w = cv.clientWidth; if (!w) return; const dpr = window.devicePixelRatio || 1, h = Math.round(w * .6);
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); cv.style.height = h + "px";
+    const c = cv.getContext("2d"), k = cv.height / 50; c.setTransform(k, 0, 0, k, (cv.width - 60 * k) / 2, 0); c.clearRect(0, 0, 60, 50);
+    desenharPet2D(c, cv.dataset.pet, 30, 30, 0, skinDe(perfil()));   // mostra o pet combinando com a skin que a pessoa usa
+  });
+}
 acoes.comprarArremesso = el => {
   const k = el.dataset.k, nome = perfil(), a = arremessoInfo(k);
   const usar = () => { G.inv = G.inv || {}; G.inv[nome] = G.inv[nome] || { vidas: 0 }; G.inv[nome].arremesso = k; salvarPlacar(); };
@@ -4196,6 +4659,7 @@ const SONS_EMOJI = {
   gelo: [[100, 100, 0, .05, "sine"], [96, 96, .06, .05, "sine"], [103, 103, .12, .05, "sine"], [91, 84, .2, .4, "triangle"]],
   labareda: [[40, 64, 0, .25, "sawtooth"], [64, 52, .22, .3, "sawtooth"], [76, 76, .5, .15, "square"]],
   gelofogo: [[100, 100, 0, .08, "sine"], [96, 96, .1, .08, "sine"], [45, 70, .25, .35, "sawtooth"]],
+  cristal: [[103, 103, 0, .06, "sine"], [108, 108, .06, .06, "sine"], [100, 100, .12, .06, "triangle"], [96, 84, .2, .35, "triangle"], [110, 110, .3, .12, "sine"]],
   choque: [[100, 70, 0, .5, "sawtooth"], [44, 32, 0, .45, "square"], [96, 96, .35, .08, "sine"], [91, 91, .45, .12, "sine"]],
   diamante: [[96, 96, 0, .06, "sine"], [100, 100, .07, .06, "sine"], [103, 103, .14, .06, "sine"], [108, 108, .21, .3, "sine"]],
   sideral: [[96, 72, 0, .45, "sine"], [91, 91, .4, .08, "triangle"], [96, 96, .5, .08, "triangle"], [100, 100, .6, .25, "triangle"]],
@@ -4275,7 +4739,7 @@ const GESTOS = [
   { k: "piao", icone: "🌪️", nome: "Pião", preco: 150, dura: 1.6, som: [[60, 96, 0, .8, "square"]] },
   { k: "mortal", icone: "🤸", nome: "Mortal", preco: 200, dura: 1.3, som: [[60, 84, 0, .35, "sine"], [84, 84, .45, .1, "square"], [88, 88, .55, .3, "square"]] },
   // edição limitada: só dá para comprar até "ate" (horário de Brasília); quem comprou fica com ele
-  { k: "buraconegro", icone: "🌑", nome: "Sugado", preco: 250, dura: 2.2, tipo: "gesto", limitada: true, ate: "2026-11-07T23:59:59-03:00",
+  { k: "buraconegro", icone: "🌑", nome: "Sugado", preco: 250, dura: 2.2, tipo: "gesto", limitada: true, ate: "2026-11-03T23:59:59-03:00",
     som: [[84, 36, 0, 1, "sawtooth"], [36, 36, 1, .15, "sine"], [40, 90, 1.2, .5, "sine"], [96, 96, 1.7, .25, "triangle"]] },
   { k: "gelo", icone: "🥶", nome: "Congelar", preco: 250, dura: 2.2, tipo: "gesto", limitada: true, ate: "2026-11-10T23:59:59-03:00",
     som: [[96, 96, 0, .06, "sine"], [100, 100, .08, .06, "sine"], [91, 79, .2, .5, "triangle"], [60, 40, 1.45, .3, "square"], [96, 96, 1.6, .05, "sine"], [91, 91, 1.68, .05, "sine"]] },
@@ -4285,7 +4749,7 @@ const GESTOS = [
     som: [[96, 96, 0, .08, "sine"], [45, 60, .3, .25, "sawtooth"], [100, 100, .65, .08, "sine"], [48, 64, .95, .25, "sawtooth"], [84, 96, 1.4, .4, "triangle"]] },
   { k: "sideral", icone: "🛸", nome: "Disco Voador", preco: 250, dura: 2.4, tipo: "gesto", limitada: true, ate: "2026-11-02T12:00:00-03:00",
     som: [[72, 76, 0, .3, "sine"], [76, 72, .3, .3, "sine"], [72, 76, .6, .3, "sine"], [76, 72, .9, .3, "sine"], [79, 91, 1.3, .5, "triangle"], [91, 60, 1.8, .5, "sine"]] },
-  { k: "galactico", icone: "🚀", nome: "Galáctico", preco: 250, dura: 2.4, tipo: "gesto", limitada: true, ate: "2026-11-06T23:59:59-03:00",
+  { k: "galactico", icone: "🚀", nome: "Galáctico", preco: 250, dura: 2.4, tipo: "gesto", limitada: true, ate: "2026-11-03T23:59:59-03:00",
     som: [[48, 72, 0, .9, "sine"], [84, 84, .8, .1, "triangle"], [88, 88, .95, .1, "triangle"], [91, 91, 1.1, .1, "triangle"], [96, 96, 1.25, .35, "triangle"], [72, 55, 1.7, .6, "sine"]] },
 ];
 const gestoInfo = k => GESTOS.find(g => g.k === k) || null;
@@ -4477,6 +4941,11 @@ function pedirConfirmacao(chave) {
 acoes.comprarSkin = el => {
   const k = el.dataset.s, nome = perfil(), s = skinInfo(k);
   if (temSkin(nome, k)) { usarSkin(nome, k); salvarPlacar(); const y = window.scrollY; render(); window.scrollTo(0, y); toast(`Agora você está de ${s.nome}`); return; }
+  if (s.codigo) { toast("Essa skin só se ganha com um código de presente"); return; }
+  if (s.variante) {   // versão Neon: precisa ter a original e ela ainda estar à venda
+    if (!temSkin(nome, s.base)) { toast(`Primeiro compre a skin ${skinInfo(s.base).nome}`); return; }
+    if (!naVenda(skinInfo(s.base))) { toast("A versão Neon só dá para comprar enquanto a coleção estiver na loja"); return; }
+  }
   if (!naVenda(s)) { toast("Essa edição limitada já acabou"); return; }
   if (soColecionador(s, nome)) return;
   if ((G.banco[nome] || 0) < s.preco) return;
@@ -5082,12 +5551,12 @@ document.addEventListener("click", e => {
 /* skins limitadas: o ADM pode mudar prazo e preço neste aparelho (G.admLim) */
 SKINS.forEach(s => { if (s.limitada) { s.ateOriginal = s.ate; s.precoOriginal = s.preco; } });
 FUNDOS_LIM.forEach(f => { f.ateOriginal = f.ate; f.precoOriginal = f.preco; });
-[...EMOJIS, ...GESTOS, ...AV_ESPECIAIS, ...ARREMESSOS].forEach(e => { if (e.limitada) { e.ateOriginal = e.ate; e.precoOriginal = e.preco; } });
-const todasLimitadas = () => [...SKINS.filter(s => s.limitada), ...FUNDOS_LIM, ...EMOJIS.filter(e => e.limitada), ...GESTOS.filter(g => g.limitada), ...AV_ESPECIAIS.filter(x => x.limitada), ...ARREMESSOS.filter(a => a.limitada)];
+[...EMOJIS, ...GESTOS, ...AV_ESPECIAIS, ...ARREMESSOS, ...PETS].forEach(e => { if (e.limitada) { e.ateOriginal = e.ate; e.precoOriginal = e.preco; } });
+const todasLimitadas = () => [...SKINS.filter(s => s.limitada), ...FUNDOS_LIM, ...EMOJIS.filter(e => e.limitada), ...GESTOS.filter(g => g.limitada), ...AV_ESPECIAIS.filter(x => x.limitada), ...ARREMESSOS.filter(a => a.limitada), ...PETS.filter(x => x.limitada)];
 /* cada item limitado tem sua chave (tipo + nome), porque "galactico" existe como fundo, emoji, gesto... */
 const chaveLim = x => (x.tipo || "skin") + "-" + x.k;
 const limInfo = k => todasLimitadas().find(x => chaveLim(x) === k);
-const temLim = (j, x) => (x.tipo === "fundo" ? temFundo(j, x.k) : x.tipo === "emoji" ? temEmoji(j, x.k) : x.tipo === "gesto" ? temGesto(j, x.k) : x.tipo === "avatar" ? temAvatar(j, x.k) : x.tipo === "arremesso" ? temArremesso(j, x.k) : temSkin(j, x.k));
+const temLim = (j, x) => (x.tipo === "fundo" ? temFundo(j, x.k) : x.tipo === "emoji" ? temEmoji(j, x.k) : x.tipo === "gesto" ? temGesto(j, x.k) : x.tipo === "avatar" ? temAvatar(j, x.k) : x.tipo === "arremesso" ? temArremesso(j, x.k) : x.tipo === "pet" ? temPet(j, x.k) : temSkin(j, x.k));
 function aplicarLimitadas() {
   const volta = {}; voltasAtivas().forEach(v => { COLECOES[v.col].chaves.forEach(k => { if (!volta[k] || Date.parse(v.ate) > Date.parse(volta[k])) volta[k] = v.ate; }); volta["pacote-" + COLECOES[v.col].pacote] = v.ate; });
   todasLimitadas().forEach(s => { const o = (G.admLim || {})[chaveLim(s)] || {}; s.ate = o.ate || s.ateOriginal; const vk = volta[chaveLim(s)]; if (vk && Date.parse(vk) > Date.parse(s.ate)) s.ate = vk; s.preco = o.preco || s.precoOriginal; if (s.tipo === "fundo") PRECO_FUNDO[s.k] = s.preco; });
@@ -5130,10 +5599,11 @@ TELAS.adm = () => {
     <h3>Jogador</h3>${escolherJog}
     <h3>Vidas extras</h3>
     <div class="stepper"><button class="btn ghost" type="button" data-a="admVida" data-v="-1" aria-label="Menos uma vida">−</button><b>${invVidas(n)}</b><button class="btn ghost" type="button" data-a="admVida" data-v="1" aria-label="Mais uma vida">+</button></div>
-    <h3>Skins</h3><div class="chips">${SKINS.map(s => chipItem(temSkin(n, s.k), s.preco === 0, "skin", s.k, esc(s.nome) + (s.limitada ? " ⭐" : ""))).join("")}</div>
+    <h3>Skins</h3><div class="chips">${SKINS.filter(s => !s.variante).map(s => chipItem(temSkin(n, s.k), s.preco === 0, "skin", s.k, esc(s.nome) + (s.limitada ? " ⭐" : ""))).join("")}</div>
     <h3>Fundos</h3><div class="chips">${FUNDOS.map(([k, t]) => chipItem(temFundo(n, k), k === "basico", "fundo", k, esc(t))).join("")}</div>
     <h3>Emojis</h3><div class="chips">${EMOJIS.map(e => chipItem(temEmoji(n, e.k), e.preco === 0, "emoji", e.k, e.e)).join("")}</div>
     <h3>Gestos</h3><div class="chips">${GESTOS.map(g => chipItem(temGesto(n, g.k), g.preco === 0, "gesto", g.k, g.icone + " " + esc(g.nome))).join("")}</div>
+    <h3>Pets</h3><div class="chips">${PETS.map(x => chipItem(temPet(n, x.k), false, "pet", x.k, x.icone + " " + esc(x.nome))).join("")}</div>
     <h3>Arremessos</h3><div class="chips">${ARREMESSOS.map(a => chipItem(temArremesso(n, a.k), a.preco === 0, "arremesso", a.k, a.icone + " " + esc(a.nome))).join("")}</div>
     <h3>Fotos de perfil</h3><div class="chips">${AV_ESPECIAIS.map(x => chipItem(temAvatar(n, x.k), false, "avatar", x.k, x.icone + " " + esc(x.nome))).join("")}</div>
     <p class="dim" style="font-size:14px">Toque para dar ou tirar. Verde = tem.</p>`;
@@ -5224,7 +5694,7 @@ Object.assign(acoes, {
   admItem(el) {
     const n = ADM.jog, k = el.dataset.k, t = el.dataset.t;
     G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 };
-    const lista = { skin: "skins", fundo: "fundos", emoji: "emojis", gesto: "gestos", avatar: "avatares", arremesso: "arremessos" }[t];
+    const lista = { skin: "skins", fundo: "fundos", emoji: "emojis", gesto: "gestos", avatar: "avatares", arremesso: "arremessos", pet: "pets" }[t];
     const atual = G.inv[n][lista] || [];
     if (el.getAttribute("aria-pressed") === "true") {
       G.inv[n][lista] = atual.filter(x => x !== k);
@@ -5441,20 +5911,20 @@ async function hashPresente(c) {
 function nomePremio(p) {
   if (p.moedas) return Math.round(p.moedas) + " moedas";
   const [tipo, k] = String(p.item || "").split(":");
-  const x = tipo === "skin" ? SKINS.find(i => i.k === k) : tipo === "emoji" ? emojiInfo(k) : tipo === "gesto" ? gestoInfo(k) : tipo === "arremesso" ? ARREMESSOS.find(i => i.k === k) : tipo === "avatar" ? avEspecial(k) : null;
+  const x = tipo === "skin" ? SKINS.find(i => i.k === k) : tipo === "emoji" ? emojiInfo(k) : tipo === "gesto" ? gestoInfo(k) : tipo === "arremesso" ? ARREMESSOS.find(i => i.k === k) : tipo === "avatar" ? avEspecial(k) : tipo === "pet" ? petInfo(k) : null;
   if (tipo === "fundo") { const f = FUNDOS.find(([fk]) => fk === k); return f ? "o fundo " + f[1] : ""; }
   if (!x) return "";
-  return { skin: "a skin ", emoji: "o emoji " + (x.e || "") + " ", gesto: "o gesto " + (x.icone || "") + " ", arremesso: "o arremesso " + (x.icone || "") + " ", avatar: "a foto " }[tipo] + x.nome;
+  return { skin: "a skin ", emoji: "o emoji " + (x.e || "") + " ", gesto: "o gesto " + (x.icone || "") + " ", arremesso: "o arremesso " + (x.icone || "") + " ", avatar: "a foto ", pet: "o pet " + (x.icone || "") + " " }[tipo] + x.nome;
 }
 function darPremio(nome, p) {
   G.inv = G.inv || {}; G.inv[nome] = G.inv[nome] || { vidas: 0 };
   const txt = nomePremio(p); if (!txt) return null;
   if (p.moedas) { const v = Math.round(+p.moedas); if (!(v >= 1 && v <= 5000)) return null; G.banco[nome] = Math.round(((G.banco[nome] || 0) + v) * 10) / 10; return { txt }; }
   const [tipo, k] = String(p.item).split(":");
-  const tem = { skin: () => temSkin(nome, k), emoji: () => temEmoji(nome, k), gesto: () => temGesto(nome, k), arremesso: () => temArremesso(nome, k), fundo: () => temFundo(nome, k), avatar: () => temAvatar(nome, k) }[tipo];
+  const tem = { skin: () => temSkin(nome, k), emoji: () => temEmoji(nome, k), gesto: () => temGesto(nome, k), arremesso: () => temArremesso(nome, k), fundo: () => temFundo(nome, k), avatar: () => temAvatar(nome, k), pet: () => temPet(nome, k) }[tipo];
   if (tem()) return { txt, jaTem: true };
   ({ skin: () => darSkin(nome, k), emoji: () => darEmoji(nome, k), gesto: () => darGesto(nome, k), fundo: () => darFundo(nome, k),
-    arremesso: () => { G.inv[nome].arremessos = [...(G.inv[nome].arremessos || []), k]; }, avatar: () => { G.inv[nome].avatares = [...(G.inv[nome].avatares || []), k]; } })[tipo]();
+    arremesso: () => { G.inv[nome].arremessos = [...(G.inv[nome].arremessos || []), k]; }, avatar: () => { G.inv[nome].avatares = [...(G.inv[nome].avatares || []), k]; }, pet: () => darPet(nome, k) })[tipo]();
   return { txt };
 }
 function mostrarPresente(nome, txt) {
@@ -5502,12 +5972,13 @@ function eventoFaixa() {
 function opcoesPremio() {
   const op = (v, t) => `<option value="${v}">${esc(t)}</option>`, grupo = (t, l) => l.length ? `<optgroup label="${t}">${l.join("")}</optgroup>` : "";
   return grupo("Moedas", [50, 100, 200, 500, 1000].map(v => op("moedas:" + v, v + " moedas")))
-    + grupo("Skins", SKINS.filter(x => x.preco > 0).map(x => op("skin:" + x.k, x.nome)))
+    + grupo("Skins", SKINS.filter(x => x.preco > 0 || x.codigo).map(x => op("skin:" + x.k, x.codigo ? "🔑 " + x.nome + " (só com código)" : x.nome)))
     + grupo("Emojis", EMOJIS.filter(x => x.preco > 0).map(x => op("emoji:" + x.k, x.e + " " + x.nome)))
     + grupo("Gestos", GESTOS.filter(x => x.preco > 0).map(x => op("gesto:" + x.k, x.icone + " " + x.nome)))
     + grupo("Arremessos", ARREMESSOS.filter(x => x.preco > 0).map(x => op("arremesso:" + x.k, x.icone + " " + x.nome)))
     + grupo("Fundos", FUNDOS.filter(([k]) => k !== "basico").map(([k, t]) => op("fundo:" + k, t)))
-    + grupo("Fotos de perfil", AV_ESPECIAIS.map(x => op("avatar:" + x.k, x.icone + " " + x.nome)));
+    + grupo("Fotos de perfil", AV_ESPECIAIS.map(x => op("avatar:" + x.k, x.icone + " " + x.nome)))
+    + grupo("Pets", PETS.map(x => op("pet:" + x.k, x.icone + " " + x.nome)));
 }
 function admEventosHTML() {
   if (!(chaveGitHub() && PODE_PUBLICAR_DIRETO)) return `<h3>Eventos para todo mundo</h3><p>Para publicar daqui, abra o jogo pelo site e guarde a chave do GitHub na aba <b>Aviso</b>. Também dá para pedir ao Claude, por exemplo: "começa um evento de moedas em dobro até domingo".</p>`;
@@ -5707,7 +6178,7 @@ function hostRecebe(conn, d) {
     const base = String(d.nome || "Amigo").replace(/\s+/g, " ").trim().slice(0, 20) || "Amigo";
     const usados = [perfil(), ...ON.sala.map(s => s.nome)];
     let nome = base, k = 2; while (usados.some(u => u.toLowerCase() === nome.toLowerCase())) nome = base + " " + (k++);
-    ON.sala.push({ conn, nome, moedas: Math.max(0, +d.moedas || 0), vidasInv: Math.max(0, Math.floor(+d.vidas || 0)), skin: skinInfo(d.skin).k, ficha: limparFicha(d.ficha), codigo: limparCodigoAmigo(d.amigo), arremesso: arremessoInfo(String(d.arremesso || "")).k, selo: [1, 2, 3].includes(d.selo) ? d.selo : 0 });
+    ON.sala.push({ conn, nome, moedas: Math.max(0, +d.moedas || 0), vidasInv: Math.max(0, Math.floor(+d.vidas || 0)), skin: skinInfo(d.skin).k, ficha: limparFicha(d.ficha), codigo: limparCodigoAmigo(d.amigo), arremesso: arremessoInfo(String(d.arremesso || "")).k, selo: [1, 2, 3].includes(d.selo) ? d.selo : 0, pet: petInfo(String(d.pet || "")) ? String(d.pet) : null });
     enviar(conn, { t: "bemvindo", nome, code: ON.code });
     enviarSala(); toast(`${nome} entrou na sala`); bip(880, .08);
     if (G.tela === "salaHost") render();
@@ -5739,7 +6210,7 @@ function hostSaiu(conn) {
 
 /* ---------- Anfitrião: começar ---------- */
 function comecarOnline() {
-  const lista = [{ nome: perfil(), local: true }].concat(ON.sala.filter(s => s.conn.open).map(s => ({ nome: s.nome, conn: s.conn, moedas: s.moedas, vidasInv: s.vidasInv, skin: s.skin, ficha: s.ficha, arremesso: s.arremesso, selo: s.selo || 0 })));
+  const lista = [{ nome: perfil(), local: true }].concat(ON.sala.filter(s => s.conn.open).map(s => ({ nome: s.nome, conn: s.conn, moedas: s.moedas, vidasInv: s.vidasInv, skin: s.skin, ficha: s.ficha, arremesso: s.arremesso, selo: s.selo || 0, pet: s.pet || null })));
   for (let k = 1; k <= ON.robos; k++) lista.push({ nome: "Robô " + k, robo: true });
   if (lista.length < 3) { toast("Precisa de pelo menos 3 jogadores"); return; }
   // times: sorteia e completa com robôs; cada time fica junto na roda
@@ -5754,16 +6225,17 @@ function comecarOnline() {
       cor: A_CORES[i % A_CORES.length], pele: A_PELE[i % A_PELE.length],
       vidas: A.cfg.vidas, vivo: true, moedas: 0, guardado: o.robo ? 0 : o.local ? (G.banco[o.nome] || 0) : (o.moedas || 0), ganho: 0, compradas: 0,
       home, x: home.x, y: home.y, alvo: null, modo: "casa", vel: A_VEL * aRnd(.88, 1.12), habil: aRnd(-.08, .08),
-      flash: 0, passo: 0, ctrl: false, tocou: false, saiuEm: null, arremesso: o.robo ? "bola" : o.local ? arremessoDe(o.nome) : (o.arremesso || "bola"), time: o.time };
+      flash: 0, passo: 0, ctrl: false, tocou: false, saiuEm: null, arremesso: o.robo ? "bola" : o.local ? arremessoDe(o.nome) : (o.arremesso || "bola"), pet: o.robo ? null : o.local ? petDe(o.nome) : (o.pet || null), time: o.time };
   });
   vestirRobos(A.P);
+  A.P.forEach(p => { const pt = p.humano && petInfo(p.pet); if (pt && pt.vel) p.vel *= pt.vel; });   // poder do pet (Coelho)
   A.P.forEach((p, i) => { if (!p.humano) return; p.selo = lista[i].local ? nivelSelo(p.nome) : (lista[i].selo || 0); vestir(p, lista[i].local ? skinDe(p.nome) : lista[i].skin); const f = lista[i].local ? personagemDe(p.nome) : lista[i].ficha; if (f) p.ficha = f; });
   A.cel = ON.myIdx = Math.max(0, lista.findIndex(o => o.local)); A.balls = []; A.fx = []; A.t = 0; A.fim = null; A.ptr = null; A.inicio = Date.now();
   A.st = { palavras: 0, acertos: 0, erros: 0, timeouts: 0, votos: 0, votosOk: 0, arremessos: 0, acertosBola: 0, rodadas: 0, compras: 0, moedas: {}, eventos: [] };
   ON.on = true; ON.pedido = null; ON.esperaTxt = ""; ON.fimVisto = false;
   $("app").hidden = true; $("arena").hidden = false; $("a-setup").hidden = true; $("a-game").hidden = false;
   window.scrollTo(0, 0);
-  const estatico = A.P.map(p => ({ nome: p.nome, cor: p.cor, pele: p.pele, skin: p.skin || "classico", ficha: p.ficha || null, arremesso: p.arremesso || "bola", selo: p.selo || 0, time: p.time, humano: p.humano, hx: Math.round(p.home.x), hy: Math.round(p.home.y) }));
+  const estatico = A.P.map(p => ({ nome: p.nome, cor: p.cor, pele: p.pele, skin: p.skin || "classico", ficha: p.ficha || null, arremesso: p.arremesso || "bola", selo: p.selo || 0, pet: p.pet || null, time: p.time, humano: p.humano, hx: Math.round(p.home.x), hy: Math.round(p.home.y) }));
   A.P.forEach(p => { if (p.conn) enviar(p.conn, { t: "start", P: estatico, eu: p.i, cfg: A.cfg, times: A.times }); });
   A.fp = false;
   iniciarLoop();
@@ -6063,7 +6535,8 @@ function renderActOnline() {
 /* ---------- Fim de partida online ---------- */
 function mostrarFimOnline() {
   const v = A.fim.vencedor, me = A.P[ON.myIdx];
-  if ((A.fim.ganhadores || [v]).some(p => p.skin === "buraconegro")) explosaoEstrelas();
+  if ((A.fim.ganhadores || [v]).some(p => skinBase(p.skin) === "buraconegro")) explosaoEstrelas();
+  else if ((A.fim.ganhadores || [v]).some(p => skinBase(p.skin) === "cristal")) { explosaoEstrelas("cristal"); somEmoji("cristal"); }
   const ord = [...A.P].sort((a, b) => (b.vivo - a.vivo) || (b.moedas - a.moedas));
   let nota = 0;
   const desenhar = enviado => abrirOv(`
@@ -6096,7 +6569,7 @@ function mostrarFimOnline() {
 }
 function novaRodadaSala() {
   clearInterval(ON.timer); fecharOv(); pararLoop();
-  ON.sala = A.P.filter(p => p.remoto && p.conn && p.conn.open).map(p => ({ conn: p.conn, nome: p.nome, moedas: Math.round(((p.guardado || 0) + Math.max(0, p.moedas)) * 10) / 10, vidasInv: p.vidasInv || 0, skin: p.skin || "classico", ficha: p.ficha || null, arremesso: p.arremesso || "bola", selo: p.selo || 0 }));
+  ON.sala = A.P.filter(p => p.remoto && p.conn && p.conn.open).map(p => ({ conn: p.conn, nome: p.nome, moedas: Math.round(((p.guardado || 0) + Math.max(0, p.moedas)) * 10) / 10, vidasInv: p.vidasInv || 0, skin: p.skin || "classico", ficha: p.ficha || null, arremesso: p.arremesso || "bola", selo: p.selo || 0, pet: p.pet || null }));
   ON.sala.forEach(s => enviar(s.conn, { t: "voltaSala" }));
   ON.on = false; A.P = []; A.fim = null;
   $("arena").hidden = true; $("app").hidden = false;
@@ -6170,7 +6643,7 @@ function entrarSala(code, nome, naoAbrir = false) {
   peer.on("open", () => {
     const conn = peer.connect(PREFIXO + code, { reliable: true, serialization: "json" });
     ON.hostConn = conn;
-    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome), ficha: personagemDe(nome), amigo: meuCodigoAmigo(), arremesso: arremessoDe(nome), selo: nivelSelo(nome) }); });
+    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome), ficha: personagemDe(nome), amigo: meuCodigoAmigo(), arremesso: arremessoDe(nome), selo: nivelSelo(nome), pet: petDe(nome) }); });
     conn.on("data", cliRecebe);
     conn.on("close", () => { if (ON.peer === peer) { toast("A conexão com a sala caiu."); sairOnline(); } });
   });
@@ -6196,7 +6669,7 @@ function cliRecebe(d) {
 }
 function iniciarCliente(d) {
   A.cfg = { ...PADRAO, ...(d.cfg || {}) };
-  A.P = d.P.map((o, i) => ({ i, nome: String(o.nome), cor: o.cor, pele: o.pele, skin: skinInfo(o.skin).k, ficha: o.ficha ? limparFicha(o.ficha) : null, arremesso: arremessoInfo(String(o.arremesso || "")).k, selo: [1, 2, 3].includes(o.selo) ? o.selo : 0, time: Number.isInteger(o.time) && TIMES[o.time] ? o.time : null, humano: !!o.humano, home: { x: o.hx, y: o.hy },
+  A.P = d.P.map((o, i) => ({ i, nome: String(o.nome), cor: o.cor, pele: o.pele, skin: skinInfo(o.skin).k, ficha: o.ficha ? limparFicha(o.ficha) : null, arremesso: arremessoInfo(String(o.arremesso || "")).k, selo: [1, 2, 3].includes(o.selo) ? o.selo : 0, pet: petInfo(String(o.pet || "")) ? String(o.pet) : null, time: Number.isInteger(o.time) && TIMES[o.time] ? o.time : null, humano: !!o.humano, home: { x: o.hx, y: o.hy },
     x: o.hx, y: o.hy, tx: o.hx, ty: o.hy, vidas: A.cfg.vidas, vivo: true, moedas: 0, ganho: 0, compradas: 0,
     alvo: null, modo: "casa", vel: A_VEL, habil: 0, flash: 0, passo: 0, ctrl: false, tocou: false }));
   A.cel = d.eu; ON.myIdx = d.eu; ON.on = true; ON.host = false; ON.fimVisto = false; ON.actKey = "";
