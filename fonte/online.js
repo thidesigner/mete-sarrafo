@@ -463,6 +463,7 @@ function renderActOnline() {
 function mostrarFimOnline() {
   const v = A.fim.vencedor, me = A.P[ON.myIdx];
   if ((A.fim.ganhadores || [v]).some(p => skinBase(p.skin) === "buraconegro")) explosaoEstrelas();
+  else if ((A.fim.ganhadores || [v]).some(p => skinBase(p.skin) === "cristal")) { explosaoEstrelas("cristal"); somEmoji("cristal"); }
   const ord = [...A.P].sort((a, b) => (b.vivo - a.vivo) || (b.moedas - a.moedas));
   let nota = 0;
   const desenhar = enviado => abrirOv(`
