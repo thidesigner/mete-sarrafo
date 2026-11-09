@@ -2588,11 +2588,27 @@ function desenharAcessorio2D(c, skin, x, y) {
     }
     case "cristal": {
       const t = performance.now() / 1000;
+      // brilho de arco-íris passando pela roupa (dentro do corpo)
+      c.save(); c.beginPath(); c.roundRect ? c.roundRect(x - 15, y - 20, 30, 30, 8) : c.rect(x - 15, y - 20, 30, 30); c.clip();
+      const fx = x - 30 + ((t * 22) % 70), arco = c.createLinearGradient(fx - 10, y - 20, fx + 10, y + 10);
+      ["rgba(255,120,200,0)", "rgba(255,120,200,.55)", "rgba(255,230,120,.55)", "rgba(120,255,200,.55)", "rgba(120,180,255,.55)", "rgba(120,180,255,0)"].forEach((cc, i, l) => arco.addColorStop(i / (l.length - 1), cc));
+      c.fillStyle = arco; c.fillRect(x - 15, y - 20, 30, 30);
+      const bg = c.createLinearGradient(x, y - 20, x, y + 10); bg.addColorStop(0, "rgba(255,255,255,.35)"); bg.addColorStop(.5, "rgba(255,255,255,0)"); c.fillStyle = bg; c.fillRect(x - 15, y - 20, 30, 30);
+      c.restore();
       // facetas brilhando na roupa
       c.strokeStyle = "rgba(255,255,255,.75)"; c.lineWidth = 1; c.beginPath();
       c.moveTo(x - 15, y - 12); c.lineTo(x - 4, y - 20); c.lineTo(x + 6, y - 6); c.lineTo(x - 6, y + 10); c.moveTo(x + 15, y - 14); c.lineTo(x + 6, y - 6); c.lineTo(x + 15, y + 4); c.moveTo(x - 4, y - 20); c.lineTo(x - 15, y + 2); c.stroke();
+      // cristais nos ombros e coroa de cristais
+      const cristal = (cx, cy, h, w, ang) => { c.save(); c.translate(cx, cy); c.rotate(ang); const gg = c.createLinearGradient(-w, -h, w, 0); gg.addColorStop(0, "#ffffff"); gg.addColorStop(.5, "#a8f0ff"); gg.addColorStop(1, "#4fb6e8");
+        c.fillStyle = gg; c.strokeStyle = "rgba(255,255,255,.9)"; c.lineWidth = .8; c.beginPath(); c.moveTo(-w, 0); c.lineTo(-w * .6, -h * .7); c.lineTo(0, -h); c.lineTo(w * .6, -h * .7); c.lineTo(w, 0); c.closePath(); c.fill(); c.stroke();
+        c.beginPath(); c.moveTo(0, -h); c.lineTo(0, 0); c.stroke(); c.restore(); };
+      cristal(x - 15, y - 16, 10, 3.5, -.6); cristal(x - 12, y - 18, 7, 2.5, -.3); cristal(x + 15, y - 16, 10, 3.5, .6); cristal(x + 12, y - 18, 7, 2.5, .3);
+      [[-10, 8, -.45], [-5, 11, -.2], [0, 14, 0], [5, 11, .2], [10, 8, .45]].forEach(([dx, h, ang]) => cristal(hx + dx, hy - Math.sqrt(Math.max(0, 225 - dx * dx)) + 3, h, 2.6, ang));
+      // cristaizinhos coloridos girando em volta (refletindo arco-íris)
+      for (let i = 0; i < 5; i++) { const a = -t * 1.1 + i * 1.26, sx = x + Math.cos(a) * 32, sy = y - 10 + Math.sin(a) * 12, cor = ["#ff9ad5", "#ffe27a", "#8affc8", "#8fd2ff", "#c9a2ff"][i];
+        if (Math.sin(a) < 0) continue; c.save(); c.globalCompositeOperation = "lighter"; c.fillStyle = cor; c.beginPath(); c.moveTo(sx, sy - 5); c.lineTo(sx + 3, sy); c.lineTo(sx, sy + 5); c.lineTo(sx - 3, sy); c.closePath(); c.fill(); c.restore(); }
       // diamante flutuando e girando em cima da cabeça
-      const dy = hy - 24 + Math.sin(t * 2) * 2, larg = Math.abs(Math.cos(t * 1.6)) * 9 + 2;
+      const dy = hy - 26 + Math.sin(t * 2) * 2, larg = Math.abs(Math.cos(t * 1.6)) * 7 + 2;
       c.save(); c.globalCompositeOperation = "lighter"; const g = c.createRadialGradient(hx, dy, 1, hx, dy, 16); g.addColorStop(0, "rgba(160,240,255,.6)"); g.addColorStop(1, "rgba(160,240,255,0)"); c.fillStyle = g; c.beginPath(); c.arc(hx, dy, 16, 0, Math.PI * 2); c.fill(); c.restore();
       const dg = c.createLinearGradient(hx - larg, dy - 8, hx + larg, dy + 8); dg.addColorStop(0, "#ffffff"); dg.addColorStop(.5, "#7fe7ff"); dg.addColorStop(1, "#3d8fe6");
       c.fillStyle = dg; c.strokeStyle = "#ffffff"; c.lineWidth = 1; c.beginPath(); c.moveTo(hx - larg, dy - 3); c.lineTo(hx - larg * .5, dy - 8); c.lineTo(hx + larg * .5, dy - 8); c.lineTo(hx + larg, dy - 3); c.lineTo(hx, dy + 9); c.closePath(); c.fill(); c.stroke();
@@ -3336,9 +3352,14 @@ function acessorio3D(cabeca, skin) {
     }
     case "cristal": {
       const brilho = (cor, op) => new THREE.MeshBasicMaterial({ color: cor, transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false });
-      const orb = new THREE.Group(); orb.position.y = .5; orb.userData.gira = 1.6; cabeca.add(orb);
+      const orb = new THREE.Group(); orb.position.y = .6; orb.userData.gira = 1.6; cabeca.add(orb);
       const dia = new THREE.Mesh(new THREE.OctahedronGeometry(.11), new THREE.MeshLambertMaterial({ color: "#8fe9ff", emissive: "#2a7fa8" })); dia.scale.set(1, 1.3, 1); orb.add(dia);
       orb.add(new THREE.Mesh(new THREE.SphereGeometry(.2, 12, 10), brilho("#a0f0ff", .25)));
+      const vidro = cor => new THREE.MeshLambertMaterial({ color: cor, emissive: "#1f6f94", transparent: true, opacity: .92 });
+      for (let k = 0; k < 7; k++) { const a = Math.PI + (k - 3) * .4, h = k === 3 ? .2 : k % 2 ? .12 : .15, m = new THREE.Mesh(new THREE.ConeGeometry(.03, h, 4), vidro(k % 2 ? "#e6fbff" : "#9fe8ff")); m.position.set(Math.sin(a) * .17, .17 + h / 2, Math.cos(a) * .17 - .03); m.rotation.z = -Math.sin(a) * .5; cabeca.add(m); }
+      for (const l of [-1, 1]) for (const [dx, h, inc] of [[.21, .2, .5], [.17, .13, .3]]) { const m = new THREE.Mesh(new THREE.ConeGeometry(.035, h, 4), vidro("#b8f2ff")); m.position.set(l * dx, -.24 + h / 2, 0); m.rotation.z = -l * inc; cabeca.add(m); }
+      const arco = new THREE.Group(); arco.position.y = -.35; arco.rotation.x = .3; arco.userData.gira = .9; cabeca.add(arco);
+      ["#ff9ad5", "#ffe27a", "#8affc8", "#8fd2ff", "#c9a2ff"].forEach((cor, k) => { const seg = new THREE.Mesh(new THREE.TorusGeometry(.52, .012, 6, 20, Math.PI * 2 / 5), brilho(cor, .85)); seg.rotation.x = Math.PI / 2; seg.rotation.z = k * Math.PI * 2 / 5; arco.add(seg); });
       const giro = new THREE.Group(); giro.position.y = -.3; giro.userData.gira = -1.1; cabeca.add(giro);
       for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2, m = new THREE.Mesh(new THREE.OctahedronGeometry(.035), new THREE.MeshBasicMaterial({ color: "#e6fbff" })); m.position.set(Math.cos(a) * .48, (k % 2 ? .12 : -.08), Math.sin(a) * .48); giro.add(m); }
       break;

@@ -162,5 +162,5 @@ A loja agora tem abas no topo, que ficam presas ao rolar: ⭐ Destaques, 👕 Sk
 
 ## Skin de código: Cristal Secreto (9/nov, pedido do Andre)
 
-Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um **código de presente** criado pelo ADM (Painel de ADM, aba Eventos → Código de presente → presente "🔑 Skin Cristal Secreto (só com código)", ou na Central de Eventos, aba Presente). Visual: roupa azul-cristal com facetas brilhando, um diamante flutuando e girando em cima da cabeça e brilhinhos em volta (também no 3D). Os robôs não usam essa skin. Quem ganha a skin vê ela na loja (para usar) e no "Minhas skins".
+Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um **código de presente** criado pelo ADM (Painel de ADM, aba Eventos → Código de presente → presente "🔑 Skin Cristal Secreto (só com código)", ou na Central de Eventos, aba Presente). Visual: roupa azul-cristal com facetas brilhando, um diamante flutuando e girando em cima da cabeça e brilhinhos em volta (também no 3D). Melhorada (9/nov): coroa de cristais, cristais nos ombros, brilho de arco-íris passando pela roupa e cristaizinhos coloridos girando em volta; no 3D, coroa e ombros de cristal e um anel de arco-íris girando. Os robôs não usam essa skin. Quem ganha a skin vê ela na loja (para usar) e no "Minhas skins".
 
