@@ -8,10 +8,10 @@ const { chromium } = require('playwright'); const fs = require('fs'); const T = 
   await ctx.route(u => u.pathname.endsWith('/avisos.json'), r => r.fulfill({ contentType: 'application/json', body: '{"avisos":[]}' }));
   const errs = [], abrir = async (nome, banco, extra) => { const pg = await ctx.newPage(); pg.on('pageerror', e => errs.push(nome + ': ' + e.message));
     await pg.goto('http://localhost:8767/teste/'); { const ab = await pg.$('#abertura'); if (ab) await ab.click(); }
-    await pg.evaluate(([n, bb, ex]) => { G.perfil = n; G.banco[n] = bb; G.visaoOnline = false; if (ex) G.evRank = { sem: semanaEvento().id, j: ex }; salvar(); ir("eventos"); }, [nome, banco, extra]); await pg.waitForTimeout(300); return pg; };
-  const host = await abrir("Andre", 500); await host.click('[data-a="entrarEvento"]'); await host.waitForTimeout(900);
+    await pg.evaluate(([n, bb, ex]) => { G.perfil = n; G.banco[n] = bb; G.visaoOnline = false; if (ex) G.evRank = { sem: semanaEvento().id, j: ex }; salvar(); ir("lobby"); }, [nome, banco, extra]); await pg.waitForTimeout(300); return pg; };
+  const host = await abrir("Andre", 500); await host.evaluate(() => acoes.entrarEvento()); await host.waitForTimeout(900);
   const h1 = await host.evaluate(() => ({ tela: G.tela, code: ON.code, host: ON.host }));
-  const amigo = await abrir("Maria", 300, { Maria: { g: 5, t: 100, v: 1 }, Leo: { g: 0, t: 50, v: 3 } }); await amigo.click('[data-a="entrarEvento"]'); await amigo.waitForTimeout(900);
+  const amigo = await abrir("Maria", 300, { Maria: { g: 5, t: 100, v: 1 }, Leo: { g: 0, t: 50, v: 3 } }); await amigo.evaluate(() => acoes.entrarEvento()); await amigo.waitForTimeout(900);
   const a1 = await amigo.evaluate(() => ({ tela: G.tela, code: ON.codeEntrar }));
   const rankHost0 = await host.evaluate(() => G.evRank.j);
   await host.evaluate(() => { ON.fp = false; }); await host.click('[data-a="comecarOnline"]'); await host.waitForTimeout(900);
@@ -33,8 +33,8 @@ const { chromium } = require('playwright'); const fs = require('fs'); const T = 
   // fim: Andre vence
   await host.evaluate(() => { A.t = 125; terminarA(A.P[ON.myIdx]); }); await host.waitForTimeout(1200);
   const rankHost = await host.evaluate(() => G.evRank.j), rankAmigo = await amigo.evaluate(() => G.evRank.j);
-  await amigo.evaluate(() => { sairOnline(); ir("eventos"); }); await amigo.waitForTimeout(500);
+  await amigo.evaluate(() => { sairOnline(); abrirPraca(); }); await amigo.waitForTimeout(800);
+  await amigo.evaluate(() => { PRACA.rankAba = "g"; abrirPainelPraca("🏆 Classificação", () => rankingHTML()); }); await amigo.waitForTimeout(300);
   await amigo.screenshot({ path: S + '/evp-rank.png' });
-  await amigo.click('[data-a="rankAba"][data-k="g"]'); await amigo.waitForTimeout(300);
-  const abaG = await amigo.$$eval('.ev-rank li', l => l.map(x => x.textContent.trim().replace(/\s+/g, ' ')));
+  const abaG = await amigo.$$eval('#pr-painel .ev-rank li', l => l.map(x => x.textContent.trim().replace(/\s+/g, ' ')));
   console.log(JSON.stringify({ h1, a1, rankHost0, lojaAmigo, h2, a2, h3, rankHost, rankAmigo, abaG, errs }, null, 0)); await b.close(); })();

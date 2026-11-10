@@ -187,3 +187,9 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
   - **Loja dentro da partida** (paga com as moedas guardadas): ❤️ Vida extra 60 (até 2 por partida), 🛡️ Escudo 40 (segura uma bolada), ⚡ Correr rápido 30 (35% mais rápido por 10 segundos) e 💡 Dica de letra 25 (só na sua vez de chutar, uma por palavra).
   - **Classificação da semana** (de segunda a domingo): 🏆 vitórias, ⏱️ tempo jogando e 💰 moedas gastas na loja do evento. Mostra quem jogou a Partida do Evento junto. Não há servidor: o celular de quem abre a sala soma no fim de cada partida e manda para todos; cada celular guarda a sua cópia e junta com a dos outros quando se encontram na sala.
   - Só funciona no site (é online). Dentro do Claude aparece só a lista do que está valendo.
+- **Praça Central (ideia do Andre, 10/nov):** o botão Eventos virou **Praça**: um lugar em 3D para andar com o seu bonequinho (com skin e pet). No site, quem está na praça vê os outros andando.
+  - **Placas de classificação:** 🏆 vitórias, ⏱️ tempo jogando e 💰 moedas gastas (da Partida do Evento, na semana) e 🪙 quem tem mais moedas.
+  - **Barraquinhas:** Skins, Pets, Arremessos e Emojis, mais a de ⭐ Destaques. Dá para comprar ali mesmo, sem ir para a loja.
+  - **Mural 📢 de eventos:** o que está valendo agora e as limitadas.
+  - **Porta 🏟️ da Partida do Evento:** entra na partida com loja (vida, escudo, correr rápido e dica). Quem está na praça recebe o aviso "Fulano entrou na partida!".
+  - Chafariz, árvores, bancos e um botão de pular.

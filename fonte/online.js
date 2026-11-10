@@ -1014,29 +1014,11 @@ verQuemEstaOnline = async () => { await _verOnline(); amigos().forEach(a => { if
    Sala de código fixo: todo mundo que toca em "Entrar na partida" cai na mesma sala (quem chega e acha fechada, abre).
    Dentro da partida tem loja (vida extra, escudo, correr rápido e dica de letra), paga com as moedas guardadas.
    Classificação da semana (vitórias, tempo jogando e moedas gastas na loja do evento): o anfitrião soma no fim
-   de cada partida e manda para todos; cada aparelho guarda em G.evRank e junta com o que recebe (o maior número vale). */
+   de cada partida e manda para todos; cada aparelho guarda em G.evRank e junta com o que recebe (o maior número vale).
+   A classificação aparece nas placas da Praça Central (semanaEvento, rankAtual e mesclarRank ficam em jogo.html). */
 const SALA_EVENTO = "EVENTOS1";
 const LOJA_EV = { vida: { ic: "❤️", nome: "Vida extra", preco: 60 }, escudo: { ic: "🛡️", nome: "Escudo", preco: 40 }, rapido: { ic: "⚡", nome: "Correr rápido", preco: 30 }, dica: { ic: "💡", nome: "Dica de letra", preco: 25 } };
 const evOn = () => ON.on && (ON.host ? ON.code : ON.codeEntrar) === SALA_EVENTO;
-function semanaEvento() {   // a semana vai de segunda a domingo (horário de Brasília)
-  const d = new Date(Date.now() - 3 * 3600000), dow = (d.getUTCDay() + 6) % 7;
-  const seg = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - dow)), dom = new Date(seg.getTime() + 6 * 86400000);
-  return { id: seg.toISOString().slice(0, 10), fim: `${dom.getUTCDate()}/${dom.getUTCMonth() + 1}` };
-}
-function rankAtual() { const sem = semanaEvento().id; if (!G.evRank || G.evRank.sem !== sem || !G.evRank.j) G.evRank = { sem, j: {} }; return G.evRank; }
-function mesclarRank(r) {
-  if (!r || typeof r !== "object" || typeof r.sem !== "string" || !r.j || typeof r.j !== "object") return;
-  const meu = rankAtual(); if (r.sem !== meu.sem) return;   // só vale a semana de agora
-  const num = x => Math.max(0, Math.min(1e7, Math.round(+x || 0)));
-  for (const [n0, e] of Object.entries(r.j).slice(0, 80)) {
-    const n = String(n0).replace(/\s+/g, " ").trim().slice(0, 20); if (!n || !e || typeof e !== "object") continue;
-    const a = meu.j[n] || { g: 0, t: 0, v: 0 };
-    meu.j[n] = { g: Math.max(a.g, num(e.g)), t: Math.max(a.t, num(e.t)), v: Math.max(a.v, num(e.v)) };
-  }
-  const nomes = Object.keys(meu.j), peso = n => meu.j[n].v * 100000 + meu.j[n].t + meu.j[n].g;
-  if (nomes.length > 60) nomes.sort((x, y) => peso(y) - peso(x)).slice(60).forEach(n => delete meu.j[n]);
-  salvar();
-}
 /* loja dentro da partida: o anfitrião confere e aplica; quem é de fora desconta as moedas quando chega o "lojaOk" */
 function comprarEvento(p, k) {
   const it = LOJA_EV[k], ph = A.ph || {}; if (!it || !p || !evOn() || A.fim) return;
@@ -1106,31 +1088,116 @@ mostrarFimOnline = function () {
   }
   return _fimEv();
 };
-/* Centro de Eventos: Partida do Evento e classificação da semana (em cima da lista do que está valendo) */
-function tempoTxt(s) { s = Math.round(s); if (s < 60) return s + " s"; const m = Math.floor(s / 60); return m < 60 ? m + " min" : Math.floor(m / 60) + " h " + (m % 60) + " min"; }
-function eventoPartidaHTML() {
-  const sem = semanaEvento(), r = rankAtual(), nome = perfil(), aba = ["v", "t", "g"].includes(ON.rankAba) ? ON.rankAba : "v";
-  const lista = Object.entries(r.j).map(([n, e]) => ({ n, ...e })).filter(e => e[aba] > 0).sort((a, b) => b[aba] - a[aba]).slice(0, 10);
-  const fmt = { g: e => fmtM(e.g) + " moedas", t: e => tempoTxt(e.t), v: e => e.v + (e.v === 1 ? " vitória" : " vitórias") };
-  return `
-    <div class="mi-caixa">
-      <h2 class="lb-secao">🏟️ Partida do Evento</h2>
-      <p class="lb-sub">Todo mundo entra na mesma sala. Dentro da partida tem loja: ❤️ vida extra, 🛡️ escudo, ⚡ correr rápido e 💡 dica de letra.</p>
-      <button class="lb-jogar" data-a="entrarEvento" style="flex:none;min-height:64px;font-size:26px" ${ON.conectando ? "disabled" : ""}>${ON.conectando ? "Entrando…" : "Entrar na partida"}</button>
-    </div>
-    <div class="mi-caixa">
-      <h2 class="lb-secao">🏆 Classificação da semana</h2>
-      <p class="lb-sub">Quem joga a Partida do Evento junto aparece aqui. Vale até domingo (${sem.fim}) e recomeça na segunda.</p>
-      <div class="seg2 ev-abas" role="group" aria-label="Classificação por">${[["v", "🏆 Vitórias"], ["t", "⏱️ Tempo"], ["g", "💰 Gastou"]].map(([k, t]) => `<button type="button" data-a="rankAba" data-k="${k}" aria-pressed="${aba === k}">${t}</button>`).join("")}</div>
-      ${lista.length ? `<ol class="ev-rank">${lista.map((e, i) => `<li class="${e.n === nome ? "eu" : ""}"><span class="ev-pos">${["🥇", "🥈", "🥉"][i] || i + 1 + "º"}</span><b>${esc(e.n)}${e.n === nome ? " (você)" : ""}</b><span>${fmt[aba](e)}</span></li>`).join("")}</ol>`
-        : `<p class="lb-sub">Ninguém ainda. Entre na Partida do Evento e seja o primeiro!</p>`}
-    </div>`;
-}
-if (TELAS.eventos) {
-  const _telaEventos = TELAS.eventos;
-  TELAS.eventos = () => _telaEventos().replace('<h1 class="lb-title">Centro de<br>Eventos</h1>', m => m + eventoPartidaHTML());
-}
 Object.assign(acoes, {
   entrarEvento() { if (ON.conectando) return; ON.codeEntrar = SALA_EVENTO; entrarSala(SALA_EVENTO, perfil()); },
-  rankAba(el) { ON.rankAba = el.dataset.k; const y = window.scrollY; render(); window.scrollTo(0, y); },
 });
+
+/* ================= Praça Central: ver os amigos andando (só no site) =================
+   O primeiro que entra na praça vira o "dono" (PeerJS com o id fixo PRACA_ID) e repassa a posição de todos.
+   Os outros se ligam nele. Se o dono sai, quem sobrou se reconecta e alguém vira o novo dono.
+   Vai pela rede: apelido, skin, pet, selo, personagem, moedas, posição e a classificação da semana. */
+const PRACA_ID = PREFIXO + "praca-v1";
+const PR = { peer: null, dono: false, conns: new Map(), hostConn: null, prox: 1, meuId: "", info: null, t: 0, tRank: 0, tentando: null, saindo: false };
+function prInfoLimpa(d) {
+  if (!d || typeof d !== "object") return null;
+  const nome = nomeLimpo(d.nome) || "Amigo";
+  return { nome, skin: skinInfo(String(d.skin || "")).k, pet: d.pet && petInfo(String(d.pet)) ? String(d.pet) : null, ficha: d.ficha ? limparFicha(d.ficha) : null,
+    selo: [1, 2, 3].includes(d.selo) ? d.selo : 0, moedas: Math.max(0, Math.min(1e7, Math.round(+d.moedas || 0))), cor: A_CORES[0], pele: A_PELE[0] };
+}
+function prPos(x, z, r, y) {
+  PR.t += 1;
+  const num = v => Math.round((+v || 0) * 100) / 100;
+  if (PR.dono) return;   // o dono manda a posição dele junto com a de todos (prTick)
+  if (PR.hostConn && PR.ultimoPs && Date.now() - PR.ultimoPs > 6000) { PR.ultimoPs = 0; prReconectar(); return; }   // o dono sumiu sem avisar
+  if (PR.t % 6 === 0 && PR.hostConn) enviar(PR.hostConn, { t: "p", x: num(x), z: num(z), r: num(r), y: num(y) });
+}
+function prTick() {
+  if (!PR.dono || !PRACA.on) return;
+  const eu = PRACA.eu, num = v => Math.round((+v || 0) * 100) / 100, l = [["h", num(eu.x), num(eu.z), num(eu.r), num(eu.y)]];
+  for (const [id, c] of PR.conns) if (c.pos) l.push([id, ...c.pos]);
+  for (const c of PR.conns.values()) enviar(c.conn, { t: "ps", l });
+  if (Date.now() - PR.tRank > 4000) { PR.tRank = Date.now(); for (const c of PR.conns.values()) enviar(c.conn, { t: "rk", r: rankAtual(), m: moedasPraca() }); }
+}
+function prInfos() { const l = { h: PR.info }; for (const [id, c] of PR.conns) if (c.info) l[id] = c.info; return l; }
+function prMandarInfos() { const l = prInfos(); for (const c of PR.conns.values()) enviar(c.conn, { t: "infos", l }); }
+function prVirarDono() {
+  const peer = new Peer(PRACA_ID, { debug: 0 }); PR.peer = peer;
+  peer.on("open", () => { PR.dono = true; PR.meuId = "h"; prContar(); clearInterval(PR.timer); PR.timer = setInterval(prTick, 120); });
+  peer.on("error", e => { if (!PRACA.on || PR.peer !== peer) return; if (e.type === "unavailable-id") { try { peer.destroy(); } catch {} prReconectar(); } });
+  peer.on("connection", conn => {
+    conn.on("data", d => prDonoRecebe(conn, d));
+    const sai = () => { for (const [id, c] of PR.conns) if (c.conn === conn) { PR.conns.delete(id); pracaTirar(id); for (const o of PR.conns.values()) enviar(o.conn, { t: "sai", id }); } prContar(); };
+    conn.on("close", sai); conn.on("error", sai);
+  });
+}
+function prDonoRecebe(conn, d) {
+  if (!d || typeof d !== "object") return;
+  let id = null; for (const [k, c] of PR.conns) if (c.conn === conn) id = k;
+  if (d.t === "ola") {
+    if (!id) { if (PR.conns.size >= 19) { enviar(conn, { t: "cheia" }); return; } id = "c" + (PR.prox++); PR.conns.set(id, { conn, info: null, pos: null }); }
+    const c = PR.conns.get(id); c.info = prInfoLimpa(d.info); mesclarRank(d.r, d.m);
+    enviar(conn, { t: "bem", id }); pracaOutro(id, c.info); prMandarInfos(); prContar();
+    enviar(conn, { t: "rk", r: rankAtual(), m: moedasPraca() });
+    return;
+  }
+  if (!id) return;
+  const c = PR.conns.get(id);
+  if (d.t === "p") { const n = v => Math.max(-40, Math.min(40, +v || 0)); c.pos = [n(d.x), n(d.z), +d.r || 0, Math.max(0, Math.min(5, +d.y || 0))]; pracaPos(id, ...c.pos); }
+  else if (d.t === "info") { c.info = prInfoLimpa(d.info); pracaOutro(id, c.info); prMandarInfos(); }
+  else if (d.t === "rk") mesclarRank(d.r, d.m);
+  else if (d.t === "portal" && c.info) { toast(`${c.info.nome} entrou na Partida do Evento! Vá até a porta para jogar junto.`); for (const [k, o] of PR.conns) if (k !== id) enviar(o.conn, { t: "portal", nome: c.info.nome }); }
+}
+function prEntrar() {
+  const peer = new Peer({ debug: 0 }); PR.peer = peer;
+  peer.on("open", () => {
+    const conn = peer.connect(PRACA_ID, { reliable: true, serialization: "json" }); PR.hostConn = conn;
+    conn.on("open", () => { enviar(conn, { t: "ola", info: PR.info, r: rankAtual(), m: moedasPraca() }); });
+    conn.on("data", d => prMembroRecebe(d));
+    conn.on("close", () => { if (PR.peer === peer && PRACA.on && !PR.saindo) prReconectar(); });
+  });
+  peer.on("error", e => {
+    if (!PRACA.on || PR.peer !== peer) return;
+    if (e.type === "peer-unavailable") { try { peer.destroy(); } catch {} prVirarDono(); return; }   // ninguém na praça: você é o dono
+    prReconectar();
+  });
+}
+function prMembroRecebe(d) {
+  if (!d || typeof d !== "object") return;
+  if (d.t !== "cheia") PR.ultimoPs = Date.now();
+  if (d.t === "bem") { PR.meuId = String(d.id); prContar(); }
+  else if (d.t === "infos" && d.l && typeof d.l === "object") {
+    const ids = Object.keys(d.l).filter(id => id !== PR.meuId).slice(0, 20);
+    for (const id of ids) pracaOutro(id, prInfoLimpa(d.l[id]));
+    for (const id of [...PRACA.outros.keys()]) if (!ids.includes(id)) pracaTirar(id);
+    prContar();
+  }
+  else if (d.t === "ps" && Array.isArray(d.l)) for (const a of d.l.slice(0, 20)) { if (!Array.isArray(a) || a[0] === PR.meuId) continue; const n = v => Math.max(-40, Math.min(40, +v || 0)); pracaPos(String(a[0]), n(a[1]), n(a[2]), +a[3] || 0, Math.max(0, Math.min(5, +a[4] || 0))); }
+  else if (d.t === "sai") { pracaTirar(String(d.id)); prContar(); }
+  else if (d.t === "rk") mesclarRank(d.r, d.m);
+  else if (d.t === "portal") toast(`${nomeLimpo(d.nome)} entrou na Partida do Evento! Vá até a porta para jogar junto.`);
+  else if (d.t === "cheia") toast("A praça está cheia agora. Você está passeando sozinho.");
+}
+function prReconectar() {
+  clearTimeout(PR.tentando); clearInterval(PR.timer);
+  try { if (PR.peer) PR.peer.destroy(); } catch {}
+  PR.peer = null; PR.hostConn = null; PR.dono = false; PR.conns.clear(); pracaTirarTodos(); prContar();
+  PR.tentando = setTimeout(() => { if (PRACA.on) prEntrar(); }, 400 + Math.random() * 1400);
+}
+function prContar() { const g = $("pr-gente"); if (g) g.textContent = PRACA.rede.contar(); }
+PRACA.rede = {
+  pos: prPos,
+  info(i) { PR.info = prInfoLimpa(i); if (PR.dono) { prMandarInfos(); } else if (PR.hostConn) enviar(PR.hostConn, { t: "info", info: PR.info }); },
+  portal() { if (PR.dono) { for (const c of PR.conns.values()) enviar(c.conn, { t: "portal", nome: PR.info.nome }); } else if (PR.hostConn) enviar(PR.hostConn, { t: "portal" }); },
+  contar() { const n = 1 + PRACA.outros.size; return n === 1 ? "👤 Só você aqui" : `👥 ${n} na praça`; },
+};
+PRACA.conectar = info => {
+  if (typeof Peer === "undefined") { const g = $("pr-gente"); if (g) g.textContent = "👤 Sem internet: só você"; return; }
+  PR.saindo = false; PR.info = prInfoLimpa(info); anotarMoedas(PR.info.nome, PR.info.moedas); PR.prox = 1; prEntrar();
+};
+PRACA.desconectar = () => {
+  PR.saindo = true; clearTimeout(PR.tentando); clearInterval(PR.timer); PR.ultimoPs = 0;
+  try { if (PR.hostConn) PR.hostConn.close(); } catch {}
+  for (const c of PR.conns.values()) { try { c.conn.close(); } catch {} }   // avisa quem ficou, para alguém virar o novo dono
+  try { if (PR.peer) PR.peer.destroy(); } catch {}
+  PR.peer = null; PR.hostConn = null; PR.dono = false; PR.conns.clear();
+};

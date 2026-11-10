@@ -102,12 +102,22 @@ Abre com **5 toques rápidos no título "Jogo de Pergunta"** da tela inicial e d
 - Tudo vale só no aparelho onde foi feito (não há servidor). Skin limitada nova ou mudança para todos: no código.
 - Não descreva o toque escondido em textos para as crianças. O segredo de verdade é o código de 5 números.
 
+## Praça Central (ideia do Andre)
+
+Botão "Praça" na tela inicial: lugar 3D para andar com o bonequinho (`abrirPraca`, bloco "Praça Central" em `fonte/jogo.html`; fica num `div#praca` por cima do `#app`, como a arena).
+- Tem 4 placas de classificação (`PRACA_PLACAS`: vitórias, tempo, gastou e moedas), barraquinhas da loja (`PRACA_BARRACAS`, mostram um pedaço da loja com `lojaSecHTML`), mural de eventos, destaques e a porta da Partida do Evento. Chegando perto aparece um botão; o painel por cima usa as mesmas ações da loja (`atualizarPainelPraca` refaz o painel depois de cada toque).
+- Controles: círculo à esquerda para andar, arrastar a tela para olhar, botão de pular; no PC, WASD/setas e espaço.
+- Bonequinho: `modeloBoneco3D` (o mesmo da partida) em `pracaModelo`.
+- Ver os amigos (só no site, `fonte/online.js`, bloco "Praça Central"): o primeiro que entra vira o dono (PeerJS com id fixo `PRACA_ID`) e repassa as posições; se o dono sai, quem fica se reconecta e alguém vira o novo dono. Vai pela rede só apelido, skin, pet, selo, personagem, moedas, posição e a classificação. Máximo de 20 na praça.
+- Classificação: `G.evRank` (semana, Partida do Evento) e `G.pracaMoedas` (moedas vistas na praça), juntadas por `mesclarRank`.
+- Teste: `ferramentas/teste/teste-praca.js`.
+
 ## Avisos do ADM para todo mundo
 
 `avisos.json` na raiz do site: `{"avisos": [{"id", "texto" (até 200 letras), "de", "ate"}]}` (datas ISO). Todo jogo aberto no site (oficial e teste) lê o arquivo ao abrir e a cada minuto; aviso novo aparece uma vez numa janela "📢 Aviso do ADM" e, enquanto vale, numa faixa que corre na tela inicial. Dentro do Claude não chega.
 - Quando o pai pedir "manda o aviso: …": acrescente um aviso com `id` novo (ex.: `a` + data), `de` agora e `ate` (padrão 1 dia), apague os vencidos, commit e push direto na `main`. Em ~1 minuto chega em todos.
 - O pai também publica sozinho pela aba "Aviso" do Painel de ADM. Com a **chave do GitHub** guardada no celular dele (token fino, só o repositório `mete-sarrafo`, só Contents leitura e escrita), o botão "Publicar para todo mundo" grava `avisos.json` direto pela API do GitHub. A chave fica só em `localStorage["ms-adm-chave"]` daquele aparelho, fora do estado do jogo (`ms-festa`). **Nunca peça, guarde, escreva ou faça commit dessa chave.** Sem chave, a aba monta o arquivo para colar no editor do GitHub.
-- Centro de Eventos (botão "Eventos" na tela inicial, `TELAS.eventos`): mostra para os jogadores o que vale agora (`eventosAgora`) e as coleções limitadas à venda (`colecoesNaLoja`). Só leitura; o número do botão (`qtdEventos`) conta só os eventos do ADM. Tipo de evento novo: acrescente também em `eventosAgora`.
+- Mural de eventos (`muralEventosHTML`, dentro da Praça Central): mostra o que vale agora (`eventosAgora`) e as coleções limitadas à venda (`colecoesNaLoja`). Só leitura; o número do botão Praça (`qtdEventos`) conta só os eventos do ADM. Tipo de evento novo: acrescente também em `eventosAgora`.
 - Partida do Evento (só no site, em `fonte/online.js`, bloco "Partida do Evento"): sala fixa `SALA_EVENTO` (`EVENTOS1`), aberta pelo primeiro que chega. Loja dentro da partida `LOJA_EV` (mensagem `lojaEv`; o anfitrião confere em `comprarEvento` e responde `lojaOk`/`lojaNao`). Classificação da semana em `G.evRank = {sem, j: {nome: {g, t, v}}}` (gastou, segundos, vitórias): o anfitrião soma no fim (`mostrarFimOnline`) e manda `rank`; o `hello` e a `sala` também levam a tabela, juntada por `mesclarRank` (o maior número vale). Teste: `ferramentas/teste/teste-evento.js`.
 - Só o pai pede aviso. Texto curto, para crianças, sem dados pessoais, sem links.
 - Pelo chat também vale para eventos: "manda o evento: moedas em dobro até domingo", "promoção de 30% nas skins por 1 dia", "código de presente FESTA com 200 moedas" (no arquivo vai só o hash) ou "encerra a promoção". Faça igual ao aviso: edite `avisos.json`, commit e push direto na `main`.
