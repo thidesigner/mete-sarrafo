@@ -325,6 +325,20 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .mi-missao { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,.06); border-radius: 12px; padding: 8px; }
 .mi-missao.pegou { opacity: .6; }
 .ev-item .mi-txt small.ev-fim { color: #ffd23f; font-weight: 700; }
+.ev-abas { align-self: center; }
+.ev-rank { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.ev-rank li { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,.06); border-radius: 12px; padding: 8px 10px; }
+.ev-rank li.eu { background: rgba(255,210,63,.18); outline: 2px solid #ffd23f; }
+.ev-rank .ev-pos { width: 30px; text-align: center; font-weight: 800; flex: none; }
+.ev-rank b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ev-rank li > span:last-child { color: #c9d6ea; font-size: 14px; flex: none; }
+.ev-loja { margin-top: 10px; border-top: 1px dashed rgba(255,255,255,.25); padding-top: 8px; }
+.ev-loja p { display: flex; justify-content: space-between; align-items: center; margin: 0 0 6px; }
+.ev-loja p > span { display: inline-flex; align-items: center; gap: 4px; font-weight: 800; }
+.ev-loja-b { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.ev-loja-b button { display: flex; justify-content: space-between; align-items: center; gap: 4px; font: 700 13px Nunito, sans-serif; color: #0b1b33; background: #ffd23f; border: 2px solid #0b1b33; border-radius: 10px; padding: 8px; min-height: 40px; cursor: pointer; }
+.ev-loja-b button b { background: #0b1b33; color: #ffd23f; border-radius: 8px; padding: 1px 6px; }
+.ev-loja-b button:disabled { opacity: .45; cursor: default; }
 .mi-ic { font-size: 28px; flex: none; }
 .mi-txt { flex: 1; min-width: 0; display: grid; gap: 4px; } .mi-txt b { font-size: 15px; } .mi-txt small { font-size: 12px; color: #c9d6ea; }
 .mi-barra { display: block; height: 10px; border-radius: 6px; background: rgba(0,0,0,.35); overflow: hidden; } .mi-barra i { display: block; height: 100%; background: linear-gradient(90deg, #37d99a, #ffd23f); }
@@ -3821,6 +3835,8 @@ function desenhar3D() {
     const s = Math.sin((p.passo + (pose ? pose.passo : 0)) / 14) * .7;
     b.pernaE.rotation.x = s; b.pernaD.rotation.x = -s; b.bracoE.rotation.x = -s * .8; b.bracoD.rotation.x = s * .8;
     b.corpoMat.emissive.set(p.flash > 0 ? "#ff1f4b" : "#000000");
+    if (p.escudo && !b.bolha) { b.bolha = new THREE.Mesh(new THREE.SphereGeometry(.95, 18, 14), new THREE.MeshBasicMaterial({ color: "#7fd0ff", transparent: true, opacity: .22, depthWrite: false })); b.bolha.position.y = .95; b.g.add(b.bolha); }
+    if (b.bolha) b.bolha.visible = !!p.escudo;   // escudo comprado na Partida do Evento
     const rot = p.nome + "|" + p.vidas;
     if (rot !== b.rotulo) {
       b.rotulo = rot; b.g.remove(b.tag); b.tag.material.map.dispose();

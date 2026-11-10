@@ -17,10 +17,10 @@ TELAS_COM_MUSICA.push("salaHost", "esperando", "entrar", "criandoSala");
 /* ---------- Anfitrião: criar sala ---------- */
 function usarSalaFixa() { return G.salaFixa ?? (perfil().toLowerCase() === "andre"); }
 /* auto: nome de quem chegou pelo QR e achou a sala fechada; essa pessoa abre a sala */
-function criarSala(fixa = usarSalaFixa(), auto = null) {
+function criarSala(fixa = usarSalaFixa(), auto = null, codigoFixo = SALA_DO_ANDRE) {
   if (typeof Peer === "undefined") { toast("A conexão online não carregou. Confira a internet."); return; }
   if (ON.peer) { try { ON.peer.destroy(); } catch {} }
-  ON.host = true; ON.on = false; ON.code = fixa ? SALA_DO_ANDRE : gerarCodigo(); ON.sala = [];
+  ON.host = true; ON.on = false; ON.code = fixa ? codigoFixo : gerarCodigo(); ON.sala = [];
   const peer = new Peer(PREFIXO + ON.code, { debug: 0 });
   ON.peer = peer;
   ir("criandoSala");
@@ -31,7 +31,7 @@ function criarSala(fixa = usarSalaFixa(), auto = null) {
   peer.on("error", e => {
     if (e.type === "unavailable-id" && auto) { entrarSala(ON.code, auto, true); return; }   // alguém abriu ao mesmo tempo
     if (e.type === "unavailable-id") {
-      if (fixa) { toast("A Sala do Andre já está aberta. Entrando nela…"); ON.codeEntrar = SALA_DO_ANDRE; entrarSala(SALA_DO_ANDRE, perfil(), true); return; }
+      if (fixa) { toast(codigoFixo === SALA_EVENTO ? "A Partida do Evento já está aberta. Entrando nela…" : "A Sala do Andre já está aberta. Entrando nela…"); ON.codeEntrar = codigoFixo; entrarSala(codigoFixo, perfil(), true); return; }
       criarSala(false); return;
     }
     if (e.type === "peer-unavailable") return;
@@ -47,7 +47,8 @@ function criarSala(fixa = usarSalaFixa(), auto = null) {
 function enviarSala() {
   const nomes = [perfil(), ...ON.sala.map(s => s.nome)];
   const codigos = { [perfil()]: meuCodigoAmigo() }; ON.sala.forEach(s => { if (s.codigo) codigos[s.nome] = s.codigo; });
-  ON.sala.forEach(s => enviar(s.conn, { t: "sala", nomes, robos: ON.robos, code: ON.code, codigos }));
+  const rank = ON.code === SALA_EVENTO ? rankAtual() : undefined;
+  ON.sala.forEach(s => enviar(s.conn, { t: "sala", nomes, robos: ON.robos, code: ON.code, codigos, rank }));
 }
 TELAS.criandoSala = () => `
   <section data-fundo="${fundoAtual()}" class="bgf lobby"><h1 class="lb-title" style="font-size:40px">Criando sala…</h1><p class="lb-sub">Conectando ao servidor.</p>
@@ -62,9 +63,9 @@ TELAS.salaHost = () => {
   return `
   <section data-fundo="${fundoAtual()}" class="bgf lobby" aria-label="Sala online">
     <div class="lb-top"><button class="lb-pill" data-a="encerrarSala">← Fechar sala</button><span class="lb-pill">Sala <b style="font-family:var(--display);font-size:20px;margin-left:6px">${esc(ON.code)}</b></span></div>
-    <h1 class="lb-title" style="font-size:38px">Chame os amigos</h1>
+    <h1 class="lb-title" style="font-size:38px">${ON.code === SALA_EVENTO ? "Partida do Evento" : "Chame os amigos"}</h1>
     <p class="lb-sub">Eles escaneiam o QR code ou abrem o link no celular deles. Ninguém precisa de conta.</p>
-    ${ON.sala.length ? "" : `<button class="lb-cont" data-a="trocarSala">${ON.code === SALA_DO_ANDRE ? "Usar um código sorteado" : "Usar a Sala do Andre (QR impresso)"}</button>`}
+    ${ON.sala.length || ON.code === SALA_EVENTO ? "" : `<button class="lb-cont" data-a="trocarSala">${ON.code === SALA_DO_ANDRE ? "Usar um código sorteado" : "Usar a Sala do Andre (QR impresso)"}</button>`}
     <div class="qr" id="qr-sala" role="img" aria-label="QR code da sala"></div>
     <div class="url" style="color:#fff">${esc(linkSala(ON.code))}</div>
     <div class="card" style="background:rgba(11,27,51,.6)">
@@ -106,6 +107,7 @@ function hostRecebe(conn, d) {
     const usados = [perfil(), ...ON.sala.map(s => s.nome)];
     let nome = base, k = 2; while (usados.some(u => u.toLowerCase() === nome.toLowerCase())) nome = base + " " + (k++);
     ON.sala.push({ conn, nome, moedas: Math.max(0, +d.moedas || 0), vidasInv: Math.max(0, Math.floor(+d.vidas || 0)), skin: skinInfo(d.skin).k, ficha: limparFicha(d.ficha), codigo: limparCodigoAmigo(d.amigo), arremesso: arremessoInfo(String(d.arremesso || "")).k, selo: [1, 2, 3].includes(d.selo) ? d.selo : 0, pet: petInfo(String(d.pet || "")) ? String(d.pet) : null });
+    if (ON.code === SALA_EVENTO) mesclarRank(d.rank);
     enviar(conn, { t: "bemvindo", nome, code: ON.code });
     enviarSala(); toast(`${nome} entrou na sala`); bip(880, .08);
     if (G.tela === "salaHost") render();
@@ -244,6 +246,9 @@ function entrada(p, d) {
         } else if (d.escolha === "comprar" && saldoCompra(p) >= A.cfg.preco && p.compradas < A.cfg.maxCompra) comprarA(p);
         else eliminarA(p);
       }
+      break;
+    case "lojaEv":
+      comprarEvento(p, String(d.k || ""));
       break;
     case "sug": {
       const nota = [1, 2, 3, 4, 5].includes(d.nota) ? d.nota : null;
@@ -564,20 +569,20 @@ Object.assign(acoes, {
 function entrarSala(code, nome, naoAbrir = false) {
   if (typeof Peer === "undefined") { toast("A conexão online não carregou. Confira a internet."); return; }
   if (ON.peer) { try { ON.peer.destroy(); } catch {} }
-  ON.host = false; ON.conectando = true; render();
+  ON.host = false; ON.conectando = true; ON.codeEntrar = code; render();
   const peer = new Peer({ debug: 0 }); ON.peer = peer;
   const desiste = setTimeout(() => { if (ON.conectando) { ON.conectando = false; toast("Não consegui entrar. Confira a internet e tente de novo."); render(); } }, 15000);
   peer.on("open", () => {
     const conn = peer.connect(PREFIXO + code, { reliable: true, serialization: "json" });
     ON.hostConn = conn;
-    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome), ficha: personagemDe(nome), amigo: meuCodigoAmigo(), arremesso: arremessoDe(nome), selo: nivelSelo(nome), pet: petDe(nome) }); });
+    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome), ficha: personagemDe(nome), amigo: meuCodigoAmigo(), arremesso: arremessoDe(nome), selo: nivelSelo(nome), pet: petDe(nome), rank: code === SALA_EVENTO ? rankAtual() : undefined }); });
     conn.on("data", cliRecebe);
     conn.on("close", () => { if (ON.peer === peer) { toast("A conexão com a sala caiu."); sairOnline(); } });
   });
   peer.on("error", e => {
     clearTimeout(desiste); ON.conectando = false;
     // a Sala do Andre está fechada: quem chegou primeiro abre a sala
-    if (e.type === "peer-unavailable" && code === SALA_DO_ANDRE && !naoAbrir) { criarSala(true, nome); return; }
+    if (e.type === "peer-unavailable" && (code === SALA_DO_ANDRE || code === SALA_EVENTO) && !naoAbrir) { criarSala(true, nome, code); return; }
     toast(e.type === "peer-unavailable" ? "Sala não encontrada. Confira o código." : "Problema na conexão: " + e.type);
     if (G.tela === "entrar") render();
   });
@@ -586,7 +591,10 @@ function cliRecebe(d) {
   if (!d || typeof d !== "object") return;
   switch (d.t) {
     case "bemvindo": ON.meuNome = d.nome; ir("esperando"); break;
-    case "sala": ON.salaNomes = Array.isArray(d.nomes) ? d.nomes.map(String) : []; ON.robos = +d.robos || 0; ON.salaCodigos = d.codigos && typeof d.codigos === "object" ? d.codigos : {}; if (G.tela === "esperando") render(); break;
+    case "rank": mesclarRank(d.r); break;
+    case "lojaOk": { const it = LOJA_EV[d.k]; if (!it) break; G.banco[ON.meuNome] = Math.round(((G.banco[ON.meuNome] || 0) - it.preco) * 10) / 10; salvar(); toast(`${it.ic} ${it.nome}!`); bip(990, .08); renderAct(); break; }
+    case "lojaNao": toast(String(d.msg || "Não deu para comprar.").slice(0, 80)); renderAct(); break;
+    case "sala": if (d.rank) mesclarRank(d.rank); ON.salaNomes = Array.isArray(d.nomes) ? d.nomes.map(String) : []; ON.robos = +d.robos || 0; ON.salaCodigos = d.codigos && typeof d.codigos === "object" ? d.codigos : {}; if (G.tela === "esperando") render(); break;
     case "fora": toast(d.msg || "Não deu para entrar."); sairOnline(); break;
     case "start": iniciarCliente(d); break;
     case "st": if (ON.on) aplicarEstado(d); break;
@@ -1001,3 +1009,128 @@ amigoRecebe = (conn, d) => {
 };
 const _verOnline = verQuemEstaOnline;
 verQuemEstaOnline = async () => { await _verOnline(); amigos().forEach(a => { if (AMG.online[a.codigo] && conversa(a.codigo).some(m => m.pendente)) entregarPendentes(a.codigo); }); };
+
+/* ================= Partida do Evento (botão Eventos → Centro de Eventos) =================
+   Sala de código fixo: todo mundo que toca em "Entrar na partida" cai na mesma sala (quem chega e acha fechada, abre).
+   Dentro da partida tem loja (vida extra, escudo, correr rápido e dica de letra), paga com as moedas guardadas.
+   Classificação da semana (vitórias, tempo jogando e moedas gastas na loja do evento): o anfitrião soma no fim
+   de cada partida e manda para todos; cada aparelho guarda em G.evRank e junta com o que recebe (o maior número vale). */
+const SALA_EVENTO = "EVENTOS1";
+const LOJA_EV = { vida: { ic: "❤️", nome: "Vida extra", preco: 60 }, escudo: { ic: "🛡️", nome: "Escudo", preco: 40 }, rapido: { ic: "⚡", nome: "Correr rápido", preco: 30 }, dica: { ic: "💡", nome: "Dica de letra", preco: 25 } };
+const evOn = () => ON.on && (ON.host ? ON.code : ON.codeEntrar) === SALA_EVENTO;
+function semanaEvento() {   // a semana vai de segunda a domingo (horário de Brasília)
+  const d = new Date(Date.now() - 3 * 3600000), dow = (d.getUTCDay() + 6) % 7;
+  const seg = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - dow)), dom = new Date(seg.getTime() + 6 * 86400000);
+  return { id: seg.toISOString().slice(0, 10), fim: `${dom.getUTCDate()}/${dom.getUTCMonth() + 1}` };
+}
+function rankAtual() { const sem = semanaEvento().id; if (!G.evRank || G.evRank.sem !== sem || !G.evRank.j) G.evRank = { sem, j: {} }; return G.evRank; }
+function mesclarRank(r) {
+  if (!r || typeof r !== "object" || typeof r.sem !== "string" || !r.j || typeof r.j !== "object") return;
+  const meu = rankAtual(); if (r.sem !== meu.sem) return;   // só vale a semana de agora
+  const num = x => Math.max(0, Math.min(1e7, Math.round(+x || 0)));
+  for (const [n0, e] of Object.entries(r.j).slice(0, 80)) {
+    const n = String(n0).replace(/\s+/g, " ").trim().slice(0, 20); if (!n || !e || typeof e !== "object") continue;
+    const a = meu.j[n] || { g: 0, t: 0, v: 0 };
+    meu.j[n] = { g: Math.max(a.g, num(e.g)), t: Math.max(a.t, num(e.t)), v: Math.max(a.v, num(e.v)) };
+  }
+  const nomes = Object.keys(meu.j), peso = n => meu.j[n].v * 100000 + meu.j[n].t + meu.j[n].g;
+  if (nomes.length > 60) nomes.sort((x, y) => peso(y) - peso(x)).slice(60).forEach(n => delete meu.j[n]);
+  salvar();
+}
+/* loja dentro da partida: o anfitrião confere e aplica; quem é de fora desconta as moedas quando chega o "lojaOk" */
+function comprarEvento(p, k) {
+  const it = LOJA_EV[k], ph = A.ph || {}; if (!it || !p || !evOn() || A.fim) return;
+  const nao = msg => { if (p.remoto) enviar(p.conn, { t: "lojaNao", msg }); else { toast(msg); renderAct(); } };
+  if (!p.vivo) return nao("Você já saiu desta partida.");
+  if ((p.guardado || 0) < it.preco) return nao("Suas moedas guardadas não dão.");
+  p.evComp = p.evComp || {};
+  if (k === "vida") { if ((p.evComp.vida || 0) >= 2) return nao("Só dá para comprar 2 vidas por partida."); p.vidas++; }
+  if (k === "escudo") { if (p.escudo) return nao("Você já está com escudo."); p.escudo = true; }
+  if (k === "rapido") { if (p.rapidoAte > A.t) return nao("Você já está rápido!"); p.rapidoAte = A.t + 10; }
+  if (k === "dica") {
+    if (ph.k !== "pergunta" || ph.voto || !ph.ordem || ph.ordem[ph.idx] !== p) return nao("A dica só vale na sua vez de chutar.");
+    const chave = ph.palavra + "|" + (ph.perg ? ph.perg.i : "");
+    if (p.dicaPal === chave) return nao("Você já pegou dica nesta palavra.");
+    const l = revelarMaisA(ph); if (!l) return nao("Falta só uma letra: tenta chutar!");
+    p.dicaPal = chave; aMsg(`${p.nome} comprou uma dica: tem a letra ${l}!`);
+  }
+  p.evComp[k] = (p.evComp[k] || 0) + 1; p.evGasto = (p.evGasto || 0) + it.preco;
+  p.guardado = Math.round(((p.guardado || 0) - it.preco) * 10) / 10;
+  aFx(p.x, p.y - 60, it.ic, "#ffd23f");
+  if (p.remoto) enviar(p.conn, { t: "lojaOk", k });
+  else { G.banco[p.nome] = Math.round(((G.banco[p.nome] || 0) - it.preco) * 10) / 10; salvarPlacar(); toast(`${it.ic} ${it.nome}!`); bip(990, .08); renderAct(); }
+}
+// escudo: segura uma bolada
+const _atingirEv = atingirA;
+atingirA = function (p) {
+  if (p && p.escudo) { p.escudo = false; p.flash = .3; if (A.ph && A.ph.atingidos) A.ph.atingidos.add(p); aFx(p.x, p.y - 60, "🛡️", "#7fd0ff"); bip(1200, .12); aMsg(`O escudo de ${p.nome} segurou a bolada!`); return; }
+  return _atingirEv(p);
+};
+// correr rápido: 35% mais rápido por 10 segundos (vale para quem joga no anfitrião e para quem joga de fora)
+const _moverEv = moverControlado;
+moverControlado = function (p, dt) { return _moverEv(p, p.rapidoAte > A.t ? dt * 1.35 : dt); };
+// o estado manda o escudo e o "rápido" para todos verem
+const _estadoEv = estadoAtual;
+estadoAtual = function () { const s = _estadoEv(); if (evOn()) s.P.forEach((a, i) => { const p = A.P[i]; a.push(p.escudo ? 1 : 0, p.rapidoAte > A.t ? 1 : 0); }); return s; };
+const _aplicarEv = aplicarEstado;
+aplicarEstado = function (s) { _aplicarEv(s); (s.P || []).forEach((a, i) => { const p = A.P[i]; if (p) { p.escudo = !!a[11]; p.rapido = !!a[12]; } }); };
+const _bonecoEv = desenharBoneco2;
+desenharBoneco2 = function (c, p, ph) {
+  _bonecoEv(c, p, ph);
+  if (!ON.on || !p.vivo) return;
+  const t = performance.now() / 1000;
+  if (p.rapido || p.rapidoAte > A.t) { c.save(); c.strokeStyle = "rgba(255,210,63,.85)"; c.lineWidth = 3; c.lineCap = "round"; for (let i = 0; i < 3; i++) { const yy = p.y - 30 + i * 14, d = 8 + 6 * Math.sin(t * 12 + i); c.beginPath(); c.moveTo(p.x - 26 - d, yy); c.lineTo(p.x - 40 - d, yy); c.stroke(); } c.restore(); }
+  if (p.escudo) { c.save(); c.globalAlpha = .9; c.fillStyle = "rgba(127,208,255,.16)"; c.strokeStyle = "rgba(127,208,255,.95)"; c.lineWidth = 3; c.beginPath(); c.arc(p.x, p.y - 18, 42 + 2 * Math.sin(t * 4), 0, Math.PI * 2); c.fill(); c.stroke(); c.restore(); }
+};
+// loja no painel de baixo
+const _actEv = renderActOnline;
+renderActOnline = function () {
+  _actEv();
+  if (!evOn() || A.fim) return;
+  const box = $("a-act"), me = A.P[ON.myIdx], ph = A.ph || {}; if (!box || !me || !me.vivo) return;
+  const minhaVez = ph.k === "pergunta" && !ph.voto && !ph.espera && ph.ordem && ph.ordem[ph.idx] === me;
+  const saldo = G.banco[ON.host ? perfil() : ON.meuNome] || 0;
+  box.insertAdjacentHTML("beforeend", `<div class="ev-loja"><p><b>🛒 Loja do evento</b><span><span class="lb-coin" aria-hidden="true">$</span>${fmtM(saldo)}</span></p><div class="ev-loja-b">${Object.entries(LOJA_EV).filter(([k]) => k !== "dica" || minhaVez).map(([k, it]) => `<button type="button" data-ev="${k}" ${saldo < it.preco ? "disabled" : ""}>${it.ic} ${it.nome}<b>${it.preco}</b></button>`).join("")}</div></div>`);
+  box.querySelectorAll("[data-ev]").forEach(b => b.addEventListener("click", () => { b.disabled = true; agir({ t: "lojaEv", k: b.dataset.ev }); }));
+};
+// fim da partida do evento: o anfitrião soma a classificação e manda para todos
+const _comecarEv = comecarOnline;
+comecarOnline = function () { _comecarEv(); if (evOn()) A.P.forEach(p => { p.evJog = !!p.humano; p.evGasto = 0; p.escudo = false; p.rapidoAte = 0; }); };
+const _fimEv = mostrarFimOnline;
+mostrarFimOnline = function () {
+  if (ON.host && evOn() && A.fim && !A.fim.evFeito) {
+    A.fim.evFeito = true;
+    const r = rankAtual(), gan = A.fim.ganhadores || [A.fim.vencedor];
+    A.P.filter(p => p.evJog).forEach(p => { const e = r.j[p.nome] || { g: 0, t: 0, v: 0 }; r.j[p.nome] = { g: e.g + Math.round(p.evGasto || 0), t: e.t + Math.round(A.t), v: e.v + (gan.includes(p) ? 1 : 0) }; });
+    salvar(); A.P.forEach(p => { if (p.conn) enviar(p.conn, { t: "rank", r }); });
+  }
+  return _fimEv();
+};
+/* Centro de Eventos: Partida do Evento e classificação da semana (em cima da lista do que está valendo) */
+function tempoTxt(s) { s = Math.round(s); if (s < 60) return s + " s"; const m = Math.floor(s / 60); return m < 60 ? m + " min" : Math.floor(m / 60) + " h " + (m % 60) + " min"; }
+function eventoPartidaHTML() {
+  const sem = semanaEvento(), r = rankAtual(), nome = perfil(), aba = ["v", "t", "g"].includes(ON.rankAba) ? ON.rankAba : "v";
+  const lista = Object.entries(r.j).map(([n, e]) => ({ n, ...e })).filter(e => e[aba] > 0).sort((a, b) => b[aba] - a[aba]).slice(0, 10);
+  const fmt = { g: e => fmtM(e.g) + " moedas", t: e => tempoTxt(e.t), v: e => e.v + (e.v === 1 ? " vitória" : " vitórias") };
+  return `
+    <div class="mi-caixa">
+      <h2 class="lb-secao">🏟️ Partida do Evento</h2>
+      <p class="lb-sub">Todo mundo entra na mesma sala. Dentro da partida tem loja: ❤️ vida extra, 🛡️ escudo, ⚡ correr rápido e 💡 dica de letra.</p>
+      <button class="lb-jogar" data-a="entrarEvento" style="flex:none;min-height:64px;font-size:26px" ${ON.conectando ? "disabled" : ""}>${ON.conectando ? "Entrando…" : "Entrar na partida"}</button>
+    </div>
+    <div class="mi-caixa">
+      <h2 class="lb-secao">🏆 Classificação da semana</h2>
+      <p class="lb-sub">Quem joga a Partida do Evento junto aparece aqui. Vale até domingo (${sem.fim}) e recomeça na segunda.</p>
+      <div class="seg2 ev-abas" role="group" aria-label="Classificação por">${[["v", "🏆 Vitórias"], ["t", "⏱️ Tempo"], ["g", "💰 Gastou"]].map(([k, t]) => `<button type="button" data-a="rankAba" data-k="${k}" aria-pressed="${aba === k}">${t}</button>`).join("")}</div>
+      ${lista.length ? `<ol class="ev-rank">${lista.map((e, i) => `<li class="${e.n === nome ? "eu" : ""}"><span class="ev-pos">${["🥇", "🥈", "🥉"][i] || i + 1 + "º"}</span><b>${esc(e.n)}${e.n === nome ? " (você)" : ""}</b><span>${fmt[aba](e)}</span></li>`).join("")}</ol>`
+        : `<p class="lb-sub">Ninguém ainda. Entre na Partida do Evento e seja o primeiro!</p>`}
+    </div>`;
+}
+if (TELAS.eventos) {
+  const _telaEventos = TELAS.eventos;
+  TELAS.eventos = () => _telaEventos().replace('<h1 class="lb-title">Centro de<br>Eventos</h1>', m => m + eventoPartidaHTML());
+}
+Object.assign(acoes, {
+  entrarEvento() { if (ON.conectando) return; ON.codeEntrar = SALA_EVENTO; entrarSala(SALA_EVENTO, perfil()); },
+  rankAba(el) { ON.rankAba = el.dataset.k; const y = window.scrollY; render(); window.scrollTo(0, y); },
+});

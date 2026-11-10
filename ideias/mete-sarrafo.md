@@ -183,3 +183,7 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
 - "Valendo agora": avisos do ADM, moedas em dobro ou triplo, promoção, vidas extras, coleção que voltou, presente para todos (diz se você já ganhou) e se tem código de presente valendo (sem mostrar o código). Cada um com o tempo que falta.
 - "Edições limitadas na loja": cada coleção limitada à venda, quantos itens você já tem e quando acaba; "Ver" abre a loja no pacote.
 - O número vermelho no botão conta só os eventos do ADM.
+- **Partida do Evento (ideia do Andre, 10/nov):** o Centro de Eventos virou também uma partida. Botão "Entrar na partida": todo mundo cai na mesma sala online (código fixo `EVENTOS1`); quem chega e acha a sala fechada abre a sala e comanda a partida, igual à Sala do Andre.
+  - **Loja dentro da partida** (paga com as moedas guardadas): ❤️ Vida extra 60 (até 2 por partida), 🛡️ Escudo 40 (segura uma bolada), ⚡ Correr rápido 30 (35% mais rápido por 10 segundos) e 💡 Dica de letra 25 (só na sua vez de chutar, uma por palavra).
+  - **Classificação da semana** (de segunda a domingo): 🏆 vitórias, ⏱️ tempo jogando e 💰 moedas gastas na loja do evento. Mostra quem jogou a Partida do Evento junto. Não há servidor: o celular de quem abre a sala soma no fim de cada partida e manda para todos; cada celular guarda a sua cópia e junta com a dos outros quando se encontram na sala.
+  - Só funciona no site (é online). Dentro do Claude aparece só a lista do que está valendo.
