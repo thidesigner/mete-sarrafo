@@ -331,6 +331,7 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .mi-dia.feito { background: rgba(55,217,154,.25); } .mi-dia.hoje { border-color: #ffd23f; box-shadow: 0 0 10px rgba(255,210,63,.5); }
 .mi-missao { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,.06); border-radius: 12px; padding: 8px; }
 .mi-missao.pegou { opacity: .6; }
+.ev-item .mi-txt small.ev-fim { color: #ffd23f; font-weight: 700; }
 .mi-ic { font-size: 28px; flex: none; }
 .mi-txt { flex: 1; min-width: 0; display: grid; gap: 4px; } .mi-txt b { font-size: 15px; } .mi-txt small { font-size: 12px; color: #c9d6ea; }
 .mi-barra { display: block; height: 10px; border-radius: 6px; background: rgba(0,0,0,.35); overflow: hidden; } .mi-barra i { display: block; height: 100%; background: linear-gradient(90deg, #37d99a, #ffd23f); }
@@ -3989,6 +3990,7 @@ TELAS.lobby = () => {
       <div class="lb-side lb-side-d"><!--lado-direito-->
         <button class="lb-btn" data-a="mais">${ICONES.regras}<span>Regras</span>${sugestoes.length ? `<i class="lb-badge">${sugestoes.length}</i>` : ""}</button>
         <button class="lb-btn" data-a="missoes"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="#ff4d6d" stroke="#0b1b33" stroke-width="1.5"/><circle cx="12" cy="12" r="6" fill="#f4f7fb" stroke="#0b1b33" stroke-width="1.2"/><circle cx="12" cy="12" r="3" fill="#ff4d6d" stroke="#0b1b33" stroke-width="1.2"/><path d="M12 12l7-7M17 3.5l2 1.5 1.5 2" stroke="#0b1b33" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>Missões</span>${temAlgoPraPegar(nome) ? `<i class="lb-tag">🎁!</i>` : ""}</button>
+        <button class="lb-btn" data-a="eventos" aria-label="Centro de Eventos"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5" fill="#f4f7fb" stroke="#0b1b33" stroke-width="1.5"/><path d="M3.5 9.5h17" stroke="#0b1b33" stroke-width="1.5"/><rect x="3.5" y="5" width="17" height="4.5" rx="2" fill="#ff4d6d" stroke="#0b1b33" stroke-width="1.5"/><path d="M8 3v4M16 3v4" stroke="#0b1b33" stroke-width="1.8" stroke-linecap="round"/><path d="M12 11.5l1.3 2.6 2.9.4-2.1 2 .5 2.9-2.6-1.4-2.6 1.4.5-2.9-2.1-2 2.9-.4z" fill="#ffd23f" stroke="#0b1b33" stroke-width="1" stroke-linejoin="round"/></svg><span>Eventos</span>${typeof qtdEventos === "function" && qtdEventos() ? `<i class="lb-badge">${qtdEventos()}</i>` : ""}</button>
       </div>
       <button type="button" class="lb-boneco" data-a="minhasSkins" aria-label="Trocar a skin de ${esc(nome)}"><canvas id="lb-canvas" aria-hidden="true"></canvas><span class="lb-trocar" aria-hidden="true">👕</span></button>
       <div class="lb-nome">${esc(nome)}${nivelSelo(nome) ? ` <span class="selo-col" title="Selo de colecionador ${SELO_NOMES[nivelSelo(nome)]}" aria-label="Selo de colecionador ${SELO_NOMES[nivelSelo(nome)]}">${SELOS[nivelSelo(nome)]}</span>` : ""}</div>
@@ -4047,6 +4049,62 @@ function darRecompensa(nome, v, txt) {
   const y = window.scrollY; render(); window.scrollTo(0, y);
 }
 acoes.missoes = () => ir("missoes");
+/* Centro de Eventos: tudo o que está valendo agora (eventos do ADM e coleções limitadas na loja), só para olhar */
+function colecoesNaLoja(nome) {
+  if (typeof todasLimitadas !== "function") return [];
+  const lim = todasLimitadas().filter(x => x.ate && naVenda(x)), usadas = new Set(), lista = [];
+  for (const [id, c] of Object.entries(COLECOES)) {
+    const itens = lim.filter(x => c.chaves.includes(chaveLim(x))); if (!itens.length) continue;
+    itens.forEach(x => usadas.add(chaveLim(x)));
+    const pac = PACOTES.find(p => p.id === c.pacote), fim = itens.reduce((a, x) => Date.parse(x.ate) < Date.parse(a.ate) ? x : a);
+    lista.push({ id, nome: c.nome, ic: pac ? pac.emoji : "⭐", fim, faltam: itens.filter(x => !temLim(nome, x)).length, total: itens.length, pacote: c.pacote });
+  }
+  lim.filter(x => !usadas.has(chaveLim(x))).forEach(x => lista.push({ id: chaveLim(x), nome: x.nome, ic: x.icone || x.e || "⭐", fim: x, faltam: temLim(nome, x) ? 0 : 1, total: 1 }));
+  return lista.sort((a, b) => Date.parse(a.fim.ate) - Date.parse(b.fim.ate));
+}
+function eventosAgora() {
+  const l = [], ev = eventoMoedas(), pr = promoAtiva(), vida = vidaExtraEvento(), ate = x => x && x.ate ? faltaParaAcabar(x) : "";
+  (AVISOS.lista || []).filter(evtValido).forEach(a => l.push({ ic: "📢", t: "Aviso do ADM", d: a.texto, f: ate(a) }));
+  if (ev) l.push({ ic: ev.mult === 3 ? "🤑" : "💰", t: `Moedas em ${ev.mult === 3 ? "triplo" : "dobro"}!`, d: `Tudo o que você ganhar nas partidas vale ${ev.mult} vezes mais.`, f: ate(ev) });
+  if (pr) l.push({ ic: "🏷️", t: `Promoção: ${pr.desc}% de desconto`, d: `Em: ${PROMO_ALVOS[pr.alvo]}.`, f: ate(pr), loja: true });
+  if (vida) { const v = EVT.vidas.filter(evtValido).sort((a, b) => b.extra - a.extra)[0]; l.push({ ic: "❤️", t: `+${vida} ${vida === 1 ? "vida" : "vidas"} em cada partida`, d: "Todo mundo começa a partida com vida a mais.", f: ate(v) }); }
+  voltasAtivas().forEach(v => l.push({ ic: "🔁", t: `A coleção ${COLECOES[v.col].nome} voltou!`, d: "Está de novo na loja, com o pacote.", f: ate(v), loja: true }));
+  const nome = perfil(), ja = ((G.brindesRecebidos || {})[nome]) || [];
+  EVT.brindes.filter(evtValido).forEach(b => l.push({ ic: "🎁", t: "Presente para todos", d: `${nomePremio(b)}${ja.includes(b.id) ? " — você já ganhou ✔" : " — aparece quando você abrir a tela inicial."}`, f: ate(b) }));
+  if (EVT.presentes.some(evtValido)) l.push({ ic: "🔑", t: "Código de presente valendo", d: "Quem souber o código escreve na loja, em \"Código de presente\".", f: "", loja: true });
+  return l;
+}
+const qtdEventos = () => { try { return eventosAgora().length; } catch (e) { return 0; } };   // número no botão: só os eventos do ADM
+TELAS.eventos = () => {
+  const nome = perfil(), moedas = G.banco[nome] || 0, evs = eventosAgora(), cols = colecoesNaLoja(nome);
+  return `
+  <section data-fundo="${fundoAtual()}" class="bgf lobby lb-loja" aria-label="Centro de Eventos">
+    <div class="lb-top">
+      <button class="lb-pill" data-a="voltarLobby">← Voltar</button>
+      <div class="lb-pill lb-moedas"><span class="lb-coin" aria-hidden="true">$</span><b>${fmtM(moedas)}</b></div>
+    </div>
+    <h1 class="lb-title">Centro de<br>Eventos</h1>
+    <div class="mi-caixa">
+      <h2 class="lb-secao">🎉 Valendo agora</h2>
+      ${evs.length ? evs.map(e => `<div class="mi-missao ev-item">
+          <span class="mi-ic" aria-hidden="true">${e.ic}</span>
+          <div class="mi-txt"><b>${esc(e.t)}</b><small>${esc(e.d)}</small>${e.f ? `<small class="ev-fim">⏳ ${esc(e.f)}</small>` : ""}</div>
+          ${e.loja ? `<button class="lb-comprar lb-comprar-p" data-a="loja">Loja</button>` : ""}
+        </div>`).join("") : `<p class="lb-sub">Nenhum evento agora. Fique de olho: quando o ADM criar um, ele aparece aqui!</p>`}
+      ${EVT_NO_SITE ? "" : `<p class="lb-sub">Os eventos do ADM só chegam no site do jogo.</p>`}
+    </div>
+    <div class="mi-caixa">
+      <h2 class="lb-secao">⭐ Edições limitadas na loja</h2>
+      ${cols.length ? cols.map(c => `<div class="mi-missao ev-item">
+          <span class="mi-ic" aria-hidden="true">${c.ic}</span>
+          <div class="mi-txt"><b>${esc(c.nome)}</b><small>${c.faltam ? (c.total > 1 ? `Você tem ${c.total - c.faltam} de ${c.total} itens` : "Você ainda não tem") : "✔ Você já tem tudo!"}</small><small class="ev-fim">⏳ ${esc(faltaParaAcabar(c.fim))}</small></div>
+          ${c.faltam ? `<button class="lb-comprar lb-comprar-p" data-a="eventoLoja" data-p="${esc(c.pacote || "")}">Ver</button>` : ""}
+        </div>`).join("") : `<p class="lb-sub">Nenhuma edição limitada na loja agora.</p>`}
+    </div>
+  </section>`;
+};
+acoes.eventos = () => ir("eventos");
+acoes.eventoLoja = el => { G.lojaAba = "destaques"; ir("loja"); const p = el.dataset.p; if (p) setTimeout(() => { const c = document.querySelector(".pacote-" + p); if (c) c.scrollIntoView({ behavior: "smooth", block: "center" }); }, 150); };
 acoes.pegarPresente = () => {
   const nome = perfil(), pd = presenteDe(nome); if (!pd.pode) { toast("Você já pegou o presente de hoje. Volte amanhã!"); return; }
   G.diario = G.diario || {}; G.diario[nome] = { ultimo: diaBR(), seq: pd.dia };
@@ -4361,7 +4419,7 @@ function animarLobby() {
 <script>
 /* ================= Música da tela inicial (original, feita na hora pelo navegador) ================= */
 const MUS = { ctx: null, master: null, tocando: false, timer: null, passo: 0, proximo: 0, bpm: 118, volta: 0, noise: null };
-const TELAS_COM_MUSICA = ["lobby", "loja", "perfil", "missoes"];
+const TELAS_COM_MUSICA = ["lobby", "loja", "perfil", "missoes", "eventos"];
 const somLigado = () => G.som !== false;
 const hz = m => 440 * Math.pow(2, (m - 69) / 12);
 
