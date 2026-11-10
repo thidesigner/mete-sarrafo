@@ -331,6 +331,39 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .mi-dia.feito { background: rgba(55,217,154,.25); } .mi-dia.hoje { border-color: #ffd23f; box-shadow: 0 0 10px rgba(255,210,63,.5); }
 .mi-missao { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,.06); border-radius: 12px; padding: 8px; }
 .mi-missao.pegou { opacity: .6; }
+.ev-item .mi-txt small.ev-fim { color: #ffd23f; font-weight: 700; }
+.praca { position: fixed; inset: 0; z-index: 50; background: #9fd3ff; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+.praca .pr-cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.pr-top { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; gap: 8px; align-items: center; justify-content: space-between; z-index: 2; }
+.pr-top .lb-pill { font-size: 15px; }
+.pr-titulo { position: absolute; top: 62px; left: 0; right: 0; text-align: center; font-family: var(--display); font-size: 26px; color: #ffd23f; -webkit-text-stroke: 1.5px #0b1b33; text-shadow: 0 3px 0 #0b1b33; pointer-events: none; z-index: 2; }
+.pr-dica { position: absolute; top: 100px; left: 50%; transform: translateX(-50%); width: min(90%, 360px); text-align: center; background: rgba(11,27,51,.75); color: #fff; border-radius: 12px; padding: 8px 10px; font-size: 14px; pointer-events: none; z-index: 2; }
+.pr-joy { position: absolute; left: 22px; bottom: 34px; width: 128px; height: 128px; border-radius: 50%; background: rgba(11,27,51,.35); border: 3px solid rgba(255,255,255,.7); z-index: 2; touch-action: none; }
+.pr-joy i { position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%; background: #ffd23f; border: 3px solid #0b1b33; pointer-events: none; }
+.pr-pular { position: absolute; right: 24px; bottom: 44px; width: 84px; height: 84px; border-radius: 50%; background: #37d99a; border: 3px solid #0b1b33; box-shadow: 0 5px 0 #0b1b33; font-size: 38px; color: #0b1b33; z-index: 2; cursor: pointer; }
+.pr-acao { position: absolute; left: 50%; bottom: 190px; transform: translateX(-50%); background: #ffd23f; color: #0b1b33; border: 3px solid #0b1b33; box-shadow: 0 5px 0 #0b1b33; border-radius: 16px; padding: 12px 18px; font: 800 19px Nunito, sans-serif; z-index: 3; cursor: pointer; white-space: nowrap; animation: prPulsa 1.2s ease-in-out infinite; }
+@keyframes prPulsa { 50% { transform: translateX(-50%) scale(1.06); } }
+.pr-painel { position: absolute; left: 0; right: 0; bottom: 0; max-height: 82%; display: flex; flex-direction: column; background: #13284a; border-top: 3px solid #0b1b33; border-radius: 20px 20px 0 0; z-index: 4; box-shadow: 0 -8px 30px rgba(0,0,0,.4); }
+.pr-painel-top { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px 6px; color: #fff; font: 800 20px Nunito, sans-serif; }
+.pr-painel-c { overflow-y: auto; border: 0; border-radius: 0; min-height: 0; padding: 8px 12px 24px; max-width: 560px; width: 100%; margin: 0 auto; touch-action: pan-y; }
+.pr-painel-c.lobby { background: transparent; }
+.pr-painel-c.lobby::before { display: none; }
+.pr-sub { margin: 0; text-align: center; color: #fff; font-size: 17px; }
+@media (prefers-reduced-motion: reduce) { .pr-acao { animation: none; } }
+.ev-abas { align-self: center; }
+.ev-rank { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.ev-rank li { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,.06); border-radius: 12px; padding: 8px 10px; }
+.ev-rank li.eu { background: rgba(255,210,63,.18); outline: 2px solid #ffd23f; }
+.ev-rank .ev-pos { width: 30px; text-align: center; font-weight: 800; flex: none; }
+.ev-rank b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ev-rank li > span:last-child { color: #c9d6ea; font-size: 14px; flex: none; }
+.ev-loja { margin-top: 10px; border-top: 1px dashed rgba(255,255,255,.25); padding-top: 8px; }
+.ev-loja p { display: flex; justify-content: space-between; align-items: center; margin: 0 0 6px; }
+.ev-loja p > span { display: inline-flex; align-items: center; gap: 4px; font-weight: 800; }
+.ev-loja-b { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.ev-loja-b button { display: flex; justify-content: space-between; align-items: center; gap: 4px; font: 700 13px Nunito, sans-serif; color: #0b1b33; background: #ffd23f; border: 2px solid #0b1b33; border-radius: 10px; padding: 8px; min-height: 40px; cursor: pointer; }
+.ev-loja-b button b { background: #0b1b33; color: #ffd23f; border-radius: 8px; padding: 1px 6px; }
+.ev-loja-b button:disabled { opacity: .45; cursor: default; }
 .mi-ic { font-size: 28px; flex: none; }
 .mi-txt { flex: 1; min-width: 0; display: grid; gap: 4px; } .mi-txt b { font-size: 15px; } .mi-txt small { font-size: 12px; color: #c9d6ea; }
 .mi-barra { display: block; height: 10px; border-radius: 6px; background: rgba(0,0,0,.35); overflow: hidden; } .mi-barra i { display: block; height: 100%; background: linear-gradient(90deg, #37d99a, #ffd23f); }
@@ -3429,41 +3462,42 @@ function montarBonecos3D() {
   for (const s of F.seats) F.scene.remove(s);
   F.bonecos = []; F.seats = [];
   for (const p of A.P) {
-    if (p.ficha) {
-      const { g, pernaE, pernaD, bracoE, bracoD, corpoMat } = construirPersonagem3D(p.ficha, false);
-      montarExtras3D(p, g, pernaE, pernaD, bracoE, bracoD, corpoMat);
-      continue;
-    }
-    const g = new THREE.Group();
-    const corpoMat = new THREE.MeshLambertMaterial({ color: p.cor, emissive: "#000000" });
-    const escuro = new THREE.MeshLambertMaterial({ color: "#1b1b2b" });
-    const pernaE = new THREE.Mesh(new THREE.BoxGeometry(.13, .55, .13), escuro); pernaE.geometry.translate(0, -.27, 0); pernaE.position.set(-.1, .55, 0);
-    const pernaD = pernaE.clone(); pernaD.position.x = .1;
-    const corpo = new THREE.Mesh(new THREE.BoxGeometry(.42, .5, .26), corpoMat); corpo.position.y = .82;
-    const bracoE = new THREE.Mesh(new THREE.BoxGeometry(.1, .45, .1), corpoMat); bracoE.geometry.translate(0, -.2, 0); bracoE.position.set(-.27, 1.03, 0);
-    const bracoD = bracoE.clone(); bracoD.position.x = .27;
-    let cabeca;
-    if (p.humano || roboVestido(p)) {
-      cabeca = new THREE.Mesh(new THREE.SphereGeometry(.2, 28, 20), new THREE.MeshLambertMaterial({ color: p.pele }));
-      const olho = new THREE.Mesh(new THREE.SphereGeometry(.03, 8, 6), escuro);
-      const o1 = olho.clone(); o1.position.set(-.07, .03, -.18); const o2 = olho.clone(); o2.position.set(.07, .03, -.18);
-      cabeca.add(o1, o2);
-      acessorio3D(cabeca, skinBase(p.skin));
-    } else {
-      cabeca = new THREE.Mesh(new THREE.BoxGeometry(.36, .32, .32), new THREE.MeshLambertMaterial({ color: "#c8d3e0" }));
-      const visor = new THREE.Mesh(new THREE.BoxGeometry(.26, .08, .02), new THREE.MeshBasicMaterial({ color: "#2bb5c9" })); visor.position.set(0, .02, -.17);
-      const antena = new THREE.Mesh(new THREE.CylinderGeometry(.015, .015, .2), new THREE.MeshLambertMaterial({ color: "#c8d3e0" })); antena.position.y = .26;
-      const bolinha = new THREE.Mesh(new THREE.SphereGeometry(.04, 8, 6), new THREE.MeshBasicMaterial({ color: "#ff4d6d" })); bolinha.position.y = .37;
-      cabeca.add(visor, antena, bolinha);
-    }
-    cabeca.position.y = 1.28;
-    g.add(pernaE, pernaD, corpo, bracoE, bracoD, cabeca);
-    { const sn = p.skin && SKINS.find(z => z.k === p.skin);   // versão Neon: brilho em volta de cada parte
-      if (sn && sn.neon) [[pernaE, sn.neon], [bracoE, sn.neon], [pernaD, sn.neon2 || sn.neon], [bracoD, sn.neon2 || sn.neon], [corpo, sn.neon], [cabeca, sn.neon2 || sn.neon]].forEach(([parte, cor]) => {
-        const casca = new THREE.Mesh(parte.geometry, new THREE.MeshBasicMaterial({ color: cor, side: THREE.BackSide, transparent: true, opacity: .55, blending: THREE.AdditiveBlending, depthWrite: false }));
-        casca.scale.setScalar(1.12); parte.add(casca); }); }
+    const { g, pernaE, pernaD, bracoE, bracoD, corpoMat } = modeloBoneco3D(p);
     montarExtras3D(p, g, pernaE, pernaD, bracoE, bracoD, corpoMat);
   }
+}
+/* o bonequinho em 3D (usado na partida e na Praça Central) */
+function modeloBoneco3D(p) {
+  if (p.ficha) return construirPersonagem3D(p.ficha, false);
+  const g = new THREE.Group();
+  const corpoMat = new THREE.MeshLambertMaterial({ color: p.cor, emissive: "#000000" });
+  const escuro = new THREE.MeshLambertMaterial({ color: "#1b1b2b" });
+  const pernaE = new THREE.Mesh(new THREE.BoxGeometry(.13, .55, .13), escuro); pernaE.geometry.translate(0, -.27, 0); pernaE.position.set(-.1, .55, 0);
+  const pernaD = pernaE.clone(); pernaD.position.x = .1;
+  const corpo = new THREE.Mesh(new THREE.BoxGeometry(.42, .5, .26), corpoMat); corpo.position.y = .82;
+  const bracoE = new THREE.Mesh(new THREE.BoxGeometry(.1, .45, .1), corpoMat); bracoE.geometry.translate(0, -.2, 0); bracoE.position.set(-.27, 1.03, 0);
+  const bracoD = bracoE.clone(); bracoD.position.x = .27;
+  let cabeca;
+  if (p.humano || roboVestido(p)) {
+    cabeca = new THREE.Mesh(new THREE.SphereGeometry(.2, 28, 20), new THREE.MeshLambertMaterial({ color: p.pele }));
+    const olho = new THREE.Mesh(new THREE.SphereGeometry(.03, 8, 6), escuro);
+    const o1 = olho.clone(); o1.position.set(-.07, .03, -.18); const o2 = olho.clone(); o2.position.set(.07, .03, -.18);
+    cabeca.add(o1, o2);
+    acessorio3D(cabeca, skinBase(p.skin));
+  } else {
+    cabeca = new THREE.Mesh(new THREE.BoxGeometry(.36, .32, .32), new THREE.MeshLambertMaterial({ color: "#c8d3e0" }));
+    const visor = new THREE.Mesh(new THREE.BoxGeometry(.26, .08, .02), new THREE.MeshBasicMaterial({ color: "#2bb5c9" })); visor.position.set(0, .02, -.17);
+    const antena = new THREE.Mesh(new THREE.CylinderGeometry(.015, .015, .2), new THREE.MeshLambertMaterial({ color: "#c8d3e0" })); antena.position.y = .26;
+    const bolinha = new THREE.Mesh(new THREE.SphereGeometry(.04, 8, 6), new THREE.MeshBasicMaterial({ color: "#ff4d6d" })); bolinha.position.y = .37;
+    cabeca.add(visor, antena, bolinha);
+  }
+  cabeca.position.y = 1.28;
+  g.add(pernaE, pernaD, corpo, bracoE, bracoD, cabeca);
+  { const sn = p.skin && SKINS.find(z => z.k === p.skin);   // versão Neon: brilho em volta de cada parte
+    if (sn && sn.neon) [[pernaE, sn.neon], [bracoE, sn.neon], [pernaD, sn.neon2 || sn.neon], [bracoD, sn.neon2 || sn.neon], [corpo, sn.neon], [cabeca, sn.neon2 || sn.neon]].forEach(([parte, cor]) => {
+      const casca = new THREE.Mesh(parte.geometry, new THREE.MeshBasicMaterial({ color: cor, side: THREE.BackSide, transparent: true, opacity: .55, blending: THREE.AdditiveBlending, depthWrite: false }));
+      casca.scale.setScalar(1.12); parte.add(casca); }); }
+  return { g, pernaE, pernaD, bracoE, bracoD, corpoMat };
 }
 function montarExtras3D(p, g, pernaE, pernaD, bracoE, bracoD, corpoMat) {
   { const pg = p.pet && pet3D(p.pet, p.skin); if (pg) { pg.position.set(-.5, 0, .15); g.add(pg); } }
@@ -3829,6 +3863,8 @@ function desenhar3D() {
     const s = Math.sin((p.passo + (pose ? pose.passo : 0)) / 14) * .7;
     b.pernaE.rotation.x = s; b.pernaD.rotation.x = -s; b.bracoE.rotation.x = -s * .8; b.bracoD.rotation.x = s * .8;
     b.corpoMat.emissive.set(p.flash > 0 ? "#ff1f4b" : "#000000");
+    if (p.escudo && !b.bolha) { b.bolha = new THREE.Mesh(new THREE.SphereGeometry(.95, 18, 14), new THREE.MeshBasicMaterial({ color: "#7fd0ff", transparent: true, opacity: .22, depthWrite: false })); b.bolha.position.y = .95; b.g.add(b.bolha); }
+    if (b.bolha) b.bolha.visible = !!p.escudo;   // escudo comprado na Partida do Evento
     const rot = p.nome + "|" + p.vidas;
     if (rot !== b.rotulo) {
       b.rotulo = rot; b.g.remove(b.tag); b.tag.material.map.dispose();
@@ -3988,6 +4024,7 @@ TELAS.lobby = () => {
       <div class="lb-side lb-side-d"><!--lado-direito-->
         <button class="lb-btn" data-a="mais">${ICONES.regras}<span>Regras</span>${sugestoes.length ? `<i class="lb-badge">${sugestoes.length}</i>` : ""}</button>
         <button class="lb-btn" data-a="missoes"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="#ff4d6d" stroke="#0b1b33" stroke-width="1.5"/><circle cx="12" cy="12" r="6" fill="#f4f7fb" stroke="#0b1b33" stroke-width="1.2"/><circle cx="12" cy="12" r="3" fill="#ff4d6d" stroke="#0b1b33" stroke-width="1.2"/><path d="M12 12l7-7M17 3.5l2 1.5 1.5 2" stroke="#0b1b33" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>Missões</span>${temAlgoPraPegar(nome) ? `<i class="lb-tag">🎁!</i>` : ""}</button>
+        <button class="lb-btn" data-a="praca" aria-label="Praça Central"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="19" rx="9" ry="3" fill="#e9dcc4" stroke="#0b1b33" stroke-width="1.5"/><path d="M6 18.5v-3h12v3" fill="#d8d2c4" stroke="#0b1b33" stroke-width="1.5" stroke-linejoin="round"/><path d="M12 15.5V9" stroke="#0b1b33" stroke-width="2"/><path d="M12 9c-3 0-4.5 2-4.5 3.5M12 9c3 0 4.5 2 4.5 3.5M12 9V4" fill="none" stroke="#3dd9ff" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="4" r="1.6" fill="#3dd9ff" stroke="#0b1b33" stroke-width="1"/></svg><span>Praça</span>${typeof qtdEventos === "function" && qtdEventos() ? `<i class="lb-badge">${qtdEventos()}</i>` : ""}</button>
       </div>
       <button type="button" class="lb-boneco" data-a="minhasSkins" aria-label="Trocar a skin de ${esc(nome)}"><canvas id="lb-canvas" aria-hidden="true"></canvas><span class="lb-trocar" aria-hidden="true">👕</span></button>
       <div class="lb-nome">${esc(nome)}${nivelSelo(nome) ? ` <span class="selo-col" title="Selo de colecionador ${SELO_NOMES[nivelSelo(nome)]}" aria-label="Selo de colecionador ${SELO_NOMES[nivelSelo(nome)]}">${SELOS[nivelSelo(nome)]}</span>` : ""}</div>
@@ -4046,6 +4083,433 @@ function darRecompensa(nome, v, txt) {
   const y = window.scrollY; render(); window.scrollTo(0, y);
 }
 acoes.missoes = () => ir("missoes");
+/* Centro de Eventos: tudo o que está valendo agora (eventos do ADM e coleções limitadas na loja), só para olhar */
+function colecoesNaLoja(nome) {
+  if (typeof todasLimitadas !== "function") return [];
+  const lim = todasLimitadas().filter(x => x.ate && naVenda(x)), usadas = new Set(), lista = [];
+  for (const [id, c] of Object.entries(COLECOES)) {
+    const itens = lim.filter(x => c.chaves.includes(chaveLim(x))); if (!itens.length) continue;
+    itens.forEach(x => usadas.add(chaveLim(x)));
+    const pac = PACOTES.find(p => p.id === c.pacote), fim = itens.reduce((a, x) => Date.parse(x.ate) < Date.parse(a.ate) ? x : a);
+    lista.push({ id, nome: c.nome, ic: pac ? pac.emoji : "⭐", fim, faltam: itens.filter(x => !temLim(nome, x)).length, total: itens.length, pacote: c.pacote });
+  }
+  lim.filter(x => !usadas.has(chaveLim(x))).forEach(x => lista.push({ id: chaveLim(x), nome: x.nome, ic: x.icone || x.e || "⭐", fim: x, faltam: temLim(nome, x) ? 0 : 1, total: 1 }));
+  return lista.sort((a, b) => Date.parse(a.fim.ate) - Date.parse(b.fim.ate));
+}
+function eventosAgora() {
+  const l = [], ev = eventoMoedas(), pr = promoAtiva(), vida = vidaExtraEvento(), ate = x => x && x.ate ? faltaParaAcabar(x) : "";
+  (AVISOS.lista || []).filter(evtValido).forEach(a => l.push({ ic: "📢", t: "Aviso do ADM", d: a.texto, f: ate(a) }));
+  if (ev) l.push({ ic: ev.mult === 3 ? "🤑" : "💰", t: `Moedas em ${ev.mult === 3 ? "triplo" : "dobro"}!`, d: `Tudo o que você ganhar nas partidas vale ${ev.mult} vezes mais.`, f: ate(ev) });
+  if (pr) l.push({ ic: "🏷️", t: `Promoção: ${pr.desc}% de desconto`, d: `Em: ${PROMO_ALVOS[pr.alvo]}.`, f: ate(pr), loja: true });
+  if (vida) { const v = EVT.vidas.filter(evtValido).sort((a, b) => b.extra - a.extra)[0]; l.push({ ic: "❤️", t: `+${vida} ${vida === 1 ? "vida" : "vidas"} em cada partida`, d: "Todo mundo começa a partida com vida a mais.", f: ate(v) }); }
+  voltasAtivas().forEach(v => l.push({ ic: "🔁", t: `A coleção ${COLECOES[v.col].nome} voltou!`, d: "Está de novo na loja, com o pacote.", f: ate(v), loja: true }));
+  const nome = perfil(), ja = ((G.brindesRecebidos || {})[nome]) || [];
+  EVT.brindes.filter(evtValido).forEach(b => l.push({ ic: "🎁", t: "Presente para todos", d: `${nomePremio(b)}${ja.includes(b.id) ? " — você já ganhou ✔" : " — aparece quando você abrir a tela inicial."}`, f: ate(b) }));
+  if (EVT.presentes.some(evtValido)) l.push({ ic: "🔑", t: "Código de presente valendo", d: "Quem souber o código escreve na loja, em \"Código de presente\".", f: "", loja: true });
+  return l;
+}
+const qtdEventos = () => { try { return eventosAgora().length; } catch (e) { return 0; } };   // número no botão: só os eventos do ADM
+function muralEventosHTML() {
+  const nome = perfil(), evs = eventosAgora(), cols = colecoesNaLoja(nome);
+  return `
+    <div class="mi-caixa">
+      <h2 class="lb-secao">🎉 Valendo agora</h2>
+      ${evs.length ? evs.map(e => `<div class="mi-missao ev-item">
+          <span class="mi-ic" aria-hidden="true">${e.ic}</span>
+          <div class="mi-txt"><b>${esc(e.t)}</b><small>${esc(e.d)}</small>${e.f ? `<small class="ev-fim">⏳ ${esc(e.f)}</small>` : ""}</div>
+          ${e.loja ? `<button class="lb-comprar lb-comprar-p" data-a="loja">Loja</button>` : ""}
+        </div>`).join("") : `<p class="lb-sub">Nenhum evento agora. Fique de olho: quando o ADM criar um, ele aparece aqui!</p>`}
+      ${EVT_NO_SITE ? "" : `<p class="lb-sub">Os eventos do ADM só chegam no site do jogo.</p>`}
+    </div>
+    <div class="mi-caixa">
+      <h2 class="lb-secao">⭐ Edições limitadas na loja</h2>
+      ${cols.length ? cols.map(c => `<div class="mi-missao ev-item">
+          <span class="mi-ic" aria-hidden="true">${c.ic}</span>
+          <div class="mi-txt"><b>${esc(c.nome)}</b><small>${c.faltam ? (c.total > 1 ? `Você tem ${c.total - c.faltam} de ${c.total} itens` : "Você ainda não tem") : "✔ Você já tem tudo!"}</small><small class="ev-fim">⏳ ${esc(faltaParaAcabar(c.fim))}</small></div>
+          ${c.faltam ? `<button class="lb-comprar lb-comprar-p" data-a="eventoLoja" data-p="${esc(c.pacote || "")}">Ver</button>` : ""}
+        </div>`).join("") : `<p class="lb-sub">Nenhuma edição limitada na loja agora.</p>`}
+    </div>
+`;
+}
+TELAS.eventos = () => {
+  const nome = perfil(), moedas = G.banco[nome] || 0;
+  return `
+  <section data-fundo="${fundoAtual()}" class="bgf lobby lb-loja" aria-label="Centro de Eventos">
+    <div class="lb-top">
+      <button class="lb-pill" data-a="voltarLobby">← Voltar</button>
+      <div class="lb-pill lb-moedas"><span class="lb-coin" aria-hidden="true">$</span><b>${fmtM(moedas)}</b></div>
+    </div>
+    <h1 class="lb-title">Centro de<br>Eventos</h1>
+    ${muralEventosHTML()}
+  </section>`;
+};
+acoes.eventos = () => ir("eventos");
+acoes.eventoLoja = el => { G.lojaAba = "destaques"; ir("loja"); const p = el.dataset.p; if (p) setTimeout(() => { const c = document.querySelector(".pacote-" + p); if (c) c.scrollIntoView({ behavior: "smooth", block: "center" }); }, 150); };
+/* ================= Praça Central (3D) =================
+   Lugar para andar com o seu bonequinho. Tem placas de classificação, barraquinhas da loja,
+   o mural de eventos e a porta da Partida do Evento. No site, quem está na praça vê os outros
+   (a parte de rede fica em online.js, em PRACA.conectar). Dentro do Claude a praça funciona sozinha. */
+const PRACA = { on: false, outros: new Map(), yaw: 0, alt: .42, mov: { x: 0, y: 0 }, keys: {}, perto: null, rankAba: "v", painel: null, gira: [] };
+const PRACA_R = 19;
+const PRACA_PLACAS = [
+  { k: "v", t: "🏆 Vitórias", cor: "#ffd23f", x: -6.6, z: -11.5 },
+  { k: "t", t: "⏱️ Tempo jogando", cor: "#37d99a", x: -2.2, z: -12.2 },
+  { k: "g", t: "💰 Mais gastou", cor: "#ff8a1f", x: 2.2, z: -12.2 },
+  { k: "m", t: "🪙 Mais moedas", cor: "#3dd9ff", x: 6.6, z: -11.5 },
+];
+const PRACA_BARRACAS = [
+  { k: "skins", t: "Skins", ic: "👕", cor: "#e63946", x: -11.5, z: -3.5 },
+  { k: "pets", t: "Pets", ic: "🐾", cor: "#2f80ed", x: -11.5, z: 4 },
+  { k: "arremessos", t: "Arremessos", ic: "🏀", cor: "#ff8a1f", x: 11.5, z: -3.5 },
+  { k: "emojis", t: "Emojis", ic: "😎", cor: "#9b5de5", x: 11.5, z: 4 },
+];
+const PRACA_MURAL = { x: -7.5, z: 10 }, PRACA_PORTA = { x: 0, z: 14.5 }, PRACA_DESTAQUE = { x: 7.5, z: 10 };
+function semanaEvento() {   // a semana vai de segunda a domingo (horário de Brasília)
+  const d = new Date(Date.now() - 3 * 3600000), dow = (d.getUTCDay() + 6) % 7;
+  const seg = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - dow)), dom = new Date(seg.getTime() + 6 * 86400000);
+  return { id: seg.toISOString().slice(0, 10), fim: `${dom.getUTCDate()}/${dom.getUTCMonth() + 1}` };
+}
+function rankAtual() { const sem = semanaEvento().id; if (!G.evRank || G.evRank.sem !== sem || !G.evRank.j) G.evRank = { sem, j: {} }; return G.evRank; }
+function moedasPraca() { const sem = semanaEvento().id; if (!G.pracaMoedas || G.pracaMoedas.sem !== sem || !G.pracaMoedas.j) G.pracaMoedas = { sem, j: {} }; return G.pracaMoedas; }
+const nomeLimpo = n => String(n || "").replace(/\s+/g, " ").trim().slice(0, 20);
+function mesclarRank(r, m) {
+  const num = x => Math.max(0, Math.min(1e7, Math.round(+x || 0)));
+  if (r && typeof r === "object" && r.j && typeof r.j === "object" && r.sem === rankAtual().sem) {
+    const meu = rankAtual();
+    for (const [n0, e] of Object.entries(r.j).slice(0, 80)) {
+      const n = nomeLimpo(n0); if (!n || !e || typeof e !== "object") continue;
+      const a = meu.j[n] || { g: 0, t: 0, v: 0 };
+      meu.j[n] = { g: Math.max(a.g, num(e.g)), t: Math.max(a.t, num(e.t)), v: Math.max(a.v, num(e.v)) };
+    }
+    const nomes = Object.keys(meu.j), peso = n => meu.j[n].v * 100000 + meu.j[n].t + meu.j[n].g;
+    if (nomes.length > 60) nomes.sort((x, y) => peso(y) - peso(x)).slice(60).forEach(n => delete meu.j[n]);
+  }
+  if (m && typeof m === "object" && m.j && typeof m.j === "object" && m.sem === moedasPraca().sem) {
+    const meu = moedasPraca();
+    for (const [n0, e] of Object.entries(m.j).slice(0, 80)) {
+      const n = nomeLimpo(n0); if (!n || !e || typeof e !== "object") continue;
+      const em = Math.min(Date.now(), num(e.em)); if (!meu.j[n] || meu.j[n].em < em) meu.j[n] = { m: num(e.m), em };
+    }
+    const nomes = Object.keys(meu.j); if (nomes.length > 60) nomes.sort((x, y) => meu.j[y].m - meu.j[x].m).slice(60).forEach(n => delete meu.j[n]);
+  }
+  salvar();
+}
+function anotarMoedas(nome, m) { const n = nomeLimpo(nome); if (!n) return; moedasPraca().j[n] = { m: Math.max(0, Math.round(+m || 0)), em: Date.now() }; }
+function tempoTxt(s) { s = Math.round(s); if (s < 60) return s + " s"; const m = Math.floor(s / 60); return m < 60 ? m + " min" : Math.floor(m / 60) + " h " + (m % 60) + " min"; }
+function listaPlaca(k) {
+  if (k === "m") {
+    const l = {}; Object.entries(moedasPraca().j).forEach(([n, e]) => (l[n] = e.m));
+    Object.keys(G.banco || {}).forEach(n => { if (n && !/^Robô/.test(n)) l[n] = Math.round(G.banco[n] || 0); });   // os perfis deste aparelho
+    for (const o of PRACA.outros.values()) if (o.info) l[o.info.nome] = Math.round(o.info.moedas || 0);
+    return Object.entries(l).map(([n, v]) => ({ n, v })).filter(e => e.v > 0).sort((a, b) => b.v - a.v).slice(0, 10);
+  }
+  return Object.entries(rankAtual().j).map(([n, e]) => ({ n, v: e[k] || 0 })).filter(e => e.v > 0).sort((a, b) => b.v - a.v).slice(0, 10);
+}
+const fmtPlaca = (k, v) => k === "t" ? tempoTxt(v) : k === "v" ? v + (v === 1 ? " vitória" : " vitórias") : fmtM(v);
+function rankingHTML() {
+  const sem = semanaEvento(), nome = perfil(), aba = ["v", "t", "g", "m"].includes(PRACA.rankAba) ? PRACA.rankAba : "v", lista = listaPlaca(aba);
+  return `<div class="mi-caixa">
+      <h2 class="lb-secao">🏆 Classificação da semana</h2>
+      <p class="lb-sub">Vitórias, tempo e moedas gastas contam na Partida do Evento (a porta da praça). Vale até domingo (${sem.fim}) e recomeça na segunda.</p>
+      <div class="seg2 ev-abas" role="group" aria-label="Classificação por">${PRACA_PLACAS.map(p => `<button type="button" data-a="rankAba" data-k="${p.k}" aria-pressed="${aba === p.k}">${p.t.split(" ")[0]}</button>`).join("")}</div>
+      <h3 class="pr-sub">${esc(PRACA_PLACAS.find(p => p.k === aba).t)}</h3>
+      ${lista.length ? `<ol class="ev-rank">${lista.map((e, i) => `<li class="${e.n === nome ? "eu" : ""}"><span class="ev-pos">${["🥇", "🥈", "🥉"][i] || i + 1 + "º"}</span><b>${esc(e.n)}${e.n === nome ? " (você)" : ""}</b><span>${fmtPlaca(aba, e.v)}</span></li>`).join("")}</ol>`
+        : `<p class="lb-sub">Ninguém ainda. Entre na Partida do Evento e seja o primeiro!</p>`}
+    </div>`;
+}
+acoes.rankAba = el => { PRACA.rankAba = el.dataset.k; };
+/* ---------- montar a praça ---------- */
+function texPlaca(k) {
+  const pl = PRACA_PLACAS.find(p => p.k === k), lista = listaPlaca(k), nome = perfil();
+  return texturaCanvas(512, 640, (c, w, h) => {
+    c.fillStyle = "#0f2747"; c.fillRect(0, 0, w, h);
+    c.fillStyle = pl.cor; c.fillRect(0, 0, w, 96);
+    c.fillStyle = "#0b1b33"; c.font = "800 44px Nunito, sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(pl.t, w / 2, 50);
+    c.font = "600 22px Nunito, sans-serif"; c.fillStyle = "#c9d6ea"; c.fillText(k === "m" ? "Agora" : "Desta semana", w / 2, 122);
+    if (!lista.length) { c.fillStyle = "#f4f7fb"; c.font = "700 30px Nunito, sans-serif"; c.fillText("Ninguém ainda!", w / 2, 300); return; }
+    lista.slice(0, 8).forEach((e, i) => {
+      const y = 170 + i * 58;
+      if (e.n === nome) { c.fillStyle = "rgba(255,210,63,.25)"; c.fillRect(16, y - 26, w - 32, 52); }
+      c.textAlign = "left"; c.font = "800 30px Nunito, sans-serif"; c.fillStyle = ["#ffd23f", "#dfe6f5", "#e0a060"][i] || "#8fb0d8"; c.fillText((i + 1) + "º", 28, y);
+      c.fillStyle = "#f4f7fb"; c.font = "700 30px Nunito, sans-serif"; let n = e.n; while (c.measureText(n).width > 250 && n.length > 3) n = n.slice(0, -1); c.fillText(n === e.n ? n : n + "…", 84, y);
+      c.textAlign = "right"; c.fillStyle = pl.cor; c.font = "800 26px Nunito, sans-serif"; c.fillText(fmtPlaca(k, e.v), w - 28, y);
+    });
+  });
+}
+function texTexto(txt, cor, fundo, w = 512, h = 128, fs = 60) {
+  return texturaCanvas(w, h, (c) => { c.fillStyle = fundo; c.fillRect(0, 0, w, h); c.fillStyle = cor; c.font = `800 ${fs}px Nunito, sans-serif`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(txt, w / 2, h / 2 + 4); });
+}
+function montarPraca3D() {
+  const s = new THREE.Scene(), mat = cor => new THREE.MeshLambertMaterial({ color: cor }), add = (geo, cor, x, y, z, pai = s) => { const m = new THREE.Mesh(geo, typeof cor === "string" ? mat(cor) : cor); m.position.set(x, y, z); pai.add(m); return m; };
+  const ceu = texturaCanvas(256, 256, (c, w, h) => { const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, "#3a8dde"); g.addColorStop(.5, "#9fd3ff"); g.addColorStop(1, "#e8f6ff"); c.fillStyle = g; c.fillRect(0, 0, w, h); });
+  s.add(new THREE.Mesh(new THREE.SphereGeometry(60, 24, 12), new THREE.MeshBasicMaterial({ map: ceu, side: THREE.BackSide, fog: false })));
+  s.fog = new THREE.Fog("#cfe9ff", 30, 58);
+  s.add(new THREE.HemisphereLight("#ffffff", "#5f8f4a", .9));
+  const sol = new THREE.DirectionalLight("#fff4dd", .7); sol.position.set(8, 14, 6); s.add(sol);
+  // gramado e piso de pedrinhas
+  const grama = texturaCanvas(256, 256, (c, w, h) => { c.fillStyle = "#5fbf4f"; c.fillRect(0, 0, w, h); for (let i = 0; i < 900; i++) { c.fillStyle = Math.random() < .5 ? "#54b045" : "#6fcd5c"; c.fillRect(Math.random() * w, Math.random() * h, 2, 3); } });
+  grama.wrapS = grama.wrapT = THREE.RepeatWrapping; grama.repeat.set(14, 14);
+  const chao = new THREE.Mesh(new THREE.CircleGeometry(52, 48), new THREE.MeshLambertMaterial({ map: grama })); chao.rotation.x = -Math.PI / 2; s.add(chao);
+  const piso = texturaCanvas(512, 512, (c, w, h) => { c.fillStyle = "#e9dcc4"; c.fillRect(0, 0, w, h); c.strokeStyle = "#cbb894"; c.lineWidth = 3;
+    for (let r = 30; r < 256; r += 34) { c.beginPath(); c.arc(256, 256, r, 0, Math.PI * 2); c.stroke(); }
+    for (let i = 0; i < 24; i++) { const a = i / 24 * Math.PI * 2; c.beginPath(); c.moveTo(256 + Math.cos(a) * 30, 256 + Math.sin(a) * 30); c.lineTo(256 + Math.cos(a) * 256, 256 + Math.sin(a) * 256); c.stroke(); } });
+  const pedra = new THREE.Mesh(new THREE.CircleGeometry(PRACA_R + 1, 64), new THREE.MeshLambertMaterial({ map: piso })); pedra.rotation.x = -Math.PI / 2; pedra.position.y = .01; s.add(pedra);
+  const borda = new THREE.Mesh(new THREE.TorusGeometry(PRACA_R + 1, .25, 6, 64), mat("#b89a6a")); borda.rotation.x = Math.PI / 2; borda.position.y = .05; s.add(borda);
+  // chafariz no meio, com água subindo
+  add(new THREE.CylinderGeometry(2.6, 2.8, .7, 32), "#d8d2c4", 0, .35, 0);
+  const agua = add(new THREE.CylinderGeometry(2.35, 2.35, .1, 32), new THREE.MeshLambertMaterial({ color: "#5ec8ff", transparent: true, opacity: .85 }), 0, .66, 0);
+  add(new THREE.CylinderGeometry(.35, .5, 1.6, 16), "#d8d2c4", 0, 1.2, 0);
+  add(new THREE.CylinderGeometry(1.1, .8, .25, 24), "#d8d2c4", 0, 2.05, 0);
+  const jato = add(new THREE.ConeGeometry(.35, 1.4, 12, 1, true), new THREE.MeshLambertMaterial({ color: "#bfeaff", transparent: true, opacity: .7 }), 0, 2.9, 0);
+  PRACA.gotas = Array.from({ length: 18 }, (_, i) => { const m = add(new THREE.SphereGeometry(.08, 6, 4), new THREE.MeshBasicMaterial({ color: "#d6f2ff" }), 0, 2.2, 0); return { m, a: i / 18 * Math.PI * 2, f: i / 18 }; });
+  PRACA.agua = agua; PRACA.jato = jato;
+  // árvores, bancos e postes em volta
+  for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2 + .26, r = PRACA_R + 3.5, x = Math.cos(a) * r, z = Math.sin(a) * r;
+    add(new THREE.CylinderGeometry(.22, .3, 1.6, 8), "#8a5a2b", x, .8, z); const copa = add(new THREE.SphereGeometry(1.5, 10, 8), i % 3 ? "#3f9d3a" : "#4fb446", x, 2.6, z); copa.scale.y = 1.15; }
+  for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2 + Math.PI / 8, r = 5.2, x = Math.cos(a) * r, z = Math.sin(a) * r, b = new THREE.Group(); b.position.set(x, 0, z); b.rotation.y = -a + Math.PI / 2; s.add(b);
+    add(new THREE.BoxGeometry(1.6, .12, .5), "#c0763a", 0, .5, 0, b); add(new THREE.BoxGeometry(1.6, .5, .1), "#c0763a", 0, .8, .22, b); [-.7, .7].forEach(dx => add(new THREE.BoxGeometry(.1, .5, .45), "#3a3a48", dx, .25, 0, b)); }
+  for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2, r = PRACA_R - .6, x = Math.cos(a) * r, z = Math.sin(a) * r;
+    add(new THREE.CylinderGeometry(.08, .1, 3, 8), "#2b2f3a", x, 1.5, z); add(new THREE.SphereGeometry(.28, 12, 10), new THREE.MeshBasicMaterial({ color: "#fff3b0" }), x, 3.1, z); }
+  // placas de classificação
+  PRACA.placas = PRACA_PLACAS.map(pl => {
+    const g = new THREE.Group(); g.position.set(pl.x, 0, pl.z); g.rotation.y = Math.atan2(-pl.x, -pl.z); s.add(g);
+    [-1.6, 1.6].forEach(dx => add(new THREE.BoxGeometry(.18, 4.6, .18), "#3a3a48", dx, 2.3, 0, g));
+    add(new THREE.BoxGeometry(3.6, 4.4, .16), pl.cor, 0, 3.1, 0, g);
+    const tela = add(new THREE.PlaneGeometry(3.3, 4.1), new THREE.MeshBasicMaterial({ map: texPlaca(pl.k) }), 0, 3.1, .09, g);
+    return { pl, tela, chave: "" };
+  });
+  // barraquinhas da loja (toldo listrado, balcão e placa)
+  for (const b of PRACA_BARRACAS) {
+    const g = new THREE.Group(); g.position.set(b.x, 0, b.z); g.rotation.y = b.x < 0 ? Math.PI / 2 : -Math.PI / 2; s.add(g);
+    add(new THREE.BoxGeometry(3, 1.1, 1.2), "#f4e3c1", 0, .55, 0, g);
+    add(new THREE.BoxGeometry(3.1, .12, 1.3), "#c0763a", 0, 1.16, 0, g);
+    [-1.4, 1.4].forEach(dx => add(new THREE.BoxGeometry(.12, 2.6, .12), "#c0763a", dx, 1.3, .5, g));
+    const listra = texturaCanvas(256, 64, (c, w, h) => { for (let i = 0; i < 8; i++) { c.fillStyle = i % 2 ? "#ffffff" : b.cor; c.fillRect(i * 32, 0, 32, h); } });
+    const toldo = add(new THREE.BoxGeometry(3.4, .14, 1.9), new THREE.MeshLambertMaterial({ map: listra }), 0, 2.65, .25, g); toldo.rotation.x = -.25;
+    const placa = add(new THREE.PlaneGeometry(2.6, .65), new THREE.MeshBasicMaterial({ map: texTexto(b.ic + " " + b.t, "#ffffff", b.cor) }), 0, 3.15, .55, g);
+    for (let i = 0; i < 3; i++) add(new THREE.BoxGeometry(.4, .4, .4), ["#ffd23f", "#3dd9ff", "#ff4d6d"][i], -.8 + i * .8, 1.42, 0, g).rotation.y = i;
+  }
+  // mural de eventos e barraca de destaques
+  { const g = new THREE.Group(); g.position.set(PRACA_MURAL.x, 0, PRACA_MURAL.z); g.rotation.y = Math.atan2(-PRACA_MURAL.x, -PRACA_MURAL.z); s.add(g);
+    [-1.3, 1.3].forEach(dx => add(new THREE.BoxGeometry(.16, 3.2, .16), "#8a5a2b", dx, 1.6, 0, g));
+    add(new THREE.BoxGeometry(3, 2, .14), "#c0763a", 0, 2.2, 0, g);
+    add(new THREE.PlaneGeometry(2.7, 1.7), new THREE.MeshBasicMaterial({ map: texTexto("📢 Eventos", "#0b1b33", "#ffd23f", 512, 320, 84) }), 0, 2.2, .08, g); }
+  { const g = new THREE.Group(); g.position.set(PRACA_DESTAQUE.x, 0, PRACA_DESTAQUE.z); g.rotation.y = Math.atan2(-PRACA_DESTAQUE.x, -PRACA_DESTAQUE.z); s.add(g);
+    add(new THREE.CylinderGeometry(1.3, 1.3, 1, 20), "#7b2cbf", 0, .5, 0, g);
+    const estrela = add(new THREE.OctahedronGeometry(.6), new THREE.MeshBasicMaterial({ color: "#ffd23f" }), 0, 2, 0, g); estrela.userData.gira = 1.2; PRACA.gira.push(estrela);
+    const pl = add(new THREE.PlaneGeometry(2.4, .6), new THREE.MeshBasicMaterial({ map: texTexto("⭐ Destaques", "#ffffff", "#7b2cbf") }), 0, 1.15, 1.31, g); }
+  // porta da Partida do Evento
+  { const g = new THREE.Group(); g.position.set(PRACA_PORTA.x, 0, PRACA_PORTA.z); s.add(g);
+    [-2, 2].forEach(dx => add(new THREE.BoxGeometry(.7, 4.2, .7), "#0f3057", dx, 2.1, 0, g));
+    add(new THREE.BoxGeometry(4.9, .8, .8), "#0f3057", 0, 4.4, 0, g);
+    add(new THREE.PlaneGeometry(4.2, .6), new THREE.MeshBasicMaterial({ map: texTexto("🏟️ Partida do Evento", "#0b1b33", "#ffd23f", 512, 80, 40) }), 0, 4.4, -.41, g).rotation.y = Math.PI;
+    const portal = add(new THREE.PlaneGeometry(3.3, 3.8), new THREE.MeshBasicMaterial({ color: "#7fd0ff", transparent: true, opacity: .45, side: THREE.DoubleSide, depthWrite: false }), 0, 1.9, 0, g);
+    const anel = add(new THREE.TorusGeometry(1.4, .08, 8, 40), new THREE.MeshBasicMaterial({ color: "#ffd23f" }), 0, 2, -.05, g); anel.userData.gira = 1.5; PRACA.gira.push(anel);
+    PRACA.portal = portal; }
+  // sombra redondinha
+  PRACA.sombraTex = texturaCanvas(64, 64, (c) => { const g = c.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, "rgba(0,0,0,.45)"); g.addColorStop(1, "rgba(0,0,0,0)"); c.fillStyle = g; c.fillRect(0, 0, 64, 64); });
+  return s;
+}
+/* bonequinho da praça (o seu e o dos outros): mesmo modelo do 3D da partida */
+function pracaModelo(info) {
+  const p = { i: -1, nome: info.nome, humano: true, cor: info.cor || A_CORES[0], pele: info.pele || A_PELE[0], vidas: 0, x: 0, y: 0, passo: 0, flash: 0 };
+  vestir(p, info.skin || "classico"); if (info.ficha) p.ficha = info.ficha; p.pet = info.pet || null; p.selo = info.selo || 0;
+  const m = modeloBoneco3D(p), g = new THREE.Group(); g.add(m.g);
+  const pg = p.pet && pet3D(p.pet, p.skin); if (pg) { pg.position.set(-.5, 0, .15); m.g.add(pg); }
+  deixarDesenho(m.g, m.corpoMat);
+  const tag = etiqueta({ nome: nomeComSelo(p), vidas: "" }); tag.position.y = 1.95; g.add(tag);
+  const sombra = new THREE.Mesh(new THREE.PlaneGeometry(.9, .9), new THREE.MeshBasicMaterial({ map: PRACA.sombraTex, transparent: true, depthWrite: false })); sombra.rotation.x = -Math.PI / 2; sombra.position.y = .02; g.add(sombra);
+  const giram = []; g.traverse(o => { if (o.userData && o.userData.gira) giram.push(o); });
+  return { g, corpo: m.g, pernaE: m.pernaE, pernaD: m.pernaD, bracoE: m.bracoE, bracoD: m.bracoD, giram, tag, passo: 0 };
+}
+function meuInfoPraca() {
+  const nome = perfil();
+  return { nome, skin: skinDe(nome), pet: petDe(nome), ficha: typeof personagemDe === "function" ? personagemDe(nome) : null, selo: nivelSelo(nome), moedas: Math.round(G.banco[nome] || 0), cor: A_CORES[0], pele: A_PELE[0] };
+}
+function pracaTrocarMeu() {
+  const eu = PRACA.eu; if (!eu) return;
+  const novo = meuInfoPraca(), chave = [novo.skin, novo.pet, novo.selo, JSON.stringify(novo.ficha || null)].join("|");
+  if (chave === eu.chave) return;
+  PRACA.cena.remove(eu.m.g); const m = pracaModelo(novo); m.g.position.copy(eu.m.g.position); m.g.rotation.y = eu.m.g.rotation.y; PRACA.cena.add(m.g);
+  eu.m = m; eu.chave = chave; eu.info = novo; if (PRACA.rede && PRACA.rede.info) PRACA.rede.info(novo);
+}
+/* os outros jogadores (a rede chama estas funções) */
+function pracaOutro(id, info) {
+  let o = PRACA.outros.get(id);
+  const chave = info ? [info.nome, info.skin, info.pet, info.selo, JSON.stringify(info.ficha || null)].join("|") : "";
+  if (o && info && o.chave !== chave) {   // trocou de skin ou de pet: monta de novo no mesmo lugar
+    PRACA.cena.remove(o.m.g); const m = pracaModelo(info); PRACA.cena.add(m.g); m.g.visible = o.m.g.visible; o.m = m; o.chave = chave;
+  }
+  if (!o) { if (!info) return null; const m = pracaModelo(info); PRACA.cena.add(m.g); o = { m, info, chave, x: 0, z: 14, r: 0, y: 0, alvo: null }; PRACA.outros.set(id, o); m.g.visible = false; }
+  if (info) { o.info = info; anotarMoedas(info.nome, info.moedas); }
+  return o;
+}
+function pracaPos(id, x, z, r, y) { const o = PRACA.outros.get(id); if (!o) return; if (!o.alvo) { o.x = x; o.z = z; o.m.g.visible = true; } o.alvo = { x, z, r, y }; }
+function pracaTirar(id) { const o = PRACA.outros.get(id); if (!o) return; PRACA.cena.remove(o.m.g); PRACA.outros.delete(id); }
+function pracaTirarTodos() { for (const id of [...PRACA.outros.keys()]) pracaTirar(id); }
+/* ---------- abrir e fechar ---------- */
+function abrirPraca() {
+  if (typeof THREE === "undefined") { toast("O 3D não carregou. Confira a internet."); return; }
+  let box = $("praca");
+  if (!box) { box = document.createElement("div"); box.id = "praca"; box.className = "praca"; box.hidden = true; document.body.appendChild(box); }
+  box.innerHTML = `
+    <div class="pr-top"><button type="button" class="lb-pill" id="pr-sair">← Sair</button><span class="lb-pill" id="pr-gente">👥 1</span><span class="lb-pill lb-moedas"><span class="lb-coin" aria-hidden="true">$</span><b id="pr-moedas"></b></span></div>
+    <div class="pr-titulo">Praça Central</div>
+    <div class="pr-dica" id="pr-dica">Ande com o círculo da esquerda. Arraste a tela para olhar em volta.</div>
+    <div class="pr-joy" id="pr-joy" aria-label="Andar"><i></i></div>
+    <button type="button" class="pr-pular" id="pr-pular" aria-label="Pular">⤴</button>
+    <button type="button" class="pr-acao" id="pr-acao" hidden></button>
+    <div class="pr-painel" id="pr-painel" hidden role="dialog" aria-modal="true"><div class="pr-painel-top"><b id="pr-painel-t"></b><button type="button" class="lb-pill" id="pr-fechar" aria-label="Fechar">✕</button></div><div class="pr-painel-c lobby lb-loja" id="pr-painel-c"></div></div>`;
+  let r;
+  try { r = new THREE.WebGLRenderer({ antialias: true }); } catch { toast("Este aparelho não conseguiu abrir o 3D."); return; }
+  r.setPixelRatio(Math.min(1.75, window.devicePixelRatio || 1)); r.domElement.className = "pr-cv"; box.prepend(r.domElement);
+  PRACA.r = r; PRACA.gira = []; PRACA.cena = montarPraca3D(); PRACA.cam = new THREE.PerspectiveCamera(60, 1, .1, 120);
+  const info = meuInfoPraca(), m = pracaModelo(info); m.g.position.set(0, 0, 9); PRACA.cena.add(m.g);
+  PRACA.eu = { m, info, chave: [info.skin, info.pet, info.selo, JSON.stringify(info.ficha || null)].join("|"), vy: 0, y: 0, x: 0, z: 9, r: 0 };
+  PRACA.yaw = 0; PRACA.alt = .42; PRACA.mov = { x: 0, y: 0 }; PRACA.keys = {}; PRACA.perto = null; PRACA.on = true; PRACA.tPlaca = 0;
+  $("app").hidden = true; box.hidden = false; G.tela = "praca"; window.scrollTo(0, 0);
+  ligarControlesPraca(box);
+  PRACA.ult = performance.now(); PRACA.raf = requestAnimationFrame(quadroPraca);
+  setTimeout(() => { const d = $("pr-dica"); if (d) d.hidden = true; }, 7000);
+  if (typeof PRACA.conectar === "function") PRACA.conectar(info);
+  else $("pr-gente").textContent = "👤 Só você (no site, os amigos aparecem aqui)";
+  if (typeof tocarNotas === "function") tocarNotas([[72, 72, 0, .1, "triangle"], [76, 76, .1, .1, "triangle"], [79, 79, .2, .2, "triangle"]]);
+}
+function fecharPraca(irLobby = true) {
+  if (!PRACA.on) return;
+  PRACA.on = false; cancelAnimationFrame(PRACA.raf);
+  if (typeof PRACA.desconectar === "function") PRACA.desconectar();
+  pracaTirarTodos();
+  window.removeEventListener("keydown", PRACA.kd); window.removeEventListener("keyup", PRACA.ku);
+  try { PRACA.r.dispose(); } catch {}
+  PRACA.r = null; PRACA.cena = null; PRACA.eu = null;
+  const box = $("praca"); if (box) { box.hidden = true; box.innerHTML = ""; }
+  $("app").hidden = false; salvar();
+  if (irLobby) ir("lobby");
+}
+TELAS.praca = () => `<section class="bgf lobby" aria-label="Praça Central"></section>`;
+acoes.praca = () => abrirPraca();
+/* ---------- controles: círculo para andar, arrastar para olhar, botão pular, teclado ---------- */
+function ligarControlesPraca(box) {
+  const joy = $("pr-joy"), bola = joy.querySelector("i");
+  let joyId = null, olharId = null, ox = 0, oy = 0;
+  joy.addEventListener("pointerdown", e => { joyId = e.pointerId; joy.setPointerCapture(e.pointerId); mexe(e); e.preventDefault(); });
+  const mexe = e => { const b = joy.getBoundingClientRect(), cx = b.left + b.width / 2, cy = b.top + b.height / 2, R = b.width / 2;
+    let dx = (e.clientX - cx) / R, dy = (e.clientY - cy) / R; const m = Math.hypot(dx, dy); if (m > 1) { dx /= m; dy /= m; }
+    PRACA.mov = { x: dx, y: dy }; bola.style.transform = `translate(${dx * R * .6}px, ${dy * R * .6}px)`; };
+  joy.addEventListener("pointermove", e => { if (e.pointerId === joyId) mexe(e); });
+  const solta = e => { if (e.pointerId !== joyId) return; joyId = null; PRACA.mov = { x: 0, y: 0 }; bola.style.transform = ""; };
+  joy.addEventListener("pointerup", solta); joy.addEventListener("pointercancel", solta);
+  const cv = PRACA.r.domElement;
+  cv.addEventListener("pointerdown", e => { olharId = e.pointerId; ox = e.clientX; oy = e.clientY; cv.setPointerCapture(e.pointerId); $("pr-dica").hidden = true; });
+  cv.addEventListener("pointermove", e => { if (e.pointerId !== olharId) return; PRACA.yaw -= (e.clientX - ox) * .008; PRACA.alt = Math.max(.12, Math.min(.85, PRACA.alt + (e.clientY - oy) * .003)); ox = e.clientX; oy = e.clientY; });
+  const soltaOlhar = e => { if (e.pointerId === olharId) olharId = null; };
+  cv.addEventListener("pointerup", soltaOlhar); cv.addEventListener("pointercancel", soltaOlhar);
+  $("pr-pular").addEventListener("click", pularPraca);
+  $("pr-sair").addEventListener("click", () => fecharPraca());
+  $("pr-fechar").addEventListener("click", fecharPainelPraca);
+  $("pr-acao").addEventListener("click", () => { if (PRACA.perto) PRACA.perto.abrir(); });
+  PRACA.kd = e => { if (!PRACA.on || PRACA.painel) return; if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return; PRACA.keys[e.key.toLowerCase()] = true; if (e.key === " ") { pularPraca(); e.preventDefault(); } if (e.key === "Enter" && PRACA.perto) PRACA.perto.abrir(); };
+  PRACA.ku = e => { PRACA.keys[e.key.toLowerCase()] = false; };
+  window.addEventListener("keydown", PRACA.kd); window.addEventListener("keyup", PRACA.ku);
+}
+function pularPraca() { const eu = PRACA.eu; if (eu && eu.y <= .001) { eu.vy = 6.5; bip(660, .05); } }
+/* ---------- lugares onde dá para fazer alguma coisa ---------- */
+function lugaresPraca() {
+  const l = [];
+  PRACA_PLACAS.forEach(pl => l.push({ x: pl.x * .8, z: pl.z * .8, r: 3, txt: `🏆 Ver classificação`, abrir: () => abrirPainelPraca("🏆 Classificação", () => { PRACA.rankAba = PRACA.rankAba || pl.k; return rankingHTML(); }, pl.k) }));
+  PRACA_BARRACAS.forEach(b => l.push({ x: b.x * .82, z: b.z, r: 2.6, txt: `${b.ic} Barraca de ${b.t}`, abrir: () => abrirPainelPraca(`${b.ic} Barraca de ${b.t}`, () => lojaSecHTML(b.k)) }));
+  l.push({ x: PRACA_MURAL.x * .85, z: PRACA_MURAL.z * .85, r: 2.6, txt: "📢 Ver eventos", abrir: () => abrirPainelPraca("📢 Eventos", () => muralEventosHTML()) });
+  l.push({ x: PRACA_DESTAQUE.x * .85, z: PRACA_DESTAQUE.z * .85, r: 2.6, txt: "⭐ Destaques da loja", abrir: () => abrirPainelPraca("⭐ Destaques", () => lojaSecHTML("destaques")) });
+  l.push({ x: PRACA_PORTA.x, z: PRACA_PORTA.z - 1.6, r: 2.4, txt: "🏟️ Entrar na partida", abrir: entrarPortaPraca });
+  return l;
+}
+function entrarPortaPraca() {
+  if (typeof acoes.entrarEvento !== "function" || typeof Peer === "undefined") { toast("A Partida do Evento é só no site do jogo."); return; }
+  if (PRACA.rede && PRACA.rede.portal) PRACA.rede.portal();
+  fecharPraca(false); G.tela = "lobby"; render(); acoes.entrarEvento();
+}
+/* painel por cima da praça: classificação, barraquinhas (pedaço da loja) e mural de eventos */
+function lojaSecHTML(aba) {
+  const ant = G.lojaAba; G.lojaAba = aba; const h = TELAS.loja(); G.lojaAba = ant;
+  const d = document.createElement("div"); d.innerHTML = h; const sec = d.querySelector(`.loja-sec[data-sec="${aba}"]`);
+  return sec ? (sec.hidden = false, sec.outerHTML) : `<p class="lb-sub">Nada aqui agora.</p>`;
+}
+function abrirPainelPraca(titulo, fazer, aba) {
+  if (aba) PRACA.rankAba = aba;
+  PRACA.painel = { titulo, fazer }; PRACA.mov = { x: 0, y: 0 }; PRACA.keys = {};
+  $("pr-painel-t").textContent = titulo; $("pr-painel").hidden = false; atualizarPainelPraca(true);
+}
+function atualizarPainelPraca(topo) {
+  const pn = PRACA.painel, c = $("pr-painel-c"); if (!pn || !c) return;
+  const y = c.scrollTop; G.tela = "praca"; depoisFn = null;
+  c.innerHTML = pn.fazer(); ligar(c); depois(); G.tela = "praca"; if (!topo) c.scrollTop = y;
+  c.querySelectorAll("[data-a]").forEach(el => el.addEventListener(el.tagName === "FORM" ? "submit" : "click", () => setTimeout(() => { if (!PRACA.on) return; if (G.tela !== "praca") { const t = G.tela; fecharPraca(false); ir(t); return; } atualizarPainelPraca(); pracaTrocarMeu(); }, 60)));
+}
+function fecharPainelPraca() { PRACA.painel = null; const p = $("pr-painel"); if (p) p.hidden = true; pracaTrocarMeu(); }
+/* ---------- quadro a quadro ---------- */
+function quadroPraca(ts) {
+  if (!PRACA.on) return;
+  PRACA.raf = requestAnimationFrame(quadroPraca);
+  const dt = Math.min(.05, (ts - PRACA.ult) / 1000); PRACA.ult = ts;
+  const r = PRACA.r, cv = r.domElement, w = cv.clientWidth, h = cv.clientHeight;
+  if (!w || !h) return;
+  if (cv.width !== Math.round(w * r.getPixelRatio()) || cv.height !== Math.round(h * r.getPixelRatio())) { r.setSize(w, h, false); PRACA.cam.aspect = w / h; PRACA.cam.updateProjectionMatrix(); }
+  const eu = PRACA.eu, k = PRACA.keys;
+  // andar (o círculo ou as teclas), relativo para onde a câmera olha
+  let mx = PRACA.mov.x, my = PRACA.mov.y;
+  const kx = (k.d || k.arrowright ? 1 : 0) - (k.a || k.arrowleft ? 1 : 0), ky = (k.s || k.arrowdown ? 1 : 0) - (k.w || k.arrowup ? 1 : 0);
+  if (kx || ky) { const m = Math.hypot(kx, ky); mx = kx / m; my = ky / m; }
+  if (PRACA.painel) { mx = 0; my = 0; }
+  const sy = Math.sin(PRACA.yaw), cy = Math.cos(PRACA.yaw), vx = (mx * cy + my * sy) * 6, vz = (-mx * sy + my * cy) * 6;
+  const anda = Math.hypot(vx, vz) > .1;
+  if (anda) {
+    let nx = eu.x + vx * dt, nz = eu.z + vz * dt;
+    const d = Math.hypot(nx, nz); if (d > PRACA_R) { nx *= PRACA_R / d; nz *= PRACA_R / d; }
+    if (Math.hypot(nx, nz) < 3.2) { const a = Math.atan2(nz, nx); nx = Math.cos(a) * 3.2; nz = Math.sin(a) * 3.2; }   // não entra no chafariz
+    eu.x = nx; eu.z = nz; eu.r = Math.atan2(-vx, -vz); eu.m.passo += Math.hypot(vx, vz) * dt * 3;
+  }
+  eu.vy -= 18 * dt; eu.y = Math.max(0, eu.y + eu.vy * dt); if (eu.y === 0) eu.vy = 0;
+  animarBonecoPraca(eu.m, eu.x, eu.y, eu.z, eu.r, anda, dt);
+  // os outros: andam suave até a última posição recebida
+  for (const o of PRACA.outros.values()) {
+    if (!o.alvo) continue;
+    const kk = 1 - Math.exp(-dt * 10), ax = o.x, az = o.z;
+    o.x += (o.alvo.x - o.x) * kk; o.z += (o.alvo.z - o.z) * kk; o.y += ((o.alvo.y || 0) - o.y) * kk;
+    let dr = o.alvo.r - o.r; dr = (dr + Math.PI * 3) % (Math.PI * 2) - Math.PI; o.r += dr * kk;
+    const v = Math.hypot(o.x - ax, o.z - az) / Math.max(dt, .001); o.m.passo += v * dt * 3;
+    animarBonecoPraca(o.m, o.x, o.y, o.z, o.r, v > .4, dt);
+  }
+  // chafariz, coisas girando e portal piscando
+  const t = ts / 1000;
+  for (const gt of PRACA.gotas) { gt.f = (gt.f + dt * .7) % 1; const rr = gt.f * 2.1; gt.m.position.set(Math.cos(gt.a) * rr, 2.6 + gt.f * 1.6 - gt.f * gt.f * 3.4, Math.sin(gt.a) * rr); }
+  PRACA.jato.scale.y = 1 + .12 * Math.sin(t * 6);
+  for (const o of PRACA.gira) o.rotation.y += o.userData.gira * dt;
+  PRACA.portal.material.opacity = .35 + .15 * Math.sin(t * 3);
+  // placas: redesenha quando a classificação muda
+  PRACA.tPlaca -= dt;
+  if (PRACA.tPlaca <= 0) { PRACA.tPlaca = 1.5;
+    for (const p of PRACA.placas) { const ch = JSON.stringify(listaPlaca(p.pl.k).slice(0, 8)) + perfil(); if (ch !== p.chave) { p.chave = ch; const velha = p.tela.material.map; p.tela.material.map = texPlaca(p.pl.k); p.tela.material.needsUpdate = true; if (velha) velha.dispose(); } }
+    const mo = $("pr-moedas"); if (mo) mo.textContent = fmtM(G.banco[perfil()] || 0);
+    if (PRACA.rede && PRACA.rede.contar) $("pr-gente").textContent = PRACA.rede.contar();
+  }
+  // perto de alguma coisa? mostra o botão de ação
+  let perto = null; for (const l of lugaresPraca()) if (Math.hypot(eu.x - l.x, eu.z - l.z) < l.r) { perto = l; break; }
+  if ((perto && perto.txt) !== (PRACA.perto && PRACA.perto.txt)) { const b = $("pr-acao"); if (b) { b.hidden = !perto; if (perto) b.textContent = perto.txt; } }
+  PRACA.perto = perto;
+  // câmera atrás do bonequinho
+  const dist = 7, alt = 1.2 + PRACA.alt * 7;
+  PRACA.cam.position.set(eu.x + sy * dist, eu.y + alt, eu.z + cy * dist);
+  PRACA.cam.lookAt(eu.x, eu.y + 1.3, eu.z);
+  if (PRACA.rede && PRACA.rede.pos) PRACA.rede.pos(eu.x, eu.z, eu.r, eu.y);
+  r.render(PRACA.cena, PRACA.cam);
+}
+function animarBonecoPraca(m, x, y, z, r, anda, dt) {
+  m.g.position.set(x, y, z); m.corpo.rotation.y = r;
+  const s = anda ? Math.sin(m.passo) * .7 : 0;
+  m.pernaE.rotation.x = s; m.pernaD.rotation.x = -s; m.bracoE.rotation.x = -s * .8; m.bracoD.rotation.x = s * .8;
+  for (const o of m.giram) { if (o.isGroup) o.rotation.y += o.userData.gira * dt; else o.rotation.z += o.userData.gira * dt; }
+}
 acoes.pegarPresente = () => {
   const nome = perfil(), pd = presenteDe(nome); if (!pd.pode) { toast("Você já pegou o presente de hoje. Volte amanhã!"); return; }
   G.diario = G.diario || {}; G.diario[nome] = { ultimo: diaBR(), seq: pd.dia };
@@ -4360,7 +4824,7 @@ function animarLobby() {
 <script>
 /* ================= Música da tela inicial (original, feita na hora pelo navegador) ================= */
 const MUS = { ctx: null, master: null, tocando: false, timer: null, passo: 0, proximo: 0, bpm: 118, volta: 0, noise: null };
-const TELAS_COM_MUSICA = ["lobby", "loja", "perfil", "missoes"];
+const TELAS_COM_MUSICA = ["lobby", "loja", "perfil", "missoes", "eventos"];
 const somLigado = () => G.som !== false;
 const hz = m => 440 * Math.pow(2, (m - 69) / 12);
 
@@ -6394,10 +6858,10 @@ TELAS_COM_MUSICA.push("salaHost", "esperando", "entrar", "criandoSala");
 /* ---------- Anfitrião: criar sala ---------- */
 function usarSalaFixa() { return G.salaFixa ?? (perfil().toLowerCase() === "andre"); }
 /* auto: nome de quem chegou pelo QR e achou a sala fechada; essa pessoa abre a sala */
-function criarSala(fixa = usarSalaFixa(), auto = null) {
+function criarSala(fixa = usarSalaFixa(), auto = null, codigoFixo = SALA_DO_ANDRE) {
   if (typeof Peer === "undefined") { toast("A conexão online não carregou. Confira a internet."); return; }
   if (ON.peer) { try { ON.peer.destroy(); } catch {} }
-  ON.host = true; ON.on = false; ON.code = fixa ? SALA_DO_ANDRE : gerarCodigo(); ON.sala = [];
+  ON.host = true; ON.on = false; ON.code = fixa ? codigoFixo : gerarCodigo(); ON.sala = [];
   const peer = new Peer(PREFIXO + ON.code, { debug: 0 });
   ON.peer = peer;
   ir("criandoSala");
@@ -6408,7 +6872,7 @@ function criarSala(fixa = usarSalaFixa(), auto = null) {
   peer.on("error", e => {
     if (e.type === "unavailable-id" && auto) { entrarSala(ON.code, auto, true); return; }   // alguém abriu ao mesmo tempo
     if (e.type === "unavailable-id") {
-      if (fixa) { toast("A Sala do Andre já está aberta. Entrando nela…"); ON.codeEntrar = SALA_DO_ANDRE; entrarSala(SALA_DO_ANDRE, perfil(), true); return; }
+      if (fixa) { toast(codigoFixo === SALA_EVENTO ? "A Partida do Evento já está aberta. Entrando nela…" : "A Sala do Andre já está aberta. Entrando nela…"); ON.codeEntrar = codigoFixo; entrarSala(codigoFixo, perfil(), true); return; }
       criarSala(false); return;
     }
     if (e.type === "peer-unavailable") return;
@@ -6424,7 +6888,8 @@ function criarSala(fixa = usarSalaFixa(), auto = null) {
 function enviarSala() {
   const nomes = [perfil(), ...ON.sala.map(s => s.nome)];
   const codigos = { [perfil()]: meuCodigoAmigo() }; ON.sala.forEach(s => { if (s.codigo) codigos[s.nome] = s.codigo; });
-  ON.sala.forEach(s => enviar(s.conn, { t: "sala", nomes, robos: ON.robos, code: ON.code, codigos }));
+  const rank = ON.code === SALA_EVENTO ? rankAtual() : undefined;
+  ON.sala.forEach(s => enviar(s.conn, { t: "sala", nomes, robos: ON.robos, code: ON.code, codigos, rank }));
 }
 TELAS.criandoSala = () => `
   <section data-fundo="${fundoAtual()}" class="bgf lobby"><h1 class="lb-title" style="font-size:40px">Criando sala…</h1><p class="lb-sub">Conectando ao servidor.</p>
@@ -6439,9 +6904,9 @@ TELAS.salaHost = () => {
   return `
   <section data-fundo="${fundoAtual()}" class="bgf lobby" aria-label="Sala online">
     <div class="lb-top"><button class="lb-pill" data-a="encerrarSala">← Fechar sala</button><span class="lb-pill">Sala <b style="font-family:var(--display);font-size:20px;margin-left:6px">${esc(ON.code)}</b></span></div>
-    <h1 class="lb-title" style="font-size:38px">Chame os amigos</h1>
+    <h1 class="lb-title" style="font-size:38px">${ON.code === SALA_EVENTO ? "Partida do Evento" : "Chame os amigos"}</h1>
     <p class="lb-sub">Eles escaneiam o QR code ou abrem o link no celular deles. Ninguém precisa de conta.</p>
-    ${ON.sala.length ? "" : `<button class="lb-cont" data-a="trocarSala">${ON.code === SALA_DO_ANDRE ? "Usar um código sorteado" : "Usar a Sala do Andre (QR impresso)"}</button>`}
+    ${ON.sala.length || ON.code === SALA_EVENTO ? "" : `<button class="lb-cont" data-a="trocarSala">${ON.code === SALA_DO_ANDRE ? "Usar um código sorteado" : "Usar a Sala do Andre (QR impresso)"}</button>`}
     <div class="qr" id="qr-sala" role="img" aria-label="QR code da sala"></div>
     <div class="url" style="color:#fff">${esc(linkSala(ON.code))}</div>
     <div class="card" style="background:rgba(11,27,51,.6)">
@@ -6483,6 +6948,7 @@ function hostRecebe(conn, d) {
     const usados = [perfil(), ...ON.sala.map(s => s.nome)];
     let nome = base, k = 2; while (usados.some(u => u.toLowerCase() === nome.toLowerCase())) nome = base + " " + (k++);
     ON.sala.push({ conn, nome, moedas: Math.max(0, +d.moedas || 0), vidasInv: Math.max(0, Math.floor(+d.vidas || 0)), skin: skinInfo(d.skin).k, ficha: limparFicha(d.ficha), codigo: limparCodigoAmigo(d.amigo), arremesso: arremessoInfo(String(d.arremesso || "")).k, selo: [1, 2, 3].includes(d.selo) ? d.selo : 0, pet: petInfo(String(d.pet || "")) ? String(d.pet) : null });
+    if (ON.code === SALA_EVENTO) mesclarRank(d.rank);
     enviar(conn, { t: "bemvindo", nome, code: ON.code });
     enviarSala(); toast(`${nome} entrou na sala`); bip(880, .08);
     if (G.tela === "salaHost") render();
@@ -6621,6 +7087,9 @@ function entrada(p, d) {
         } else if (d.escolha === "comprar" && saldoCompra(p) >= A.cfg.preco && p.compradas < A.cfg.maxCompra) comprarA(p);
         else eliminarA(p);
       }
+      break;
+    case "lojaEv":
+      comprarEvento(p, String(d.k || ""));
       break;
     case "sug": {
       const nota = [1, 2, 3, 4, 5].includes(d.nota) ? d.nota : null;
@@ -6941,20 +7410,20 @@ Object.assign(acoes, {
 function entrarSala(code, nome, naoAbrir = false) {
   if (typeof Peer === "undefined") { toast("A conexão online não carregou. Confira a internet."); return; }
   if (ON.peer) { try { ON.peer.destroy(); } catch {} }
-  ON.host = false; ON.conectando = true; render();
+  ON.host = false; ON.conectando = true; ON.codeEntrar = code; render();
   const peer = new Peer({ debug: 0 }); ON.peer = peer;
   const desiste = setTimeout(() => { if (ON.conectando) { ON.conectando = false; toast("Não consegui entrar. Confira a internet e tente de novo."); render(); } }, 15000);
   peer.on("open", () => {
     const conn = peer.connect(PREFIXO + code, { reliable: true, serialization: "json" });
     ON.hostConn = conn;
-    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome), ficha: personagemDe(nome), amigo: meuCodigoAmigo(), arremesso: arremessoDe(nome), selo: nivelSelo(nome), pet: petDe(nome) }); });
+    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome), ficha: personagemDe(nome), amigo: meuCodigoAmigo(), arremesso: arremessoDe(nome), selo: nivelSelo(nome), pet: petDe(nome), rank: code === SALA_EVENTO ? rankAtual() : undefined }); });
     conn.on("data", cliRecebe);
     conn.on("close", () => { if (ON.peer === peer) { toast("A conexão com a sala caiu."); sairOnline(); } });
   });
   peer.on("error", e => {
     clearTimeout(desiste); ON.conectando = false;
     // a Sala do Andre está fechada: quem chegou primeiro abre a sala
-    if (e.type === "peer-unavailable" && code === SALA_DO_ANDRE && !naoAbrir) { criarSala(true, nome); return; }
+    if (e.type === "peer-unavailable" && (code === SALA_DO_ANDRE || code === SALA_EVENTO) && !naoAbrir) { criarSala(true, nome, code); return; }
     toast(e.type === "peer-unavailable" ? "Sala não encontrada. Confira o código." : "Problema na conexão: " + e.type);
     if (G.tela === "entrar") render();
   });
@@ -6963,7 +7432,10 @@ function cliRecebe(d) {
   if (!d || typeof d !== "object") return;
   switch (d.t) {
     case "bemvindo": ON.meuNome = d.nome; ir("esperando"); break;
-    case "sala": ON.salaNomes = Array.isArray(d.nomes) ? d.nomes.map(String) : []; ON.robos = +d.robos || 0; ON.salaCodigos = d.codigos && typeof d.codigos === "object" ? d.codigos : {}; if (G.tela === "esperando") render(); break;
+    case "rank": mesclarRank(d.r); break;
+    case "lojaOk": { const it = LOJA_EV[d.k]; if (!it) break; G.banco[ON.meuNome] = Math.round(((G.banco[ON.meuNome] || 0) - it.preco) * 10) / 10; salvar(); toast(`${it.ic} ${it.nome}!`); bip(990, .08); renderAct(); break; }
+    case "lojaNao": toast(String(d.msg || "Não deu para comprar.").slice(0, 80)); renderAct(); break;
+    case "sala": if (d.rank) mesclarRank(d.rank); ON.salaNomes = Array.isArray(d.nomes) ? d.nomes.map(String) : []; ON.robos = +d.robos || 0; ON.salaCodigos = d.codigos && typeof d.codigos === "object" ? d.codigos : {}; if (G.tela === "esperando") render(); break;
     case "fora": toast(d.msg || "Não deu para entrar."); sairOnline(); break;
     case "start": iniciarCliente(d); break;
     case "st": if (ON.on) aplicarEstado(d); break;
@@ -7378,6 +7850,198 @@ amigoRecebe = (conn, d) => {
 };
 const _verOnline = verQuemEstaOnline;
 verQuemEstaOnline = async () => { await _verOnline(); amigos().forEach(a => { if (AMG.online[a.codigo] && conversa(a.codigo).some(m => m.pendente)) entregarPendentes(a.codigo); }); };
+
+/* ================= Partida do Evento (botão Eventos → Centro de Eventos) =================
+   Sala de código fixo: todo mundo que toca em "Entrar na partida" cai na mesma sala (quem chega e acha fechada, abre).
+   Dentro da partida tem loja (vida extra, escudo, correr rápido e dica de letra), paga com as moedas guardadas.
+   Classificação da semana (vitórias, tempo jogando e moedas gastas na loja do evento): o anfitrião soma no fim
+   de cada partida e manda para todos; cada aparelho guarda em G.evRank e junta com o que recebe (o maior número vale).
+   A classificação aparece nas placas da Praça Central (semanaEvento, rankAtual e mesclarRank ficam em jogo.html). */
+const SALA_EVENTO = "EVENTOS1";
+const LOJA_EV = { vida: { ic: "❤️", nome: "Vida extra", preco: 60 }, escudo: { ic: "🛡️", nome: "Escudo", preco: 40 }, rapido: { ic: "⚡", nome: "Correr rápido", preco: 30 }, dica: { ic: "💡", nome: "Dica de letra", preco: 25 } };
+const evOn = () => ON.on && (ON.host ? ON.code : ON.codeEntrar) === SALA_EVENTO;
+/* loja dentro da partida: o anfitrião confere e aplica; quem é de fora desconta as moedas quando chega o "lojaOk" */
+function comprarEvento(p, k) {
+  const it = LOJA_EV[k], ph = A.ph || {}; if (!it || !p || !evOn() || A.fim) return;
+  const nao = msg => { if (p.remoto) enviar(p.conn, { t: "lojaNao", msg }); else { toast(msg); renderAct(); } };
+  if (!p.vivo) return nao("Você já saiu desta partida.");
+  if ((p.guardado || 0) < it.preco) return nao("Suas moedas guardadas não dão.");
+  p.evComp = p.evComp || {};
+  if (k === "vida") { if ((p.evComp.vida || 0) >= 2) return nao("Só dá para comprar 2 vidas por partida."); p.vidas++; }
+  if (k === "escudo") { if (p.escudo) return nao("Você já está com escudo."); p.escudo = true; }
+  if (k === "rapido") { if (p.rapidoAte > A.t) return nao("Você já está rápido!"); p.rapidoAte = A.t + 10; }
+  if (k === "dica") {
+    if (ph.k !== "pergunta" || ph.voto || !ph.ordem || ph.ordem[ph.idx] !== p) return nao("A dica só vale na sua vez de chutar.");
+    const chave = ph.palavra + "|" + (ph.perg ? ph.perg.i : "");
+    if (p.dicaPal === chave) return nao("Você já pegou dica nesta palavra.");
+    const l = revelarMaisA(ph); if (!l) return nao("Falta só uma letra: tenta chutar!");
+    p.dicaPal = chave; aMsg(`${p.nome} comprou uma dica: tem a letra ${l}!`);
+  }
+  p.evComp[k] = (p.evComp[k] || 0) + 1; p.evGasto = (p.evGasto || 0) + it.preco;
+  p.guardado = Math.round(((p.guardado || 0) - it.preco) * 10) / 10;
+  aFx(p.x, p.y - 60, it.ic, "#ffd23f");
+  if (p.remoto) enviar(p.conn, { t: "lojaOk", k });
+  else { G.banco[p.nome] = Math.round(((G.banco[p.nome] || 0) - it.preco) * 10) / 10; salvarPlacar(); toast(`${it.ic} ${it.nome}!`); bip(990, .08); renderAct(); }
+}
+// escudo: segura uma bolada
+const _atingirEv = atingirA;
+atingirA = function (p) {
+  if (p && p.escudo) { p.escudo = false; p.flash = .3; if (A.ph && A.ph.atingidos) A.ph.atingidos.add(p); aFx(p.x, p.y - 60, "🛡️", "#7fd0ff"); bip(1200, .12); aMsg(`O escudo de ${p.nome} segurou a bolada!`); return; }
+  return _atingirEv(p);
+};
+// correr rápido: 35% mais rápido por 10 segundos (vale para quem joga no anfitrião e para quem joga de fora)
+const _moverEv = moverControlado;
+moverControlado = function (p, dt) { return _moverEv(p, p.rapidoAte > A.t ? dt * 1.35 : dt); };
+// o estado manda o escudo e o "rápido" para todos verem
+const _estadoEv = estadoAtual;
+estadoAtual = function () { const s = _estadoEv(); if (evOn()) s.P.forEach((a, i) => { const p = A.P[i]; a.push(p.escudo ? 1 : 0, p.rapidoAte > A.t ? 1 : 0); }); return s; };
+const _aplicarEv = aplicarEstado;
+aplicarEstado = function (s) { _aplicarEv(s); (s.P || []).forEach((a, i) => { const p = A.P[i]; if (p) { p.escudo = !!a[11]; p.rapido = !!a[12]; } }); };
+const _bonecoEv = desenharBoneco2;
+desenharBoneco2 = function (c, p, ph) {
+  _bonecoEv(c, p, ph);
+  if (!ON.on || !p.vivo) return;
+  const t = performance.now() / 1000;
+  if (p.rapido || p.rapidoAte > A.t) { c.save(); c.strokeStyle = "rgba(255,210,63,.85)"; c.lineWidth = 3; c.lineCap = "round"; for (let i = 0; i < 3; i++) { const yy = p.y - 30 + i * 14, d = 8 + 6 * Math.sin(t * 12 + i); c.beginPath(); c.moveTo(p.x - 26 - d, yy); c.lineTo(p.x - 40 - d, yy); c.stroke(); } c.restore(); }
+  if (p.escudo) { c.save(); c.globalAlpha = .9; c.fillStyle = "rgba(127,208,255,.16)"; c.strokeStyle = "rgba(127,208,255,.95)"; c.lineWidth = 3; c.beginPath(); c.arc(p.x, p.y - 18, 42 + 2 * Math.sin(t * 4), 0, Math.PI * 2); c.fill(); c.stroke(); c.restore(); }
+};
+// loja no painel de baixo
+const _actEv = renderActOnline;
+renderActOnline = function () {
+  _actEv();
+  if (!evOn() || A.fim) return;
+  const box = $("a-act"), me = A.P[ON.myIdx], ph = A.ph || {}; if (!box || !me || !me.vivo) return;
+  const minhaVez = ph.k === "pergunta" && !ph.voto && !ph.espera && ph.ordem && ph.ordem[ph.idx] === me;
+  const saldo = G.banco[ON.host ? perfil() : ON.meuNome] || 0;
+  box.insertAdjacentHTML("beforeend", `<div class="ev-loja"><p><b>🛒 Loja do evento</b><span><span class="lb-coin" aria-hidden="true">$</span>${fmtM(saldo)}</span></p><div class="ev-loja-b">${Object.entries(LOJA_EV).filter(([k]) => k !== "dica" || minhaVez).map(([k, it]) => `<button type="button" data-ev="${k}" ${saldo < it.preco ? "disabled" : ""}>${it.ic} ${it.nome}<b>${it.preco}</b></button>`).join("")}</div></div>`);
+  box.querySelectorAll("[data-ev]").forEach(b => b.addEventListener("click", () => { b.disabled = true; agir({ t: "lojaEv", k: b.dataset.ev }); }));
+};
+// fim da partida do evento: o anfitrião soma a classificação e manda para todos
+const _comecarEv = comecarOnline;
+comecarOnline = function () { _comecarEv(); if (evOn()) A.P.forEach(p => { p.evJog = !!p.humano; p.evGasto = 0; p.escudo = false; p.rapidoAte = 0; }); };
+const _fimEv = mostrarFimOnline;
+mostrarFimOnline = function () {
+  if (ON.host && evOn() && A.fim && !A.fim.evFeito) {
+    A.fim.evFeito = true;
+    const r = rankAtual(), gan = A.fim.ganhadores || [A.fim.vencedor];
+    A.P.filter(p => p.evJog).forEach(p => { const e = r.j[p.nome] || { g: 0, t: 0, v: 0 }; r.j[p.nome] = { g: e.g + Math.round(p.evGasto || 0), t: e.t + Math.round(A.t), v: e.v + (gan.includes(p) ? 1 : 0) }; });
+    salvar(); A.P.forEach(p => { if (p.conn) enviar(p.conn, { t: "rank", r }); });
+  }
+  return _fimEv();
+};
+Object.assign(acoes, {
+  entrarEvento() { if (ON.conectando) return; ON.codeEntrar = SALA_EVENTO; entrarSala(SALA_EVENTO, perfil()); },
+});
+
+/* ================= Praça Central: ver os amigos andando (só no site) =================
+   O primeiro que entra na praça vira o "dono" (PeerJS com o id fixo PRACA_ID) e repassa a posição de todos.
+   Os outros se ligam nele. Se o dono sai, quem sobrou se reconecta e alguém vira o novo dono.
+   Vai pela rede: apelido, skin, pet, selo, personagem, moedas, posição e a classificação da semana. */
+const PRACA_ID = PREFIXO + "praca-v1";
+const PR = { peer: null, dono: false, conns: new Map(), hostConn: null, prox: 1, meuId: "", info: null, t: 0, tRank: 0, tentando: null, saindo: false };
+function prInfoLimpa(d) {
+  if (!d || typeof d !== "object") return null;
+  const nome = nomeLimpo(d.nome) || "Amigo";
+  return { nome, skin: skinInfo(String(d.skin || "")).k, pet: d.pet && petInfo(String(d.pet)) ? String(d.pet) : null, ficha: d.ficha ? limparFicha(d.ficha) : null,
+    selo: [1, 2, 3].includes(d.selo) ? d.selo : 0, moedas: Math.max(0, Math.min(1e7, Math.round(+d.moedas || 0))), cor: A_CORES[0], pele: A_PELE[0] };
+}
+function prPos(x, z, r, y) {
+  PR.t += 1;
+  const num = v => Math.round((+v || 0) * 100) / 100;
+  if (PR.dono) return;   // o dono manda a posição dele junto com a de todos (prTick)
+  if (PR.hostConn && PR.ultimoPs && Date.now() - PR.ultimoPs > 6000) { PR.ultimoPs = 0; prReconectar(); return; }   // o dono sumiu sem avisar
+  if (PR.t % 6 === 0 && PR.hostConn) enviar(PR.hostConn, { t: "p", x: num(x), z: num(z), r: num(r), y: num(y) });
+}
+function prTick() {
+  if (!PR.dono || !PRACA.on) return;
+  const eu = PRACA.eu, num = v => Math.round((+v || 0) * 100) / 100, l = [["h", num(eu.x), num(eu.z), num(eu.r), num(eu.y)]];
+  for (const [id, c] of PR.conns) if (c.pos) l.push([id, ...c.pos]);
+  for (const c of PR.conns.values()) enviar(c.conn, { t: "ps", l });
+  if (Date.now() - PR.tRank > 4000) { PR.tRank = Date.now(); for (const c of PR.conns.values()) enviar(c.conn, { t: "rk", r: rankAtual(), m: moedasPraca() }); }
+}
+function prInfos() { const l = { h: PR.info }; for (const [id, c] of PR.conns) if (c.info) l[id] = c.info; return l; }
+function prMandarInfos() { const l = prInfos(); for (const c of PR.conns.values()) enviar(c.conn, { t: "infos", l }); }
+function prVirarDono() {
+  const peer = new Peer(PRACA_ID, { debug: 0 }); PR.peer = peer;
+  peer.on("open", () => { PR.dono = true; PR.meuId = "h"; prContar(); clearInterval(PR.timer); PR.timer = setInterval(prTick, 120); });
+  peer.on("error", e => { if (!PRACA.on || PR.peer !== peer) return; if (e.type === "unavailable-id") { try { peer.destroy(); } catch {} prReconectar(); } });
+  peer.on("connection", conn => {
+    conn.on("data", d => prDonoRecebe(conn, d));
+    const sai = () => { for (const [id, c] of PR.conns) if (c.conn === conn) { PR.conns.delete(id); pracaTirar(id); for (const o of PR.conns.values()) enviar(o.conn, { t: "sai", id }); } prContar(); };
+    conn.on("close", sai); conn.on("error", sai);
+  });
+}
+function prDonoRecebe(conn, d) {
+  if (!d || typeof d !== "object") return;
+  let id = null; for (const [k, c] of PR.conns) if (c.conn === conn) id = k;
+  if (d.t === "ola") {
+    if (!id) { if (PR.conns.size >= 19) { enviar(conn, { t: "cheia" }); return; } id = "c" + (PR.prox++); PR.conns.set(id, { conn, info: null, pos: null }); }
+    const c = PR.conns.get(id); c.info = prInfoLimpa(d.info); mesclarRank(d.r, d.m);
+    enviar(conn, { t: "bem", id }); pracaOutro(id, c.info); prMandarInfos(); prContar();
+    enviar(conn, { t: "rk", r: rankAtual(), m: moedasPraca() });
+    return;
+  }
+  if (!id) return;
+  const c = PR.conns.get(id);
+  if (d.t === "p") { const n = v => Math.max(-40, Math.min(40, +v || 0)); c.pos = [n(d.x), n(d.z), +d.r || 0, Math.max(0, Math.min(5, +d.y || 0))]; pracaPos(id, ...c.pos); }
+  else if (d.t === "info") { c.info = prInfoLimpa(d.info); pracaOutro(id, c.info); prMandarInfos(); }
+  else if (d.t === "rk") mesclarRank(d.r, d.m);
+  else if (d.t === "portal" && c.info) { toast(`${c.info.nome} entrou na Partida do Evento! Vá até a porta para jogar junto.`); for (const [k, o] of PR.conns) if (k !== id) enviar(o.conn, { t: "portal", nome: c.info.nome }); }
+}
+function prEntrar() {
+  const peer = new Peer({ debug: 0 }); PR.peer = peer;
+  peer.on("open", () => {
+    const conn = peer.connect(PRACA_ID, { reliable: true, serialization: "json" }); PR.hostConn = conn;
+    conn.on("open", () => { enviar(conn, { t: "ola", info: PR.info, r: rankAtual(), m: moedasPraca() }); });
+    conn.on("data", d => prMembroRecebe(d));
+    conn.on("close", () => { if (PR.peer === peer && PRACA.on && !PR.saindo) prReconectar(); });
+  });
+  peer.on("error", e => {
+    if (!PRACA.on || PR.peer !== peer) return;
+    if (e.type === "peer-unavailable") { try { peer.destroy(); } catch {} prVirarDono(); return; }   // ninguém na praça: você é o dono
+    prReconectar();
+  });
+}
+function prMembroRecebe(d) {
+  if (!d || typeof d !== "object") return;
+  if (d.t !== "cheia") PR.ultimoPs = Date.now();
+  if (d.t === "bem") { PR.meuId = String(d.id); prContar(); }
+  else if (d.t === "infos" && d.l && typeof d.l === "object") {
+    const ids = Object.keys(d.l).filter(id => id !== PR.meuId).slice(0, 20);
+    for (const id of ids) pracaOutro(id, prInfoLimpa(d.l[id]));
+    for (const id of [...PRACA.outros.keys()]) if (!ids.includes(id)) pracaTirar(id);
+    prContar();
+  }
+  else if (d.t === "ps" && Array.isArray(d.l)) for (const a of d.l.slice(0, 20)) { if (!Array.isArray(a) || a[0] === PR.meuId) continue; const n = v => Math.max(-40, Math.min(40, +v || 0)); pracaPos(String(a[0]), n(a[1]), n(a[2]), +a[3] || 0, Math.max(0, Math.min(5, +a[4] || 0))); }
+  else if (d.t === "sai") { pracaTirar(String(d.id)); prContar(); }
+  else if (d.t === "rk") mesclarRank(d.r, d.m);
+  else if (d.t === "portal") toast(`${nomeLimpo(d.nome)} entrou na Partida do Evento! Vá até a porta para jogar junto.`);
+  else if (d.t === "cheia") toast("A praça está cheia agora. Você está passeando sozinho.");
+}
+function prReconectar() {
+  clearTimeout(PR.tentando); clearInterval(PR.timer);
+  try { if (PR.peer) PR.peer.destroy(); } catch {}
+  PR.peer = null; PR.hostConn = null; PR.dono = false; PR.conns.clear(); pracaTirarTodos(); prContar();
+  PR.tentando = setTimeout(() => { if (PRACA.on) prEntrar(); }, 400 + Math.random() * 1400);
+}
+function prContar() { const g = $("pr-gente"); if (g) g.textContent = PRACA.rede.contar(); }
+PRACA.rede = {
+  pos: prPos,
+  info(i) { PR.info = prInfoLimpa(i); if (PR.dono) { prMandarInfos(); } else if (PR.hostConn) enviar(PR.hostConn, { t: "info", info: PR.info }); },
+  portal() { if (PR.dono) { for (const c of PR.conns.values()) enviar(c.conn, { t: "portal", nome: PR.info.nome }); } else if (PR.hostConn) enviar(PR.hostConn, { t: "portal" }); },
+  contar() { const n = 1 + PRACA.outros.size; return n === 1 ? "👤 Só você aqui" : `👥 ${n} na praça`; },
+};
+PRACA.conectar = info => {
+  if (typeof Peer === "undefined") { const g = $("pr-gente"); if (g) g.textContent = "👤 Sem internet: só você"; return; }
+  PR.saindo = false; PR.info = prInfoLimpa(info); anotarMoedas(PR.info.nome, PR.info.moedas); PR.prox = 1; prEntrar();
+};
+PRACA.desconectar = () => {
+  PR.saindo = true; clearTimeout(PR.tentando); clearInterval(PR.timer); PR.ultimoPs = 0;
+  try { if (PR.hostConn) PR.hostConn.close(); } catch {}
+  for (const c of PR.conns.values()) { try { c.conn.close(); } catch {} }   // avisa quem ficou, para alguém virar o novo dono
+  try { if (PR.peer) PR.peer.destroy(); } catch {}
+  PR.peer = null; PR.hostConn = null; PR.dono = false; PR.conns.clear();
+};
 
 render();
 </script>
