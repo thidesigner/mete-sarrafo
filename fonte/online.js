@@ -592,6 +592,7 @@ function cliRecebe(d) {
   switch (d.t) {
     case "bemvindo": ON.meuNome = d.nome; ir("esperando"); break;
     case "rank": mesclarRank(d.r); break;
+    case "bossItem": if (BOSSES[d.k]) bossPremioLocal(ON.meuNome, d.k); break;
     case "lojaOk": { const it = LOJA_EV[d.k]; if (!it) break; G.banco[ON.meuNome] = Math.round(((G.banco[ON.meuNome] || 0) - it.preco) * 10) / 10; salvar(); toast(`${it.ic} ${it.nome}!`); bip(990, .08); renderAct(); break; }
     case "lojaNao": toast(String(d.msg || "Não deu para comprar.").slice(0, 80)); renderAct(); break;
     case "sala": if (d.rank) mesclarRank(d.rank); ON.salaNomes = Array.isArray(d.nomes) ? d.nomes.map(String) : []; ON.robos = +d.robos || 0; ON.salaCodigos = d.codigos && typeof d.codigos === "object" ? d.codigos : {}; if (G.tela === "esperando") render(); break;
@@ -1083,7 +1084,7 @@ mostrarFimOnline = function () {
   if (ON.host && evOn() && A.fim && !A.fim.evFeito) {
     A.fim.evFeito = true;
     const r = rankAtual(), gan = A.fim.ganhadores || [A.fim.vencedor];
-    A.P.filter(p => p.evJog).forEach(p => { const e = r.j[p.nome] || { g: 0, t: 0, v: 0 }; r.j[p.nome] = { g: e.g + Math.round(p.evGasto || 0), t: e.t + Math.round(A.t), v: e.v + (gan.includes(p) ? 1 : 0) }; });
+    A.P.filter(p => p.evJog).forEach(p => { const e = r.j[p.nome] || { g: 0, t: 0, v: 0, b: 0 }; r.j[p.nome] = { ...e, g: e.g + Math.round(p.evGasto || 0), t: e.t + Math.round(A.t), v: e.v + (gan.includes(p) ? 1 : 0) }; });
     salvar(); A.P.forEach(p => { if (p.conn) enviar(p.conn, { t: "rank", r }); });
   }
   return _fimEv();
@@ -1091,6 +1092,80 @@ mostrarFimOnline = function () {
 Object.assign(acoes, {
   entrarEvento() { if (ON.conectando) return; ON.codeEntrar = SALA_EVENTO; entrarSala(SALA_EVENTO, perfil()); },
 });
+
+/* ================= Boss da Partida do Evento (todos contra o boss) =================
+   Sempre que tem coleção com boss na loja (BOSSES em jogo.html), ele fica no meio da quadra.
+   Acertar a palavra tira 25 de vida; bola que cai nele tira 8. Na hora da bola ele joga bolas do tema em quem corre.
+   Derrotado: cada um ganha as moedas, o item só do boss e +1 na placa "Bosses" da Praça (G.evRank[...].b). */
+const BOSS_PALAVRA = 25, BOSS_BOLA = 8, BOSS_RAIO = 90;
+function bossVidaMax() { return 80 + 40 * A.P.filter(p => p.humano).length; }
+function bossDano(v, p) {
+  const B = A.boss; if (!B || B.morto) return;
+  B.hp = Math.max(0, B.hp - v); B.hit = .45;
+  aFx(AC, AC - 150, "-" + v, "#ffd23f"); bip(240, .12);
+  if (B.hp <= 0) bossDerrotado(p);
+}
+function bossDerrotado(p) {
+  const B = A.boss, cfg = BOSSES[B.k]; B.morto = true;
+  const r = rankAtual();
+  A.P.filter(q => q.evJog && q.humano).forEach(q => {
+    aGanhar(q, cfg.moedas, "boss");
+    const e = r.j[q.nome] || { g: 0, t: 0, v: 0, b: 0 }; r.j[q.nome] = { ...e, b: (e.b || 0) + 1 };
+    if (q.remoto && q.conn) enviar(q.conn, { t: "bossItem", k: B.k });
+    else if (q.i === ON.myIdx) bossPremioLocal(perfil(), B.k);
+  });
+  salvar(); A.P.forEach(q => { if (q.conn) enviar(q.conn, { t: "rank", r }); });
+  aMsg(`${p ? p.nome + " deu o golpe final! " : ""}O ${cfg.nome} foi derrotado! Todo mundo ganha ${cfg.moedas} moedas.`);
+  if (typeof somEmoji === "function") somEmoji(B.k === "eclipse" ? "eclipse" : "choque");
+  if (typeof explosaoEstrelas === "function") explosaoEstrelas();
+}
+function bossPremioLocal(nome, k) {
+  const cfg = BOSSES[k]; if (!cfg) return;
+  let txt = `${cfg.ic} Vocês derrotaram o ${cfg.nome}! +${cfg.moedas} moedas`;
+  if (cfg.item) { const r = darPremio(nome, { item: cfg.item }); if (r && !r.jaTem) txt += ` e ${r.txt} (só de quem derrota o boss)`; }
+  salvar(); toast(txt + "!");
+}
+function passoBoss(dt) {
+  const B = A.boss, ph = A.ph || {}, cfg = BOSSES[B.k]; B.hit = Math.max(0, B.hit - dt);
+  const correndo = () => aVivos().filter(q => q.modo === "fugindo" || q.modo === "voltando");
+  for (const b of A.balls) {
+    if (b.done || b.t + dt < b.T) continue;
+    if (b.boss) {   // bola do boss: acerta quem está correndo perto de onde caiu
+      b.done = true; if (ph.k !== "bola") continue;
+      let best = null, bd = A_RAIO; for (const q of correndo()) { if (ph.atingidos && ph.atingidos.has(q)) continue; const d = aDist(q, b.to); if (d < bd) { bd = d; best = q; } }
+      if (best) { const vivo = best.vidas; atingirA(best); if (best.vidas < vivo && best.vivo && best.vidas > 0) aMsg(`O ${cfg.nome} acertou ${best.nome}! Restam ${best.vidas} vidas.`); }
+      else aFx(b.to.x, b.to.y - 20, "errou", "#b8c6da");
+    } else if (ph.k === "bola" && !B.morto && aDist(b.to, { x: AC, y: AC }) < BOSS_RAIO && !aCorrendo().some(q => aDist(q, b.to) < A_RAIO)) {   // bola do jogador no boss
+      b.done = true; bossDano(BOSS_BOLA, ph.atir);
+    }
+  }
+  if (B.morto || ph.k !== "bola" || !ph.pronto) return;
+  B.cd -= dt;
+  const alvos = correndo();
+  if (B.cd <= 0 && alvos.length) {
+    const alvo = alvos[Math.floor(Math.random() * alvos.length)], to = { x: Math.max(40, Math.min(AW - 40, alvo.x + (Math.random() - .5) * 70)), y: Math.max(40, Math.min(AW - 40, alvo.y + (Math.random() - .5) * 70)) };
+    const from = { x: AC, y: AC - 30 }; B.n = (B.n || 0) + 1;
+    A.balls.push({ from, to, t: 0, T: Math.max(.6, aDist(from, to) / A_BOLA * 1.25), k: cfg.bolas[B.n % 2], boss: true });
+    B.cd = 2.6; bip(180, .1);
+  }
+}
+const _passoBoss = passoA;
+passoA = function (dt) { if (onHost() && evOn() && A.boss && !A.fim && !A.ov && !(A.ph && A.ph.voto)) passoBoss(dt); return _passoBoss(dt); };
+const _chuteBoss = chuteA;
+chuteA = function (p, certo, chute, timeout) { if (certo && onHost() && evOn() && A.boss) bossDano(BOSS_PALAVRA, p); return _chuteBoss(p, certo, chute, timeout); };
+const _comecarBoss = comecarOnline;
+comecarOnline = function () { A.boss = null; _comecarBoss(); if (ON.on && evOn()) { const k = bossDaLoja(); if (k) { const max = bossVidaMax(); A.boss = { k, hp: max, max, cd: 4, morto: false, hit: 0 }; setTimeout(() => toast(`${BOSSES[k].ic} O ${BOSSES[k].nome} apareceu! Acertem a palavra e joguem a bola nele!`), 600); } } };
+const _estadoBoss = estadoAtual;
+estadoAtual = function () { const s = _estadoBoss(); const B = A.boss; s.bo = B ? [B.k, Math.round(B.hp), B.max, B.morto ? 1 : 0, +B.hit.toFixed(2)] : null; return s; };
+const _aplicarBoss = aplicarEstado;
+aplicarEstado = function (s) {
+  _aplicarBoss(s);
+  if (Array.isArray(s.bo) && BOSSES[s.bo[0]]) { const era = A.boss; A.boss = { k: s.bo[0], hp: +s.bo[1] || 0, max: Math.max(1, +s.bo[2] || 1), morto: !!s.bo[3], hit: +s.bo[4] || 0, tm: era && era.tm, tm3: era && era.tm3 };
+    if (!era && A.boss) setTimeout(() => toast(`${BOSSES[A.boss.k].ic} O ${BOSSES[A.boss.k].nome} apareceu! Acertem a palavra e joguem a bola nele!`), 300); }
+  else A.boss = null;
+};
+const _limparBoss = limparOnline; limparOnline = function () { A.boss = null; return _limparBoss(); };
+const _voltarBoss = voltarEsperando; voltarEsperando = function () { A.boss = null; return _voltarBoss(); };
 
 /* ================= Praça Central: ver os amigos andando (só no site) =================
    O primeiro que entra na praça vira o "dono" (PeerJS com o id fixo PRACA_ID) e repassa a posição de todos.

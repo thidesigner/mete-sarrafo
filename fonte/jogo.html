@@ -353,6 +353,12 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .pr-fala::after { content: ""; position: absolute; left: 50%; bottom: -12px; margin-left: -9px; border: 9px solid transparent; border-top-color: #0b1b33; border-bottom: 0; }
 @media (prefers-reduced-motion: reduce) { .pr-acao { animation: none; } .pr-faixa { animation: none; } }
 .ev-abas { align-self: center; }
+.a-boss { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; background: #1b1430; color: #fff; border: 3px solid #ffc56b; border-radius: 14px; padding: 8px 12px; box-shadow: 0 0 16px rgba(255,197,107,.45); }
+.a-boss b { font: 800 16px Nunito, sans-serif; white-space: nowrap; }
+.a-boss i { height: 14px; background: rgba(255,255,255,.15); border-radius: 7px; overflow: hidden; }
+.a-boss i span { display: block; height: 100%; background: linear-gradient(90deg, #ff4d6d, #ffd23f); transition: width .3s; }
+.a-boss small { font-weight: 800; font-size: 13px; color: #ffd23f; }
+.a-boss.morto { grid-template-columns: 1fr; text-align: center; border-color: #37d99a; }
 .pr-missao { position: absolute; top: 100px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; background: rgba(11,27,51,.82); color: #fff; border: 2px solid #ffd23f; border-radius: 14px; padding: 6px 12px; font: 700 15px Nunito, sans-serif; z-index: 2; white-space: nowrap; pointer-events: none; }
 .pr-missao b { color: #ffd23f; }
 .praca.pr-cena .pr-missao { display: none !important; }
@@ -700,6 +706,7 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
     <div class="top"><span class="eyebrow" id="a-phase"></span><span class="clock" id="a-clock"></span></div>
     <div class="card a-hud"><div class="tema" id="a-tema"></div><div class="word" id="a-word"></div><div class="dim" id="a-sub" style="text-align:center;font-size:15px"></div></div>
     <div class="scorebar" id="a-bar"></div>
+    <div class="a-boss" id="a-boss" hidden></div>
     <div class="stage-wrap"><canvas id="a-canvas" aria-label="Quadra do Jogo de Pergunta"></canvas><span class="a-emo-eu" id="a-emo-eu" aria-hidden="true"></span><div class="overlay" id="a-ov" hidden></div></div>
     <div class="a-emo" id="a-emo" role="group" aria-label="Mandar emoji"></div>
     <div class="card a-act" id="a-act"></div>
@@ -1637,6 +1644,7 @@ function renderSetup() {
 
 /* ---------- Partida ---------- */
 function comecarArena() {
+  A.boss = null;   // boss só na Partida do Evento (online)
   const s = A.setup;
   let lista = G.nomes.map(n => ({ nome: n, humano: !s.robo[n] }));
   for (let k = 1; k <= s.extras; k++) lista.push({ nome: "Robô " + k, humano: false });
@@ -1777,6 +1785,7 @@ const ARREMESSOS = [
   { k: "sol", nome: "Bola de Sol", icone: "☀️", preco: 200, cor: "#ffd23f", tipo: "arremesso", limitada: true, ate: "2026-11-16T23:59:59-03:00" },
   { k: "lua", nome: "Pedra da Lua", icone: "🌙", preco: 200, cor: "#dfe6f5", tipo: "arremesso", limitada: true, ate: "2026-11-16T23:59:59-03:00" },
   { k: "eclipse", nome: "Anel de Eclipse", icone: "🌗", preco: 200, cor: "#ffb347", tipo: "arremesso", limitada: true, ate: "2026-11-16T23:59:59-03:00" },
+  { k: "coroaeclipse", nome: "Coroa do Eclipse", icone: "👑", preco: 999, cor: "#ffb347", tipo: "arremesso", boss: true },   // só quem derrota o Rei Eclipse
 ];
 const arremessoInfo = k => ARREMESSOS.find(a => a.k === k) || ARREMESSOS[0];
 /* ---------- Pets: andam ao lado do bonequinho e têm um poder pequeno ---------- */
@@ -2070,7 +2079,80 @@ function pet3D(k, skin) {
 }
 function temArremesso(n, k) { const a = ARREMESSOS.find(x => x.k === k); return !!a && (a.preco === 0 || (((G.inv || {})[n] || {}).arremessos || []).includes(k)); }
 function arremessoDe(n) { const k = ((G.inv || {})[n] || {}).arremesso; return temArremesso(n, k) ? k : "bola"; }
+/* ================= Boss da Partida do Evento (ideia do Andre) =================
+   Combina com a coleção que está na loja (BOSSES[...].cols). A lógica fica em online.js (bloco "Boss");
+   aqui ficam a configuração e o desenho (de cima, 3D e a barra de vida). */
+const BOSSES = {
+  eclipse: { nome: "Rei Eclipse", ic: "👑", cols: ["sol", "lua", "eclipse"], bolas: ["sol", "lua"], moedas: 200, item: "arremesso:coroaeclipse",
+    corpo: ["#0b0a16", "#0b0a16"], coroa: "#ffc56b", olhos: "#ffd23f" },
+  gelofogo: { nome: "Dragão de Gelo e Fogo", ic: "🐉", cols: ["gelo", "fogo", "gelofogo"], bolas: ["gelo", "fogo"], moedas: 200, item: null,
+    corpo: ["#5fb3e6", "#e2462b"], coroa: "#ffffff", olhos: "#ffffff" },
+};
+function bossDaLoja() { const na = colecoesNaLoja(perfil()).map(c => c.id); return Object.keys(BOSSES).find(k => BOSSES[k].cols.some(c => na.includes(c))) || null; }
+function atualizarBossBarra() {
+  const el = $("a-boss"); if (!el) return;
+  const B = A.boss, cfg = B && BOSSES[B.k];
+  if (!cfg) { if (!el.hidden) el.hidden = true; return; }
+  const ch = [B.k, Math.round(B.hp), B.max, B.morto].join("|"); if (ch === el.dataset.ch) return; el.dataset.ch = ch; el.hidden = false;
+  el.classList.toggle("morto", !!B.morto);
+  el.innerHTML = B.morto ? `<b>${cfg.ic} ${esc(cfg.nome)} foi derrotado! 🎉</b>` : `<b>${cfg.ic} ${esc(cfg.nome)}</b><i><span style="width:${Math.max(0, Math.round(B.hp / B.max * 100))}%"></span></i><small>${Math.round(B.hp)}/${B.max}</small>`;
+}
+function desenharBoss2D(c) {
+  atualizarBossBarra();
+  const B = A.boss, cfg = B && BOSSES[B.k]; if (!cfg) return;
+  const t = A.t, morre = B.morto ? Math.min(1, (B.tm = (B.tm || 0) + 1 / 60) / 1.2) : 0; if (morre >= 1) return;
+  const x = AC, y = AC - 30 + Math.sin(t * 2) * 8, R = 64 * (1 - morre), hit = B.hit > 0;
+  c.save();
+  c.fillStyle = "rgba(0,0,0,.3)"; c.beginPath(); c.ellipse(AC, AC + 50, R * .9, R * .3, 0, 0, Math.PI * 2); c.fill();
+  c.globalCompositeOperation = "lighter";
+  for (let i = 0; i < 18; i++) { const a = i / 18 * Math.PI * 2 + t * .6, r2 = R + 22 + 12 * Math.sin(t * 4 + i); c.strokeStyle = cfg.coroa; c.globalAlpha = .7; c.lineWidth = 4; c.beginPath(); c.moveTo(x + Math.cos(a) * (R + 6), y + Math.sin(a) * (R + 6)); c.lineTo(x + Math.cos(a) * r2, y + Math.sin(a) * r2); c.stroke(); }
+  c.globalAlpha = 1; c.shadowColor = cfg.coroa; c.shadowBlur = 24; c.strokeStyle = cfg.coroa; c.lineWidth = 7; c.beginPath(); c.arc(x, y, R + 4, 0, Math.PI * 2); c.stroke();
+  c.restore(); c.save();
+  c.fillStyle = hit ? "#ff4d6d" : cfg.corpo[0]; c.beginPath(); c.arc(x, y, R, Math.PI / 2, Math.PI * 1.5); c.fill();
+  c.fillStyle = hit ? "#ff4d6d" : cfg.corpo[1]; c.beginPath(); c.arc(x, y, R, -Math.PI / 2, Math.PI / 2); c.fill();
+  // coroa
+  c.fillStyle = "#ffd23f"; c.strokeStyle = "#0b1b33"; c.lineWidth = 3; c.beginPath(); c.moveTo(x - 34, y - R + 8);
+  [[-34, -30], [-17, -12], [0, -36], [17, -12], [34, -30]].forEach(([dx, dy], i) => { c.lineTo(x + dx, y - R + dy); if (i < 4) c.lineTo(x + dx + 8.5, y - R + 2); });
+  c.lineTo(x + 34, y - R + 8); c.closePath(); c.fill(); c.stroke();
+  // olhos bravos e boca
+  c.fillStyle = cfg.olhos; c.shadowColor = cfg.olhos; c.shadowBlur = 14;
+  [-1, 1].forEach(l => { c.beginPath(); c.moveTo(x + l * 10, y - 14); c.lineTo(x + l * 30, y - 22); c.lineTo(x + l * 28, y - 6); c.closePath(); c.fill(); });
+  c.shadowBlur = 0; c.strokeStyle = cfg.olhos; c.lineWidth = 4; c.beginPath(); c.arc(x, y + 30, 16, Math.PI * 1.15, Math.PI * 1.85); c.stroke();
+  // barra de vida em cima
+  const w = 150; c.fillStyle = "rgba(11,27,51,.85)"; c.fillRect(x - w / 2 - 3, y - R - 70, w + 6, 18); c.fillStyle = "#ff4d6d"; c.fillRect(x - w / 2, y - R - 67, w * Math.max(0, B.hp / B.max), 12);
+  c.restore();
+}
+function boss3D() {
+  atualizarBossBarra();
+  const B = A.boss, cfg = B && BOSSES[B.k];
+  if (!cfg) { if (F.bossG) { F.scene.remove(F.bossG); F.bossG = null; } return; }
+  if (!F.bossG || F.bossG.userData.k !== B.k) {
+    if (F.bossG) F.scene.remove(F.bossG);
+    const g = new THREE.Group(), luz = (cor, op) => new THREE.MeshBasicMaterial({ color: cor, transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false });
+    const corpo = new THREE.Group(); g.add(corpo);
+    const m1 = new THREE.MeshLambertMaterial({ color: cfg.corpo[0] }), m2 = new THREE.MeshLambertMaterial({ color: cfg.corpo[1] });
+    const h1 = new THREE.Mesh(new THREE.SphereGeometry(1.3, 28, 20, 0, Math.PI), m1), h2 = new THREE.Mesh(new THREE.SphereGeometry(1.3, 28, 20, Math.PI, Math.PI), m2); corpo.add(h1, h2);
+    const coroa = new THREE.Mesh(new THREE.TorusGeometry(1.55, .12, 10, 48), luz(cfg.coroa, .95)); corpo.add(coroa);
+    const raios = new THREE.Group(); raios.userData.gira = .6; corpo.add(raios);
+    for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2, r = new THREE.Mesh(new THREE.ConeGeometry(.1, .6, 6), luz(cfg.coroa, .9)); r.position.set(Math.cos(a) * 1.95, Math.sin(a) * 1.95, 0); r.rotation.z = a - Math.PI / 2; raios.add(r); }
+    const ouro = new THREE.MeshLambertMaterial({ color: "#ffd23f", emissive: "#6a4b00" });
+    for (let i = 0; i < 5; i++) { const ponta = new THREE.Mesh(new THREE.ConeGeometry(.16, i % 2 ? .4 : .62, 6), ouro); ponta.position.set(-.6 + i * .3, 1.38 + (i % 2 ? .12 : .22), 0); corpo.add(ponta); }
+    const aro = new THREE.Mesh(new THREE.CylinderGeometry(.8, .85, .22, 20, 1, true), ouro); aro.material.side = THREE.DoubleSide; aro.position.y = 1.2; corpo.add(aro);
+    for (const l of [-1, 1]) { const o = new THREE.Mesh(new THREE.BoxGeometry(.42, .12, .1), new THREE.MeshBasicMaterial({ color: cfg.olhos })); o.position.set(l * .42, .28, 1.24); o.rotation.z = l * .35; corpo.add(o); }
+    const brilho = new THREE.Sprite(new THREE.SpriteMaterial({ map: brilhoTextura(cfg.coroa === "#ffffff" ? "rgba(220,240,255,1)" : "rgba(255,200,90,1)"), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); brilho.scale.setScalar(4.8); g.add(brilho);
+    g.userData = { k: B.k, corpo, raios, m1, m2, cores: cfg.corpo };
+    g.position.set(0, 2.3, 0); F.scene.add(g); F.bossG = g;
+  }
+  const g = F.bossG, u = g.userData, t = A.t;
+  g.position.y = 2.3 + Math.sin(t * 2) * .2;
+  if (F.cam) { const dx = F.cam.position.x - g.position.x, dz = F.cam.position.z - g.position.z; u.corpo.rotation.y = Math.atan2(dx, dz); }
+  u.raios.rotation.z += .01;
+  const hit = B.hit > 0; u.m1.color.set(hit ? "#ff4d6d" : u.cores[0]); u.m2.color.set(hit ? "#ff4d6d" : u.cores[1]);
+  if (B.morto) { B.tm3 = (B.tm3 || 0) + 1 / 60; const f = Math.min(1, B.tm3 / 1.2); g.scale.setScalar(Math.max(.01, 1 - f)); u.corpo.rotation.z += .3; g.visible = f < 1; }
+  else { g.scale.setScalar(1 + (hit ? .08 : 0)); g.visible = true; }
+}
 function desenharArremesso2D(c, k, x, y, giro) {
+  const coroaBoss = k === "coroaeclipse"; if (coroaBoss) k = "eclipse";   // Coroa do Eclipse: o eclipse com uma coroa de ouro em cima
   if (k === "sol" || k === "lua" || k === "eclipse") {
     const t = performance.now() / 1000, a = giro * .2 + Math.PI * .75;
     c.save(); c.globalCompositeOperation = "lighter";
@@ -2082,6 +2164,7 @@ function desenharArremesso2D(c, k, x, y, giro) {
     if (k === "sol") { const g = c.createRadialGradient(x - 2, y - 2, 1, x, y, 10); g.addColorStop(0, "#fffbe0"); g.addColorStop(.5, "#ffd23f"); g.addColorStop(1, "#ff9a1f"); c.fillStyle = g; c.beginPath(); c.arc(x, y, 9, 0, Math.PI * 2); c.fill(); }
     else if (k === "lua") { c.fillStyle = "#e6ecf8"; c.beginPath(); c.arc(x, y, 9, -Math.PI / 2, Math.PI / 2); c.arc(x - 4, y, 7.5, Math.PI / 2, -Math.PI / 2, true); c.closePath(); c.fill(); }
     else { c.fillStyle = "#08070d"; c.beginPath(); c.arc(x, y, 9, 0, Math.PI * 2); c.fill(); }
+    if (coroaBoss) { c.fillStyle = "#ffd23f"; c.strokeStyle = "#0b1b33"; c.lineWidth = 1.2; c.beginPath(); c.moveTo(x - 8, y - 9); c.lineTo(x - 8, y - 17); c.lineTo(x - 4, y - 12); c.lineTo(x, y - 19); c.lineTo(x + 4, y - 12); c.lineTo(x + 8, y - 17); c.lineTo(x + 8, y - 9); c.closePath(); c.fill(); c.stroke(); }
     return;
   }
   if (k === "gelo" || k === "fogo" || k === "gelofogo") {
@@ -2316,6 +2399,7 @@ function desenharA() {
     c.fillStyle = item.cor; b.hist.forEach(([hx, hy], i) => { if (!i) return; c.globalAlpha = Math.max(0, .45 - i * .045); c.beginPath(); c.arc(hx, hy, 13 - i * 1.1, 0, Math.PI * 2); c.fill(); }); c.globalAlpha = 1;
     desenharArremesso2D(c, b.k, x, y - h, f * 12);
   }
+  desenharBoss2D(c);
   faiscasCima(c);
   for (const f of A.fx) {
     c.globalAlpha = Math.max(0, 1 - f.t / 1.4);
@@ -3837,6 +3921,7 @@ function desenhar3D() {
   const h = Math.round(w * 1.15);
   if (F.r.domElement.width !== Math.round(w * F.r.getPixelRatio()) || F.lastH !== h) { F.r.setSize(w, h, true); F.cam.aspect = w / h; F.cam.updateProjectionMatrix(); F.lastH = h; }
   const ph = A.ph || {};
+  boss3D();
   const dono = A.P[A.cel];
   const chave = A.cel + ":" + (ph.k || "") + ":" + (ph.k === "bola" ? ph.atir.i : "");
   if (chave !== F.faseKey && dono) {
@@ -4158,10 +4243,11 @@ acoes.eventoLoja = el => { G.lojaAba = "destaques"; ir("loja"); const p = el.dat
 const PRACA = { on: false, outros: new Map(), yaw: 0, alt: .42, mov: { x: 0, y: 0 }, keys: {}, perto: null, rankAba: "v", painel: null, gira: [] };
 const PRACA_R = 19;
 const PRACA_PLACAS = [
-  { k: "v", t: "🏆 Vitórias", cor: "#ffd23f", x: -6.6, z: -11.5 },
-  { k: "t", t: "⏱️ Tempo jogando", cor: "#37d99a", x: -2.2, z: -12.2 },
-  { k: "g", t: "💰 Mais gastou", cor: "#ff8a1f", x: 2.2, z: -12.2 },
-  { k: "m", t: "🪙 Mais moedas", cor: "#3dd9ff", x: 6.6, z: -11.5 },
+  { k: "v", t: "🏆 Vitórias", cor: "#ffd23f", x: -8.4, z: -9.9 },
+  { k: "t", t: "⏱️ Tempo jogando", cor: "#37d99a", x: -4.2, z: -12.3 },
+  { k: "b", t: "👾 Bosses", cor: "#ff4d6d", x: 0, z: -13 },
+  { k: "g", t: "💰 Mais gastou", cor: "#ff8a1f", x: 4.2, z: -12.3 },
+  { k: "m", t: "🪙 Mais moedas", cor: "#3dd9ff", x: 8.4, z: -9.9 },
 ];
 const PRACA_BARRACAS = [
   { k: "skins", t: "Skins", ic: "👕", cor: "#e63946", x: -11.5, z: -3.5 },
@@ -4184,8 +4270,8 @@ function mesclarRank(r, m) {
     const meu = rankAtual();
     for (const [n0, e] of Object.entries(r.j).slice(0, 80)) {
       const n = nomeLimpo(n0); if (!n || !e || typeof e !== "object") continue;
-      const a = meu.j[n] || { g: 0, t: 0, v: 0 };
-      meu.j[n] = { g: Math.max(a.g, num(e.g)), t: Math.max(a.t, num(e.t)), v: Math.max(a.v, num(e.v)) };
+      const a = meu.j[n] || { g: 0, t: 0, v: 0, b: 0 };
+      meu.j[n] = { g: Math.max(a.g, num(e.g)), t: Math.max(a.t, num(e.t)), v: Math.max(a.v, num(e.v)), b: Math.max(a.b || 0, num(e.b)) };
     }
     const nomes = Object.keys(meu.j), peso = n => meu.j[n].v * 100000 + meu.j[n].t + meu.j[n].g;
     if (nomes.length > 60) nomes.sort((x, y) => peso(y) - peso(x)).slice(60).forEach(n => delete meu.j[n]);
@@ -4211,12 +4297,12 @@ function listaPlaca(k) {
   }
   return Object.entries(rankAtual().j).map(([n, e]) => ({ n, v: e[k] || 0 })).filter(e => e.v > 0).sort((a, b) => b.v - a.v).slice(0, 10);
 }
-const fmtPlaca = (k, v) => k === "t" ? tempoTxt(v) : k === "v" ? v + (v === 1 ? " vitória" : " vitórias") : fmtM(v);
+const fmtPlaca = (k, v) => k === "t" ? tempoTxt(v) : k === "v" ? v + (v === 1 ? " vitória" : " vitórias") : k === "b" ? v + (v === 1 ? " boss" : " bosses") : fmtM(v);
 function rankingHTML() {
   const sem = semanaEvento(), nome = perfil(), aba = ["v", "t", "g", "m"].includes(PRACA.rankAba) ? PRACA.rankAba : "v", lista = listaPlaca(aba);
   return `<div class="mi-caixa">
       <h2 class="lb-secao">🏆 Classificação da semana</h2>
-      <p class="lb-sub">Vitórias, tempo e moedas gastas contam na Partida do Evento (a porta da praça). Vale até domingo (${sem.fim}) e recomeça na segunda.</p>
+      <p class="lb-sub">Vitórias, tempo, bosses derrotados e moedas gastas contam na Partida do Evento (a porta da praça). Vale até domingo (${sem.fim}) e recomeça na segunda.</p>
       <div class="seg2 ev-abas" role="group" aria-label="Classificação por">${PRACA_PLACAS.map(p => `<button type="button" data-a="rankAba" data-k="${p.k}" aria-pressed="${aba === p.k}">${p.t.split(" ")[0]}</button>`).join("")}</div>
       <h3 class="pr-sub">${esc(PRACA_PLACAS.find(p => p.k === aba).t)}</h3>
       ${lista.length ? `<ol class="ev-rank">${lista.map((e, i) => `<li class="${e.n === nome ? "eu" : ""}"><span class="ev-pos">${["🥇", "🥈", "🥉"][i] || i + 1 + "º"}</span><b>${esc(e.n)}${e.n === nome ? " (você)" : ""}</b><span>${fmtPlaca(aba, e.v)}</span></li>`).join("")}</ol>`
@@ -4878,7 +4964,7 @@ TELAS.loja = () => {
     <div class="loja-sec" data-sec="arremessos"${secOculta("arremessos")}>
     <h2 class="lb-secao">Arremessos</h2>
     <p class="lb-sub" style="margin-top:-6px">O que você joga quando acerta a palavra. Funciona igual à bola, só muda o jeito.</p>
-    <div class="fd-grid">${ARREMESSOS.filter(a => !a.secreto && (naVenda(a) || temArremesso(nome, a.k))).sort((a, b) => !!b.limitada - !!a.limitada).map(a => {
+    <div class="fd-grid">${ARREMESSOS.filter(a => !a.secreto && ((naVenda(a) && !a.boss) || temArremesso(nome, a.k))).sort((a, b) => !!b.limitada - !!a.limitada).map(a => {
       const tem = temArremesso(nome, a.k), usando = arremessoDe(nome) === a.k, podeA = moedas >= a.preco;
       const rotulo = usando ? "Usando" : tem ? "Usar" : G.lojaConf === "arr:" + a.k ? "Confirmar?" : podeA ? `<span class="lb-coin" aria-hidden="true">$</span>${a.preco}` : `$ ${a.preco}`;
       return `<div class="fd-tile${tem ? "" : " fd-travado"}${a.limitada ? " sk-limitada" : ""}"${usando ? ' aria-current="true"' : ""}>
@@ -5570,6 +5656,7 @@ acoes.comprarArremesso = el => {
   const k = el.dataset.k, nome = perfil(), a = arremessoInfo(k);
   const usar = () => { G.inv = G.inv || {}; G.inv[nome] = G.inv[nome] || { vidas: 0 }; G.inv[nome].arremesso = k; salvarPlacar(); };
   if (temArremesso(nome, k)) { usar(); const y = window.scrollY; render(); window.scrollTo(0, y); toast(`Agora você joga ${a.nome} ${a.icone}`); return; }
+  if (a.boss) { toast("Esse arremesso só se ganha derrotando o boss na Partida do Evento"); return; }
   if (!naVenda(a)) { toast("Esse arremesso de edição limitada já acabou"); return; }
   if (soColecionador(a, nome)) return;
   if ((G.banco[nome] || 0) < a.preco) return;

@@ -209,3 +209,8 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
   - ❄️🔥 **Gelo e Fogo** (quando voltar): pegar 5 ❄️ e 5 🔥 para eles fazerem as pazes; ganha 300 moedas e um item da coleção.
   - O progresso aparece no alto da tela da praça e no mural de eventos. Cada perfil faz a sua missão.
 - **Só com o ADM (pedido do Andre, 11/nov):** a história e a missão de uma coleção só aparecem quando o ADM liga. No Painel de ADM, aba Eventos, "🎬 História e missão na Praça" (escolhe a coleção e por quanto tempo vale), ou na Central de Eventos, aba "🎬 Missão". Para desligar: "Desligar" no ADM ou "Encerrar → História e missão" na Central. Quando acaba o tempo, os fragmentos somem da praça.
+- **Boss da Partida do Evento (ideia do Andre, 11/nov):** toda Partida do Evento tem um boss que combina com a coleção da loja. Agora é o **👑 Rei Eclipse** (Sol, Lua e Eclipse): uma bola escura gigante com coroa de luz, coroa de ouro e olhos bravos, no meio da quadra.
+  - **Todos contra ele:** acertar a palavra tira 25 de vida e jogar a bola nele tira 8. Na hora da bola, ele joga bolas de sol e de lua em quem está correndo (o escudo da loja do evento segura).
+  - A vida dele cresce com a turma: 80 + 40 por pessoa.
+  - **Derrotou:** cada um ganha **200 moedas**, o arremesso **👑 Coroa do Eclipse** (só quem derrota o boss tem; não está na loja) e +1 na placa nova **👾 Bosses** da Praça.
+  - Já ficou pronto também o **🐉 Dragão de Gelo e Fogo** para quando essa coleção voltar (ainda sem item próprio).
