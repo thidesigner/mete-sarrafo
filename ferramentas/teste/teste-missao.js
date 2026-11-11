@@ -5,11 +5,13 @@ const { chromium } = require('playwright'); const fs = require('fs'); const T = 
   const ctx = await b.newContext({ viewport: { width: 390, height: 780 }, deviceScaleFactor: 2 });
   await ctx.route('**/peerjs.min.js', r => r.fulfill({ body: fs.readFileSync(T + 'mockpeer.js'), contentType: 'application/javascript' }));
   await ctx.route('**/three.min.js', r => r.fulfill({ body: fs.readFileSync(T + 'vendor/three.min.js'), contentType: 'application/javascript' }));
-  await ctx.route(u => u.pathname.endsWith('/avisos.json'), r => r.fulfill({ contentType: 'application/json', body: '{"avisos":[]}' }));
+  const SEM_ADM = process.env.SEM_ADM === '1';   // sem o ADM ligar, não pode aparecer história nem missão
+  await ctx.route(u => u.pathname.endsWith('/avisos.json'), r => r.fulfill({ contentType: 'application/json', body: JSON.stringify(SEM_ADM ? { avisos: [] } : { avisos: [], historias: [{ id: "m1", tema: "eclipse", de: "2026-11-01T00:00:00-03:00", ate: "2030-01-01T00:00:00-03:00" }] }) }));
   const pg = await ctx.newPage(); const errs = []; pg.on('pageerror', e => errs.push(e.message));
   await pg.goto('http://localhost:8767/teste/'); { const ab = await pg.$('#abertura'); if (ab) await ab.click(); }
   await pg.evaluate(() => { G.perfil = "Andre"; G.banco.Andre = 100; salvar(); ir("lobby"); }); await pg.waitForTimeout(1200);
   await pg.evaluate(() => abrirPraca());
+  if (SEM_ADM) { await pg.waitForTimeout(5000); console.log(JSON.stringify({ semAdm: await pg.evaluate(() => ({ hist: !!PRACA.hist, lista: historiasAgora().map(h => h.id), frags: PRACA.frags.length })) })); await b.close(); return; }
   const espera = c => pg.waitForFunction(c, null, { timeout: 60000 });
   await espera(() => PRACA.hist && PRACA.hist.fala === 4); await pg.waitForTimeout(1600); await pg.screenshot({ path: S + '/ms-quebra.png' });
   await espera(() => !PRACA.hist);

@@ -1518,7 +1518,7 @@ const missaoPronta = (m, pr) => (pr[m.tipo] || 0) >= m.alvo && !pr.pegou.include
 function temAlgoPraPegar(nome) { if (!nome) return false; const pr = progressoMissoes(nome); return presenteDe(nome).pode || missoesDoDia().some(m => missaoPronta(m, pr)); }
 function fimDePartidaMissao(nome, moedas, venceu) { contarMissao(nome, "jogar"); contarMissao(nome, "moedas", Math.max(0, moedas || 0)); if (venceu) contarMissao(nome, "vencer"); }
 /* Eventos do ADM: chegam pelo avisos.json junto com os avisos (só no site): moedas em dobro, promoção na loja e códigos de presente */
-const EVT = { eventos: [], promos: [], presentes: [], brindes: [], voltas: [], vidas: [] };
+const EVT = { eventos: [], promos: [], presentes: [], brindes: [], voltas: [], vidas: [], historias: [] };
 /* coleções limitadas que o ADM pode trazer de volta para a loja (chaves "tipo-k" de chaveLim e o pacote) */
 const COLECOES = {
   galactico: { nome: "Galáctica", chaves: ["skin-galactica", "fundo-galactico", "emoji-galactico", "gesto-galactico", "avatar-galactico", "pet-coelhogalactico"], pacote: "galactico" },
@@ -4117,6 +4117,7 @@ function eventosAgora() {
   if (ev) l.push({ ic: ev.mult === 3 ? "🤑" : "💰", t: `Moedas em ${ev.mult === 3 ? "triplo" : "dobro"}!`, d: `Tudo o que você ganhar nas partidas vale ${ev.mult} vezes mais.`, f: ate(ev) });
   if (pr) l.push({ ic: "🏷️", t: `Promoção: ${pr.desc}% de desconto`, d: `Em: ${PROMO_ALVOS[pr.alvo]}.`, f: ate(pr), loja: true });
   if (vida) { const v = EVT.vidas.filter(evtValido).sort((a, b) => b.extra - a.extra)[0]; l.push({ ic: "❤️", t: `+${vida} ${vida === 1 ? "vida" : "vidas"} em cada partida`, d: "Todo mundo começa a partida com vida a mais.", f: ate(v) }); }
+  EVT.historias.filter(evtValido).forEach(e => { const t = HIST_TEMAS[e.tema]; if (t) l.push({ ic: "🎬", t: `Missão ${t.nome}: ${t.missao.titulo}`, d: "Vá até a Praça: a nave dos robôs conta a história e espalha fragmentos para você pegar.", f: ate(e) }); });
   voltasAtivas().forEach(v => l.push({ ic: "🔁", t: `A coleção ${COLECOES[v.col].nome} voltou!`, d: "Está de novo na loja, com o pacote.", f: ate(v), loja: true }));
   const nome = perfil(), ja = ((G.brindesRecebidos || {})[nome]) || [];
   EVT.brindes.filter(evtValido).forEach(b => l.push({ ic: "🎁", t: "Presente para todos", d: `${nomePremio(b)}${ja.includes(b.id) ? " — você já ganhou ✔" : " — aparece quando você abrir a tela inicial."}`, f: ate(b) }));
@@ -4532,28 +4533,26 @@ function quadroPraca(ts) {
    O botão "Pular" corta a história; no mural de eventos dá para ver de novo. */
 const ateTxt = x => { if (!x || !x.ate) return ""; const d = new Date(Date.parse(x.ate) - 3 * 3600000); return ` até ${d.getUTCDate()}/${d.getUTCMonth() + 1}`; };
 const HIST_TEMAS = {   // coleções que contam história juntas: quem o Bip e o Bop vestem e qual surpresa acontece
-  eclipse: { cols: ["sol", "lua", "eclipse"], skins: ["sol", "lua"], efeito: "eclipse", efeitoEm: 2, quebraEm: 4,
+  eclipse: { nome: "Sol, Lua e Eclipse", cols: ["sol", "lua", "eclipse"], skins: ["sol", "lua"], efeito: "eclipse", efeitoEm: 2, quebraEm: 4,
     falas: fim => [["Bip", "Bip! Eu sou o SOL e brilho mais que todo mundo!"], ["Bop", "Bop! Nada disso, a LUA é a mais bonita do céu!"], ["Bip", "Sai da minha frente, Lua!"], ["Bop", "Opa... olha o céu! A gente fez um ECLIPSE!"],
-      ["Bip", "Ih! O eclipse se quebrou em fragmentos pela praça!"], ["Bop", "Junte 5 ☀️ do Sol e 5 🌙 da Lua para formar o Eclipse de novo!"], ["Bip", `Quem conseguir ganha prêmios! E as coleções Sol, Lua e Eclipse estão na loja${fim}!`]],
+      ["Bip", "Ih! O eclipse se quebrou em fragmentos pela praça!"], ["Bop", "Junte 5 ☀️ do Sol e 5 🌙 da Lua para formar o Eclipse de novo!"], ["Bip", fim ? `Quem conseguir ganha prêmios! E as coleções Sol, Lua e Eclipse estão na loja${fim}!` : "Quem conseguir ganha prêmios! Boa sorte!"]],
     missao: { titulo: "Forme o Eclipse", feitoTitulo: "Você formou o ECLIPSE!", qtd: 5, moedas: 300, exclusivo: "gesto:eclipsetotal",
       frag: [{ ic: "☀️", nome: "do Sol", cor: "#ffc93c", brilho: "rgba(255,200,60,1)" }, { ic: "🌙", nome: "da Lua", cor: "#c9d8ff", brilho: "rgba(170,195,255,1)" }],
       fimFalas: [["Bip", "Bip bop! Você juntou todos os fragmentos!"], ["Bop", "O Sol e a Lua viraram... ECLIPSE!"], ["Bip", "Agora a gente é amigo. Toma seus prêmios!"]] } },
-  gelofogo: { cols: ["gelo", "fogo", "gelofogo"], skins: ["gelo", "fogo"], efeito: "gelofogo", efeitoEm: 2, quebraEm: 4,
+  gelofogo: { nome: "Gelo e Fogo", cols: ["gelo", "fogo", "gelofogo"], skins: ["gelo", "fogo"], efeito: "gelofogo", efeitoEm: 2, quebraEm: 4,
     falas: fim => [["Bip", "Brrr! O GELO congela qualquer um!"], ["Bop", "Hahaha! O FOGO derrete tudo!"], ["Bip", "Então toma essa bola de neve!"], ["Bop", "Tsss... virou vapor! Empatou!"],
-      ["Bip", "O vapor espalhou pedaços de gelo e fogo pela praça!"], ["Bop", "Junte 5 ❄️ de Gelo e 5 🔥 de Fogo para fazer as pazes!"], ["Bip", `Tem prêmio! E as coleções Gelo, Fogo e Gelo e Fogo estão na loja${fim}!`]],
+      ["Bip", "O vapor espalhou pedaços de gelo e fogo pela praça!"], ["Bop", "Junte 5 ❄️ de Gelo e 5 🔥 de Fogo para fazer as pazes!"], ["Bip", fim ? `Tem prêmio! E as coleções Gelo, Fogo e Gelo e Fogo estão na loja${fim}!` : "Tem prêmio para quem conseguir! Boa sorte!"]],
     missao: { titulo: "Junte Gelo e Fogo", feitoTitulo: "Gelo e Fogo fizeram as pazes!", qtd: 5, moedas: 300, exclusivo: null,
       frag: [{ ic: "❄️", nome: "de Gelo", cor: "#bfe8ff", brilho: "rgba(140,210,255,1)" }, { ic: "🔥", nome: "de Fogo", cor: "#ff6a2a", brilho: "rgba(255,120,40,1)" }],
       fimFalas: [["Bip", "Você juntou tudo!"], ["Bop", "Gelo e Fogo agora são amigos!"], ["Bip", "Toma seus prêmios!"]] } },
 };
 function historiasAgora() {
   const l = [], ev = eventoMoedas(), pr = promoAtiva(), usadas = new Set();
-  // coleções limitadas na loja: a história combina com o tema (ex.: Sol, Lua e Eclipse)
-  for (const c of colecoesNaLoja(perfil())) {
-    if (!COLECOES[c.id] || usadas.has(c.id)) continue;
-    const tema = Object.entries(HIST_TEMAS).find(([, t]) => t.cols.includes(c.id));
-    if (tema) { const [k, t] = tema; t.cols.forEach(x => usadas.add(x)); l.push({ id: "col-" + k + "-" + c.fim.ate, tipo: t.efeito, skins: t.skins, efeitoEm: t.efeitoEm, quebraEm: t.quebraEm, missao: { ...t.missao, cols: [...t.cols].reverse() }, falas: t.falas(ateTxt(c.fim)) }); continue; }
-    usadas.add(c.id); const sk = (COLECOES[c.id].chaves.find(x => x.startsWith("skin-")) || "").slice(5) || null;
-    l.push({ id: "col-" + c.id + "-" + c.fim.ate, tipo: "caixa", txt: c.nome, cor: "#7b2cbf", skins: [sk, sk], falas: [["Bip", "Bip bop! Novidade chegando do espaço!"], ["Bop", `É a coleção ${c.nome}!`], ["Bip", `Ela está na loja${ateTxt(c.fim)}. Corre!`]] });
+  // história e missão de coleção: só quando o ADM liga (lista "historias" do avisos.json)
+  for (const e of EVT.historias.filter(evtValido)) {
+    const t = HIST_TEMAS[e.tema]; if (!t || usadas.has(e.tema)) continue; usadas.add(e.tema);
+    const naLoja = colecoesNaLoja(perfil()).filter(c => t.cols.includes(c.id)), fim = naLoja.length ? ateTxt(naLoja.reduce((a, c) => Date.parse(c.fim.ate) < Date.parse(a.ate) ? c.fim : a, naLoja[0].fim)) : null;
+    l.push({ id: "hi-" + e.id, tipo: t.efeito, skins: t.skins, efeitoEm: t.efeitoEm, quebraEm: t.quebraEm, missao: { ...t.missao, cols: [...t.cols].reverse() }, falas: t.falas(fim) });
   }
   if (ev) l.push({ id: "ev-" + ev.id, tipo: "moedas", falas: [["Bip", "Bip bop! Atenção, Praça Central!"], ["Bop", "Trouxemos a Máquina de Moedas!"], ["Bip", `Moedas ${ev.mult === 3 ? "em TRIPLO" : "em DOBRO"} nas partidas${ateTxt(ev)}!`], ["Bop", "Corre jogar! Bip!"]] });
   if (pr) l.push({ id: "pr-" + pr.id, tipo: "promo", txt: `-${pr.desc}% ${PROMO_ALVOS[pr.alvo]}`, falas: [["Bop", "Bop bip! Chegou a liquidação!"], ["Bip", `${pr.desc}% de desconto em: ${PROMO_ALVOS[pr.alvo]}${ateTxt(pr)}!`], ["Bop", "As barraquinhas da praça já estão com o preço novo!"]] });
@@ -6832,7 +6831,7 @@ async function buscarAvisos() {
     const lst = (v, n) => Array.isArray(v) ? v.filter(x => x && typeof x === "object").slice(0, n) : [];
     const antes = JSON.stringify([eventoMoedas(), promoAtiva()]);
     EVT.eventos = lst(d.eventos, 10); EVT.promos = lst(d.promos, 10); EVT.presentes = lst(d.presentes, 50);
-    EVT.brindes = lst(d.brindes, 10); EVT.voltas = lst(d.voltas, 10); EVT.vidas = lst(d.vidas, 10);
+    EVT.brindes = lst(d.brindes, 10); EVT.voltas = lst(d.voltas, 10); EVT.vidas = lst(d.vidas, 10); EVT.historias = lst(d.historias, 10);
     aplicarLimitadas();
     if (antes !== JSON.stringify([eventoMoedas(), promoAtiva()]) && G.tela === "loja" && !$("app").hidden && !(document.activeElement && document.activeElement.id === "pres-cod")) { const y = window.scrollY; render(); window.scrollTo(0, y); }
   } catch { return; }
@@ -6889,13 +6888,13 @@ async function gravarSite(muda, msg) {
   if (!r.ok) throw new Error("Não consegui ler os avisos (" + r.status + ").");
   const atual = await r.json(); let dados = {};
   try { dados = JSON.parse(deBase64(atual.content)) || {}; } catch {}
-  ["avisos", "eventos", "promos", "presentes", "brindes", "voltas", "vidas"].forEach(k => { if (!Array.isArray(dados[k])) dados[k] = []; });
+  ["avisos", "eventos", "promos", "presentes", "brindes", "voltas", "vidas", "historias"].forEach(k => { if (!Array.isArray(dados[k])) dados[k] = []; });
   const novo = muda(dados), limpo = { avisos: novo.avisos || [] };
-  ["eventos", "promos", "presentes", "brindes", "voltas", "vidas"].forEach(k => { const v = (novo[k] || []).filter(x => !x.ate || Date.now() <= Date.parse(x.ate)); if (v.length) limpo[k] = v; });
+  ["eventos", "promos", "presentes", "brindes", "voltas", "vidas", "historias"].forEach(k => { const v = (novo[k] || []).filter(x => !x.ate || Date.now() <= Date.parse(x.ate)); if (v.length) limpo[k] = v; });
   const w = await fetch(REPO_API, { method: "PUT", headers: { ...cabecalhos(), "Content-Type": "application/json" },
     body: JSON.stringify({ message: msg, content: paraBase64(JSON.stringify(limpo, null, 2) + "\n"), sha: atual.sha, branch: "main" }) });
   if (!w.ok) throw new Error("O GitHub não aceitou (" + w.status + "). Tente de novo.");
-  AVISOS.lista = limpo.avisos; EVT.eventos = limpo.eventos || []; EVT.promos = limpo.promos || []; EVT.presentes = limpo.presentes || []; EVT.brindes = limpo.brindes || []; EVT.voltas = limpo.voltas || []; EVT.vidas = limpo.vidas || [];
+  AVISOS.lista = limpo.avisos; EVT.eventos = limpo.eventos || []; EVT.promos = limpo.promos || []; EVT.presentes = limpo.presentes || []; EVT.brindes = limpo.brindes || []; EVT.voltas = limpo.voltas || []; EVT.vidas = limpo.vidas || []; EVT.historias = limpo.historias || [];
   aplicarLimitadas();
 }
 const gravarAvisos = (montar, msg) => gravarSite(d => ({ ...d, avisos: montar(d.avisos) }), msg);
@@ -7042,6 +7041,12 @@ function admEventosHTML() {
     <label for="adm-vt-col">Coleção</label><select id="adm-vt-col">${Object.entries(COLECOES).map(([k, c]) => `<option value="${k}">${esc(c.nome)}</option>`).join("")}</select>
     <label for="adm-vt-h">Vale por</label>${dur("adm-vt-h", 24)}
     <button type="button" class="btn" data-a="admCriarVolta" ${ocupado}>Trazer de volta</button>
+    <h3>🎬 História e missão na Praça</h3>
+    ${EVT.historias.filter(evtValido).map(e => `<div class="adm-lim"><p>🎬 ${esc((HIST_TEMAS[e.tema] || { nome: e.tema }).nome)} · até ${brDataHora(Date.parse(e.ate))}</p><button type="button" class="lb-pill" data-a="admApagarHistoria" data-id="${esc(e.id)}" ${ocupado}>Desligar</button></div>`).join("")}
+    <p class="dim" style="font-size:14px">A nave dos robôs conta a história da coleção na Praça e espalha fragmentos. Quem junta todos ganha moedas, um item da coleção e o item só da missão.</p>
+    <label for="adm-hi-tema">Coleção</label><select id="adm-hi-tema">${Object.entries(HIST_TEMAS).map(([k, t]) => `<option value="${k}">${esc(t.nome)}</option>`).join("")}</select>
+    <label for="adm-hi-h">Vale por</label>${dur("adm-hi-h", 168, [[720, "30 dias"]])}
+    <button type="button" class="btn" data-a="admCriarHistoria" ${ocupado}>Ligar a história e a missão</button>
     <h3>❤️ Vida extra grátis</h3>
     ${vidaExtraEvento() ? `<p>Valendo: <b>+${vidaExtraEvento()} ${vidaExtraEvento() === 1 ? "vida" : "vidas"}</b> em cada partida até ${brDataHora(Math.max(...EVT.vidas.filter(evtValido).map(v => Date.parse(v.ate))))}</p><button type="button" class="lb-pill" data-a="admEncerrarEvt" data-tipo="vidas" ${ocupado}>Encerrar</button>` : ""}
     <p class="dim" style="font-size:14px">Cada partida começa com mais vidas para todo mundo.</p>
@@ -7095,6 +7100,11 @@ Object.assign(acoes, {
     publicarEvt(d => ({ ...d, voltas: [...d.voltas.filter(x => evtValido(x) && x.col !== col).slice(-9), { id: "v" + Date.now().toString(36), col, ...t }] }), "Volta das limitadas", `A coleção ${COLECOES[col].nome} voltou para a loja. 🔁`);
   },
   admApagarVolta(el) { const id = el.dataset.id; publicarEvt(d => ({ ...d, voltas: d.voltas.filter(x => x.id !== id) }), "Encerra volta das limitadas", "A coleção saiu da loja de novo."); },
+  admCriarHistoria() {
+    const tema = HIST_TEMAS[($("adm-hi-tema") || {}).value] ? $("adm-hi-tema").value : null; if (!tema) return; const t = periodo("adm-hi-h");
+    publicarEvt(d => ({ ...d, historias: [...d.historias.filter(x => evtValido(x) && x.tema !== tema).slice(-9), { id: "m" + Date.now().toString(36), tema, ...t }] }), "História e missão na Praça", `História e missão ${HIST_TEMAS[tema].nome} ligadas! 🎬`);
+  },
+  admApagarHistoria(el) { const id = el.dataset.id; publicarEvt(d => ({ ...d, historias: d.historias.filter(x => x.id !== id) }), "Desliga história e missão", "História e missão desligadas."); },
   admCriarVida() {
     const extra = +($("adm-vd-n") || {}).value === 2 ? 2 : 1, t = periodo("adm-vd-h");
     publicarEvt(d => ({ ...d, vidas: [{ id: "h" + Date.now().toString(36), extra, ...t }] }), "Vida extra grátis", `Evento publicado: +${extra} ${extra === 1 ? "vida" : "vidas"} em cada partida. ❤️`);
