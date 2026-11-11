@@ -8,7 +8,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const T = 
   await ctx.route(u => u.pathname.endsWith('/avisos.json'), r => r.fulfill({ contentType: 'application/json', body: '{"avisos":[]}' }));
   const errs = [], abrir = async (nome, banco, skin, ex) => { const pg = await ctx.newPage(); pg.on('pageerror', e => errs.push(nome + ': ' + e.message));
     await pg.goto('http://localhost:8767/teste/'); { const ab = await pg.$('#abertura'); if (ab) await ab.click(); }
-    await pg.evaluate(([n, bb, sk, ex]) => { G.perfil = n; G.banco[n] = bb; G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 }; if (sk) { G.inv[n].skins = [sk]; G.inv[n].skin = sk; } if (ex) G.evRank = { sem: semanaEvento().id, j: ex }; salvar(); ir("lobby"); }, [nome, banco, skin, ex]); await pg.waitForTimeout(300); return pg; };
+    await pg.evaluate(([n, bb, sk, ex]) => { G.perfil = n; G.banco[n] = bb; G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 }; if (sk) { G.inv[n].skins = [sk]; G.inv[n].skin = sk; } if (ex) G.evRank = { sem: semanaEvento().id, j: ex }; G.historias = { vistas: historiasAgora().map(h => h.id) }; salvar(); ir("lobby"); }, [nome, banco, skin, ex]); await pg.waitForTimeout(300); return pg; };
   const a = await abrir("Andre", 900, "sol", { Andre: { g: 120, t: 600, v: 4 }, Leo: { g: 40, t: 900, v: 2 } });
   await a.click('[data-a="praca"]'); await a.waitForTimeout(1500);
   const m = await abrir("Maria", 400, "lua"); await m.click('[data-a="praca"]'); await m.waitForTimeout(1500);

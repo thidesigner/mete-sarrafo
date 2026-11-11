@@ -4242,10 +4242,11 @@ function texTexto(txt, cor, fundo, w = 512, h = 128, fs = 60) {
 function montarPraca3D() {
   const s = new THREE.Scene(), mat = cor => new THREE.MeshLambertMaterial({ color: cor }), add = (geo, cor, x, y, z, pai = s) => { const m = new THREE.Mesh(geo, typeof cor === "string" ? mat(cor) : cor); m.position.set(x, y, z); pai.add(m); return m; };
   const ceu = texturaCanvas(256, 256, (c, w, h) => { const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, "#3a8dde"); g.addColorStop(.5, "#9fd3ff"); g.addColorStop(1, "#e8f6ff"); c.fillStyle = g; c.fillRect(0, 0, w, h); });
-  s.add(new THREE.Mesh(new THREE.SphereGeometry(60, 24, 12), new THREE.MeshBasicMaterial({ map: ceu, side: THREE.BackSide, fog: false })));
+  PRACA.ceu = new THREE.Mesh(new THREE.SphereGeometry(60, 24, 12), new THREE.MeshBasicMaterial({ map: ceu, side: THREE.BackSide, fog: false })); s.add(PRACA.ceu);
   s.fog = new THREE.Fog("#cfe9ff", 30, 58);
-  s.add(new THREE.HemisphereLight("#ffffff", "#5f8f4a", .9));
+  const hemi = new THREE.HemisphereLight("#ffffff", "#5f8f4a", .9); s.add(hemi);
   const sol = new THREE.DirectionalLight("#fff4dd", .7); sol.position.set(8, 14, 6); s.add(sol);
+  PRACA.luzes = [[hemi, .9], [sol, .7]];
   // gramado e piso de pedrinhas
   const grama = texturaCanvas(256, 256, (c, w, h) => { c.fillStyle = "#5fbf4f"; c.fillRect(0, 0, w, h); for (let i = 0; i < 900; i++) { c.fillStyle = Math.random() < .5 ? "#54b045" : "#6fcd5c"; c.fillRect(Math.random() * w, Math.random() * h, 2, 3); } });
   grama.wrapS = grama.wrapT = THREE.RepeatWrapping; grama.repeat.set(14, 14);
@@ -4512,11 +4513,27 @@ function quadroPraca(ts) {
    Passa uma vez por evento em cada aparelho (G.historias), quando a pessoa está na Praça Central.
    O botão "Pular" corta a história; no mural de eventos dá para ver de novo. */
 const ateTxt = x => { if (!x || !x.ate) return ""; const d = new Date(Date.parse(x.ate) - 3 * 3600000); return ` até ${d.getUTCDate()}/${d.getUTCMonth() + 1}`; };
+const HIST_TEMAS = {   // coleções que contam história juntas: quem o Bip e o Bop vestem e qual surpresa acontece
+  eclipse: { cols: ["sol", "lua", "eclipse"], skins: ["sol", "lua"], efeito: "eclipse", efeitoEm: 2,
+    falas: fim => [["Bip", "Bip! Eu sou o SOL e brilho mais que todo mundo!"], ["Bop", "Bop! Nada disso, a LUA é a mais bonita do céu!"], ["Bip", "Sai da minha frente, Lua!"], ["Bop", "Opa... olha o céu! A gente fez um ECLIPSE!"],
+      ["Bip", `Chegaram as coleções Sol, Lua e Eclipse na loja${fim}!`], ["Bop", "E quando o Sol acerta a Lua na partida... acontece um eclipse!"]] },
+  gelofogo: { cols: ["gelo", "fogo", "gelofogo"], skins: ["gelo", "fogo"], efeito: "gelofogo", efeitoEm: 2,
+    falas: fim => [["Bip", "Brrr! O GELO congela qualquer um!"], ["Bop", "Hahaha! O FOGO derrete tudo!"], ["Bip", "Então toma essa bola de neve!"], ["Bop", "Tsss... virou vapor! Empatou!"],
+      ["Bip", `As coleções Gelo, Fogo e Gelo e Fogo estão na loja${fim}!`]] },
+};
 function historiasAgora() {
-  const l = [], ev = eventoMoedas(), pr = promoAtiva();
+  const l = [], ev = eventoMoedas(), pr = promoAtiva(), usadas = new Set();
+  // coleções limitadas na loja: a história combina com o tema (ex.: Sol, Lua e Eclipse)
+  for (const c of colecoesNaLoja(perfil())) {
+    if (!COLECOES[c.id] || usadas.has(c.id)) continue;
+    const tema = Object.entries(HIST_TEMAS).find(([, t]) => t.cols.includes(c.id));
+    if (tema) { const [k, t] = tema; t.cols.forEach(x => usadas.add(x)); l.push({ id: "col-" + k + "-" + c.fim.ate, tipo: t.efeito, skins: t.skins, efeitoEm: t.efeitoEm, falas: t.falas(ateTxt(c.fim)) }); continue; }
+    usadas.add(c.id); const sk = (COLECOES[c.id].chaves.find(x => x.startsWith("skin-")) || "").slice(5) || null;
+    l.push({ id: "col-" + c.id + "-" + c.fim.ate, tipo: "caixa", txt: c.nome, cor: "#7b2cbf", skins: [sk, sk], falas: [["Bip", "Bip bop! Novidade chegando do espaço!"], ["Bop", `É a coleção ${c.nome}!`], ["Bip", `Ela está na loja${ateTxt(c.fim)}. Corre!`]] });
+  }
   if (ev) l.push({ id: "ev-" + ev.id, tipo: "moedas", falas: [["Bip", "Bip bop! Atenção, Praça Central!"], ["Bop", "Trouxemos a Máquina de Moedas!"], ["Bip", `Moedas ${ev.mult === 3 ? "em TRIPLO" : "em DOBRO"} nas partidas${ateTxt(ev)}!`], ["Bop", "Corre jogar! Bip!"]] });
   if (pr) l.push({ id: "pr-" + pr.id, tipo: "promo", txt: `-${pr.desc}% ${PROMO_ALVOS[pr.alvo]}`, falas: [["Bop", "Bop bip! Chegou a liquidação!"], ["Bip", `${pr.desc}% de desconto em: ${PROMO_ALVOS[pr.alvo]}${ateTxt(pr)}!`], ["Bop", "As barraquinhas da praça já estão com o preço novo!"]] });
-  voltasAtivas().forEach(v => l.push({ id: "vo-" + v.id, tipo: "caixa", txt: COLECOES[v.col].nome, cor: "#37d99a", falas: [["Bip", "Bip! Achamos uma caixa perdida no espaço..."], ["Bop", `É a coleção ${COLECOES[v.col].nome}! Ela voltou para a loja${ateTxt(v)}!`], ["Bip", "Pegue antes que a gente leve de volta!"]] }));
+  voltasAtivas().forEach(v => l.push({ id: "vo-" + v.id, tipo: "caixa", txt: COLECOES[v.col].nome, cor: "#37d99a", skins: (sk => [sk, sk])((COLECOES[v.col].chaves.find(x => x.startsWith("skin-")) || "").slice(5) || null), falas: [["Bip", "Bip! Achamos uma caixa perdida no espaço..."], ["Bop", `É a coleção ${COLECOES[v.col].nome}! Ela voltou para a loja${ateTxt(v)}!`], ["Bip", "Pegue antes que a gente leve de volta!"]] }));
   { const vida = vidaExtraEvento(); if (vida) { const v = EVT.vidas.filter(evtValido).sort((a, b) => b.extra - a.extra)[0]; l.push({ id: "vi-" + v.id, tipo: "coracoes", falas: [["Bop", "Bop! Trouxemos corações de robô!"], ["Bip", `Todo mundo começa cada partida com +${vida} ${vida === 1 ? "vida" : "vidas"}${ateTxt(v)}!`], ["Bop", "Agora ficou mais difícil te queimar!"]] }); } }
   EVT.brindes.filter(evtValido).forEach(b => l.push({ id: "br-" + b.id, tipo: "caixa", txt: "🎁", cor: "#ff4d6d", falas: [["Bip", "Bip bip! Entrega especial!"], ["Bop", `Um presente para todo mundo: ${nomePremio(b)}!`], ["Bip", "Ele aparece quando você volta para a tela inicial."]] }));
   if (EVT.presentes.some(evtValido)) { const p = EVT.presentes.filter(evtValido)[0]; l.push({ id: "co-" + p.id, tipo: "segredo", falas: [["Bop", "Psiu... bop..."], ["Bip", "Tem um código secreto de presente valendo!"], ["Bop", "Quem souber, escreve na loja, em \"Código de presente\"."]] }); }
@@ -4524,8 +4541,9 @@ function historiasAgora() {
 }
 function proximaHistoria() { const vistas = (G.historias || {}).vistas || []; return historiasAgora().find(h => !vistas.includes(h.id)) || null; }
 function marcarHistoria(id) { G.historias = G.historias || {}; const v = G.historias.vistas = (G.historias.vistas || []).filter(x => x !== id); v.push(id); if (v.length > 60) v.splice(0, v.length - 60); salvar(); }
-function roboHistoria(nome, cor) {
+function roboHistoria(nome, cor, skin) {
   const p = { i: -1, nome, humano: false, cor, pele: "#c8d3e0", vidas: 0, x: 0, y: 0, passo: 0, flash: 0 };
+  if (skin && skinInfo(skin).k === skin) vestir(p, skin);   // vestido com a skin do evento
   const m = modeloBoneco3D(p), g = new THREE.Group(); g.add(m.g); deixarDesenho(m.g, m.corpoMat);
   const tag = etiqueta({ nome: nome + " 🤖", vidas: "" }, cor); tag.position.y = 1.95; g.add(tag);
   return { ...m, g, corpo: m.g, passo: 0 };
@@ -4541,7 +4559,7 @@ function iniciarHistoria(h) {
   const raio = new THREE.Mesh(new THREE.CylinderGeometry(.9, 2.4, 1, 24, 1, true), new THREE.MeshBasicMaterial({ color: "#bfefff", transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }));
   raio.geometry.translate(0, -.5, 0); nave.add(raio);
   s.add(nave); o.nave = nave; o.luzes = luzes; o.raio = raio;
-  o.robos = [roboHistoria("Bip", "#3dd9ff"), roboHistoria("Bop", "#ff8a1f")];
+  const sk = h.skins || []; o.robos = [roboHistoria("Bip", "#3dd9ff", sk[0]), roboHistoria("Bop", "#ff8a1f", sk[1])];
   o.robos.forEach((r, i) => { r.g.position.set(i ? 1.3 : -1.3, 0, 4.6); r.g.scale.setScalar(.01); r.g.rotation.y = 0; r.corpo.rotation.y = Math.PI; s.add(r.g); });
   PRACA.hist = o; if (PRACA.eu) PRACA.eu.m.g.visible = false;   // o seu bonequinho sai da frente da câmera
   const box = $("praca"); box.classList.add("pr-cena");
@@ -4549,8 +4567,25 @@ function iniciarHistoria(h) {
   $("pr-pulahist").addEventListener("click", () => acabarHistoria());
   if (typeof tocarNotas === "function") tocarNotas([[60, 72, 0, .8, "sine"], [72, 84, .8, .8, "sine"], [84, 79, 1.6, .5, "sine"]]);
 }
-function efeitoHistoria(o) {   // a "surpresa" de cada evento, na segunda fala
+function efeitoHistoria(o) {   // a "surpresa" de cada evento
   const s = PRACA.cena, h = o.h;
+  if (h.tipo === "eclipse") {   // o sol e a lua se encontram no céu, a praça escurece e aparece a coroa de luz
+    const disco = (cor, x, r) => { const m = new THREE.Mesh(new THREE.CircleGeometry(r, 40), new THREE.MeshBasicMaterial({ color: cor, fog: false })); m.position.set(x, 10.5, -14); s.add(m); return m; };
+    const brilho = new THREE.Sprite(new THREE.SpriteMaterial({ map: brilhoTextura("rgba(255,210,90,1)"), transparent: true, depthWrite: false, fog: false, blending: THREE.AdditiveBlending })); brilho.scale.setScalar(9); brilho.position.set(-9, 10.5, -14.2); s.add(brilho);
+    const solM = disco("#ffd23f", -9, 2.2), luaM = disco("#e6ecf8", 9, 2.15); luaM.position.z = -13.9;
+    const coroa = new THREE.Mesh(new THREE.RingGeometry(2.2, 3.4, 48), new THREE.MeshBasicMaterial({ color: "#ffc56b", transparent: true, opacity: 0, fog: false, blending: THREE.AdditiveBlending, depthWrite: false })); coroa.position.set(0, 10.5, -14.1); s.add(coroa);
+    o.fx.push({ m: solM, eclipse: { solM, luaM, brilho, coroa, t: 0 } }, { m: luaM }, { m: brilho }, { m: coroa });
+    if (typeof somEmoji === "function") setTimeout(() => { if (PRACA.hist === o) somEmoji("eclipse"); }, 2600);
+    return;
+  }
+  if (h.tipo === "gelofogo") {   // bola de neve contra bola de fogo, e vapor no meio
+    const [a, b] = o.robos.map(r => r.g.position);
+    const neve = new THREE.Mesh(new THREE.SphereGeometry(.32, 14, 10), new THREE.MeshBasicMaterial({ color: "#e6f7ff" })), fogo = new THREE.Mesh(new THREE.SphereGeometry(.32, 14, 10), new THREE.MeshBasicMaterial({ color: "#ff6a2a" }));
+    neve.position.set(a.x, 1.4, a.z); fogo.position.set(b.x, 1.4, b.z); s.add(neve, fogo);
+    const vapor = new THREE.Mesh(new THREE.SphereGeometry(.5, 16, 12), new THREE.MeshBasicMaterial({ color: "#ffffff", transparent: true, opacity: 0, depthWrite: false })); vapor.position.set(0, 1.6, (a.z + b.z) / 2); s.add(vapor);
+    o.fx.push({ m: neve, duelo: { neve, fogo, vapor, de: [a.x, b.x], t: 0, bateu: false } }, { m: fogo }, { m: vapor });
+    return;
+  }
   if (h.tipo === "moedas") for (let i = 0; i < 46; i++) { const m = new THREE.Mesh(new THREE.CylinderGeometry(.22, .22, .06, 16), new THREE.MeshLambertMaterial({ color: "#ffd23f", emissive: "#6a4b00" })); const a = Math.random() * Math.PI * 2, r = 1 + Math.random() * 6;
     m.position.set(Math.cos(a) * r, 8 + Math.random() * 7, 3 + Math.sin(a) * r * .6); m.rotation.x = Math.PI / 2; s.add(m); o.fx.push({ m, vy: 0, gira: 4 + Math.random() * 6, chao: false }); }
   if (h.tipo === "coracoes") for (let i = 0; i < 18; i++) { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTexto("❤️", "#ff4d6d", "rgba(0,0,0,0)", 128, 128, 100), transparent: true, depthWrite: false })); sp.scale.setScalar(.7);
@@ -4574,7 +4609,7 @@ function passoHistoria(dt) {
     if (o.fala < 0 || o.falaT <= 0) {
       o.fala++;
       if (o.fala >= o.h.falas.length) { o.fase = "tchau"; o.t = 0; $("pr-fala").hidden = true; }
-      else { const [quem, txt] = o.h.falas[o.fala]; o.falaT = 1.6 + txt.length * .055; o.letras = 0; o.quem = quem === "Bip" ? 0 : 1; const el = $("pr-fala"); el.hidden = false; el.dataset.q = o.quem; el.innerHTML = `<b>${esc(quem)}</b><span></span>`; if (o.fala === 1) efeitoHistoria(o); }
+      else { const [quem, txt] = o.h.falas[o.fala]; o.falaT = 1.6 + txt.length * .055; o.letras = 0; o.quem = quem === "Bip" ? 0 : 1; const el = $("pr-fala"); el.hidden = false; el.dataset.q = o.quem; el.innerHTML = `<b>${esc(quem)}</b><span></span>`; if (o.fala === (o.h.efeitoEm ?? 1)) efeitoHistoria(o); }
     }
     if (o.fase === "fala") {
       o.falaT -= dt; const txt = o.h.falas[o.fala][1], n = Math.min(txt.length, Math.floor((o.t * 30)));
@@ -4590,7 +4625,17 @@ function passoHistoria(dt) {
   else if (o.fase === "sobe") { o.raio.material.opacity = .5; R.forEach(r => { r.g.position.y = o.t * 3; r.g.scale.setScalar(Math.max(.01, 1.25 * (1 - o.t / 1.2))); }); if (o.t > 1.2) { o.fase = "vai"; o.t = 0; o.raio.material.opacity = 0; } }
   else if (o.fase === "vai") { o.nave.position.y = 5.6 + o.t * o.t * 9; o.nave.position.x = o.t * o.t * 4; if (o.t > 2) { acabarHistoria(); return; } }
   // efeitos (moedas caindo, corações subindo, faixa, caixa)
+  if (o.h.tipo === "eclipse" && o.fase === "fala") o.nave.position.y += (15 - o.nave.position.y) * Math.min(1, dt * 1.5);   // a nave sobe para deixar ver o céu
+  if (o.h.tipo === "eclipse" && (o.fase === "tchau" || o.fase === "sobe")) o.nave.position.y += (5.6 - o.nave.position.y) * Math.min(1, dt * 3);
   for (const e of o.fx) {
+    if (e.eclipse) { const E = e.eclipse; E.t += dt; const f = Math.min(1, E.t / 2.8), q = f * f * (3 - 2 * f);
+      E.solM.position.x = -9 + 9 * q; E.brilho.position.x = E.solM.position.x; E.luaM.position.x = 9 - 9 * q;
+      const escuro = Math.max(0, (q - .55) / .45); PRACA.luzes.forEach(([l, v]) => (l.intensity = v * (1 - .7 * escuro)));
+      PRACA.ceu.material.color.setScalar(1 - .82 * escuro); E.luaM.material.color.set(escuro > .2 ? "#0b0a16" : "#e6ecf8");
+      E.coroa.material.opacity = escuro * (.8 + .2 * Math.sin(E.t * 5)); E.coroa.rotation.z += dt * .5; E.brilho.material.opacity = 1 - .6 * escuro; }
+    if (e.duelo) { const D = e.duelo; D.t += dt; const f = Math.min(1, D.t / 1.1);
+      if (!D.bateu) { D.neve.position.x = D.de[0] * (1 - f); D.fogo.position.x = D.de[1] * (1 - f); D.neve.position.y = D.fogo.position.y = 1.4 + Math.sin(Math.PI * f) * 1.2; if (f >= 1) { D.bateu = true; D.neve.visible = D.fogo.visible = false; if (typeof somEmoji === "function") somEmoji("choque"); } }
+      else { const g = Math.min(1, (D.t - 1.1) / 4); D.vapor.material.opacity = .9 * (1 - g * g); D.vapor.scale.setScalar(1 + Math.min(1, g * 2.5) * 4); } }
     if (e.vy !== undefined && e.gira) { if (!e.chao) { e.vy -= 14 * dt; e.m.position.y += e.vy * dt; if (e.m.position.y < .05) { e.m.position.y = .05; e.vy = -e.vy * .35; if (Math.abs(e.vy) < .8) e.chao = true; } } e.m.rotation.z += e.gira * dt * (e.chao ? .1 : 1); }
     if (e.sobe) { e.t += dt; if (e.t > 0) e.m.position.y += e.sobe * dt; e.m.material.opacity = Math.max(0, 1 - e.t / 3.5); }
     if (e.cresce) { const sc = e.m.scale.x + (1 - e.m.scale.x) * Math.min(1, dt * 6); e.m.scale.setScalar(sc * (e.pisca ? 1 + .06 * Math.sin(performance.now() / 120) : 1)); }
@@ -4601,6 +4646,7 @@ function acabarHistoria() {
   const o = PRACA.hist; if (!o) return;
   PRACA.hist = null; marcarHistoria(o.h.id); if (PRACA.eu) PRACA.eu.m.g.visible = true;
   const s = PRACA.cena; if (s) { s.remove(o.nave); o.robos.forEach(r => s.remove(r.g)); o.fx.forEach(e => s.remove(e.m)); }
+  if (PRACA.luzes) PRACA.luzes.forEach(([l, v]) => (l.intensity = v)); if (PRACA.ceu) PRACA.ceu.material.color.setScalar(1);
   const box = $("praca"); if (box) { box.classList.remove("pr-cena"); box.querySelectorAll(".pr-faixa, .pr-fala, .pr-pulahist").forEach(e => e.remove()); }
   PRACA.tHist = 2;
 }

@@ -200,3 +200,7 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
   - 🔁 coleção que voltou e 🎁 presente para todos: cai uma caixa que se abre;
   - 🔑 código de presente: um "?" piscando (o código nunca aparece).
   - Depois eles acenam, sobem no raio e a nave vai embora. Passa uma vez por evento; tem botão "Pular" e, no mural de eventos, "Ver a história dos robôs de novo".
+- **A história combina com o evento (pedido do Andre, 11/nov):** cada coleção limitada nova também tem história.
+  - ☀️🌙 **Sol, Lua e Eclipse:** Bip chega vestido de Sol e Bop de Lua. Eles brigam para ver quem brilha mais, o sol e a lua se encontram no céu, a praça escurece e aparece a coroa de luz do eclipse. Depois anunciam as coleções na loja.
+  - ❄️🔥 **Gelo e Fogo:** Bip de Gelo joga uma bola de neve, Bop de Fogo joga uma bola de fogo, elas batem no meio e viram vapor.
+  - Outras coleções: os robôs vestem a skin da coleção e cai a caixa com o nome dela.
