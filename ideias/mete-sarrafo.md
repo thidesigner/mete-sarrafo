@@ -204,3 +204,7 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
   - ☀️🌙 **Sol, Lua e Eclipse:** Bip chega vestido de Sol e Bop de Lua. Eles brigam para ver quem brilha mais, o sol e a lua se encontram no céu, a praça escurece e aparece a coroa de luz do eclipse. Depois anunciam as coleções na loja.
   - ❄️🔥 **Gelo e Fogo:** Bip de Gelo joga uma bola de neve, Bop de Fogo joga uma bola de fogo, elas batem no meio e viram vapor.
   - Outras coleções: os robôs vestem a skin da coleção e cai a caixa com o nome dela.
+- **Missão do evento (ideia do Andre, 11/nov):** cada coleção tem uma missão que continua a história.
+  - ☀️🌙 **Sol, Lua e Eclipse:** depois da briga, o eclipse se quebra em fragmentos pela praça. Pegue **5 ☀️ do Sol e 5 🌙 da Lua** (eles brilham e têm uma coluna de luz). No final os robôs voltam, o Sol e a Lua viram Eclipse e você ganha **300 moedas**, **um item da coleção** que ainda não tem (primeiro a skin Eclipse) e o gesto **🌘 Eclipse Total**, que só quem completa a missão tem (não está à venda).
+  - ❄️🔥 **Gelo e Fogo** (quando voltar): pegar 5 ❄️ e 5 🔥 para eles fazerem as pazes; ganha 300 moedas e um item da coleção.
+  - O progresso aparece no alto da tela da praça e no mural de eventos. Cada perfil faz a sua missão.
