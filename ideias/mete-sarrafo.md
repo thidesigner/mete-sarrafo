@@ -193,3 +193,10 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
   - **Mural 📢 de eventos:** o que está valendo agora e as limitadas.
   - **Porta 🏟️ da Partida do Evento:** entra na partida com loja (vida, escudo, correr rápido e dica). Quem está na praça recebe o aviso "Fulano entrou na partida!".
   - Chafariz, árvores, bancos e um botão de pular.
+- **História dos robôs nos eventos (ideia do Andre, 11/nov):** quando começa um evento e você entra na Praça, a nave dos robôs **Bip** e **Bop** desce, eles contam o evento em balões de fala (com vozinha de robô) e fazem uma surpresa:
+  - 💰 moedas em dobro ou triplo: chuva de moedas;
+  - 🏷️ promoção: faixa com o desconto;
+  - ❤️ vidas extras: corações subindo;
+  - 🔁 coleção que voltou e 🎁 presente para todos: cai uma caixa que se abre;
+  - 🔑 código de presente: um "?" piscando (o código nunca aparece).
+  - Depois eles acenam, sobem no raio e a nave vai embora. Passa uma vez por evento; tem botão "Pular" e, no mural de eventos, "Ver a história dos robôs de novo".

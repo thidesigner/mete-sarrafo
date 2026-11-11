@@ -342,7 +342,16 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .pr-painel-c.lobby { background: transparent; }
 .pr-painel-c.lobby::before { display: none; }
 .pr-sub { margin: 0; text-align: center; color: #fff; font-size: 17px; }
-@media (prefers-reduced-motion: reduce) { .pr-acao { animation: none; } }
+.praca.pr-cena .pr-joy, .praca.pr-cena .pr-pular, .praca.pr-cena .pr-acao, .praca.pr-cena .pr-dica, .praca.pr-cena .pr-titulo { display: none !important; }
+.pr-faixa { position: absolute; left: 0; right: 0; height: 11%; background: #000; z-index: 3; pointer-events: none; animation: prFaixa .6s ease-out; }
+.pr-faixa-c { top: 0; } .pr-faixa-b { bottom: 0; }
+@keyframes prFaixa { from { height: 0; } }
+.pr-pulahist { position: absolute; right: 12px; bottom: calc(11% + 12px); z-index: 4; }
+.pr-fala { position: absolute; z-index: 4; transform: translate(-50%, -100%); width: max-content; max-width: min(78vw, 300px); background: #fff; color: #0b1b33; border: 3px solid #0b1b33; border-radius: 16px; padding: 8px 12px; font: 700 17px Nunito, sans-serif; box-shadow: 0 4px 0 #0b1b33; pointer-events: none; }
+.pr-fala b { display: block; font-size: 13px; color: #2f80ed; }
+.pr-fala[data-q="1"] b { color: #e8590c; }
+.pr-fala::after { content: ""; position: absolute; left: 50%; bottom: -12px; margin-left: -9px; border: 9px solid transparent; border-top-color: #0b1b33; border-bottom: 0; }
+@media (prefers-reduced-motion: reduce) { .pr-acao { animation: none; } .pr-faixa { animation: none; } }
 .ev-abas { align-self: center; }
 .ev-rank { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .ev-rank li { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,.06); border-radius: 12px; padding: 8px 10px; }
@@ -4357,7 +4366,7 @@ function abrirPraca() {
   PRACA.r = r; PRACA.gira = []; PRACA.cena = montarPraca3D(); PRACA.cam = new THREE.PerspectiveCamera(60, 1, .1, 120);
   const info = meuInfoPraca(), m = pracaModelo(info); m.g.position.set(0, 0, 9); PRACA.cena.add(m.g);
   PRACA.eu = { m, info, chave: [info.skin, info.pet, info.selo, JSON.stringify(info.ficha || null)].join("|"), vy: 0, y: 0, x: 0, z: 9, r: 0 };
-  PRACA.yaw = 0; PRACA.alt = .42; PRACA.mov = { x: 0, y: 0 }; PRACA.keys = {}; PRACA.perto = null; PRACA.on = true; PRACA.tPlaca = 0;
+  PRACA.yaw = 0; PRACA.alt = .42; PRACA.mov = { x: 0, y: 0 }; PRACA.keys = {}; PRACA.perto = null; PRACA.on = true; PRACA.tPlaca = 0; PRACA.hist = null; PRACA.tHist = 2;
   $("app").hidden = true; box.hidden = false; G.tela = "praca"; window.scrollTo(0, 0);
   ligarControlesPraca(box);
   PRACA.ult = performance.now(); PRACA.raf = requestAnimationFrame(quadroPraca);
@@ -4368,7 +4377,7 @@ function abrirPraca() {
 }
 function fecharPraca(irLobby = true) {
   if (!PRACA.on) return;
-  PRACA.on = false; cancelAnimationFrame(PRACA.raf);
+  PRACA.on = false; cancelAnimationFrame(PRACA.raf); PRACA.hist = null;
   if (typeof PRACA.desconectar === "function") PRACA.desconectar();
   pracaTirarTodos();
   window.removeEventListener("keydown", PRACA.kd); window.removeEventListener("keyup", PRACA.ku);
@@ -4410,7 +4419,7 @@ function lugaresPraca() {
   const l = [];
   PRACA_PLACAS.forEach(pl => l.push({ x: pl.x * .8, z: pl.z * .8, r: 3, txt: `🏆 Ver classificação`, abrir: () => abrirPainelPraca("🏆 Classificação", () => { PRACA.rankAba = PRACA.rankAba || pl.k; return rankingHTML(); }, pl.k) }));
   PRACA_BARRACAS.forEach(b => l.push({ x: b.x * .82, z: b.z, r: 2.6, txt: `${b.ic} Barraca de ${b.t}`, abrir: () => abrirPainelPraca(`${b.ic} Barraca de ${b.t}`, () => lojaSecHTML(b.k)) }));
-  l.push({ x: PRACA_MURAL.x * .85, z: PRACA_MURAL.z * .85, r: 2.6, txt: "📢 Ver eventos", abrir: () => abrirPainelPraca("📢 Eventos", () => muralEventosHTML()) });
+  l.push({ x: PRACA_MURAL.x * .85, z: PRACA_MURAL.z * .85, r: 2.6, txt: "📢 Ver eventos", abrir: () => abrirPainelPraca("📢 Eventos", () => (historiasAgora().length ? `<button class="lb-comprar" data-a="verHistorias">🎬 Ver a história dos robôs de novo</button>` : "") + muralEventosHTML()) });
   l.push({ x: PRACA_DESTAQUE.x * .85, z: PRACA_DESTAQUE.z * .85, r: 2.6, txt: "⭐ Destaques da loja", abrir: () => abrirPainelPraca("⭐ Destaques", () => lojaSecHTML("destaques")) });
   l.push({ x: PRACA_PORTA.x, z: PRACA_PORTA.z - 1.6, r: 2.4, txt: "🏟️ Entrar na partida", abrir: entrarPortaPraca });
   return l;
@@ -4451,7 +4460,7 @@ function quadroPraca(ts) {
   let mx = PRACA.mov.x, my = PRACA.mov.y;
   const kx = (k.d || k.arrowright ? 1 : 0) - (k.a || k.arrowleft ? 1 : 0), ky = (k.s || k.arrowdown ? 1 : 0) - (k.w || k.arrowup ? 1 : 0);
   if (kx || ky) { const m = Math.hypot(kx, ky); mx = kx / m; my = ky / m; }
-  if (PRACA.painel) { mx = 0; my = 0; }
+  if (PRACA.painel || PRACA.hist) { mx = 0; my = 0; }
   const sy = Math.sin(PRACA.yaw), cy = Math.cos(PRACA.yaw), vx = (mx * cy + my * sy) * 6, vz = (-mx * sy + my * cy) * 6;
   const anda = Math.hypot(vx, vz) > .1;
   if (anda) {
@@ -4484,17 +4493,118 @@ function quadroPraca(ts) {
     const mo = $("pr-moedas"); if (mo) mo.textContent = fmtM(G.banco[perfil()] || 0);
     if (PRACA.rede && PRACA.rede.contar) $("pr-gente").textContent = PRACA.rede.contar();
   }
+  // evento novo? a nave dos robôs vem contar (uma vez por evento)
+  PRACA.tHist = (PRACA.tHist ?? 2) - dt;
+  if (!PRACA.hist && !PRACA.painel && PRACA.tHist <= 0) { PRACA.tHist = 1.5; const h = proximaHistoria(); if (h) iniciarHistoria(h); }
   // perto de alguma coisa? mostra o botão de ação
-  let perto = null; for (const l of lugaresPraca()) if (Math.hypot(eu.x - l.x, eu.z - l.z) < l.r) { perto = l; break; }
+  let perto = null; if (!PRACA.hist) for (const l of lugaresPraca()) if (Math.hypot(eu.x - l.x, eu.z - l.z) < l.r) { perto = l; break; }
   if ((perto && perto.txt) !== (PRACA.perto && PRACA.perto.txt)) { const b = $("pr-acao"); if (b) { b.hidden = !perto; if (perto) b.textContent = perto.txt; } }
   PRACA.perto = perto;
-  // câmera atrás do bonequinho
-  const dist = 7, alt = 1.2 + PRACA.alt * 7;
-  PRACA.cam.position.set(eu.x + sy * dist, eu.y + alt, eu.z + cy * dist);
-  PRACA.cam.lookAt(eu.x, eu.y + 1.3, eu.z);
+  // câmera atrás do bonequinho (ou a câmera da história)
+  if (PRACA.hist) passoHistoria(dt);
+  else { const dist = 7, alt = 1.2 + PRACA.alt * 7;
+    PRACA.cam.position.set(eu.x + sy * dist, eu.y + alt, eu.z + cy * dist);
+    PRACA.cam.lookAt(eu.x, eu.y + 1.3, eu.z); }
   if (PRACA.rede && PRACA.rede.pos) PRACA.rede.pos(eu.x, eu.z, eu.r, eu.y);
   r.render(PRACA.cena, PRACA.cam);
 }
+/* ---------- Mini história dos eventos: a nave dos robôs Bip e Bop desce na praça e conta o evento ----------
+   Passa uma vez por evento em cada aparelho (G.historias), quando a pessoa está na Praça Central.
+   O botão "Pular" corta a história; no mural de eventos dá para ver de novo. */
+const ateTxt = x => { if (!x || !x.ate) return ""; const d = new Date(Date.parse(x.ate) - 3 * 3600000); return ` até ${d.getUTCDate()}/${d.getUTCMonth() + 1}`; };
+function historiasAgora() {
+  const l = [], ev = eventoMoedas(), pr = promoAtiva();
+  if (ev) l.push({ id: "ev-" + ev.id, tipo: "moedas", falas: [["Bip", "Bip bop! Atenção, Praça Central!"], ["Bop", "Trouxemos a Máquina de Moedas!"], ["Bip", `Moedas ${ev.mult === 3 ? "em TRIPLO" : "em DOBRO"} nas partidas${ateTxt(ev)}!`], ["Bop", "Corre jogar! Bip!"]] });
+  if (pr) l.push({ id: "pr-" + pr.id, tipo: "promo", txt: `-${pr.desc}% ${PROMO_ALVOS[pr.alvo]}`, falas: [["Bop", "Bop bip! Chegou a liquidação!"], ["Bip", `${pr.desc}% de desconto em: ${PROMO_ALVOS[pr.alvo]}${ateTxt(pr)}!`], ["Bop", "As barraquinhas da praça já estão com o preço novo!"]] });
+  voltasAtivas().forEach(v => l.push({ id: "vo-" + v.id, tipo: "caixa", txt: COLECOES[v.col].nome, cor: "#37d99a", falas: [["Bip", "Bip! Achamos uma caixa perdida no espaço..."], ["Bop", `É a coleção ${COLECOES[v.col].nome}! Ela voltou para a loja${ateTxt(v)}!`], ["Bip", "Pegue antes que a gente leve de volta!"]] }));
+  { const vida = vidaExtraEvento(); if (vida) { const v = EVT.vidas.filter(evtValido).sort((a, b) => b.extra - a.extra)[0]; l.push({ id: "vi-" + v.id, tipo: "coracoes", falas: [["Bop", "Bop! Trouxemos corações de robô!"], ["Bip", `Todo mundo começa cada partida com +${vida} ${vida === 1 ? "vida" : "vidas"}${ateTxt(v)}!`], ["Bop", "Agora ficou mais difícil te queimar!"]] }); } }
+  EVT.brindes.filter(evtValido).forEach(b => l.push({ id: "br-" + b.id, tipo: "caixa", txt: "🎁", cor: "#ff4d6d", falas: [["Bip", "Bip bip! Entrega especial!"], ["Bop", `Um presente para todo mundo: ${nomePremio(b)}!`], ["Bip", "Ele aparece quando você volta para a tela inicial."]] }));
+  if (EVT.presentes.some(evtValido)) { const p = EVT.presentes.filter(evtValido)[0]; l.push({ id: "co-" + p.id, tipo: "segredo", falas: [["Bop", "Psiu... bop..."], ["Bip", "Tem um código secreto de presente valendo!"], ["Bop", "Quem souber, escreve na loja, em \"Código de presente\"."]] }); }
+  return l;
+}
+function proximaHistoria() { const vistas = (G.historias || {}).vistas || []; return historiasAgora().find(h => !vistas.includes(h.id)) || null; }
+function marcarHistoria(id) { G.historias = G.historias || {}; const v = G.historias.vistas = (G.historias.vistas || []).filter(x => x !== id); v.push(id); if (v.length > 60) v.splice(0, v.length - 60); salvar(); }
+function roboHistoria(nome, cor) {
+  const p = { i: -1, nome, humano: false, cor, pele: "#c8d3e0", vidas: 0, x: 0, y: 0, passo: 0, flash: 0 };
+  const m = modeloBoneco3D(p), g = new THREE.Group(); g.add(m.g); deixarDesenho(m.g, m.corpoMat);
+  const tag = etiqueta({ nome: nome + " 🤖", vidas: "" }, cor); tag.position.y = 1.95; g.add(tag);
+  return { ...m, g, corpo: m.g, passo: 0 };
+}
+function iniciarHistoria(h) {
+  const s = PRACA.cena, o = { h, t: 0, objs: [], fx: [], fala: -1, falaT: 0, fase: "chega" };
+  // nave: disco com cúpula e luzinhas
+  const nave = new THREE.Group(); nave.position.set(0, 26, 2.2);
+  nave.add(new THREE.Mesh(new THREE.CylinderGeometry(2.4, 1.2, .55, 32), new THREE.MeshLambertMaterial({ color: "#c9d3e0", emissive: "#5a6475" })));
+  const cup = new THREE.Mesh(new THREE.SphereGeometry(1.05, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshLambertMaterial({ color: "#7fd0ff", transparent: true, opacity: .8 })); cup.position.y = .25; nave.add(cup);
+  const luzes = new THREE.Group(); luzes.userData.gira = 2; nave.add(luzes);
+  for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2, l = new THREE.Mesh(new THREE.SphereGeometry(.13, 8, 6), new THREE.MeshBasicMaterial({ color: ["#ffd23f", "#ff4d6d", "#37d99a"][i % 3] })); l.position.set(Math.cos(a) * 2.25, -.05, Math.sin(a) * 2.25); luzes.add(l); }
+  const raio = new THREE.Mesh(new THREE.CylinderGeometry(.9, 2.4, 1, 24, 1, true), new THREE.MeshBasicMaterial({ color: "#bfefff", transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }));
+  raio.geometry.translate(0, -.5, 0); nave.add(raio);
+  s.add(nave); o.nave = nave; o.luzes = luzes; o.raio = raio;
+  o.robos = [roboHistoria("Bip", "#3dd9ff"), roboHistoria("Bop", "#ff8a1f")];
+  o.robos.forEach((r, i) => { r.g.position.set(i ? 1.3 : -1.3, 0, 4.6); r.g.scale.setScalar(.01); r.g.rotation.y = 0; r.corpo.rotation.y = Math.PI; s.add(r.g); });
+  PRACA.hist = o; if (PRACA.eu) PRACA.eu.m.g.visible = false;   // o seu bonequinho sai da frente da câmera
+  const box = $("praca"); box.classList.add("pr-cena");
+  box.insertAdjacentHTML("beforeend", `<div class="pr-faixa pr-faixa-c"></div><div class="pr-faixa pr-faixa-b"></div><div class="pr-fala" id="pr-fala" hidden></div><button type="button" class="lb-pill pr-pulahist" id="pr-pulahist">Pular ⏭</button>`);
+  $("pr-pulahist").addEventListener("click", () => acabarHistoria());
+  if (typeof tocarNotas === "function") tocarNotas([[60, 72, 0, .8, "sine"], [72, 84, .8, .8, "sine"], [84, 79, 1.6, .5, "sine"]]);
+}
+function efeitoHistoria(o) {   // a "surpresa" de cada evento, na segunda fala
+  const s = PRACA.cena, h = o.h;
+  if (h.tipo === "moedas") for (let i = 0; i < 46; i++) { const m = new THREE.Mesh(new THREE.CylinderGeometry(.22, .22, .06, 16), new THREE.MeshLambertMaterial({ color: "#ffd23f", emissive: "#6a4b00" })); const a = Math.random() * Math.PI * 2, r = 1 + Math.random() * 6;
+    m.position.set(Math.cos(a) * r, 8 + Math.random() * 7, 3 + Math.sin(a) * r * .6); m.rotation.x = Math.PI / 2; s.add(m); o.fx.push({ m, vy: 0, gira: 4 + Math.random() * 6, chao: false }); }
+  if (h.tipo === "coracoes") for (let i = 0; i < 18; i++) { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTexto("❤️", "#ff4d6d", "rgba(0,0,0,0)", 128, 128, 100), transparent: true, depthWrite: false })); sp.scale.setScalar(.7);
+    sp.position.set((Math.random() - .5) * 5, .5 + Math.random() * 1.5, 4 + (Math.random() - .5) * 2); s.add(sp); o.fx.push({ m: sp, sobe: .8 + Math.random() * 1.2, t: -Math.random() * 1.5 }); }
+  if (h.tipo === "promo") { const ban = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 1.1), new THREE.MeshBasicMaterial({ map: texTexto("🏷️ " + h.txt, "#0b1b33", "#ffd23f", 640, 192, 64), side: THREE.DoubleSide })); ban.position.set(0, 3.55, 4.4); ban.scale.setScalar(.01); s.add(ban); o.fx.push({ m: ban, cresce: true }); }
+  if (h.tipo === "caixa") { const cx = new THREE.Group(); const corpo = new THREE.Mesh(new THREE.BoxGeometry(1, .9, 1), new THREE.MeshLambertMaterial({ map: texTexto(h.txt, "#ffffff", h.cor, 256, 256, h.txt.length > 3 ? 40 : 120) })); corpo.position.y = .45; cx.add(corpo);
+    const tampa = new THREE.Mesh(new THREE.BoxGeometry(1.12, .2, 1.12), new THREE.MeshLambertMaterial({ color: "#ffd23f" })); tampa.position.y = .98; cx.add(tampa);
+    cx.position.set(0, 6, 4.2); s.add(cx); o.fx.push({ m: cx, tampa, cai: true, vy: 0 }); }
+  if (h.tipo === "segredo") { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTexto("❓", "#ffd23f", "rgba(0,0,0,0)", 128, 128, 100), transparent: true, depthWrite: false })); sp.position.set(0, 2.6, 4.7); sp.scale.setScalar(.01); s.add(sp); o.fx.push({ m: sp, cresce: true, pisca: true }); }
+  if (typeof tocarNotas === "function") tocarNotas([[72, 72, 0, .1, "square"], [76, 76, .1, .1, "square"], [79, 79, .2, .1, "square"], [84, 84, .3, .35, "square"]]);
+}
+function passoHistoria(dt) {
+  const o = PRACA.hist, cam = PRACA.cam; o.t += dt; o.luzes.rotation.y += dt * 3;
+  const fim = (o.nave.position.y), ease = x => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
+  // câmera de cinema: de frente para a nave e os robôs
+  cam.position.set(Math.sin(o.t * .15) * 1.8, 2.5 + Math.sin(o.t * .2) * .2, 11.8); cam.lookAt(0, o.fase === "chega" || o.fase === "vai" ? 4.2 : 2.9, 3.5);
+  const R = o.robos;
+  if (o.fase === "chega") { const f = ease(o.t / 2.6); o.nave.position.y = 26 - (26 - 5.6) * f; o.nave.rotation.z = Math.sin(o.t * 3) * .05 * (1 - f); if (o.t > 2.6) { o.fase = "raio"; o.t = 0; } }
+  else if (o.fase === "raio") { o.raio.scale.y = 5.6; o.raio.material.opacity = .5 * Math.min(1, o.t * 3); R.forEach(r => r.g.scale.setScalar(Math.max(.01, 1.25 * ease((o.t - .3) / 1)))); if (o.t > 1.5) { o.fase = "fala"; o.t = 0; o.fala = -1; o.raio.material.opacity = 0; } }
+  else if (o.fase === "fala") {
+    if (o.fala < 0 || o.falaT <= 0) {
+      o.fala++;
+      if (o.fala >= o.h.falas.length) { o.fase = "tchau"; o.t = 0; $("pr-fala").hidden = true; }
+      else { const [quem, txt] = o.h.falas[o.fala]; o.falaT = 1.6 + txt.length * .055; o.letras = 0; o.quem = quem === "Bip" ? 0 : 1; const el = $("pr-fala"); el.hidden = false; el.dataset.q = o.quem; el.innerHTML = `<b>${esc(quem)}</b><span></span>`; if (o.fala === 1) efeitoHistoria(o); }
+    }
+    if (o.fase === "fala") {
+      o.falaT -= dt; const txt = o.h.falas[o.fala][1], n = Math.min(txt.length, Math.floor((o.t * 30)));
+      if (n !== o.letras) { if (n % 3 === 0 && n < txt.length) bip(o.quem ? 420 + Math.random() * 120 : 620 + Math.random() * 160, .035); o.letras = n; $("pr-fala").querySelector("span").textContent = txt.slice(0, n); }
+      if (o.falaT <= 0) o.t = 0;
+      // robô que fala pula de leve; balão em cima dele
+      R.forEach((r, i) => { r.g.position.y = i === o.quem && o.letras < txt.length ? Math.abs(Math.sin(o.t * 14)) * .12 : 0; r.bracoD.rotation.x = i === o.quem ? -1.2 + Math.sin(o.t * 6) * .3 : 0; });
+      const v = new THREE.Vector3(R[o.quem].g.position.x, 2.9, R[o.quem].g.position.z).project(cam), cv = PRACA.r.domElement, el = $("pr-fala");
+      const meia = el.offsetWidth / 2 + 8; el.style.left = Math.max(meia, Math.min(cv.clientWidth - meia, (v.x + 1) / 2 * cv.clientWidth)) + "px"; el.style.top = ((1 - v.y) / 2 * cv.clientHeight) + "px";
+    }
+  }
+  else if (o.fase === "tchau") { R.forEach((r, i) => { r.bracoD.rotation.z = (i ? 1 : -1) * 0; r.bracoD.rotation.x = -2.6 + Math.sin(o.t * 12) * .4; r.bracoE.rotation.x = -2.6 + Math.cos(o.t * 12) * .4; }); if (o.t > 1.4) { o.fase = "sobe"; o.t = 0; } }
+  else if (o.fase === "sobe") { o.raio.material.opacity = .5; R.forEach(r => { r.g.position.y = o.t * 3; r.g.scale.setScalar(Math.max(.01, 1.25 * (1 - o.t / 1.2))); }); if (o.t > 1.2) { o.fase = "vai"; o.t = 0; o.raio.material.opacity = 0; } }
+  else if (o.fase === "vai") { o.nave.position.y = 5.6 + o.t * o.t * 9; o.nave.position.x = o.t * o.t * 4; if (o.t > 2) { acabarHistoria(); return; } }
+  // efeitos (moedas caindo, corações subindo, faixa, caixa)
+  for (const e of o.fx) {
+    if (e.vy !== undefined && e.gira) { if (!e.chao) { e.vy -= 14 * dt; e.m.position.y += e.vy * dt; if (e.m.position.y < .05) { e.m.position.y = .05; e.vy = -e.vy * .35; if (Math.abs(e.vy) < .8) e.chao = true; } } e.m.rotation.z += e.gira * dt * (e.chao ? .1 : 1); }
+    if (e.sobe) { e.t += dt; if (e.t > 0) e.m.position.y += e.sobe * dt; e.m.material.opacity = Math.max(0, 1 - e.t / 3.5); }
+    if (e.cresce) { const sc = e.m.scale.x + (1 - e.m.scale.x) * Math.min(1, dt * 6); e.m.scale.setScalar(sc * (e.pisca ? 1 + .06 * Math.sin(performance.now() / 120) : 1)); }
+    if (e.cai) { if (e.m.position.y > 0) { e.vy -= 16 * dt; e.m.position.y = Math.max(0, e.m.position.y + e.vy * dt); if (e.m.position.y === 0) { e.vy = 0; bip(180, .12); } } else { e.tampa.position.y += (2 - e.tampa.position.y) * Math.min(1, dt * 3); e.tampa.rotation.y += dt * 3; } }
+  }
+}
+function acabarHistoria() {
+  const o = PRACA.hist; if (!o) return;
+  PRACA.hist = null; marcarHistoria(o.h.id); if (PRACA.eu) PRACA.eu.m.g.visible = true;
+  const s = PRACA.cena; if (s) { s.remove(o.nave); o.robos.forEach(r => s.remove(r.g)); o.fx.forEach(e => s.remove(e.m)); }
+  const box = $("praca"); if (box) { box.classList.remove("pr-cena"); box.querySelectorAll(".pr-faixa, .pr-fala, .pr-pulahist").forEach(e => e.remove()); }
+  PRACA.tHist = 2;
+}
+acoes.verHistorias = () => { G.historias = G.historias || {}; const ids = historiasAgora().map(h => h.id); G.historias.vistas = (G.historias.vistas || []).filter(x => !ids.includes(x)); fecharPainelPraca(); PRACA.tHist = .3; };
 function animarBonecoPraca(m, x, y, z, r, anda, dt) {
   m.g.position.set(x, y, z); m.corpo.rotation.y = r;
   const s = anda ? Math.sin(m.passo) * .7 : 0;

@@ -110,7 +110,8 @@ Botão "Praça" na tela inicial: lugar 3D para andar com o bonequinho (`abrirPra
 - Bonequinho: `modeloBoneco3D` (o mesmo da partida) em `pracaModelo`.
 - Ver os amigos (só no site, `fonte/online.js`, bloco "Praça Central"): o primeiro que entra vira o dono (PeerJS com id fixo `PRACA_ID`) e repassa as posições; se o dono sai, quem fica se reconecta e alguém vira o novo dono. Vai pela rede só apelido, skin, pet, selo, personagem, moedas, posição e a classificação. Máximo de 20 na praça.
 - Classificação: `G.evRank` (semana, Partida do Evento) e `G.pracaMoedas` (moedas vistas na praça), juntadas por `mesclarRank`.
-- Teste: `ferramentas/teste/teste-praca.js`.
+- Mini história dos eventos (ideia do Andre): quando há evento do ADM que a pessoa ainda não viu, a nave dos robôs Bip e Bop desce na praça e conta o evento com balões de fala e uma surpresa (moedas caindo, faixa da promoção, corações, caixa da coleção ou do presente, "?" do código). `historiasAgora` (falas de cada tipo), `iniciarHistoria`/`passoHistoria`/`acabarHistoria`; vistas em `G.historias.vistas` (uma vez por evento em cada aparelho). Botão "Pular" e "Ver a história de novo" no mural. Tipo de evento novo: acrescente uma história em `historiasAgora`.
+- Teste: `ferramentas/teste/teste-praca.js` e `ferramentas/teste/teste-historia.js`.
 
 ## Avisos do ADM para todo mundo
 
