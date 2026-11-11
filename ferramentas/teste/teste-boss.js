@@ -20,7 +20,9 @@ const { chromium } = require('playwright'); const fs = require('fs'); const T = 
   const b1 = await host.evaluate(() => ({ hp: A.boss.hp, fase: A.ph.k }));
   // espera a fase da bola e o boss atacar
   await host.waitForFunction(() => A.ph.k === "bola" && A.ph.pronto, null, { timeout: 15000 }).catch(() => {});
-  await host.waitForTimeout(4500);
+  await host.waitForFunction(() => A.boss.alerta, null, { timeout: 15000 }).catch(() => {});
+  await amigo.waitForTimeout(150); await (await amigo.$('#a-boss')).screenshot({ path: S + '/boss-alerta.png' });
+  await host.waitForTimeout(2500);
   const ataques = await host.evaluate(() => A.boss.n || 0);
   await amigo.waitForTimeout(200); await (await amigo.$('#a-game .stage-wrap')).screenshot({ path: S + '/boss-2d.png' });
   await (await amigo.$('#a-boss')).screenshot({ path: S + '/boss-barra.png' });
@@ -30,7 +32,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const T = 
   const b2 = await host.evaluate(() => A.boss.hp);
   // golpe final
   await host.evaluate(() => { A.boss.hp = 5; bossDano(8, A.P[ON.myIdx]); }); await host.waitForTimeout(1200);
-  const fimH = await host.evaluate(() => ({ morto: A.boss.morto, rank: G.evRank.j, item: temArremesso("Andre", "coroaeclipse"), moedasNaPartida: A.P[ON.myIdx].moedas }));
-  const fimA = await amigo.evaluate(() => ({ morto: A.boss && A.boss.morto, item: temArremesso("Maria", "coroaeclipse"), rank: G.evRank.j }));
+  const fimH = await host.evaluate(() => ({ morto: A.boss.morto, rank: G.evRank.j, item: temArremesso("Andre", "coroaeclipse"), banco: G.banco.Andre, bossG: G.bossG }));
+  const fimA = await amigo.evaluate(() => ({ morto: A.boss && A.boss.morto, item: temArremesso("Maria", "coroaeclipse"), banco: G.banco.Maria, bossG: G.bossG }));
   await (await amigo.$('#a-game .stage-wrap')).screenshot({ path: S + '/boss-morto.png' });
   console.log(JSON.stringify({ b0, b1, ataques, b2, fimH, fimA, errs })); await b.close(); })();

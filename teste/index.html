@@ -366,6 +366,13 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .a-boss i span { display: block; height: 100%; background: linear-gradient(90deg, #ff4d6d, #ffd23f); transition: width .3s; }
 .a-boss small { font-weight: 800; font-size: 13px; color: #ffd23f; }
 .a-boss.morto { grid-template-columns: 1fr; text-align: center; border-color: #37d99a; }
+.a-boss em { grid-column: 1 / -1; font: 700 13px Nunito, sans-serif; font-style: normal; color: #c9d6ea; text-align: center; }
+.a-boss.alerta { border-color: #ff4d6d; animation: bossAlerta .4s ease-in-out infinite alternate; }
+.a-boss.alerta em { color: #ff8fa3; font-weight: 800; font-size: 15px; }
+@keyframes bossAlerta { to { box-shadow: 0 0 22px rgba(255,77,109,.9); } }
+.stage-wrap.tremor { animation: tremor .45s linear; }
+@keyframes tremor { 20% { transform: translate(-6px, 3px); } 40% { transform: translate(5px, -4px); } 60% { transform: translate(-4px, -2px); } 80% { transform: translate(3px, 4px); } }
+@media (prefers-reduced-motion: reduce) { .stage-wrap.tremor, .a-boss.alerta { animation: none; } }
 .pr-missao { position: absolute; top: 100px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; background: rgba(11,27,51,.82); color: #fff; border: 2px solid #ffd23f; border-radius: 14px; padding: 6px 12px; font: 700 15px Nunito, sans-serif; z-index: 2; white-space: nowrap; pointer-events: none; }
 .pr-missao b { color: #ffd23f; }
 .praca.pr-cena .pr-missao { display: none !important; }
@@ -2103,9 +2110,13 @@ function atualizarBossBarra() {
   const el = $("a-boss"); if (!el) return;
   const B = A.boss, cfg = B && BOSSES[B.k];
   if (!cfg) { if (!el.hidden) el.hidden = true; return; }
-  const ch = [B.k, Math.round(B.hp), B.max, B.morto].join("|"); if (ch === el.dataset.ch) return; el.dataset.ch = ch; el.hidden = false;
-  el.classList.toggle("morto", !!B.morto);
-  el.innerHTML = B.morto ? `<b>${cfg.ic} ${esc(cfg.nome)} foi derrotado! 🎉</b>` : `<b>${cfg.ic} ${esc(cfg.nome)}</b><i><span style="width:${Math.max(0, Math.round(B.hp / B.max * 100))}%"></span></i><small>${Math.round(B.hp)}/${B.max}</small>`;
+  const ch = [B.k, Math.round(B.hp), B.max, B.morto, B.partida, B.alerta].join("|"); if (ch === el.dataset.ch) return;
+  if (B.alerta && el.dataset.al !== "1") { bip(880, .1); setTimeout(() => bip(660, .1), 130); setTimeout(() => bip(880, .1), 260); }   // sirene do alerta
+  el.dataset.al = B.alerta ? "1" : ""; el.dataset.ch = ch; el.hidden = false;
+  el.classList.toggle("morto", !!B.morto); el.classList.toggle("alerta", !!B.alerta && !B.morto);
+  el.innerHTML = B.morto ? `<b>${cfg.ic} Todo mundo junto derrotou o ${esc(cfg.nome)}! 🎉</b>`
+    : `<b>${cfg.ic} ${esc(cfg.nome)}</b><i><span style="width:${Math.max(0, Math.round(B.hp / B.max * 100))}%"></span></i><small>${Math.round(B.hp).toLocaleString("pt-BR")}/${B.max.toLocaleString("pt-BR")}</small>
+       <em>${B.alerta ? `⚠️ O ${esc(cfg.nome)} vai atacar! Corre!` : `Vida de todo mundo do jogo${B.partida ? ` · esta partida: -${B.partida}` : ""}`}</em>`;
 }
 function desenharBoss2D(c) {
   atualizarBossBarra();
@@ -2135,6 +2146,7 @@ function desenharBoss2D(c) {
 function boss3D() {
   atualizarBossBarra();
   const B = A.boss, cfg = B && BOSSES[B.k];
+  climaBoss3D(!!cfg && !B.morto);
   if (!cfg) { if (F.bossG) { F.scene.remove(F.bossG); F.bossG = null; } return; }
   if (!F.bossG || F.bossG.userData.k !== B.k) {
     if (F.bossG) F.scene.remove(F.bossG);
@@ -2160,6 +2172,124 @@ function boss3D() {
   const hit = B.hit > 0; u.m1.color.set(hit ? "#ff4d6d" : u.cores[0]); u.m2.color.set(hit ? "#ff4d6d" : u.cores[1]);
   if (B.morto) { B.tm3 = (B.tm3 || 0) + 1 / 60; const f = Math.min(1, B.tm3 / 1.2); g.scale.setScalar(Math.max(.01, 1 - f)); u.corpo.rotation.z += .3; g.visible = f < 1; }
   else { g.scale.setScalar(1 + (hit ? .08 : 0)); g.visible = true; }
+}
+/* ---------- Boss do jogo todo: uma vida só, dividida por todo mundo ----------
+   Cada aparelho guarda G.bossG = {id, k, dano: {nome: dano}, fim, meus: [perfis deste aparelho que lutaram], premiados}.
+   O dano de cada um cresce sempre; quando dois aparelhos se encontram (Partida do Evento ou Praça) juntam as tabelas (o maior vale).
+   Quando a soma passa da vida, o boss cai e cada perfil deste aparelho que lutou ganha o prêmio uma vez. */
+const BOSS_VIDA_GLOBAL = 2500;
+function bossGId() {
+  const k = bossDaLoja(); if (!k) return null;
+  const cols = colecoesNaLoja(perfil()).filter(c => BOSSES[k].cols.includes(c.id));
+  const ate = cols.reduce((a, c) => (!a || Date.parse(c.fim.ate) > Date.parse(a)) ? c.fim.ate : a, null);
+  return { k, id: k + "|" + (ate || "") };
+}
+function bossGlobal() {
+  const b = bossGId(); if (!b) return null;
+  if (!G.bossG || G.bossG.id !== b.id || !G.bossG.dano) G.bossG = { id: b.id, k: b.k, dano: {}, fim: false, meus: [], premiados: [] };
+  return G.bossG;
+}
+const bossGTotal = st => Object.values(st.dano).reduce((a, v) => a + (+v || 0), 0);
+function bossGRestante() { const st = bossGlobal(); return st ? Math.max(0, BOSS_VIDA_GLOBAL - bossGTotal(st)) : 0; }
+function bossGParaEnviar() { const st = bossGlobal(); return st ? { id: st.id, dano: st.dano, fim: st.fim } : null; }
+function mesclarBossG(bg) {
+  const st = bossGlobal(); if (!st || !bg || typeof bg !== "object" || bg.id !== st.id || !bg.dano || typeof bg.dano !== "object") return;
+  for (const [n0, v] of Object.entries(bg.dano).slice(0, 200)) { const n = nomeLimpo(n0); if (!n) continue; const x = Math.max(0, Math.min(BOSS_VIDA_GLOBAL, Math.round(+v || 0))); if (!(n in st.dano) || st.dano[n] < x) st.dano[n] = x; }
+  if (bg.fim === true) st.fim = true;
+  checarBossGlobal();
+}
+function somarBossDano(nome, d, meu) {
+  const st = bossGlobal(); if (!st) return; const n = nomeLimpo(nome); if (!n) return;
+  st.dano[n] = Math.min(BOSS_VIDA_GLOBAL, (st.dano[n] || 0) + Math.max(0, Math.round(+d || 0)));
+  if (meu && !st.meus.includes(n)) st.meus.push(n);
+  checarBossGlobal();
+}
+function checarBossGlobal() {
+  const st = bossGlobal(); if (!st) return;
+  if (!st.fim && bossGTotal(st) >= BOSS_VIDA_GLOBAL) st.fim = true;
+  if (st.fim) {
+    const cfg = BOSSES[st.k];
+    for (const n of st.meus) {
+      if (st.premiados.includes(n)) continue; st.premiados.push(n);
+      G.banco[n] = Math.round(((G.banco[n] || 0) + cfg.moedas) * 10) / 10;
+      let txt = `${cfg.ic} Todo mundo junto derrotou o ${cfg.nome}! ${n} ganhou ${cfg.moedas} moedas`;
+      if (cfg.item) { const r = darPremio(n, { item: cfg.item }); if (r && !r.jaTem) txt += ` e ${r.txt}`; }
+      const r2 = rankAtual(), e = r2.j[n] || { g: 0, t: 0, v: 0, b: 0 }; r2.j[n] = { ...e, b: (e.b || 0) + 1 };
+      setTimeout(() => toast(txt + "!"), 500); if (typeof sfxVitoria === "function") setTimeout(sfxVitoria, 400);
+    }
+  }
+  if (typeof salvarPlacar === "function") salvarPlacar(); else salvar();
+}
+/* ---------- clima de batalha na quadra ---------- */
+function tremorBoss() {
+  const w = document.querySelector("#a-game .stage-wrap"); if (w) { w.classList.remove("tremor"); void w.offsetWidth; w.classList.add("tremor"); }
+  vibrar([50, 30, 50]);
+  if (typeof MUS !== "undefined" && MUS.ctx && typeof somLigado === "function" && somLigado()) { const t = MUS.ctx.currentTime + .02; ruido(t, 1.1, .22, "bandpass", 900); ruido(t + .05, .9, .14, "bandpass", 1600); }   // a torcida grita
+}
+function climaBoss2D(c) {
+  const B = A.boss, cfg = B && BOSSES[B.k]; if (!cfg || B.morto) return;
+  const t = A.t, R = AC * .86;
+  c.save(); c.fillStyle = "rgba(12,6,32,.38)"; c.fillRect(0, 0, AW, AW);
+  // chão do tema: metade sol, metade lua, com a costura brilhando
+  c.beginPath(); c.arc(AC, AC, R, 0, Math.PI * 2); c.clip();
+  const g1 = c.createRadialGradient(AC - R * .5, AC, 10, AC - R * .5, AC, R); g1.addColorStop(0, `rgba(255,${210 + 20 * Math.sin(t * 2)},90,.62)`); g1.addColorStop(1, "rgba(232,89,12,.4)");
+  c.fillStyle = g1; c.fillRect(AC - R, AC - R, R, R * 2);
+  const g2 = c.createRadialGradient(AC + R * .5, AC, 10, AC + R * .5, AC, R); g2.addColorStop(0, "rgba(59,79,143,.62)"); g2.addColorStop(1, "rgba(13,18,64,.6)");
+  c.fillStyle = g2; c.fillRect(AC, AC - R, R, R * 2);
+  c.strokeStyle = "rgba(255,230,140,.5)"; c.lineWidth = 3; for (let i = 0; i < 10; i++) { const a = Math.PI / 2 + (i / 9 - .5) * Math.PI * .9 + Math.PI; c.beginPath(); c.moveTo(AC - 30, AC); c.lineTo(AC + Math.cos(a) * R, AC + Math.sin(a) * R); c.stroke(); }
+  c.fillStyle = "rgba(255,255,255,.7)"; for (let i = 0; i < 14; i++) { const sx = AC + 40 + ((i * 97) % (R - 50)), sy = AC - R * .8 + ((i * 131) % (R * 1.6)); c.globalAlpha = .4 + .4 * Math.sin(t * 3 + i); c.beginPath(); c.arc(sx, sy, 3, 0, Math.PI * 2); c.fill(); }
+  c.globalAlpha = 1; c.shadowColor = "#ffc56b"; c.shadowBlur = 18; c.strokeStyle = `rgba(255,200,90,${.6 + .3 * Math.sin(t * 5)})`; c.lineWidth = 6; c.beginPath(); c.moveTo(AC, AC - R); c.lineTo(AC, AC + R); c.stroke();
+  c.restore();
+}
+function climaBoss3D(ativo) {
+  if (!F.scene) return;
+  if (ativo && !F.clima) {
+    const orig = { bg: F.scene.background && F.scene.background.clone(), fog: F.scene.fog && F.scene.fog.color.clone(), luzes: [], domos: [] };
+    F.scene.traverse(o => { if (o.isLight) { orig.luzes.push([o, o.intensity]); o.intensity *= .55; } if (o.isMesh && o.material && o.material.side === THREE.BackSide && o.geometry.parameters && o.geometry.parameters.radius >= 30) { orig.domos.push([o, o.material.color.clone()]); o.material.color.set("#8a5a7a"); } });
+    if (F.scene.background) F.scene.background.set("#140a24"); if (F.scene.fog) F.scene.fog.color.set("#2a1438");
+    // eclipse gigante no céu (sempre atrás do boss) e o chão do tema
+    const ceu = texturaCanvas(256, 256, (c, w) => { const g = c.createRadialGradient(128, 128, 40, 128, 128, 128); g.addColorStop(0, "rgba(255,230,160,1)"); g.addColorStop(.42, "rgba(255,190,80,.9)"); g.addColorStop(1, "rgba(255,150,40,0)"); c.fillStyle = g; c.fillRect(0, 0, w, w); c.fillStyle = "#050409"; c.beginPath(); c.arc(128, 128, 44, 0, Math.PI * 2); c.fill(); });
+    const sol = new THREE.Sprite(new THREE.SpriteMaterial({ map: ceu, transparent: true, depthWrite: false, fog: false })); sol.scale.setScalar(16); F.scene.add(sol);
+    const R = AC * .86 * U, chaoTex = texturaCanvas(512, 512, (c, w) => {
+      const g1 = c.createRadialGradient(w * .25, w / 2, 10, w * .25, w / 2, w * .5); g1.addColorStop(0, "#ffe27a"); g1.addColorStop(.6, "#ffb627"); g1.addColorStop(1, "#e8590c"); c.fillStyle = g1; c.fillRect(0, 0, w / 2, w);
+      c.strokeStyle = "rgba(255,250,210,.7)"; c.lineWidth = 5; for (let i = 0; i < 9; i++) { const a = Math.PI / 2 + (i / 8) * Math.PI; c.beginPath(); c.moveTo(w * .25, w / 2); c.lineTo(w * .25 + Math.cos(a) * w, w / 2 + Math.sin(a) * w); c.stroke(); }
+      const g2 = c.createRadialGradient(w * .75, w / 2, 10, w * .75, w / 2, w * .5); g2.addColorStop(0, "#3b4f8f"); g2.addColorStop(1, "#0d1240"); c.fillStyle = g2; c.fillRect(w / 2, 0, w / 2, w);
+      c.fillStyle = "#e6ecf8"; c.beginPath(); c.arc(w * .75, w / 2, 46, -Math.PI / 2, Math.PI / 2); c.arc(w * .75 - 20, w / 2, 38, Math.PI / 2, -Math.PI / 2, true); c.closePath(); c.fill();
+      c.fillStyle = "#fff"; for (let i = 0; i < 40; i++) c.fillRect(w / 2 + 10 + Math.random() * (w / 2 - 20), Math.random() * w, 3, 3);
+      c.strokeStyle = "rgba(255,240,180,.9)"; c.lineWidth = 10; c.beginPath(); c.moveTo(w / 2, 0); c.lineTo(w / 2, w); c.stroke(); });
+    const chao = new THREE.Mesh(new THREE.CircleGeometry(R, 48), new THREE.MeshBasicMaterial({ map: chaoTex, transparent: true, opacity: .72, depthWrite: false })); chao.rotation.x = -Math.PI / 2; chao.position.y = .02; F.scene.add(chao);
+    F.clima = { orig, sol, chao };
+  }
+  if (!ativo && F.clima) {
+    const o = F.clima.orig; o.luzes.forEach(([l, v]) => (l.intensity = v)); o.domos.forEach(([m, c]) => m.material.color.copy(c));
+    if (o.bg && F.scene.background) F.scene.background.copy(o.bg); if (o.fog && F.scene.fog) F.scene.fog.color.copy(o.fog);
+    F.scene.remove(F.clima.sol); F.scene.remove(F.clima.chao); F.clima = null;
+  }
+  if (F.clima && F.cam && F.bossG) { const dx = F.bossG.position.x - F.cam.position.x, dz = F.bossG.position.z - F.cam.position.z, d = Math.hypot(dx, dz) || 1; F.clima.sol.position.set(F.bossG.position.x + dx / d * 24, 10, F.bossG.position.z + dz / d * 24); F.clima.chao.material.opacity = .66 + .08 * Math.sin(A.t * 3); }
+}
+/* o boss no céu da Praça, com a vida de todo mundo */
+function texBossPraca() {
+  const st = bossGlobal(), cfg = st && BOSSES[st.k];
+  return texturaCanvas(512, 600, (c, w) => {
+    if (!cfg) return;
+    const resta = bossGRestante(), x = w / 2, y = 230;
+    const g = c.createRadialGradient(x, y, 100, x, y, 250); g.addColorStop(0, "rgba(255,200,90,.95)"); g.addColorStop(1, "rgba(255,150,40,0)"); c.fillStyle = g; c.fillRect(0, 0, w, 480);
+    c.fillStyle = cfg.corpo[0]; c.beginPath(); c.arc(x, y, 120, Math.PI / 2, Math.PI * 1.5); c.fill(); c.fillStyle = cfg.corpo[1]; c.beginPath(); c.arc(x, y, 120, -Math.PI / 2, Math.PI / 2); c.fill();
+    c.fillStyle = "#ffd23f"; c.beginPath(); c.moveTo(x - 70, y - 104); [[-70, -170], [-35, -130], [0, -185], [35, -130], [70, -170]].forEach(([dx, dy], i) => { c.lineTo(x + dx, y + dy); if (i < 4) c.lineTo(x + dx + 17, y - 112); }); c.lineTo(x + 70, y - 104); c.closePath(); c.fill();
+    c.fillStyle = cfg.olhos; if (st.fim) { c.strokeStyle = cfg.olhos; c.lineWidth = 10; [-1, 1].forEach(l => { c.beginPath(); c.moveTo(x + l * 30, y - 40); c.lineTo(x + l * 70, y - 10); c.moveTo(x + l * 70, y - 40); c.lineTo(x + l * 30, y - 10); c.stroke(); }); }
+    else [-1, 1].forEach(l => { c.beginPath(); c.moveTo(x + l * 20, y - 25); c.lineTo(x + l * 75, y - 45); c.lineTo(x + l * 70, y - 8); c.closePath(); c.fill(); });
+    c.fillStyle = "rgba(11,27,51,.9)"; c.fillRect(16, 470, w - 32, 112);
+    c.fillStyle = "#fff"; c.font = "800 34px Nunito, sans-serif"; c.textAlign = "center"; c.fillText(st.fim ? `${cfg.nome} derrotado! 🎉` : `${cfg.ic} ${cfg.nome}`, x, 510);
+    c.fillStyle = "rgba(255,255,255,.2)"; c.fillRect(36, 528, w - 72, 26); c.fillStyle = "#ff4d6d"; c.fillRect(36, 528, (w - 72) * resta / BOSS_VIDA_GLOBAL, 26);
+    c.fillStyle = "#ffd23f"; c.font = "800 22px Nunito, sans-serif"; c.fillText(st.fim ? "Todo mundo junto venceu!" : `Vida de todo mundo: ${resta.toLocaleString("pt-BR")}/${BOSS_VIDA_GLOBAL.toLocaleString("pt-BR")}`, x, 575);
+  });
+}
+function pracaBossCeu() {
+  if (!PRACA.cena) return;
+  const st = bossGlobal(), ch = st ? bossGRestante() + "|" + st.fim : "";
+  if (!st) { if (PRACA.bossSp) { PRACA.cena.remove(PRACA.bossSp); PRACA.bossSp = null; } return; }
+  if (!PRACA.bossSp) { PRACA.bossSp = new THREE.Sprite(new THREE.SpriteMaterial({ transparent: true, depthWrite: false, fog: false })); PRACA.bossSp.scale.set(9, 10.5, 1); PRACA.bossSp.position.set(0, 11.2, -22); PRACA.cena.add(PRACA.bossSp); }
+  if (PRACA.bossCh !== ch) { PRACA.bossCh = ch; const v = PRACA.bossSp.material.map; PRACA.bossSp.material.map = texBossPraca(); PRACA.bossSp.material.needsUpdate = true; if (v) v.dispose(); }
 }
 function desenharArremesso2D(c, k, x, y, giro) {
   const coroaBoss = k === "coroaeclipse"; if (coroaBoss) k = "eclipse";   // Coroa do Eclipse: o eclipse com uma coroa de ouro em cima
@@ -2376,6 +2506,7 @@ function desenharA() {
   c.setTransform(k, 0, 0, k, 0, 0);
   const ph = A.ph || {};
   torcidaCima(c, ph.k === "bola");
+  climaBoss2D(c);
   for (const p of A.P) { const t = timeDe(p); c.strokeStyle = t ? t.cor : "rgba(244,247,251,.45)"; c.lineWidth = t ? 7 : 4; c.beginPath(); c.arc(p.home.x, p.home.y, 34, 0, Math.PI * 2); c.stroke(); }
   for (const p of A.P) { const t = timeDe(p); if (!t || !p.vivo) continue; c.fillStyle = t.cor; c.globalAlpha = .45; c.beginPath(); c.ellipse(p.x, p.y + 40, 30, 11, 0, 0, Math.PI * 2); c.fill(); c.globalAlpha = 1; }
   // sombras no chão
@@ -4202,6 +4333,7 @@ function eventosAgora() {
   if (ev) l.push({ ic: ev.mult === 3 ? "🤑" : "💰", t: `Moedas em ${ev.mult === 3 ? "triplo" : "dobro"}!`, d: `Tudo o que você ganhar nas partidas vale ${ev.mult} vezes mais.`, f: ate(ev) });
   if (pr) l.push({ ic: "🏷️", t: `Promoção: ${pr.desc}% de desconto`, d: `Em: ${PROMO_ALVOS[pr.alvo]}.`, f: ate(pr), loja: true });
   if (vida) { const v = EVT.vidas.filter(evtValido).sort((a, b) => b.extra - a.extra)[0]; l.push({ ic: "❤️", t: `+${vida} ${vida === 1 ? "vida" : "vidas"} em cada partida`, d: "Todo mundo começa a partida com vida a mais.", f: ate(v) }); }
+  { const st = typeof bossGlobal === "function" && bossGlobal(); if (st) { const cfg = BOSSES[st.k]; l.push({ ic: cfg.ic, t: `Boss do jogo todo: ${cfg.nome}`, d: st.fim ? "Todo mundo junto derrotou o boss! 🎉" : `Vida: ${bossGRestante().toLocaleString("pt-BR")}/${BOSS_VIDA_GLOBAL.toLocaleString("pt-BR")}. Lute contra ele na Partida do Evento (porta da Praça).`, f: "" }); } }
   EVT.historias.filter(evtValido).forEach(e => { const t = HIST_TEMAS[e.tema]; if (t) l.push({ ic: "🎬", t: `Missão ${t.nome}: ${t.missao.titulo}`, d: "Vá até a Praça: a nave dos robôs conta a história e espalha fragmentos para você pegar.", f: ate(e) }); });
   voltasAtivas().forEach(v => l.push({ ic: "🔁", t: `A coleção ${COLECOES[v.col].nome} voltou!`, d: "Está de novo na loja, com o pacote.", f: ate(v), loja: true }));
   const nome = perfil(), ja = ((G.brindesRecebidos || {})[nome]) || [];
@@ -4475,7 +4607,7 @@ function abrirPraca() {
   ligarControlesPraca(box);
   PRACA.ult = performance.now(); PRACA.raf = requestAnimationFrame(quadroPraca);
   setTimeout(() => { const d = $("pr-dica"); if (d) d.hidden = true; }, 7000);
-  PRACA.frags = []; pracaFragmentos();
+  PRACA.frags = []; pracaFragmentos(); PRACA.bossSp = null; PRACA.bossCh = ""; pracaBossCeu();
   if (typeof PRACA.conectar === "function") PRACA.conectar(info);
   else $("pr-gente").textContent = "👤 Só você (no site, os amigos aparecem aqui)";
   if (typeof tocarNotas === "function") tocarNotas([[72, 72, 0, .1, "triangle"], [76, 76, .1, .1, "triangle"], [79, 79, .2, .2, "triangle"]]);
@@ -4597,6 +4729,7 @@ function quadroPraca(ts) {
   if (PRACA.tPlaca <= 0) { PRACA.tPlaca = 1.5;
     for (const p of PRACA.placas) { const ch = JSON.stringify(listaPlaca(p.pl.k).slice(0, 8)) + perfil(); if (ch !== p.chave) { p.chave = ch; const velha = p.tela.material.map; p.tela.material.map = texPlaca(p.pl.k); p.tela.material.needsUpdate = true; if (velha) velha.dispose(); } }
     const mo = $("pr-moedas"); if (mo) mo.textContent = fmtM(G.banco[perfil()] || 0);
+    pracaBossCeu();
     if (PRACA.rede && PRACA.rede.contar) $("pr-gente").textContent = PRACA.rede.contar();
   }
   // evento novo? a nave dos robôs vem contar (uma vez por evento)
@@ -5252,7 +5385,7 @@ function musicaTocar() {
   MUS.tocando = true; MUS.passo = 0; MUS.proximo = c.currentTime + .08;
   MUS.master.gain.cancelScheduledValues(c.currentTime);
   MUS.master.gain.setValueAtTime(MUS.master.gain.value, c.currentTime);
-  MUS.master.gain.linearRampToValueAtTime(MUS.musica === "partida" ? .45 : .6, c.currentTime + .6);
+  MUS.master.gain.linearRampToValueAtTime(MUS.musica === "partida" || MUS.musica === "boss" ? .45 : .6, c.currentTime + .6);
   clearInterval(MUS.timer); MUS.timer = setInterval(agendar, 25); agendar();
 }
 function musicaParar(rapido) {
@@ -5360,8 +5493,8 @@ tocarPasso = function (i, t) { if (MUS.musica === "partida") tocarPassoPartida(i
 function musicaTrocar(nome) {
   if (!somLigado() || !nome) { if (MUS.tocando) musicaParar(); return; }
   if (MUS.tocando && MUS.musica === nome) return;
-  if (MUS.tocando) { MUS.musica = nome; MUS.bpm = nome === "partida" ? 128 : 118; MUS.passo = 0; MUS.proximo = MUS.ctx.currentTime + .05; return; }
-  MUS.musica = nome; MUS.bpm = nome === "partida" ? 128 : 118;
+  if (MUS.tocando) { MUS.musica = nome; MUS.bpm = nome === "boss" ? 150 : nome === "partida" ? 128 : 118; MUS.passo = 0; MUS.proximo = MUS.ctx.currentTime + .05; return; }
+  MUS.musica = nome; MUS.bpm = nome === "boss" ? 150 : nome === "partida" ? 128 : 118;
   musicaTocar();
 }
 naTelaComMusica = () => musicaDesejada() === "lobby";
@@ -5369,6 +5502,22 @@ setInterval(() => {
   if (!MUS.ctx || MUS.ctx.state !== "running") return;
   musicaTrocar(musicaDesejada());
 }, 250);
+/* música de batalha enquanto o boss está vivo (ré menor, 150 por minuto) */
+const BOSS_ACORDES = [[62, 65, 69], [58, 62, 65], [60, 64, 67], [57, 61, 64]], BOSS_BAIXO = [38, 34, 36, 33];
+function tocarPassoBoss(i, t) {
+  const comp = Math.floor(i / 16) % 4, p = i % 16, ac = BOSS_ACORDES[comp], b = BOSS_BAIXO[comp];
+  if (p % 4 === 0) bumbo(t);
+  if (p === 4 || p === 12) { palma(t); ruido(t, .12, .3, "bandpass", 2500); }
+  chimbal(t, p === 14);
+  if (p % 2 === 0) nota(t, hz(b + (p % 8 === 6 ? 12 : 0)), .14, "sawtooth", .22, { filtro: 700 });
+  const arp = [0, 1, 2, 1][p % 4]; if (p % 2 === 1 || p === 0) nota(t, hz(ac[arp] + 12), .1, "square", .06, { filtro: 3000 });
+  if (p === 0) ac.forEach(m => nota(t, hz(m), .9, "sawtooth", .035, { filtro: 1400 }));
+  if (i % 64 === 60) [0, .05, .1, .15].forEach((d, k) => nota(t + d, 200 - k * 30, .1, "sine", .5, { slide: .5 }));   // virada no tom
+}
+const _musicaBoss = musicaDesejada;
+musicaDesejada = function () { const m = _musicaBoss(); return m === "partida" && A.boss && !A.boss.morto ? "boss" : m; };
+const _passoMusBoss = tocarPasso;
+tocarPasso = function (i, t) { if (MUS.musica === "boss") return tocarPassoBoss(i, t); return _passoMusBoss(i, t); };
 document.addEventListener("pointerdown", () => { if (somLigado()) musCtx(); }, true);
 
 function sfxVitoria() {
@@ -7250,8 +7399,8 @@ function criarSala(fixa = usarSalaFixa(), auto = null, codigoFixo = SALA_DO_ANDR
 function enviarSala() {
   const nomes = [perfil(), ...ON.sala.map(s => s.nome)];
   const codigos = { [perfil()]: meuCodigoAmigo() }; ON.sala.forEach(s => { if (s.codigo) codigos[s.nome] = s.codigo; });
-  const rank = ON.code === SALA_EVENTO ? rankAtual() : undefined;
-  ON.sala.forEach(s => enviar(s.conn, { t: "sala", nomes, robos: ON.robos, code: ON.code, codigos, rank }));
+  const rank = ON.code === SALA_EVENTO ? rankAtual() : undefined, bg = ON.code === SALA_EVENTO ? bossGParaEnviar() : undefined;
+  ON.sala.forEach(s => enviar(s.conn, { t: "sala", nomes, robos: ON.robos, code: ON.code, codigos, rank, bg }));
 }
 TELAS.criandoSala = () => `
   <section data-fundo="${fundoAtual()}" class="bgf lobby"><h1 class="lb-title" style="font-size:40px">Criando sala…</h1><p class="lb-sub">Conectando ao servidor.</p>
@@ -7310,7 +7459,7 @@ function hostRecebe(conn, d) {
     const usados = [perfil(), ...ON.sala.map(s => s.nome)];
     let nome = base, k = 2; while (usados.some(u => u.toLowerCase() === nome.toLowerCase())) nome = base + " " + (k++);
     ON.sala.push({ conn, nome, moedas: Math.max(0, +d.moedas || 0), vidasInv: Math.max(0, Math.floor(+d.vidas || 0)), skin: skinInfo(d.skin).k, ficha: limparFicha(d.ficha), codigo: limparCodigoAmigo(d.amigo), arremesso: arremessoInfo(String(d.arremesso || "")).k, selo: [1, 2, 3].includes(d.selo) ? d.selo : 0, pet: petInfo(String(d.pet || "")) ? String(d.pet) : null });
-    if (ON.code === SALA_EVENTO) mesclarRank(d.rank);
+    if (ON.code === SALA_EVENTO) { mesclarRank(d.rank); mesclarBossG(d.bg); }
     enviar(conn, { t: "bemvindo", nome, code: ON.code });
     enviarSala(); toast(`${nome} entrou na sala`); bip(880, .08);
     if (G.tela === "salaHost") render();
@@ -7778,7 +7927,7 @@ function entrarSala(code, nome, naoAbrir = false) {
   peer.on("open", () => {
     const conn = peer.connect(PREFIXO + code, { reliable: true, serialization: "json" });
     ON.hostConn = conn;
-    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome), ficha: personagemDe(nome), amigo: meuCodigoAmigo(), arremesso: arremessoDe(nome), selo: nivelSelo(nome), pet: petDe(nome), rank: code === SALA_EVENTO ? rankAtual() : undefined }); });
+    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome), ficha: personagemDe(nome), amigo: meuCodigoAmigo(), arremesso: arremessoDe(nome), selo: nivelSelo(nome), pet: petDe(nome), rank: code === SALA_EVENTO ? rankAtual() : undefined, bg: code === SALA_EVENTO ? bossGParaEnviar() : undefined }); });
     conn.on("data", cliRecebe);
     conn.on("close", () => { if (ON.peer === peer) { toast("A conexão com a sala caiu."); sairOnline(); } });
   });
@@ -7795,10 +7944,11 @@ function cliRecebe(d) {
   switch (d.t) {
     case "bemvindo": ON.meuNome = d.nome; ir("esperando"); break;
     case "rank": mesclarRank(d.r); break;
-    case "bossItem": if (BOSSES[d.k]) bossPremioLocal(ON.meuNome, d.k); break;
+    case "bossDano": { const st = bossGlobal(); if (st && d.id === st.id) somarBossDano(ON.meuNome, d.d, true); break; }
+    case "bossG": mesclarBossG(d.bg); break;
     case "lojaOk": { const it = LOJA_EV[d.k]; if (!it) break; G.banco[ON.meuNome] = Math.round(((G.banco[ON.meuNome] || 0) - it.preco) * 10) / 10; salvar(); toast(`${it.ic} ${it.nome}!`); bip(990, .08); renderAct(); break; }
     case "lojaNao": toast(String(d.msg || "Não deu para comprar.").slice(0, 80)); renderAct(); break;
-    case "sala": if (d.rank) mesclarRank(d.rank); ON.salaNomes = Array.isArray(d.nomes) ? d.nomes.map(String) : []; ON.robos = +d.robos || 0; ON.salaCodigos = d.codigos && typeof d.codigos === "object" ? d.codigos : {}; if (G.tela === "esperando") render(); break;
+    case "sala": if (d.rank) mesclarRank(d.rank); if (d.bg) mesclarBossG(d.bg); ON.salaNomes = Array.isArray(d.nomes) ? d.nomes.map(String) : []; ON.robos = +d.robos || 0; ON.salaCodigos = d.codigos && typeof d.codigos === "object" ? d.codigos : {}; if (G.tela === "esperando") render(); break;
     case "fora": toast(d.msg || "Não deu para entrar."); sairOnline(); break;
     case "start": iniciarCliente(d); break;
     case "st": if (ON.on) aplicarEstado(d); break;
@@ -8296,37 +8446,33 @@ Object.assign(acoes, {
   entrarEvento() { if (ON.conectando) return; ON.codeEntrar = SALA_EVENTO; entrarSala(SALA_EVENTO, perfil()); },
 });
 
-/* ================= Boss da Partida do Evento (todos contra o boss) =================
-   Sempre que tem coleção com boss na loja (BOSSES em jogo.html), ele fica no meio da quadra.
-   Acertar a palavra tira 25 de vida; bola que cai nele tira 8. Na hora da bola ele joga bolas do tema em quem corre.
-   Derrotado: cada um ganha as moedas, o item só do boss e +1 na placa "Bosses" da Praça (G.evRank[...].b). */
+/* ================= Boss da Partida do Evento: o boss do jogo todo =================
+   A vida é uma só para todo mundo (BOSS_VIDA_GLOBAL, G.bossG em jogo.html). Em cada partida o anfitrião mostra
+   o que falta, soma o dano de cada pessoa (palavra certa 25, bola nele 8) e no fim manda para cada um o dano dele
+   ("bossDano") e a tabela de todos ("bossG"). Na hora da bola o boss joga bolas do tema em quem corre (com alerta e tremor). */
 const BOSS_PALAVRA = 25, BOSS_BOLA = 8, BOSS_RAIO = 90;
-function bossVidaMax() { return 80 + 40 * A.P.filter(p => p.humano).length; }
 function bossDano(v, p) {
   const B = A.boss; if (!B || B.morto) return;
-  B.hp = Math.max(0, B.hp - v); B.hit = .45;
+  B.hp = Math.max(0, B.hp - v); B.partida = (B.partida || 0) + v; B.hit = .45;
+  if (p && p.evJog) p.bossDano = (p.bossDano || 0) + v;
   aFx(AC, AC - 150, "-" + v, "#ffd23f"); bip(240, .12);
   if (B.hp <= 0) bossDerrotado(p);
 }
-function bossDerrotado(p) {
-  const B = A.boss, cfg = BOSSES[B.k]; B.morto = true;
-  const r = rankAtual();
-  A.P.filter(q => q.evJog && q.humano).forEach(q => {
-    aGanhar(q, cfg.moedas, "boss");
-    const e = r.j[q.nome] || { g: 0, t: 0, v: 0, b: 0 }; r.j[q.nome] = { ...e, b: (e.b || 0) + 1 };
-    if (q.remoto && q.conn) enviar(q.conn, { t: "bossItem", k: B.k });
-    else if (q.i === ON.myIdx) bossPremioLocal(perfil(), B.k);
+function enviarBossDanos() {
+  const st = bossGlobal(); if (!st || !A.boss) return;
+  A.P.filter(p => p.evJog).forEach(p => {
+    const d = p.bossDano || 0; p.bossDano = 0;
+    if (p.i === ON.myIdx) somarBossDano(perfil(), d, true);
+    else { somarBossDano(p.nome, d, false); if (p.remoto && p.conn) enviar(p.conn, { t: "bossDano", d, id: st.id }); }
   });
-  salvar(); A.P.forEach(q => { if (q.conn) enviar(q.conn, { t: "rank", r }); });
-  aMsg(`${p ? p.nome + " deu o golpe final! " : ""}O ${cfg.nome} foi derrotado! Todo mundo ganha ${cfg.moedas} moedas.`);
+  const bg = bossGParaEnviar(); A.P.forEach(p => { if (p.conn) enviar(p.conn, { t: "bossG", bg }); });
+}
+function bossDerrotado(p) {
+  const B = A.boss, cfg = BOSSES[B.k], st = bossGlobal(); B.morto = true; if (st) st.fim = true;
+  enviarBossDanos();   // cada aparelho dá o prêmio para quem lutou (checarBossGlobal)
+  aMsg(`${p ? p.nome + " deu o golpe final! " : ""}Todo mundo junto derrotou o ${cfg.nome}!`);
   if (typeof somEmoji === "function") somEmoji(B.k === "eclipse" ? "eclipse" : "choque");
   if (typeof explosaoEstrelas === "function") explosaoEstrelas();
-}
-function bossPremioLocal(nome, k) {
-  const cfg = BOSSES[k]; if (!cfg) return;
-  let txt = `${cfg.ic} Vocês derrotaram o ${cfg.nome}! +${cfg.moedas} moedas`;
-  if (cfg.item) { const r = darPremio(nome, { item: cfg.item }); if (r && !r.jaTem) txt += ` e ${r.txt} (só de quem derrota o boss)`; }
-  salvar(); toast(txt + "!");
 }
 function passoBoss(dt) {
   const B = A.boss, ph = A.ph || {}, cfg = BOSSES[B.k]; B.hit = Math.max(0, B.hit - dt);
@@ -8342,14 +8488,15 @@ function passoBoss(dt) {
       b.done = true; bossDano(BOSS_BOLA, ph.atir);
     }
   }
+  B.alerta = false;
   if (B.morto || ph.k !== "bola" || !ph.pronto) return;
   B.cd -= dt;
-  const alvos = correndo();
+  const alvos = correndo(); B.alerta = B.cd < 1.1 && alvos.length > 0;
   if (B.cd <= 0 && alvos.length) {
     const alvo = alvos[Math.floor(Math.random() * alvos.length)], to = { x: Math.max(40, Math.min(AW - 40, alvo.x + (Math.random() - .5) * 70)), y: Math.max(40, Math.min(AW - 40, alvo.y + (Math.random() - .5) * 70)) };
     const from = { x: AC, y: AC - 30 }; B.n = (B.n || 0) + 1;
     A.balls.push({ from, to, t: 0, T: Math.max(.6, aDist(from, to) / A_BOLA * 1.25), k: cfg.bolas[B.n % 2], boss: true });
-    B.cd = 2.6; bip(180, .1);
+    B.cd = 2.6; tremorBoss();
   }
 }
 const _passoBoss = passoA;
@@ -8357,15 +8504,27 @@ passoA = function (dt) { if (onHost() && evOn() && A.boss && !A.fim && !A.ov && 
 const _chuteBoss = chuteA;
 chuteA = function (p, certo, chute, timeout) { if (certo && onHost() && evOn() && A.boss) bossDano(BOSS_PALAVRA, p); return _chuteBoss(p, certo, chute, timeout); };
 const _comecarBoss = comecarOnline;
-comecarOnline = function () { A.boss = null; _comecarBoss(); if (ON.on && evOn()) { const k = bossDaLoja(); if (k) { const max = bossVidaMax(); A.boss = { k, hp: max, max, cd: 4, morto: false, hit: 0 }; setTimeout(() => toast(`${BOSSES[k].ic} O ${BOSSES[k].nome} apareceu! Acertem a palavra e joguem a bola nele!`), 600); } } };
+comecarOnline = function () {
+  A.boss = null; _comecarBoss();
+  if (!ON.on || !evOn()) return;
+  const st = bossGlobal(); if (!st || st.fim || bossGRestante() <= 0) return;
+  A.boss = { k: st.k, hp: bossGRestante(), max: BOSS_VIDA_GLOBAL, partida: 0, cd: 4, morto: false, hit: 0, n: 0 };
+  A.P.forEach(p => { p.bossDano = 0; });
+  setTimeout(() => toast(`${BOSSES[st.k].ic} O ${BOSSES[st.k].nome} apareceu! Todo mundo do jogo luta junto contra ele.`), 600);
+};
+const _fimBoss = mostrarFimOnline;
+mostrarFimOnline = function () { if (ON.host && A.boss && !A.fim.bossFeito) { A.fim.bossFeito = true; enviarBossDanos(); } return _fimBoss(); };
 const _estadoBoss = estadoAtual;
-estadoAtual = function () { const s = _estadoBoss(); const B = A.boss; s.bo = B ? [B.k, Math.round(B.hp), B.max, B.morto ? 1 : 0, +B.hit.toFixed(2)] : null; return s; };
+estadoAtual = function () { const s = _estadoBoss(); const B = A.boss; s.bo = B ? [B.k, Math.round(B.hp), B.max, B.morto ? 1 : 0, +B.hit.toFixed(2), Math.round(B.partida || 0), B.alerta ? 1 : 0, B.n || 0] : null; return s; };
 const _aplicarBoss = aplicarEstado;
 aplicarEstado = function (s) {
   _aplicarBoss(s);
-  if (Array.isArray(s.bo) && BOSSES[s.bo[0]]) { const era = A.boss; A.boss = { k: s.bo[0], hp: +s.bo[1] || 0, max: Math.max(1, +s.bo[2] || 1), morto: !!s.bo[3], hit: +s.bo[4] || 0, tm: era && era.tm, tm3: era && era.tm3 };
-    if (!era && A.boss) setTimeout(() => toast(`${BOSSES[A.boss.k].ic} O ${BOSSES[A.boss.k].nome} apareceu! Acertem a palavra e joguem a bola nele!`), 300); }
-  else A.boss = null;
+  if (Array.isArray(s.bo) && BOSSES[s.bo[0]]) {
+    const era = A.boss, n = +s.bo[7] || 0;
+    A.boss = { k: s.bo[0], hp: +s.bo[1] || 0, max: Math.max(1, +s.bo[2] || 1), morto: !!s.bo[3], hit: +s.bo[4] || 0, partida: +s.bo[5] || 0, alerta: !!s.bo[6], n, tm: era && era.tm, tm3: era && era.tm3 };
+    if (!era) setTimeout(() => toast(`${BOSSES[A.boss.k].ic} O ${BOSSES[A.boss.k].nome} apareceu! Todo mundo do jogo luta junto contra ele.`), 300);
+    else if (n > (era.n || 0)) tremorBoss();
+  } else A.boss = null;
 };
 const _limparBoss = limparOnline; limparOnline = function () { A.boss = null; return _limparBoss(); };
 const _voltarBoss = voltarEsperando; voltarEsperando = function () { A.boss = null; return _voltarBoss(); };
@@ -8394,7 +8553,7 @@ function prTick() {
   const eu = PRACA.eu, num = v => Math.round((+v || 0) * 100) / 100, l = [["h", num(eu.x), num(eu.z), num(eu.r), num(eu.y)]];
   for (const [id, c] of PR.conns) if (c.pos) l.push([id, ...c.pos]);
   for (const c of PR.conns.values()) enviar(c.conn, { t: "ps", l });
-  if (Date.now() - PR.tRank > 4000) { PR.tRank = Date.now(); for (const c of PR.conns.values()) enviar(c.conn, { t: "rk", r: rankAtual(), m: moedasPraca() }); }
+  if (Date.now() - PR.tRank > 4000) { PR.tRank = Date.now(); for (const c of PR.conns.values()) enviar(c.conn, { t: "rk", r: rankAtual(), m: moedasPraca(), bg: bossGParaEnviar() }); }
 }
 function prInfos() { const l = { h: PR.info }; for (const [id, c] of PR.conns) if (c.info) l[id] = c.info; return l; }
 function prMandarInfos() { const l = prInfos(); for (const c of PR.conns.values()) enviar(c.conn, { t: "infos", l }); }
@@ -8413,23 +8572,23 @@ function prDonoRecebe(conn, d) {
   let id = null; for (const [k, c] of PR.conns) if (c.conn === conn) id = k;
   if (d.t === "ola") {
     if (!id) { if (PR.conns.size >= 19) { enviar(conn, { t: "cheia" }); return; } id = "c" + (PR.prox++); PR.conns.set(id, { conn, info: null, pos: null }); }
-    const c = PR.conns.get(id); c.info = prInfoLimpa(d.info); mesclarRank(d.r, d.m);
+    const c = PR.conns.get(id); c.info = prInfoLimpa(d.info); mesclarRank(d.r, d.m); mesclarBossG(d.bg);
     enviar(conn, { t: "bem", id }); pracaOutro(id, c.info); prMandarInfos(); prContar();
-    enviar(conn, { t: "rk", r: rankAtual(), m: moedasPraca() });
+    enviar(conn, { t: "rk", r: rankAtual(), m: moedasPraca(), bg: bossGParaEnviar() });
     return;
   }
   if (!id) return;
   const c = PR.conns.get(id);
   if (d.t === "p") { const n = v => Math.max(-40, Math.min(40, +v || 0)); c.pos = [n(d.x), n(d.z), +d.r || 0, Math.max(0, Math.min(5, +d.y || 0))]; pracaPos(id, ...c.pos); }
   else if (d.t === "info") { c.info = prInfoLimpa(d.info); pracaOutro(id, c.info); prMandarInfos(); }
-  else if (d.t === "rk") mesclarRank(d.r, d.m);
+  else if (d.t === "rk") { mesclarRank(d.r, d.m); mesclarBossG(d.bg); }
   else if (d.t === "portal" && c.info) { toast(`${c.info.nome} entrou na Partida do Evento! Vá até a porta para jogar junto.`); for (const [k, o] of PR.conns) if (k !== id) enviar(o.conn, { t: "portal", nome: c.info.nome }); }
 }
 function prEntrar() {
   const peer = new Peer({ debug: 0 }); PR.peer = peer;
   peer.on("open", () => {
     const conn = peer.connect(PRACA_ID, { reliable: true, serialization: "json" }); PR.hostConn = conn;
-    conn.on("open", () => { enviar(conn, { t: "ola", info: PR.info, r: rankAtual(), m: moedasPraca() }); });
+    conn.on("open", () => { enviar(conn, { t: "ola", info: PR.info, r: rankAtual(), m: moedasPraca(), bg: bossGParaEnviar() }); });
     conn.on("data", d => prMembroRecebe(d));
     conn.on("close", () => { if (PR.peer === peer && PRACA.on && !PR.saindo) prReconectar(); });
   });
@@ -8451,7 +8610,7 @@ function prMembroRecebe(d) {
   }
   else if (d.t === "ps" && Array.isArray(d.l)) for (const a of d.l.slice(0, 20)) { if (!Array.isArray(a) || a[0] === PR.meuId) continue; const n = v => Math.max(-40, Math.min(40, +v || 0)); pracaPos(String(a[0]), n(a[1]), n(a[2]), +a[3] || 0, Math.max(0, Math.min(5, +a[4] || 0))); }
   else if (d.t === "sai") { pracaTirar(String(d.id)); prContar(); }
-  else if (d.t === "rk") mesclarRank(d.r, d.m);
+  else if (d.t === "rk") { mesclarRank(d.r, d.m); mesclarBossG(d.bg); }
   else if (d.t === "portal") toast(`${nomeLimpo(d.nome)} entrou na Partida do Evento! Vá até a porta para jogar junto.`);
   else if (d.t === "cheia") toast("A praça está cheia agora. Você está passeando sozinho.");
 }

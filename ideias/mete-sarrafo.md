@@ -214,3 +214,7 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
   - A vida dele cresce com a turma: 80 + 40 por pessoa.
   - **Derrotou:** cada um ganha **200 moedas**, o arremesso **👑 Coroa do Eclipse** (só quem derrota o boss tem; não está na loja) e +1 na placa nova **👾 Bosses** da Praça.
   - Já ficou pronto também o **🐉 Dragão de Gelo e Fogo** para quando essa coleção voltar (ainda sem item próprio).
+- **Boss do jogo todo + clima de batalha (pedido do Andre, 11/nov):** o Rei Eclipse agora tem **uma vida só para todo mundo que joga (2.500)**. Cada Partida do Evento tira um pedaço; quando a vida de todo mundo acaba, ele cai e **cada um que lutou** ganha 200 moedas, a 👑 Coroa do Eclipse e +1 na placa 👾 Bosses.
+  - Como não tem servidor, cada celular fica sabendo do dano de quem jogou junto com ele (na partida ou na Praça). A vida pode aparecer um pouco diferente em cada celular até todo mundo se encontrar.
+  - Na quadra, enquanto ele está vivo: **chão do tema** (metade Sol com raios, metade Lua com estrelas), **céu do eclipse** (estádio escuro e dourado), **música de batalha**, **alerta** "⚠️ O Rei Eclipse vai atacar! Corre!" com sirene, e a **tela treme** com a torcida gritando quando ele ataca.
+  - Na Praça, o Rei Eclipse aparece no céu com a vida de todo mundo, e o mural mostra quanto falta.

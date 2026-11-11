@@ -47,8 +47,8 @@ function criarSala(fixa = usarSalaFixa(), auto = null, codigoFixo = SALA_DO_ANDR
 function enviarSala() {
   const nomes = [perfil(), ...ON.sala.map(s => s.nome)];
   const codigos = { [perfil()]: meuCodigoAmigo() }; ON.sala.forEach(s => { if (s.codigo) codigos[s.nome] = s.codigo; });
-  const rank = ON.code === SALA_EVENTO ? rankAtual() : undefined;
-  ON.sala.forEach(s => enviar(s.conn, { t: "sala", nomes, robos: ON.robos, code: ON.code, codigos, rank }));
+  const rank = ON.code === SALA_EVENTO ? rankAtual() : undefined, bg = ON.code === SALA_EVENTO ? bossGParaEnviar() : undefined;
+  ON.sala.forEach(s => enviar(s.conn, { t: "sala", nomes, robos: ON.robos, code: ON.code, codigos, rank, bg }));
 }
 TELAS.criandoSala = () => `
   <section data-fundo="${fundoAtual()}" class="bgf lobby"><h1 class="lb-title" style="font-size:40px">Criando sala…</h1><p class="lb-sub">Conectando ao servidor.</p>
@@ -107,7 +107,7 @@ function hostRecebe(conn, d) {
     const usados = [perfil(), ...ON.sala.map(s => s.nome)];
     let nome = base, k = 2; while (usados.some(u => u.toLowerCase() === nome.toLowerCase())) nome = base + " " + (k++);
     ON.sala.push({ conn, nome, moedas: Math.max(0, +d.moedas || 0), vidasInv: Math.max(0, Math.floor(+d.vidas || 0)), skin: skinInfo(d.skin).k, ficha: limparFicha(d.ficha), codigo: limparCodigoAmigo(d.amigo), arremesso: arremessoInfo(String(d.arremesso || "")).k, selo: [1, 2, 3].includes(d.selo) ? d.selo : 0, pet: petInfo(String(d.pet || "")) ? String(d.pet) : null });
-    if (ON.code === SALA_EVENTO) mesclarRank(d.rank);
+    if (ON.code === SALA_EVENTO) { mesclarRank(d.rank); mesclarBossG(d.bg); }
     enviar(conn, { t: "bemvindo", nome, code: ON.code });
     enviarSala(); toast(`${nome} entrou na sala`); bip(880, .08);
     if (G.tela === "salaHost") render();
@@ -575,7 +575,7 @@ function entrarSala(code, nome, naoAbrir = false) {
   peer.on("open", () => {
     const conn = peer.connect(PREFIXO + code, { reliable: true, serialization: "json" });
     ON.hostConn = conn;
-    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome), ficha: personagemDe(nome), amigo: meuCodigoAmigo(), arremesso: arremessoDe(nome), selo: nivelSelo(nome), pet: petDe(nome), rank: code === SALA_EVENTO ? rankAtual() : undefined }); });
+    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome), ficha: personagemDe(nome), amigo: meuCodigoAmigo(), arremesso: arremessoDe(nome), selo: nivelSelo(nome), pet: petDe(nome), rank: code === SALA_EVENTO ? rankAtual() : undefined, bg: code === SALA_EVENTO ? bossGParaEnviar() : undefined }); });
     conn.on("data", cliRecebe);
     conn.on("close", () => { if (ON.peer === peer) { toast("A conexão com a sala caiu."); sairOnline(); } });
   });
@@ -592,10 +592,11 @@ function cliRecebe(d) {
   switch (d.t) {
     case "bemvindo": ON.meuNome = d.nome; ir("esperando"); break;
     case "rank": mesclarRank(d.r); break;
-    case "bossItem": if (BOSSES[d.k]) bossPremioLocal(ON.meuNome, d.k); break;
+    case "bossDano": { const st = bossGlobal(); if (st && d.id === st.id) somarBossDano(ON.meuNome, d.d, true); break; }
+    case "bossG": mesclarBossG(d.bg); break;
     case "lojaOk": { const it = LOJA_EV[d.k]; if (!it) break; G.banco[ON.meuNome] = Math.round(((G.banco[ON.meuNome] || 0) - it.preco) * 10) / 10; salvar(); toast(`${it.ic} ${it.nome}!`); bip(990, .08); renderAct(); break; }
     case "lojaNao": toast(String(d.msg || "Não deu para comprar.").slice(0, 80)); renderAct(); break;
-    case "sala": if (d.rank) mesclarRank(d.rank); ON.salaNomes = Array.isArray(d.nomes) ? d.nomes.map(String) : []; ON.robos = +d.robos || 0; ON.salaCodigos = d.codigos && typeof d.codigos === "object" ? d.codigos : {}; if (G.tela === "esperando") render(); break;
+    case "sala": if (d.rank) mesclarRank(d.rank); if (d.bg) mesclarBossG(d.bg); ON.salaNomes = Array.isArray(d.nomes) ? d.nomes.map(String) : []; ON.robos = +d.robos || 0; ON.salaCodigos = d.codigos && typeof d.codigos === "object" ? d.codigos : {}; if (G.tela === "esperando") render(); break;
     case "fora": toast(d.msg || "Não deu para entrar."); sairOnline(); break;
     case "start": iniciarCliente(d); break;
     case "st": if (ON.on) aplicarEstado(d); break;
@@ -1093,37 +1094,33 @@ Object.assign(acoes, {
   entrarEvento() { if (ON.conectando) return; ON.codeEntrar = SALA_EVENTO; entrarSala(SALA_EVENTO, perfil()); },
 });
 
-/* ================= Boss da Partida do Evento (todos contra o boss) =================
-   Sempre que tem coleção com boss na loja (BOSSES em jogo.html), ele fica no meio da quadra.
-   Acertar a palavra tira 25 de vida; bola que cai nele tira 8. Na hora da bola ele joga bolas do tema em quem corre.
-   Derrotado: cada um ganha as moedas, o item só do boss e +1 na placa "Bosses" da Praça (G.evRank[...].b). */
+/* ================= Boss da Partida do Evento: o boss do jogo todo =================
+   A vida é uma só para todo mundo (BOSS_VIDA_GLOBAL, G.bossG em jogo.html). Em cada partida o anfitrião mostra
+   o que falta, soma o dano de cada pessoa (palavra certa 25, bola nele 8) e no fim manda para cada um o dano dele
+   ("bossDano") e a tabela de todos ("bossG"). Na hora da bola o boss joga bolas do tema em quem corre (com alerta e tremor). */
 const BOSS_PALAVRA = 25, BOSS_BOLA = 8, BOSS_RAIO = 90;
-function bossVidaMax() { return 80 + 40 * A.P.filter(p => p.humano).length; }
 function bossDano(v, p) {
   const B = A.boss; if (!B || B.morto) return;
-  B.hp = Math.max(0, B.hp - v); B.hit = .45;
+  B.hp = Math.max(0, B.hp - v); B.partida = (B.partida || 0) + v; B.hit = .45;
+  if (p && p.evJog) p.bossDano = (p.bossDano || 0) + v;
   aFx(AC, AC - 150, "-" + v, "#ffd23f"); bip(240, .12);
   if (B.hp <= 0) bossDerrotado(p);
 }
-function bossDerrotado(p) {
-  const B = A.boss, cfg = BOSSES[B.k]; B.morto = true;
-  const r = rankAtual();
-  A.P.filter(q => q.evJog && q.humano).forEach(q => {
-    aGanhar(q, cfg.moedas, "boss");
-    const e = r.j[q.nome] || { g: 0, t: 0, v: 0, b: 0 }; r.j[q.nome] = { ...e, b: (e.b || 0) + 1 };
-    if (q.remoto && q.conn) enviar(q.conn, { t: "bossItem", k: B.k });
-    else if (q.i === ON.myIdx) bossPremioLocal(perfil(), B.k);
+function enviarBossDanos() {
+  const st = bossGlobal(); if (!st || !A.boss) return;
+  A.P.filter(p => p.evJog).forEach(p => {
+    const d = p.bossDano || 0; p.bossDano = 0;
+    if (p.i === ON.myIdx) somarBossDano(perfil(), d, true);
+    else { somarBossDano(p.nome, d, false); if (p.remoto && p.conn) enviar(p.conn, { t: "bossDano", d, id: st.id }); }
   });
-  salvar(); A.P.forEach(q => { if (q.conn) enviar(q.conn, { t: "rank", r }); });
-  aMsg(`${p ? p.nome + " deu o golpe final! " : ""}O ${cfg.nome} foi derrotado! Todo mundo ganha ${cfg.moedas} moedas.`);
+  const bg = bossGParaEnviar(); A.P.forEach(p => { if (p.conn) enviar(p.conn, { t: "bossG", bg }); });
+}
+function bossDerrotado(p) {
+  const B = A.boss, cfg = BOSSES[B.k], st = bossGlobal(); B.morto = true; if (st) st.fim = true;
+  enviarBossDanos();   // cada aparelho dá o prêmio para quem lutou (checarBossGlobal)
+  aMsg(`${p ? p.nome + " deu o golpe final! " : ""}Todo mundo junto derrotou o ${cfg.nome}!`);
   if (typeof somEmoji === "function") somEmoji(B.k === "eclipse" ? "eclipse" : "choque");
   if (typeof explosaoEstrelas === "function") explosaoEstrelas();
-}
-function bossPremioLocal(nome, k) {
-  const cfg = BOSSES[k]; if (!cfg) return;
-  let txt = `${cfg.ic} Vocês derrotaram o ${cfg.nome}! +${cfg.moedas} moedas`;
-  if (cfg.item) { const r = darPremio(nome, { item: cfg.item }); if (r && !r.jaTem) txt += ` e ${r.txt} (só de quem derrota o boss)`; }
-  salvar(); toast(txt + "!");
 }
 function passoBoss(dt) {
   const B = A.boss, ph = A.ph || {}, cfg = BOSSES[B.k]; B.hit = Math.max(0, B.hit - dt);
@@ -1139,14 +1136,15 @@ function passoBoss(dt) {
       b.done = true; bossDano(BOSS_BOLA, ph.atir);
     }
   }
+  B.alerta = false;
   if (B.morto || ph.k !== "bola" || !ph.pronto) return;
   B.cd -= dt;
-  const alvos = correndo();
+  const alvos = correndo(); B.alerta = B.cd < 1.1 && alvos.length > 0;
   if (B.cd <= 0 && alvos.length) {
     const alvo = alvos[Math.floor(Math.random() * alvos.length)], to = { x: Math.max(40, Math.min(AW - 40, alvo.x + (Math.random() - .5) * 70)), y: Math.max(40, Math.min(AW - 40, alvo.y + (Math.random() - .5) * 70)) };
     const from = { x: AC, y: AC - 30 }; B.n = (B.n || 0) + 1;
     A.balls.push({ from, to, t: 0, T: Math.max(.6, aDist(from, to) / A_BOLA * 1.25), k: cfg.bolas[B.n % 2], boss: true });
-    B.cd = 2.6; bip(180, .1);
+    B.cd = 2.6; tremorBoss();
   }
 }
 const _passoBoss = passoA;
@@ -1154,15 +1152,27 @@ passoA = function (dt) { if (onHost() && evOn() && A.boss && !A.fim && !A.ov && 
 const _chuteBoss = chuteA;
 chuteA = function (p, certo, chute, timeout) { if (certo && onHost() && evOn() && A.boss) bossDano(BOSS_PALAVRA, p); return _chuteBoss(p, certo, chute, timeout); };
 const _comecarBoss = comecarOnline;
-comecarOnline = function () { A.boss = null; _comecarBoss(); if (ON.on && evOn()) { const k = bossDaLoja(); if (k) { const max = bossVidaMax(); A.boss = { k, hp: max, max, cd: 4, morto: false, hit: 0 }; setTimeout(() => toast(`${BOSSES[k].ic} O ${BOSSES[k].nome} apareceu! Acertem a palavra e joguem a bola nele!`), 600); } } };
+comecarOnline = function () {
+  A.boss = null; _comecarBoss();
+  if (!ON.on || !evOn()) return;
+  const st = bossGlobal(); if (!st || st.fim || bossGRestante() <= 0) return;
+  A.boss = { k: st.k, hp: bossGRestante(), max: BOSS_VIDA_GLOBAL, partida: 0, cd: 4, morto: false, hit: 0, n: 0 };
+  A.P.forEach(p => { p.bossDano = 0; });
+  setTimeout(() => toast(`${BOSSES[st.k].ic} O ${BOSSES[st.k].nome} apareceu! Todo mundo do jogo luta junto contra ele.`), 600);
+};
+const _fimBoss = mostrarFimOnline;
+mostrarFimOnline = function () { if (ON.host && A.boss && !A.fim.bossFeito) { A.fim.bossFeito = true; enviarBossDanos(); } return _fimBoss(); };
 const _estadoBoss = estadoAtual;
-estadoAtual = function () { const s = _estadoBoss(); const B = A.boss; s.bo = B ? [B.k, Math.round(B.hp), B.max, B.morto ? 1 : 0, +B.hit.toFixed(2)] : null; return s; };
+estadoAtual = function () { const s = _estadoBoss(); const B = A.boss; s.bo = B ? [B.k, Math.round(B.hp), B.max, B.morto ? 1 : 0, +B.hit.toFixed(2), Math.round(B.partida || 0), B.alerta ? 1 : 0, B.n || 0] : null; return s; };
 const _aplicarBoss = aplicarEstado;
 aplicarEstado = function (s) {
   _aplicarBoss(s);
-  if (Array.isArray(s.bo) && BOSSES[s.bo[0]]) { const era = A.boss; A.boss = { k: s.bo[0], hp: +s.bo[1] || 0, max: Math.max(1, +s.bo[2] || 1), morto: !!s.bo[3], hit: +s.bo[4] || 0, tm: era && era.tm, tm3: era && era.tm3 };
-    if (!era && A.boss) setTimeout(() => toast(`${BOSSES[A.boss.k].ic} O ${BOSSES[A.boss.k].nome} apareceu! Acertem a palavra e joguem a bola nele!`), 300); }
-  else A.boss = null;
+  if (Array.isArray(s.bo) && BOSSES[s.bo[0]]) {
+    const era = A.boss, n = +s.bo[7] || 0;
+    A.boss = { k: s.bo[0], hp: +s.bo[1] || 0, max: Math.max(1, +s.bo[2] || 1), morto: !!s.bo[3], hit: +s.bo[4] || 0, partida: +s.bo[5] || 0, alerta: !!s.bo[6], n, tm: era && era.tm, tm3: era && era.tm3 };
+    if (!era) setTimeout(() => toast(`${BOSSES[A.boss.k].ic} O ${BOSSES[A.boss.k].nome} apareceu! Todo mundo do jogo luta junto contra ele.`), 300);
+    else if (n > (era.n || 0)) tremorBoss();
+  } else A.boss = null;
 };
 const _limparBoss = limparOnline; limparOnline = function () { A.boss = null; return _limparBoss(); };
 const _voltarBoss = voltarEsperando; voltarEsperando = function () { A.boss = null; return _voltarBoss(); };
@@ -1191,7 +1201,7 @@ function prTick() {
   const eu = PRACA.eu, num = v => Math.round((+v || 0) * 100) / 100, l = [["h", num(eu.x), num(eu.z), num(eu.r), num(eu.y)]];
   for (const [id, c] of PR.conns) if (c.pos) l.push([id, ...c.pos]);
   for (const c of PR.conns.values()) enviar(c.conn, { t: "ps", l });
-  if (Date.now() - PR.tRank > 4000) { PR.tRank = Date.now(); for (const c of PR.conns.values()) enviar(c.conn, { t: "rk", r: rankAtual(), m: moedasPraca() }); }
+  if (Date.now() - PR.tRank > 4000) { PR.tRank = Date.now(); for (const c of PR.conns.values()) enviar(c.conn, { t: "rk", r: rankAtual(), m: moedasPraca(), bg: bossGParaEnviar() }); }
 }
 function prInfos() { const l = { h: PR.info }; for (const [id, c] of PR.conns) if (c.info) l[id] = c.info; return l; }
 function prMandarInfos() { const l = prInfos(); for (const c of PR.conns.values()) enviar(c.conn, { t: "infos", l }); }
@@ -1210,23 +1220,23 @@ function prDonoRecebe(conn, d) {
   let id = null; for (const [k, c] of PR.conns) if (c.conn === conn) id = k;
   if (d.t === "ola") {
     if (!id) { if (PR.conns.size >= 19) { enviar(conn, { t: "cheia" }); return; } id = "c" + (PR.prox++); PR.conns.set(id, { conn, info: null, pos: null }); }
-    const c = PR.conns.get(id); c.info = prInfoLimpa(d.info); mesclarRank(d.r, d.m);
+    const c = PR.conns.get(id); c.info = prInfoLimpa(d.info); mesclarRank(d.r, d.m); mesclarBossG(d.bg);
     enviar(conn, { t: "bem", id }); pracaOutro(id, c.info); prMandarInfos(); prContar();
-    enviar(conn, { t: "rk", r: rankAtual(), m: moedasPraca() });
+    enviar(conn, { t: "rk", r: rankAtual(), m: moedasPraca(), bg: bossGParaEnviar() });
     return;
   }
   if (!id) return;
   const c = PR.conns.get(id);
   if (d.t === "p") { const n = v => Math.max(-40, Math.min(40, +v || 0)); c.pos = [n(d.x), n(d.z), +d.r || 0, Math.max(0, Math.min(5, +d.y || 0))]; pracaPos(id, ...c.pos); }
   else if (d.t === "info") { c.info = prInfoLimpa(d.info); pracaOutro(id, c.info); prMandarInfos(); }
-  else if (d.t === "rk") mesclarRank(d.r, d.m);
+  else if (d.t === "rk") { mesclarRank(d.r, d.m); mesclarBossG(d.bg); }
   else if (d.t === "portal" && c.info) { toast(`${c.info.nome} entrou na Partida do Evento! Vá até a porta para jogar junto.`); for (const [k, o] of PR.conns) if (k !== id) enviar(o.conn, { t: "portal", nome: c.info.nome }); }
 }
 function prEntrar() {
   const peer = new Peer({ debug: 0 }); PR.peer = peer;
   peer.on("open", () => {
     const conn = peer.connect(PRACA_ID, { reliable: true, serialization: "json" }); PR.hostConn = conn;
-    conn.on("open", () => { enviar(conn, { t: "ola", info: PR.info, r: rankAtual(), m: moedasPraca() }); });
+    conn.on("open", () => { enviar(conn, { t: "ola", info: PR.info, r: rankAtual(), m: moedasPraca(), bg: bossGParaEnviar() }); });
     conn.on("data", d => prMembroRecebe(d));
     conn.on("close", () => { if (PR.peer === peer && PRACA.on && !PR.saindo) prReconectar(); });
   });
@@ -1248,7 +1258,7 @@ function prMembroRecebe(d) {
   }
   else if (d.t === "ps" && Array.isArray(d.l)) for (const a of d.l.slice(0, 20)) { if (!Array.isArray(a) || a[0] === PR.meuId) continue; const n = v => Math.max(-40, Math.min(40, +v || 0)); pracaPos(String(a[0]), n(a[1]), n(a[2]), +a[3] || 0, Math.max(0, Math.min(5, +a[4] || 0))); }
   else if (d.t === "sai") { pracaTirar(String(d.id)); prContar(); }
-  else if (d.t === "rk") mesclarRank(d.r, d.m);
+  else if (d.t === "rk") { mesclarRank(d.r, d.m); mesclarBossG(d.bg); }
   else if (d.t === "portal") toast(`${nomeLimpo(d.nome)} entrou na Partida do Evento! Vá até a porta para jogar junto.`);
   else if (d.t === "cheia") toast("A praça está cheia agora. Você está passeando sozinho.");
 }
