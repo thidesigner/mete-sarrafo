@@ -1086,7 +1086,7 @@ mostrarFimOnline = function () {
   if (ON.host && evOn() && A.fim && !A.fim.evFeito) {
     A.fim.evFeito = true;
     const r = rankAtual(), gan = A.fim.ganhadores || [A.fim.vencedor];
-    A.P.filter(p => p.evJog).forEach(p => { const e = r.j[p.nome] || { g: 0, t: 0, v: 0, b: 0 }; r.j[p.nome] = { ...e, g: e.g + Math.round(p.evGasto || 0), t: e.t + Math.round(A.t), v: e.v + (gan.includes(p) ? 1 : 0) }; });
+    A.P.filter(p => p.evJog).forEach(p => { const e = r.j[p.nome] || { g: 0, t: 0, v: 0, b: 0 }; r.j[p.nome] = { ...e, v: (e.v || 0) + (gan.includes(p) ? 1 : 0) }; });   // tempo e moedas gastas: cada aparelho soma o seu (em qualquer lugar do jogo)
     salvar(); A.P.forEach(p => { if (p.conn) enviar(p.conn, { t: "rank", r }); });
   }
   return _fimEv();
