@@ -218,3 +218,4 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
   - Como não tem servidor, cada celular fica sabendo do dano de quem jogou junto com ele (na partida ou na Praça). A vida pode aparecer um pouco diferente em cada celular até todo mundo se encontrar.
   - Na quadra, enquanto ele está vivo: **chão do tema** (metade Sol com raios, metade Lua com estrelas), **céu do eclipse** (estádio escuro e dourado), **música de batalha**, **alerta** "⚠️ O Rei Eclipse vai atacar! Corre!" com sirene, e a **tela treme** com a torcida gritando quando ele ataca.
   - Na Praça, o Rei Eclipse aparece no céu com a vida de todo mundo, e o mural mostra quanto falta.
+- **Vida do boss menor (pedido do Andre, 13/nov):** a vida de todo mundo do Rei Eclipse caiu de 2.500 para **1.000**.

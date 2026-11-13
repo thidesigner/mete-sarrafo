@@ -2177,7 +2177,7 @@ function boss3D() {
    Cada aparelho guarda G.bossG = {id, k, dano: {nome: dano}, fim, meus: [perfis deste aparelho que lutaram], premiados}.
    O dano de cada um cresce sempre; quando dois aparelhos se encontram (Partida do Evento ou Praça) juntam as tabelas (o maior vale).
    Quando a soma passa da vida, o boss cai e cada perfil deste aparelho que lutou ganha o prêmio uma vez. */
-const BOSS_VIDA_GLOBAL = 2500;
+const BOSS_VIDA_GLOBAL = 1000;
 function bossGId() {
   const k = bossDaLoja(); if (!k) return null;
   const cols = colecoesNaLoja(perfil()).filter(c => BOSSES[k].cols.includes(c.id));
