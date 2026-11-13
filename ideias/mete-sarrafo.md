@@ -221,3 +221,22 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
 - **Vida do boss menor (pedido do Andre, 13/nov):** a vida de todo mundo do Rei Eclipse caiu de 2.500 para **1.000**.
 - **O boss pergunta (pedido do Andre, 13/nov):** na Partida do Evento, enquanto o boss está vivo, **quem faz as perguntas é ele**. O Rei Eclipse escolhe palavras do tema **Céu e Espaço** (SOL, LUA, ECLIPSE, ESTRELA, PLANETA, COMETA, FOGUETE…) e **todos os jogadores chutam**. Quem acerta tira 25 de vida dele e fica com a bola; depois da rodada, ele pergunta de novo. Quando ele cai, a partida volta ao normal (um jogador pergunta). O Dragão de Gelo e Fogo pergunta palavras de **Gelo e Fogo**.
 - **Classificação que não zera (pedido do Andre, 13/nov):** as placas da Praça não zeram mais toda segunda: quem entrou fica lá todos os dias, acumulando. **Vitórias** e **tempo jogando** agora contam **todas as partidas** (bonequinhos, online, bola de verdade e evento); **bosses** e **mais gastou** continuam vindo da Partida do Evento. Também corrigi a aba 👾 Bosses, que mostrava as vitórias.
+
+### Troca de coleção todo domingo (combinado com o Andre, 13/nov)
+
+- Toda semana, no **domingo à meia-noite**, a coleção limitada e o boss trocam sozinhos. A coleção anterior sai no sábado às 23h59.
+- **Sol, Lua e Eclipse** ficou até **sábado 14/11**. De **domingo 15/11 a sábado 21/11**: **⛈️ Tempestade**.
+
+### Tempestade (15/11 a 21/11)
+
+- **⚡ Raio:** skin com coroa de raios e faíscas estalando, fundo de noite com relâmpagos, emoji ⚡ Choque, gesto Relâmpago (cai um raio nele), foto, arremesso Bola de Raio e pet **Gatinho Elétrico** (corre 7% mais rápido e +0,5 moeda por letra certa).
+- **🌀 Furacão:** skin com anéis de vento e um tornadinho na cabeça, fundo de redemoinho, emoji 🌪️ Redemoinho, gesto Pião do Vento, foto, arremesso Mini Furacão e pet **Coelho do Vento** (+1 moeda por rodada em que escapa e +2 no fim).
+- **⛈️ Tempestade:** skin com nuvem escura chovendo na cabeça e relâmpagos, fundo de chuva com clarões, emoji ⛈️ Trovoada, gesto Trovão, foto, arremesso Nuvem Carregada e pet **Cachorrinho da Tempestade** (+1 moeda por rodada em que escapa e +3 no fim).
+- Skins 700, Neon 200, pacotes com 25% de desconto (1.575).
+- **Raio contra Furacão:** quando o Raio acerta o Furacão (ou o contrário), ou quem usa Tempestade acerta alguém, cai um relâmpago do céu com clarão.
+- **Boss 🌩️ Senhor da Tempestade:** pergunta palavras de **Tempo e Clima** (CHUVA, TROVÃO, FURACÃO…), joga bolas de raio e de furacão, e a quadra fica com chuva, relâmpagos e metade raio, metade vento. Quem derrota ganha 200 moedas e o arremesso **🌩️ Raio do Rei** (só do boss).
+- **Saga "Sol e Lua contra a Tempestade"** (o ADM liga): Bip (Sol) e Bop (Lua) estão na praça, até que chegam **Zap (Raio)** e **Vuuu (Furacão)** e começa a tempestade (céu escuro, chuva e trovões).
+  - **Missão 1:** pegar 5 ⚡ e 5 🌀 para enfraquecer a tempestade.
+  - **Capítulo 2:** eles conversam, e o Sol e a Lua contam o plano.
+  - **Missão 2:** pegar 5 ☀️ e 5 🌙 para formar o Eclipse.
+  - **Final:** acontece o eclipse e todos viram amigos. Prêmio: 300 moedas, um item da Tempestade e o gesto **🌩️ Tempestade Total** (só da missão).
