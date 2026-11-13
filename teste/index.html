@@ -2101,8 +2101,10 @@ function arremessoDe(n) { const k = ((G.inv || {})[n] || {}).arremesso; return t
    aqui ficam a configuração e o desenho (de cima, 3D e a barra de vida). */
 const BOSSES = {
   eclipse: { nome: "Rei Eclipse", ic: "👑", cols: ["sol", "lua", "eclipse"], bolas: ["sol", "lua"], moedas: 200, item: "arremesso:coroaeclipse",
+    tema: "Céu e Espaço", palavras: ["SOL", "LUA", "ECLIPSE", "ESTRELA", "PLANETA", "COMETA", "FOGUETE", "GALAXIA", "ASTRONAUTA", "METEORO", "UNIVERSO", "TELESCOPIO", "SATELITE", "MARTE", "SATURNO", "NOITE", "LUAR", "CRATERA"],
     corpo: ["#0b0a16", "#0b0a16"], coroa: "#ffc56b", olhos: "#ffd23f" },
   gelofogo: { nome: "Dragão de Gelo e Fogo", ic: "🐉", cols: ["gelo", "fogo", "gelofogo"], bolas: ["gelo", "fogo"], moedas: 200, item: null,
+    tema: "Gelo e Fogo", palavras: ["GELO", "FOGO", "NEVE", "VULCAO", "LAVA", "ICEBERG", "PINGUIM", "DRAGAO", "FOGUEIRA", "INVERNO", "VAPOR", "CHAMA", "GELADEIRA", "TOCHA"],
     corpo: ["#5fb3e6", "#e2462b"], coroa: "#ffffff", olhos: "#ffffff" },
 };
 function bossDaLoja() { const na = colecoesNaLoja(perfil()).map(c => c.id); return Object.keys(BOSSES).find(k => BOSSES[k].cols.some(c => na.includes(c))) || null; }
@@ -2139,6 +2141,7 @@ function desenharBoss2D(c) {
   c.fillStyle = cfg.olhos; c.shadowColor = cfg.olhos; c.shadowBlur = 14;
   [-1, 1].forEach(l => { c.beginPath(); c.moveTo(x + l * 10, y - 14); c.lineTo(x + l * 30, y - 22); c.lineTo(x + l * 28, y - 6); c.closePath(); c.fill(); });
   c.shadowBlur = 0; c.strokeStyle = cfg.olhos; c.lineWidth = 4; c.beginPath(); c.arc(x, y + 30, 16, Math.PI * 1.15, Math.PI * 1.85); c.stroke();
+  if ((A.ph || {}).k === "pergunta" && (!A.ph.perg || A.ph.perg.boss)) { c.fillStyle = "#f4f7fb"; c.beginPath(); c.arc(x + R + 10, y - R + 4, 22, 0, Math.PI * 2); c.fill(); c.fillStyle = "#0f3057"; c.font = "30px Bungee, sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("?", x + R + 10, y - R + 6); }
   // barra de vida em cima
   const w = 150; c.fillStyle = "rgba(11,27,51,.85)"; c.fillRect(x - w / 2 - 3, y - R - 70, w + 6, 18); c.fillStyle = "#ff4d6d"; c.fillRect(x - w / 2, y - R - 67, w * Math.max(0, B.hp / B.max), 12);
   c.restore();
@@ -3261,7 +3264,7 @@ function hudA() {
   const atual = ph.k === "bola" ? ph.atir : (ph.k === "pergunta" ? ph.ordem[ph.idx] : null);
   bar.innerHTML = A.P.map(p => `<div class="mini${p.vivo ? "" : " out"}${p === atual ? " now" : ""}"${timeDe(p) ? ` style="border-color:${timeDe(p).cor}"` : ""}><b>${timeDe(p) ? `<i class="tponto" style="background:${timeDe(p).cor}"></i>` : ""}${esc(p.nome)}${p.humano ? "" : " 🤖"}</b><span class="hearts">${p.vivo ? "●".repeat(Math.min(10, p.vidas)) : "fora"}</span><span class="coin">${fmtM(p.moedas)}</span></div>`).join("");
   if (ph.k === "pergunta" || ph.k === "voto") {
-    $("a-phase").textContent = `${ph.perg.nome} pergunta · volta ${(ph.voltas || 0) + 1}`;
+    $("a-phase").textContent = `${ph.perg ? ph.perg.nome : A.boss && BOSSES[A.boss.k] ? BOSSES[A.boss.k].nome : "?"} pergunta · volta ${(ph.voltas || 0) + 1}`;
     $("a-tema").textContent = ph.tema; $("a-word").textContent = aMascara(ph);
   } else if (ph.k === "bola") {
     $("a-phase").textContent = "Bola!"; $("a-tema").textContent = "a palavra era"; $("a-word").textContent = ph.palavra;
@@ -7812,7 +7815,7 @@ function renderActOnline() {
     return;
   }
   if (ph.k === "segredo") { box.innerHTML = `<h3>${ph.perg === me ? "Escolha a palavra secreta" : esc(ph.perg ? ph.perg.nome : "Alguém") + " está escolhendo a palavra…"}</h3>`; return; }
-  if (ph.k === "troca") { box.innerHTML = `<h3>${esc(ph.atir.nome)} vai perguntar agora</h3>`; return; }
+  if (ph.k === "troca") { box.innerHTML = `<h3>${A.boss && !A.boss.morto && BOSSES[A.boss.k] ? `${esc(BOSSES[A.boss.k].nome)} vai perguntar de novo` : `${esc(ph.atir.nome)} vai perguntar agora`}</h3>`; return; }
   box.innerHTML = "";
 }
 
@@ -8505,13 +8508,30 @@ const _chuteBoss = chuteA;
 chuteA = function (p, certo, chute, timeout) { if (certo && onHost() && evOn() && A.boss) bossDano(BOSS_PALAVRA, p); return _chuteBoss(p, certo, chute, timeout); };
 const _comecarBoss = comecarOnline;
 comecarOnline = function () {
-  A.boss = null; _comecarBoss();
-  if (!ON.on || !evOn()) return;
-  const st = bossGlobal(); if (!st || st.fim || bossGRestante() <= 0) return;
-  A.boss = { k: st.k, hp: bossGRestante(), max: BOSS_VIDA_GLOBAL, partida: 0, cd: 4, morto: false, hit: 0, n: 0 };
+  A.boss = null;
+  const st = ON.host && ON.code === SALA_EVENTO ? bossGlobal() : null;
+  if (st && !st.fim && bossGRestante() > 0) A.boss = { k: st.k, hp: bossGRestante(), max: BOSS_VIDA_GLOBAL, partida: 0, cd: 4, morto: false, hit: 0, n: 0 };
+  _comecarBoss();
+  if (!ON.on || !evOn() || !A.boss) { A.boss = null; return; }
   A.P.forEach(p => { p.bossDano = 0; });
-  setTimeout(() => toast(`${BOSSES[st.k].ic} O ${BOSSES[st.k].nome} apareceu! Todo mundo do jogo luta junto contra ele.`), 600);
+  setTimeout(() => toast(`${BOSSES[A.boss.k].ic} O ${BOSSES[A.boss.k].nome} apareceu! Ele faz as perguntas e todo mundo do jogo luta junto contra ele.`), 600);
 };
+/* com o boss vivo, quem pergunta é ele: escolhe uma palavra do tema e todos os jogadores chutam */
+function bossPergunta() {
+  const cfg = BOSSES[A.boss.k], palavra = aPick(cfg.palavras), letra = aPick([...new Set(palavra.replace(/ /g, ""))]);
+  const perg = { i: -1, nome: cfg.nome, boss: true, humano: false, vivo: true, moedas: 0, ganho: 0, x: AC, y: AC - 30, time: null, home: { x: AC, y: AC } };
+  const vivos = aVivos(); if (vivos.length < 2) { if (vivos[0]) terminarA(vivos[0]); return; }
+  const ini = Math.floor(Math.random() * vivos.length), ordem = vivos.map((_, k) => vivos[(ini + k) % vivos.length]);
+  const rev = new Set(); [...palavra].forEach((c, i) => { if (c === letra || c === " ") rev.add(i); });
+  A.ph = { k: "pergunta", perg, tema: cfg.tema, palavra, rev, ordem, idx: 0, voltas: 0, votou: false, pensa: 0, prazo: 0, espera: false };
+  A.st.palavras++; aEvento("palavra", { perg: perg.nome, tema: cfg.tema, palavra });
+  aMsg(`${cfg.ic} O ${cfg.nome} pensou numa palavra. Tema: ${cfg.tema}. Todo mundo chuta!`);
+  prepararVez();
+}
+const _novaPalavraBoss = novaPalavraA;
+novaPalavraA = function (perg) { if (onHost() && evOn() && A.boss && !A.boss.morto) return bossPergunta(); return _novaPalavraBoss(perg); };
+const _fimRodadaBoss = fimRodadaA;
+fimRodadaA = function (forcado) { _fimRodadaBoss(forcado); if (onHost() && evOn() && A.boss && !A.boss.morto) { const t = ($("a-sub") || {}).textContent || "", k = t.lastIndexOf(")."); aMsg((k >= 0 ? t.slice(0, k + 2) : "") + ` O ${BOSSES[A.boss.k].nome} vai perguntar de novo.`); } };
 const _fimBoss = mostrarFimOnline;
 mostrarFimOnline = function () { if (ON.host && A.boss && !A.fim.bossFeito) { A.fim.bossFeito = true; enviarBossDanos(); } return _fimBoss(); };
 const _estadoBoss = estadoAtual;
@@ -8522,7 +8542,7 @@ aplicarEstado = function (s) {
   if (Array.isArray(s.bo) && BOSSES[s.bo[0]]) {
     const era = A.boss, n = +s.bo[7] || 0;
     A.boss = { k: s.bo[0], hp: +s.bo[1] || 0, max: Math.max(1, +s.bo[2] || 1), morto: !!s.bo[3], hit: +s.bo[4] || 0, partida: +s.bo[5] || 0, alerta: !!s.bo[6], n, tm: era && era.tm, tm3: era && era.tm3 };
-    if (!era) setTimeout(() => toast(`${BOSSES[A.boss.k].ic} O ${BOSSES[A.boss.k].nome} apareceu! Todo mundo do jogo luta junto contra ele.`), 300);
+    if (!era) setTimeout(() => toast(`${BOSSES[A.boss.k].ic} O ${BOSSES[A.boss.k].nome} apareceu! Ele faz as perguntas e todo mundo do jogo luta junto contra ele.`), 300);
     else if (n > (era.n || 0)) tremorBoss();
   } else A.boss = null;
 };

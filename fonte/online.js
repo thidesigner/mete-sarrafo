@@ -460,7 +460,7 @@ function renderActOnline() {
     return;
   }
   if (ph.k === "segredo") { box.innerHTML = `<h3>${ph.perg === me ? "Escolha a palavra secreta" : esc(ph.perg ? ph.perg.nome : "Alguém") + " está escolhendo a palavra…"}</h3>`; return; }
-  if (ph.k === "troca") { box.innerHTML = `<h3>${esc(ph.atir.nome)} vai perguntar agora</h3>`; return; }
+  if (ph.k === "troca") { box.innerHTML = `<h3>${A.boss && !A.boss.morto && BOSSES[A.boss.k] ? `${esc(BOSSES[A.boss.k].nome)} vai perguntar de novo` : `${esc(ph.atir.nome)} vai perguntar agora`}</h3>`; return; }
   box.innerHTML = "";
 }
 
@@ -1153,13 +1153,30 @@ const _chuteBoss = chuteA;
 chuteA = function (p, certo, chute, timeout) { if (certo && onHost() && evOn() && A.boss) bossDano(BOSS_PALAVRA, p); return _chuteBoss(p, certo, chute, timeout); };
 const _comecarBoss = comecarOnline;
 comecarOnline = function () {
-  A.boss = null; _comecarBoss();
-  if (!ON.on || !evOn()) return;
-  const st = bossGlobal(); if (!st || st.fim || bossGRestante() <= 0) return;
-  A.boss = { k: st.k, hp: bossGRestante(), max: BOSS_VIDA_GLOBAL, partida: 0, cd: 4, morto: false, hit: 0, n: 0 };
+  A.boss = null;
+  const st = ON.host && ON.code === SALA_EVENTO ? bossGlobal() : null;
+  if (st && !st.fim && bossGRestante() > 0) A.boss = { k: st.k, hp: bossGRestante(), max: BOSS_VIDA_GLOBAL, partida: 0, cd: 4, morto: false, hit: 0, n: 0 };
+  _comecarBoss();
+  if (!ON.on || !evOn() || !A.boss) { A.boss = null; return; }
   A.P.forEach(p => { p.bossDano = 0; });
-  setTimeout(() => toast(`${BOSSES[st.k].ic} O ${BOSSES[st.k].nome} apareceu! Todo mundo do jogo luta junto contra ele.`), 600);
+  setTimeout(() => toast(`${BOSSES[A.boss.k].ic} O ${BOSSES[A.boss.k].nome} apareceu! Ele faz as perguntas e todo mundo do jogo luta junto contra ele.`), 600);
 };
+/* com o boss vivo, quem pergunta é ele: escolhe uma palavra do tema e todos os jogadores chutam */
+function bossPergunta() {
+  const cfg = BOSSES[A.boss.k], palavra = aPick(cfg.palavras), letra = aPick([...new Set(palavra.replace(/ /g, ""))]);
+  const perg = { i: -1, nome: cfg.nome, boss: true, humano: false, vivo: true, moedas: 0, ganho: 0, x: AC, y: AC - 30, time: null, home: { x: AC, y: AC } };
+  const vivos = aVivos(); if (vivos.length < 2) { if (vivos[0]) terminarA(vivos[0]); return; }
+  const ini = Math.floor(Math.random() * vivos.length), ordem = vivos.map((_, k) => vivos[(ini + k) % vivos.length]);
+  const rev = new Set(); [...palavra].forEach((c, i) => { if (c === letra || c === " ") rev.add(i); });
+  A.ph = { k: "pergunta", perg, tema: cfg.tema, palavra, rev, ordem, idx: 0, voltas: 0, votou: false, pensa: 0, prazo: 0, espera: false };
+  A.st.palavras++; aEvento("palavra", { perg: perg.nome, tema: cfg.tema, palavra });
+  aMsg(`${cfg.ic} O ${cfg.nome} pensou numa palavra. Tema: ${cfg.tema}. Todo mundo chuta!`);
+  prepararVez();
+}
+const _novaPalavraBoss = novaPalavraA;
+novaPalavraA = function (perg) { if (onHost() && evOn() && A.boss && !A.boss.morto) return bossPergunta(); return _novaPalavraBoss(perg); };
+const _fimRodadaBoss = fimRodadaA;
+fimRodadaA = function (forcado) { _fimRodadaBoss(forcado); if (onHost() && evOn() && A.boss && !A.boss.morto) { const t = ($("a-sub") || {}).textContent || "", k = t.lastIndexOf(")."); aMsg((k >= 0 ? t.slice(0, k + 2) : "") + ` O ${BOSSES[A.boss.k].nome} vai perguntar de novo.`); } };
 const _fimBoss = mostrarFimOnline;
 mostrarFimOnline = function () { if (ON.host && A.boss && !A.fim.bossFeito) { A.fim.bossFeito = true; enviarBossDanos(); } return _fimBoss(); };
 const _estadoBoss = estadoAtual;
@@ -1170,7 +1187,7 @@ aplicarEstado = function (s) {
   if (Array.isArray(s.bo) && BOSSES[s.bo[0]]) {
     const era = A.boss, n = +s.bo[7] || 0;
     A.boss = { k: s.bo[0], hp: +s.bo[1] || 0, max: Math.max(1, +s.bo[2] || 1), morto: !!s.bo[3], hit: +s.bo[4] || 0, partida: +s.bo[5] || 0, alerta: !!s.bo[6], n, tm: era && era.tm, tm3: era && era.tm3 };
-    if (!era) setTimeout(() => toast(`${BOSSES[A.boss.k].ic} O ${BOSSES[A.boss.k].nome} apareceu! Todo mundo do jogo luta junto contra ele.`), 300);
+    if (!era) setTimeout(() => toast(`${BOSSES[A.boss.k].ic} O ${BOSSES[A.boss.k].nome} apareceu! Ele faz as perguntas e todo mundo do jogo luta junto contra ele.`), 300);
     else if (n > (era.n || 0)) tremorBoss();
   } else A.boss = null;
 };

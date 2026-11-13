@@ -2091,8 +2091,10 @@ function arremessoDe(n) { const k = ((G.inv || {})[n] || {}).arremesso; return t
    aqui ficam a configuração e o desenho (de cima, 3D e a barra de vida). */
 const BOSSES = {
   eclipse: { nome: "Rei Eclipse", ic: "👑", cols: ["sol", "lua", "eclipse"], bolas: ["sol", "lua"], moedas: 200, item: "arremesso:coroaeclipse",
+    tema: "Céu e Espaço", palavras: ["SOL", "LUA", "ECLIPSE", "ESTRELA", "PLANETA", "COMETA", "FOGUETE", "GALAXIA", "ASTRONAUTA", "METEORO", "UNIVERSO", "TELESCOPIO", "SATELITE", "MARTE", "SATURNO", "NOITE", "LUAR", "CRATERA"],
     corpo: ["#0b0a16", "#0b0a16"], coroa: "#ffc56b", olhos: "#ffd23f" },
   gelofogo: { nome: "Dragão de Gelo e Fogo", ic: "🐉", cols: ["gelo", "fogo", "gelofogo"], bolas: ["gelo", "fogo"], moedas: 200, item: null,
+    tema: "Gelo e Fogo", palavras: ["GELO", "FOGO", "NEVE", "VULCAO", "LAVA", "ICEBERG", "PINGUIM", "DRAGAO", "FOGUEIRA", "INVERNO", "VAPOR", "CHAMA", "GELADEIRA", "TOCHA"],
     corpo: ["#5fb3e6", "#e2462b"], coroa: "#ffffff", olhos: "#ffffff" },
 };
 function bossDaLoja() { const na = colecoesNaLoja(perfil()).map(c => c.id); return Object.keys(BOSSES).find(k => BOSSES[k].cols.some(c => na.includes(c))) || null; }
@@ -2129,6 +2131,7 @@ function desenharBoss2D(c) {
   c.fillStyle = cfg.olhos; c.shadowColor = cfg.olhos; c.shadowBlur = 14;
   [-1, 1].forEach(l => { c.beginPath(); c.moveTo(x + l * 10, y - 14); c.lineTo(x + l * 30, y - 22); c.lineTo(x + l * 28, y - 6); c.closePath(); c.fill(); });
   c.shadowBlur = 0; c.strokeStyle = cfg.olhos; c.lineWidth = 4; c.beginPath(); c.arc(x, y + 30, 16, Math.PI * 1.15, Math.PI * 1.85); c.stroke();
+  if ((A.ph || {}).k === "pergunta" && (!A.ph.perg || A.ph.perg.boss)) { c.fillStyle = "#f4f7fb"; c.beginPath(); c.arc(x + R + 10, y - R + 4, 22, 0, Math.PI * 2); c.fill(); c.fillStyle = "#0f3057"; c.font = "30px Bungee, sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("?", x + R + 10, y - R + 6); }
   // barra de vida em cima
   const w = 150; c.fillStyle = "rgba(11,27,51,.85)"; c.fillRect(x - w / 2 - 3, y - R - 70, w + 6, 18); c.fillStyle = "#ff4d6d"; c.fillRect(x - w / 2, y - R - 67, w * Math.max(0, B.hp / B.max), 12);
   c.restore();
@@ -3251,7 +3254,7 @@ function hudA() {
   const atual = ph.k === "bola" ? ph.atir : (ph.k === "pergunta" ? ph.ordem[ph.idx] : null);
   bar.innerHTML = A.P.map(p => `<div class="mini${p.vivo ? "" : " out"}${p === atual ? " now" : ""}"${timeDe(p) ? ` style="border-color:${timeDe(p).cor}"` : ""}><b>${timeDe(p) ? `<i class="tponto" style="background:${timeDe(p).cor}"></i>` : ""}${esc(p.nome)}${p.humano ? "" : " 🤖"}</b><span class="hearts">${p.vivo ? "●".repeat(Math.min(10, p.vidas)) : "fora"}</span><span class="coin">${fmtM(p.moedas)}</span></div>`).join("");
   if (ph.k === "pergunta" || ph.k === "voto") {
-    $("a-phase").textContent = `${ph.perg.nome} pergunta · volta ${(ph.voltas || 0) + 1}`;
+    $("a-phase").textContent = `${ph.perg ? ph.perg.nome : A.boss && BOSSES[A.boss.k] ? BOSSES[A.boss.k].nome : "?"} pergunta · volta ${(ph.voltas || 0) + 1}`;
     $("a-tema").textContent = ph.tema; $("a-word").textContent = aMascara(ph);
   } else if (ph.k === "bola") {
     $("a-phase").textContent = "Bola!"; $("a-tema").textContent = "a palavra era"; $("a-word").textContent = ph.palavra;
