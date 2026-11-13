@@ -660,6 +660,7 @@ function aplicarEstado(s) {
     if (me) {
       G.banco[ON.meuNome] = Math.round(((G.banco[ON.meuNome] || 0) + Math.max(0, me.moedas)) * 10) / 10;   // soma o que ganhou na partida
       if (A.fim.ganhadores.includes(me)) { G.vitorias = G.vitorias || {}; G.vitorias[ON.meuNome] = (G.vitorias[ON.meuNome] || 0) + 1; }
+      if (!evOn()) rankSomar(ON.meuNome, { t: A.t, v: A.fim.ganhadores.includes(me) });   // classificação: partida online normal (a do evento o anfitrião soma)
       if (typeof fimDePartidaMissao === "function") fimDePartidaMissao(ON.meuNome, me.moedas, A.fim.ganhadores.includes(me));
       salvar();
     }
@@ -1015,7 +1016,7 @@ verQuemEstaOnline = async () => { await _verOnline(); amigos().forEach(a => { if
 /* ================= Partida do Evento (botão Eventos → Centro de Eventos) =================
    Sala de código fixo: todo mundo que toca em "Entrar na partida" cai na mesma sala (quem chega e acha fechada, abre).
    Dentro da partida tem loja (vida extra, escudo, correr rápido e dica de letra), paga com as moedas guardadas.
-   Classificação da semana (vitórias, tempo jogando e moedas gastas na loja do evento): o anfitrião soma no fim
+   Classificação (não zera; vitórias, tempo jogando e moedas gastas na loja do evento): o anfitrião soma no fim
    de cada partida e manda para todos; cada aparelho guarda em G.evRank e junta com o que recebe (o maior número vale).
    A classificação aparece nas placas da Praça Central (semanaEvento, rankAtual e mesclarRank ficam em jogo.html). */
 const SALA_EVENTO = "EVENTOS1";
