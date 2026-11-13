@@ -240,3 +240,4 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
   - **Capítulo 2:** eles conversam, e o Sol e a Lua contam o plano.
   - **Missão 2:** pegar 5 ☀️ e 5 🌙 para formar o Eclipse.
   - **Final:** acontece o eclipse e todos viram amigos. Prêmio: 300 moedas, um item da Tempestade e o gesto **🌩️ Tempestade Total** (só da missão).
+- **Bosses melhorados (pedido do Andre, 13/nov), só no visual:** o Rei Eclipse ganhou mãos de ouro flutuando, sol e lua girando em volta, olhos que piscam e boca que brilha quando ele vai atacar (as mãos sobem). O Senhor da Tempestade virou uma nuvem gigante com coroa de raios, chuva, rabo de tornado e braços de relâmpago. Os dois racham e ficam com olhos vermelhos com menos da metade da vida, tremem quando levam dano e explodem em luz quando são derrotados.

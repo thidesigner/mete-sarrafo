@@ -2164,7 +2164,7 @@ const BOSSES = {
     tema: "Céu e Espaço", palavras: ["SOL", "LUA", "ECLIPSE", "ESTRELA", "PLANETA", "COMETA", "FOGUETE", "GALAXIA", "ASTRONAUTA", "METEORO", "UNIVERSO", "TELESCOPIO", "SATELITE", "MARTE", "SATURNO", "NOITE", "LUAR", "CRATERA"],
     corpo: ["#0b0a16", "#0b0a16"], coroa: "#ffc56b", olhos: "#ffd23f" },
   tempestade: { nome: "Senhor da Tempestade", ic: "🌩️", cols: ["raio", "furacao", "tempestade"], bolas: ["raio", "furacao"], moedas: 200, item: "arremesso:raiorei", clima: "tempestade",
-    tema: "Tempo e Clima", palavras: ["CHUVA", "RAIO", "TROVAO", "VENTO", "NUVEM", "FURACAO", "TORNADO", "GRANIZO", "RELAMPAGO", "TEMPESTADE", "NEBLINA", "BRISA", "CICLONE", "ARCOIRIS", "GOTA", "ENCHENTE", "VENTANIA", "NEVE"],
+    forma: "tempestade", tema: "Tempo e Clima", palavras: ["CHUVA", "RAIO", "TROVAO", "VENTO", "NUVEM", "FURACAO", "TORNADO", "GRANIZO", "RELAMPAGO", "TEMPESTADE", "NEBLINA", "BRISA", "CICLONE", "ARCOIRIS", "GOTA", "ENCHENTE", "VENTANIA", "NEVE"],
     corpo: ["#3a4256", "#2a3044"], coroa: "#9ff0ff", olhos: "#ffe14d" },
   gelofogo: { nome: "Dragão de Gelo e Fogo", ic: "🐉", cols: ["gelo", "fogo", "gelofogo"], bolas: ["gelo", "fogo"], moedas: 200, item: null,
     tema: "Gelo e Fogo", palavras: ["GELO", "FOGO", "NEVE", "VULCAO", "LAVA", "ICEBERG", "PINGUIM", "DRAGAO", "FOGUEIRA", "INVERNO", "VAPOR", "CHAMA", "GELADEIRA", "TOCHA"],
@@ -2186,27 +2186,65 @@ function atualizarBossBarra() {
 function desenharBoss2D(c) {
   atualizarBossBarra();
   const B = A.boss, cfg = B && BOSSES[B.k]; if (!cfg) return;
-  const t = A.t, morre = B.morto ? Math.min(1, (B.tm = (B.tm || 0) + 1 / 60) / 1.2) : 0; if (morre >= 1) return;
-  const x = AC, y = AC - 30 + Math.sin(t * 2) * 8, R = 64 * (1 - morre), hit = B.hit > 0;
+  const t = A.t, forma = cfg.forma || "eclipse";
+  if (B.morto) {   // derrotado: explode em luz e pedacinhos
+    B.tm = (B.tm || 0) + 1 / 60; const f = Math.min(1, B.tm / 1.4); if (f >= 1) return;
+    c.save(); c.globalCompositeOperation = "lighter";
+    for (let k = 0; k < 3; k++) { c.strokeStyle = `rgba(${forma === "tempestade" ? "159,240,255" : "255,200,90"},${(1 - f) * (1 - k * .25)})`; c.lineWidth = 10 - k * 3; c.beginPath(); c.arc(AC, AC - 30, 30 + f * (220 + k * 60), 0, Math.PI * 2); c.stroke(); }
+    for (let i = 0; i < 24; i++) { const a = i / 24 * Math.PI * 2 + i, d = f * (120 + (i % 5) * 40); c.fillStyle = i % 2 ? cfg.coroa : cfg.olhos; c.globalAlpha = 1 - f; c.beginPath(); c.arc(AC + Math.cos(a) * d, AC - 30 + Math.sin(a) * d - f * 40, 7 - f * 5, 0, Math.PI * 2); c.fill(); }
+    c.restore(); return;
+  }
+  const hit = B.hit > 0, tr = hit ? (Math.random() - .5) * 10 : 0, x = AC + tr, y = AC - 30 + Math.sin(t * 2) * 8 + (hit ? (Math.random() - .5) * 6 : 0), R = 64;
+  const ferido = B.hp / B.max < .5, al = !!B.alerta, pisca = (t % 3.3) < .13;
   c.save();
   c.fillStyle = "rgba(0,0,0,.3)"; c.beginPath(); c.ellipse(AC, AC + 50, R * .9, R * .3, 0, 0, Math.PI * 2); c.fill();
-  c.globalCompositeOperation = "lighter";
-  for (let i = 0; i < 18; i++) { const a = i / 18 * Math.PI * 2 + t * .6, r2 = R + 22 + 12 * Math.sin(t * 4 + i); c.strokeStyle = cfg.coroa; c.globalAlpha = .7; c.lineWidth = 4; c.beginPath(); c.moveTo(x + Math.cos(a) * (R + 6), y + Math.sin(a) * (R + 6)); c.lineTo(x + Math.cos(a) * r2, y + Math.sin(a) * r2); c.stroke(); }
-  c.globalAlpha = 1; c.shadowColor = cfg.coroa; c.shadowBlur = 24; c.strokeStyle = cfg.coroa; c.lineWidth = 7; c.beginPath(); c.arc(x, y, R + 4, 0, Math.PI * 2); c.stroke();
-  c.restore(); c.save();
-  c.fillStyle = hit ? "#ff4d6d" : cfg.corpo[0]; c.beginPath(); c.arc(x, y, R, Math.PI / 2, Math.PI * 1.5); c.fill();
-  c.fillStyle = hit ? "#ff4d6d" : cfg.corpo[1]; c.beginPath(); c.arc(x, y, R, -Math.PI / 2, Math.PI / 2); c.fill();
-  // coroa
-  c.fillStyle = "#ffd23f"; c.strokeStyle = "#0b1b33"; c.lineWidth = 3; c.beginPath(); c.moveTo(x - 34, y - R + 8);
-  [[-34, -30], [-17, -12], [0, -36], [17, -12], [34, -30]].forEach(([dx, dy], i) => { c.lineTo(x + dx, y - R + dy); if (i < 4) c.lineTo(x + dx + 8.5, y - R + 2); });
-  c.lineTo(x + 34, y - R + 8); c.closePath(); c.fill(); c.stroke();
-  // olhos bravos e boca
-  c.fillStyle = cfg.olhos; c.shadowColor = cfg.olhos; c.shadowBlur = 14;
-  [-1, 1].forEach(l => { c.beginPath(); c.moveTo(x + l * 10, y - 14); c.lineTo(x + l * 30, y - 22); c.lineTo(x + l * 28, y - 6); c.closePath(); c.fill(); });
-  c.shadowBlur = 0; c.strokeStyle = cfg.olhos; c.lineWidth = 4; c.beginPath(); c.arc(x, y + 30, 16, Math.PI * 1.15, Math.PI * 1.85); c.stroke();
+  if (forma === "tempestade") {
+    // rabo de tornado girando e chuva caindo embaixo
+    for (let i = 0; i < 6; i++) { const yy = y + R * .45 + i * 12, rr = 34 - i * 5; c.strokeStyle = `rgba(200,220,235,${.75 - i * .08})`; c.lineWidth = 4; c.beginPath(); c.ellipse(x + Math.sin(t * 5 + i) * 5, yy, rr, 6, 0, t * 6 + i, t * 6 + i + Math.PI * 1.5); c.stroke(); }
+    c.strokeStyle = "rgba(159,240,255,.8)"; c.lineWidth = 2; for (let i = 0; i < 12; i++) { const f2 = (t * 2.2 + i / 12) % 1, rx = x - R + (i * 97) % (R * 2); c.beginPath(); c.moveTo(rx, y + 20 + f2 * 70); c.lineTo(rx - 3, y + 32 + f2 * 70); c.stroke(); }
+    // braços de relâmpago
+    [-1, 1].forEach((l, i) => { if (Math.sin(t * 6 + i * 2) > (al ? -.5 : .1)) raio2D(c, x + l * R * .8, y + 6, x + l * (R * 1.9 + Math.sin(t * 3) * 10), y + 30 + Math.cos(t * 4 + i) * 20, cfg.olhos, al ? 5 : 3, 5); });
+    // corpo de nuvem
+    const puff = [[0, -10, 52], [-40, 8, 38], [40, 8, 40], [-22, 22, 36], [24, 24, 34], [-48, -12, 26], [48, -14, 26]];
+    puff.forEach(([dx, dy, r], i) => { const g = c.createRadialGradient(x + dx - r * .3, y + dy - r * .4, 4, x + dx, y + dy, r); g.addColorStop(0, hit ? "#ff8fa3" : "#6a7488"); g.addColorStop(1, hit ? "#c0304a" : cfg.corpo[i % 2]); c.fillStyle = g; c.beginPath(); c.arc(x + dx, y + dy, r, 0, Math.PI * 2); c.fill(); });
+    // coroa de raios
+    [-1, 0, 1].forEach(l => { c.save(); c.translate(x + l * 26, y - 62 - (l ? 0 : 10)); c.rotate(l * .3); c.fillStyle = "#ffe14d"; c.strokeStyle = "#0b1b33"; c.lineWidth = 2.5; c.shadowColor = "#ffe14d"; c.shadowBlur = 12; c.beginPath(); c.moveTo(4, -22); c.lineTo(-9, 2); c.lineTo(0, 2); c.lineTo(-5, 20); c.lineTo(11, -5); c.lineTo(2, -5); c.closePath(); c.fill(); c.stroke(); c.restore(); });
+  } else {
+    // coroa de luz e raios girando
+    c.globalCompositeOperation = "lighter";
+    for (let i = 0; i < 18; i++) { const a = i / 18 * Math.PI * 2 + t * .6, r2 = R + 22 + 12 * Math.sin(t * 4 + i) + (al ? 14 : 0); c.strokeStyle = cfg.coroa; c.globalAlpha = .7; c.lineWidth = 4; c.beginPath(); c.moveTo(x + Math.cos(a) * (R + 6), y + Math.sin(a) * (R + 6)); c.lineTo(x + Math.cos(a) * r2, y + Math.sin(a) * r2); c.stroke(); }
+    c.globalAlpha = 1; c.shadowColor = cfg.coroa; c.shadowBlur = 24; c.strokeStyle = cfg.coroa; c.lineWidth = 7; c.beginPath(); c.arc(x, y, R + 4, 0, Math.PI * 2); c.stroke();
+    c.restore(); c.save();
+    // sol e lua girando em volta (o que ficar atrás aparece primeiro)
+    const orb = (frente) => [0, Math.PI].forEach((d, i) => { const a = t * 1.3 + d, ox = x + Math.cos(a) * (R + 46), oy = y + Math.sin(a) * 18; if ((Math.sin(a) > 0) !== frente) return; c.fillStyle = i ? "#e6ecf8" : "#ffd23f"; c.shadowColor = i ? "#bcd2ff" : "#ffb347"; c.shadowBlur = 12; c.beginPath(); c.arc(ox, oy, 12, 0, Math.PI * 2); c.fill(); c.shadowBlur = 0; });
+    orb(false);
+    c.fillStyle = hit ? "#ff4d6d" : cfg.corpo[0]; c.beginPath(); c.arc(x, y, R, Math.PI / 2, Math.PI * 1.5); c.fill();
+    c.fillStyle = hit ? "#ff4d6d" : cfg.corpo[1]; c.beginPath(); c.arc(x, y, R, -Math.PI / 2, Math.PI / 2); c.fill();
+    // coroa de ouro
+    c.fillStyle = "#ffd23f"; c.strokeStyle = "#0b1b33"; c.lineWidth = 3; c.beginPath(); c.moveTo(x - 34, y - R + 8);
+    [[-34, -30], [-17, -12], [0, -36], [17, -12], [34, -30]].forEach(([dx, dy], i) => { c.lineTo(x + dx, y - R + dy); if (i < 4) c.lineTo(x + dx + 8.5, y - R + 2); });
+    c.lineTo(x + 34, y - R + 8); c.closePath(); c.fill(); c.stroke();
+    c.fillStyle = "#ff4d6d"; c.beginPath(); c.arc(x, y - R - 14, 5, 0, Math.PI * 2); c.fill();
+    // mãos de ouro flutuando (sobem quando ele vai atacar)
+    [-1, 1].forEach(l => { const hy = y + 14 + Math.sin(t * 3 + l) * 6 - (al ? 34 : 0), hx = x + l * (R + 26); c.fillStyle = "#ffd23f"; c.strokeStyle = "#0b1b33"; c.lineWidth = 3; c.beginPath(); c.arc(hx, hy, 15, 0, Math.PI * 2); c.fill(); c.stroke();
+      if (al) { c.save(); c.globalCompositeOperation = "lighter"; const g = c.createRadialGradient(hx, hy, 2, hx, hy, 30); g.addColorStop(0, "rgba(255,220,120,.9)"); g.addColorStop(1, "rgba(255,220,120,0)"); c.fillStyle = g; c.beginPath(); c.arc(hx, hy, 30, 0, Math.PI * 2); c.fill(); c.restore(); } });
+    orb(true);
+  }
+  // rachaduras brilhando quando está com menos da metade da vida
+  if (ferido) { c.save(); c.strokeStyle = cfg.coroa; c.shadowColor = cfg.coroa; c.shadowBlur = 10; c.lineWidth = 3; c.beginPath(); c.moveTo(x - 20, y - 50); c.lineTo(x - 30, y - 30); c.lineTo(x - 18, y - 20); c.lineTo(x - 34, y + 4); c.moveTo(x + 30, y + 10); c.lineTo(x + 40, y + 30); c.lineTo(x + 26, y + 40); c.stroke(); c.restore(); }
+  // olhos (piscam; vermelhos quando está ferido) e boca (abre quando vai atacar)
+  const corOlho = ferido ? "#ff4d6d" : cfg.olhos; c.fillStyle = corOlho; c.strokeStyle = corOlho; c.shadowColor = corOlho; c.shadowBlur = 14;
+  if (pisca) { c.lineWidth = 4; [-1, 1].forEach(l => { c.beginPath(); c.moveTo(x + l * 12, y - 12); c.lineTo(x + l * 30, y - 16); c.stroke(); }); }
+  else [-1, 1].forEach(l => { c.beginPath(); c.moveTo(x + l * 10, y - 14); c.lineTo(x + l * 30, y - 22); c.lineTo(x + l * 28, y - 6); c.closePath(); c.fill(); });
+  c.shadowBlur = 0;
+  if (al) { c.fillStyle = "#0b0716"; c.beginPath(); c.ellipse(x, y + 26, 16, 11 + Math.sin(t * 20) * 2, 0, 0, Math.PI * 2); c.fill(); c.save(); c.globalCompositeOperation = "lighter"; c.fillStyle = `rgba(${forma === "tempestade" ? "255,225,80" : "255,190,90"},.8)`; c.beginPath(); c.ellipse(x, y + 26, 9, 6, 0, 0, Math.PI * 2); c.fill(); c.restore(); }
+  else { c.strokeStyle = corOlho; c.lineWidth = 4; c.beginPath(); c.arc(x, y + 30, 16, Math.PI * 1.15, Math.PI * 1.85); c.stroke(); }
+  if (hit) { c.save(); c.globalCompositeOperation = "lighter"; c.fillStyle = "rgba(255,255,255,.35)"; c.beginPath(); c.arc(x, y, R + 10, 0, Math.PI * 2); c.fill(); c.restore(); }
   if ((A.ph || {}).k === "pergunta" && (!A.ph.perg || A.ph.perg.boss)) { c.fillStyle = "#f4f7fb"; c.beginPath(); c.arc(x + R + 10, y - R + 4, 22, 0, Math.PI * 2); c.fill(); c.fillStyle = "#0f3057"; c.font = "30px Bungee, sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("?", x + R + 10, y - R + 6); }
-  // barra de vida em cima
-  const w = 150; c.fillStyle = "rgba(11,27,51,.85)"; c.fillRect(x - w / 2 - 3, y - R - 70, w + 6, 18); c.fillStyle = "#ff4d6d"; c.fillRect(x - w / 2, y - R - 67, w * Math.max(0, B.hp / B.max), 12);
+  // nome e barra de vida em cima
+  const w = 170, by = y - R - (forma === "tempestade" ? 104 : 74);
+  c.fillStyle = "rgba(11,27,51,.85)"; c.fillRect(x - w / 2 - 3, by - 3, w + 6, 20); c.fillStyle = "#ff4d6d"; c.fillRect(x - w / 2, by, w * Math.max(0, B.hp / B.max), 14);
+  c.fillStyle = "#fff"; c.font = "700 18px Nunito, sans-serif"; c.textAlign = "center"; c.textBaseline = "bottom"; c.fillText(`${cfg.ic} ${cfg.nome}`, x, by - 5);
   c.restore();
 }
 function boss3D() {
@@ -2214,30 +2252,60 @@ function boss3D() {
   const B = A.boss, cfg = B && BOSSES[B.k];
   climaBoss3D(!!cfg && !B.morto);
   if (!cfg) { if (F.bossG) { F.scene.remove(F.bossG); F.bossG = null; } return; }
+  const forma = cfg.forma || "eclipse";
   if (!F.bossG || F.bossG.userData.k !== B.k) {
     if (F.bossG) F.scene.remove(F.bossG);
     const g = new THREE.Group(), luz = (cor, op) => new THREE.MeshBasicMaterial({ color: cor, transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false });
     const corpo = new THREE.Group(); g.add(corpo);
-    const m1 = new THREE.MeshLambertMaterial({ color: cfg.corpo[0] }), m2 = new THREE.MeshLambertMaterial({ color: cfg.corpo[1] });
-    const h1 = new THREE.Mesh(new THREE.SphereGeometry(1.3, 28, 20, 0, Math.PI), m1), h2 = new THREE.Mesh(new THREE.SphereGeometry(1.3, 28, 20, Math.PI, Math.PI), m2); corpo.add(h1, h2);
-    const coroa = new THREE.Mesh(new THREE.TorusGeometry(1.55, .12, 10, 48), luz(cfg.coroa, .95)); corpo.add(coroa);
-    const raios = new THREE.Group(); raios.userData.gira = .6; corpo.add(raios);
-    for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2, r = new THREE.Mesh(new THREE.ConeGeometry(.1, .6, 6), luz(cfg.coroa, .9)); r.position.set(Math.cos(a) * 1.95, Math.sin(a) * 1.95, 0); r.rotation.z = a - Math.PI / 2; raios.add(r); }
-    const ouro = new THREE.MeshLambertMaterial({ color: "#ffd23f", emissive: "#6a4b00" });
-    for (let i = 0; i < 5; i++) { const ponta = new THREE.Mesh(new THREE.ConeGeometry(.16, i % 2 ? .4 : .62, 6), ouro); ponta.position.set(-.6 + i * .3, 1.38 + (i % 2 ? .12 : .22), 0); corpo.add(ponta); }
-    const aro = new THREE.Mesh(new THREE.CylinderGeometry(.8, .85, .22, 20, 1, true), ouro); aro.material.side = THREE.DoubleSide; aro.position.y = 1.2; corpo.add(aro);
-    for (const l of [-1, 1]) { const o = new THREE.Mesh(new THREE.BoxGeometry(.42, .12, .1), new THREE.MeshBasicMaterial({ color: cfg.olhos })); o.position.set(l * .42, .28, 1.24); o.rotation.z = l * .35; corpo.add(o); }
-    const brilho = new THREE.Sprite(new THREE.SpriteMaterial({ map: brilhoTextura(cfg.coroa === "#ffffff" ? "rgba(220,240,255,1)" : "rgba(255,200,90,1)"), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); brilho.scale.setScalar(4.8); g.add(brilho);
-    g.userData = { k: B.k, corpo, raios, m1, m2, cores: cfg.corpo };
-    g.position.set(0, 2.3, 0); F.scene.add(g); F.bossG = g;
+    const mats = [], u = { k: B.k, corpo, mats, forma };
+    const bolt = (cor, esc) => { const b = new THREE.Group(); [[0, .12, .25], [-.06, -.04, -.55], [.04, -.2, .25]].forEach(([x0, y0, r]) => { const m = new THREE.Mesh(new THREE.BoxGeometry(.07, .2, .07), new THREE.MeshBasicMaterial({ color: cor })); m.position.set(x0, y0, 0); m.rotation.z = r; b.add(m); }); b.scale.setScalar(esc); return b; };
+    if (forma === "tempestade") {
+      [[0, .1, 0, .9], [-.75, -.1, .1, .65], [.75, -.1, .1, .68], [-.4, -.4, .3, .6], [.42, -.38, .3, .6], [-1.05, .2, -.1, .45], [1.05, .18, -.1, .45], [0, .55, -.2, .6]].forEach(([x0, y0, z0, r], i) => {
+        const cn = ["#8a95ab", "#6c7790"][i % 2], m = new THREE.MeshLambertMaterial({ color: cn, emissive: "#1c2233" }); mats.push([m, cn]); const s = new THREE.Mesh(new THREE.SphereGeometry(r, 18, 14), m); s.position.set(x0, y0, z0); corpo.add(s); });
+      const coroa = new THREE.Group(); coroa.position.set(0, 1.25, 0); corpo.add(coroa); [-1, 0, 1].forEach(l => { const b = bolt("#ffe14d", 1.6); b.position.set(l * .45, l ? 0 : .2, 0); b.rotation.z = l * .3; coroa.add(b); });
+      const chuva = new THREE.Group(); g.add(chuva); for (let i = 0; i < 26; i++) { const d = new THREE.Mesh(new THREE.BoxGeometry(.03, .3, .03), luz("#9ff0ff", .8)); d.position.set((Math.random() - .5) * 2.4, -.8 - Math.random() * 1.6, (Math.random() - .5) * 1.4); chuva.add(d); } u.chuva = chuva;
+      const tor = new THREE.Group(); tor.position.y = -1.1; tor.userData.gira = 5; g.add(tor); const cone = new THREE.Mesh(new THREE.ConeGeometry(.75, 1.6, 16, 1, true), new THREE.MeshLambertMaterial({ color: "#aebccc", transparent: true, opacity: .55, side: THREE.DoubleSide })); cone.rotation.x = Math.PI; cone.position.y = -.4; tor.add(cone); u.tor = tor;
+      u.bracos = [-1, 1].map(l => { const b = new THREE.Group(); for (let i = 0; i < 4; i++) { const m = new THREE.Mesh(new THREE.BoxGeometry(.45, .07, .07), new THREE.MeshBasicMaterial({ color: "#ffe14d" })); m.position.set(l * (1.2 + i * .38), -.1 - (i % 2) * .18, 0); m.rotation.z = (i % 2 ? .5 : -.5) * l; b.add(m); } corpo.add(b); return b; });
+    } else {
+      const m1 = new THREE.MeshLambertMaterial({ color: cfg.corpo[0] }), m2 = new THREE.MeshLambertMaterial({ color: cfg.corpo[1] }); mats.push([m1, cfg.corpo[0]], [m2, cfg.corpo[1]]);
+      corpo.add(new THREE.Mesh(new THREE.SphereGeometry(1.3, 28, 20, 0, Math.PI), m1), new THREE.Mesh(new THREE.SphereGeometry(1.3, 28, 20, Math.PI, Math.PI), m2));
+      corpo.add(new THREE.Mesh(new THREE.TorusGeometry(1.55, .12, 10, 48), luz(cfg.coroa, .95)));
+      const raios = new THREE.Group(); raios.userData.gira = .6; corpo.add(raios); u.raios = raios;
+      for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2, r = new THREE.Mesh(new THREE.ConeGeometry(.1, .6, 6), luz(cfg.coroa, .9)); r.position.set(Math.cos(a) * 1.95, Math.sin(a) * 1.95, 0); r.rotation.z = a - Math.PI / 2; raios.add(r); }
+      const ouro = new THREE.MeshLambertMaterial({ color: "#ffd23f", emissive: "#6a4b00" });
+      for (let i = 0; i < 5; i++) { const ponta = new THREE.Mesh(new THREE.ConeGeometry(.16, i % 2 ? .4 : .62, 6), ouro); ponta.position.set(-.6 + i * .3, 1.38 + (i % 2 ? .12 : .22), 0); corpo.add(ponta); }
+      const aro = new THREE.Mesh(new THREE.CylinderGeometry(.8, .85, .22, 20, 1, true), ouro); aro.material.side = THREE.DoubleSide; aro.position.y = 1.2; corpo.add(aro);
+      const joia = new THREE.Mesh(new THREE.OctahedronGeometry(.13), new THREE.MeshBasicMaterial({ color: "#ff4d6d" })); joia.position.set(0, 1.25, .8); corpo.add(joia);
+      u.maos = [-1, 1].map(l => { const m = new THREE.Mesh(new THREE.SphereGeometry(.32, 16, 12), ouro); m.position.set(l * 1.95, -.2, .3); corpo.add(m); return m; });
+      const orb = new THREE.Group(); orb.userData.gira = 1.3; g.add(orb);
+      const sol = new THREE.Mesh(new THREE.SphereGeometry(.28, 14, 10), new THREE.MeshBasicMaterial({ color: "#ffd23f" })); sol.position.set(2.5, 0, 0); orb.add(sol);
+      const lua = new THREE.Mesh(new THREE.SphereGeometry(.24, 14, 10), new THREE.MeshBasicMaterial({ color: "#e6ecf8" })); lua.position.set(-2.5, 0, 0); orb.add(lua);
+    }
+    // olhos, boca e rachaduras (iguais para todos)
+    u.olhos = [-1, 1].map(l => { const o = new THREE.Mesh(new THREE.BoxGeometry(.42, .12, .1), new THREE.MeshBasicMaterial({ color: cfg.olhos })); o.position.set(l * .42, .28, forma === "tempestade" ? .95 : 1.24); o.rotation.z = l * .35; corpo.add(o); return o; });
+    u.boca = new THREE.Mesh(new THREE.SphereGeometry(.24, 14, 10), new THREE.MeshBasicMaterial({ color: "#0b0716" })); u.boca.scale.set(1, .15, .3); u.boca.position.set(0, -.38, forma === "tempestade" ? .92 : 1.2); corpo.add(u.boca);
+    u.rachas = new THREE.Group(); corpo.add(u.rachas); [[-.4, .55, .5], [-.55, .2, -.6], [.5, -.2, .4], [.62, -.55, -.5]].forEach(([x0, y0, r]) => { const m = new THREE.Mesh(new THREE.BoxGeometry(.05, .4, .05), new THREE.MeshBasicMaterial({ color: cfg.coroa })); m.position.set(x0, y0, forma === "tempestade" ? .88 : 1.18); m.rotation.z = r; u.rachas.add(m); }); u.rachas.visible = false;
+    u.brilho = new THREE.Sprite(new THREE.SpriteMaterial({ map: brilhoTextura(forma === "tempestade" ? "rgba(159,240,255,1)" : "rgba(255,200,90,1)"), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); u.brilho.scale.setScalar(4.8); g.add(u.brilho);
+    g.userData = u; g.position.set(0, 2.3, 0); F.scene.add(g); F.bossG = g;
   }
-  const g = F.bossG, u = g.userData, t = A.t;
-  g.position.y = 2.3 + Math.sin(t * 2) * .2;
+  const g = F.bossG, u = g.userData, t = A.t, hit = B.hit > 0, al = !!B.alerta, ferido = B.hp / B.max < .5;
+  g.position.set(hit ? (Math.random() - .5) * .25 : 0, 2.3 + Math.sin(t * 2) * .2, hit ? (Math.random() - .5) * .25 : 0);
   if (F.cam) { const dx = F.cam.position.x - g.position.x, dz = F.cam.position.z - g.position.z; u.corpo.rotation.y = Math.atan2(dx, dz); }
-  u.raios.rotation.z += .01;
-  const hit = B.hit > 0; u.m1.color.set(hit ? "#ff4d6d" : u.cores[0]); u.m2.color.set(hit ? "#ff4d6d" : u.cores[1]);
-  if (B.morto) { B.tm3 = (B.tm3 || 0) + 1 / 60; const f = Math.min(1, B.tm3 / 1.2); g.scale.setScalar(Math.max(.01, 1 - f)); u.corpo.rotation.z += .3; g.visible = f < 1; }
-  else { g.scale.setScalar(1 + (hit ? .08 : 0)); g.visible = true; }
+  if (u.raios) u.raios.rotation.z += al ? .05 : .01;
+  u.mats.forEach(([m, cor]) => m.color.set(hit ? "#ff4d6d" : cor));
+  const pisca = (t % 3.3) < .13; u.olhos.forEach(o => { o.scale.y = pisca ? .15 : 1; o.material.color.set(ferido ? "#ff4d6d" : cfg.olhos); });
+  u.boca.scale.y = al ? .55 + .1 * Math.sin(t * 20) : .15; u.boca.material.color.set(al ? (forma === "tempestade" ? "#ffe14d" : "#ffb347") : "#0b0716"); u.rachas.visible = ferido;
+  u.brilho.scale.setScalar(4.8 + (al ? 1.2 * (1 + Math.sin(t * 12)) : 0));
+  if (u.maos) u.maos.forEach((m, i) => { m.position.y = -.2 + Math.sin(t * 3 + i) * .15 + (al ? .9 : 0); });
+  if (u.chuva) u.chuva.children.forEach(d => { d.position.y -= .06; if (d.position.y < -2.4) d.position.y = -.8; });
+  if (u.bracos) u.bracos.forEach((b, i) => { b.visible = Math.sin(t * 6 + i * 2) > (al ? -.5 : .1); });
+  if (B.morto) {
+    if (!u.explodiu) { u.explodiu = true;   // explosão de luz e pedacinhos
+      const ex = new THREE.Group(); ex.position.copy(g.position); const vapor = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), new THREE.MeshBasicMaterial({ color: cfg.coroa, transparent: true, opacity: .8, depthWrite: false, blending: THREE.AdditiveBlending })); ex.add(vapor);
+      const p = Array.from({ length: 24 }, (_, i) => { const m = new THREE.Mesh(new THREE.OctahedronGeometry(.14), new THREE.MeshBasicMaterial({ color: i % 2 ? cfg.coroa : cfg.olhos })); ex.add(m); const a = i / 24 * Math.PI * 2; return { m, v: new THREE.Vector3(Math.cos(a) * (3 + Math.random() * 2), 3 + Math.random() * 3, Math.sin(a) * (3 + Math.random() * 2)) }; });
+      F.scene.add(ex); F.choques = F.choques || []; F.choques.push({ g: ex, vapor, p, t: 0 }); }
+    B.tm3 = (B.tm3 || 0) + 1 / 60; const f = Math.min(1, B.tm3 / .6); g.scale.setScalar(Math.max(.01, 1 - f)); u.corpo.rotation.z += .4; g.visible = f < 1;
+  } else { g.scale.setScalar(1 + (hit ? .08 : 0) + (al ? .04 * Math.sin(t * 16) : 0)); g.visible = true; }
 }
 /* ---------- Boss do jogo todo: uma vida só, dividida por todo mundo ----------
    Cada aparelho guarda G.bossG = {id, k, dano: {nome: dano}, fim, meus: [perfis deste aparelho que lutaram], premiados}.
@@ -2320,6 +2388,7 @@ function climaBoss2D(c) {
 }
 function climaBoss3D(ativo) {
   if (!F.scene) return;
+  if (ativo && F.clima && F.clima.k !== A.boss.k) climaBoss3D(false);   // trocou de boss: troca o céu e o chão
   if (ativo && !F.clima) {
     const orig = { bg: F.scene.background && F.scene.background.clone(), fog: F.scene.fog && F.scene.fog.color.clone(), luzes: [], domos: [] };
     F.scene.traverse(o => { if (o.isLight) { orig.luzes.push([o, o.intensity]); o.intensity *= .55; } if (o.isMesh && o.material && o.material.side === THREE.BackSide && o.geometry.parameters && o.geometry.parameters.radius >= 30) { orig.domos.push([o, o.material.color.clone()]); o.material.color.set("#8a5a7a"); } });
@@ -2340,7 +2409,7 @@ function climaBoss3D(ativo) {
       c.fillStyle = "#fff"; for (let i = 0; i < 40; i++) c.fillRect(w / 2 + 10 + Math.random() * (w / 2 - 20), Math.random() * w, 3, 3);
       c.strokeStyle = "rgba(255,240,180,.9)"; c.lineWidth = 10; c.beginPath(); c.moveTo(w / 2, 0); c.lineTo(w / 2, w); c.stroke(); });
     const chao = new THREE.Mesh(new THREE.CircleGeometry(R, 48), new THREE.MeshBasicMaterial({ map: chaoTex, transparent: true, opacity: .72, depthWrite: false })); chao.rotation.x = -Math.PI / 2; chao.position.y = .02; F.scene.add(chao);
-    F.clima = { orig, sol, chao, tempest };
+    F.clima = { orig, sol, chao, tempest, k: A.boss.k };
   }
   if (!ativo && F.clima) {
     const o = F.clima.orig; o.luzes.forEach(([l, v]) => (l.intensity = v)); o.domos.forEach(([m, c]) => m.material.color.copy(c));
@@ -2357,7 +2426,8 @@ function texBossPraca() {
     if (!cfg) return;
     const resta = bossGRestante(), x = w / 2, y = 230;
     const g = c.createRadialGradient(x, y, 100, x, y, 250); g.addColorStop(0, "rgba(255,200,90,.95)"); g.addColorStop(1, "rgba(255,150,40,0)"); c.fillStyle = g; c.fillRect(0, 0, w, 480);
-    c.fillStyle = cfg.corpo[0]; c.beginPath(); c.arc(x, y, 120, Math.PI / 2, Math.PI * 1.5); c.fill(); c.fillStyle = cfg.corpo[1]; c.beginPath(); c.arc(x, y, 120, -Math.PI / 2, Math.PI / 2); c.fill();
+    if (cfg.forma === "tempestade") { nuvem2D(c, x, y + 10, 95, cfg.corpo[0]); nuvem2D(c, x - 10, y - 5, 70, cfg.corpo[1]); [-1, 0, 1].forEach(l => raio2D(c, x + l * 50, y - 120, x + l * 60, y - 60, "#ffe14d", 8, 4)); }
+    else { c.fillStyle = cfg.corpo[0]; c.beginPath(); c.arc(x, y, 120, Math.PI / 2, Math.PI * 1.5); c.fill(); c.fillStyle = cfg.corpo[1]; c.beginPath(); c.arc(x, y, 120, -Math.PI / 2, Math.PI / 2); c.fill(); }
     c.fillStyle = "#ffd23f"; c.beginPath(); c.moveTo(x - 70, y - 104); [[-70, -170], [-35, -130], [0, -185], [35, -130], [70, -170]].forEach(([dx, dy], i) => { c.lineTo(x + dx, y + dy); if (i < 4) c.lineTo(x + dx + 17, y - 112); }); c.lineTo(x + 70, y - 104); c.closePath(); c.fill();
     c.fillStyle = cfg.olhos; if (st.fim) { c.strokeStyle = cfg.olhos; c.lineWidth = 10; [-1, 1].forEach(l => { c.beginPath(); c.moveTo(x + l * 30, y - 40); c.lineTo(x + l * 70, y - 10); c.moveTo(x + l * 70, y - 40); c.lineTo(x + l * 30, y - 10); c.stroke(); }); }
     else [-1, 1].forEach(l => { c.beginPath(); c.moveTo(x + l * 20, y - 25); c.lineTo(x + l * 75, y - 45); c.lineTo(x + l * 70, y - 8); c.closePath(); c.fill(); });
