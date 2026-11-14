@@ -9,6 +9,8 @@ Começamos uma versão do jogo no **Roblox Studio** (13/11/2026).
 - Funciona: a bola vermelha aparece no chão, quem encosta **pega**, e com clique, toque ou RT **arremessa**. Se acertar alguém ainda voando, aparece **"QUEIMADO!"**.
 - O script está em `roblox/bola.server.lua` (no Studio: ServerScriptService > Script).
 - Ajustes que o Andre pode mexer: `VELOCIDADE`, `SUBIDA` e o tamanho da bola (`bola.Size`).
+- **Quadra** (13/11/2026): dois campos, vermelho e azul, cada um com o nome pintado no chão, linha branca no meio e nas bordas, e uma mureta baixinha em volta (dá para pular). Mede 100 de comprimento por 60 de largura. A gente nasce do lado de fora, na beira da quadra, e a bola aparece no campo vermelho.
+- A quadra é montada pelo `roblox/quadra.lua` (colar na Barra de Comandos do Studio). Ajustes: `COMPRIMENTO`, `LARGURA`, `LINHA` e `MURETA`. No Studio ela fica em Workspace > Quadra.
 
 ## Ligação do Claude com o Studio (MCP)
 
@@ -18,7 +20,7 @@ Começamos uma versão do jogo no **Roblox Studio** (13/11/2026).
 
 ## Próximos passos (o Andre escolhe a ordem)
 
-1. Quadra com dois campos e uma linha no meio.
+1. ~~Quadra com dois campos e uma linha no meio.~~ Feito!
 2. Times (vermelho contra azul).
 3. Forca: como a palavra secreta entra na queimada (decisão do Andre).
 4. Placar de queimados.
