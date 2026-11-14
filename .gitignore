@@ -2,7 +2,7 @@ ferramentas/teste/vendor/
 ferramentas/teste/saida-*.png
 __pycache__/
 
-# Fora do jogo: ficam so no PC (Roblox vai para a pasta ao lado quando a conversa dele parar)
+# Fora do jogo: Roblox e Oficina 3D ficam em pastas ao lado (so no PC)
 .mcp.json
 roblox/
 ideias/roblox.md

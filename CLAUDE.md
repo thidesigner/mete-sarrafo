@@ -4,7 +4,7 @@ Ambiente onde o Andre (uma criança) cria e testa jogos com a ajuda do pai e do 
 O primeiro jogo é o **Jogo de Pergunta** (antes chamado Mete Sarrafo): forca misturada com queimada.
 O nome mudou só no que o jogador vê. Endereço do site, nome do repositório, arquivos, sala online (`metesarrafo-v1-`) e dados guardados (`ms-festa`) continuam com o nome antigo de propósito, para nada quebrar.
 Este repositório é a fonte única: sessões do Claude Code na nuvem e no desktop trabalham aqui.
-**Aqui fica só o Jogo de Pergunta.** Outros projetos do Andre ficam em pastas só no PC do pai, fora do git: Roblox (por enquanto em `roblox/` e `ideias/roblox.md`, ignorados) e a Oficina 3D (pasta "Oficina 3D do Andre", ao lado desta). Não traga esses arquivos de volta para o repositório.
+**Aqui fica só o Jogo de Pergunta.** Outros projetos do Andre ficam em pastas só no PC do pai, fora do git: Roblox (pasta "Roblox do Andre") e Oficina 3D (pasta "Oficina 3D do Andre"), ao lado desta. Não traga esses arquivos de volta para o repositório.
 
 ## Como conversar
 
