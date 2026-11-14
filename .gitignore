@@ -2,5 +2,11 @@ ferramentas/teste/vendor/
 ferramentas/teste/saida-*.png
 __pycache__/
 
-# Ligacao com o Roblox Studio (so funciona no PC de casa)
+# Fora do jogo: ficam so no PC (Roblox vai para a pasta ao lado quando a conversa dele parar)
 .mcp.json
+roblox/
+ideias/roblox.md
+
+# Soltos para conferir antes de subir
+/convite-sala-do-andre.pdf
+ideias/*.png

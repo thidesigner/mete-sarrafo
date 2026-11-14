@@ -4,6 +4,7 @@ Ambiente onde o Andre (uma criança) cria e testa jogos com a ajuda do pai e do 
 O primeiro jogo é o **Jogo de Pergunta** (antes chamado Mete Sarrafo): forca misturada com queimada.
 O nome mudou só no que o jogador vê. Endereço do site, nome do repositório, arquivos, sala online (`metesarrafo-v1-`) e dados guardados (`ms-festa`) continuam com o nome antigo de propósito, para nada quebrar.
 Este repositório é a fonte única: sessões do Claude Code na nuvem e no desktop trabalham aqui.
+**Aqui fica só o Jogo de Pergunta.** Outros projetos do Andre ficam em pastas só no PC do pai, fora do git: Roblox (por enquanto em `roblox/` e `ideias/roblox.md`, ignorados) e a Oficina 3D (pasta "Oficina 3D do Andre", ao lado desta). Não traga esses arquivos de volta para o repositório.
 
 ## Como conversar
 
@@ -28,16 +29,13 @@ Qualquer pessoa pode ler tudo o que estiver aqui, inclusive o histórico. Por is
 | `teste/index.html` | **Versão de teste**, com a faixa "VERSÃO DE TESTE" (gerada) |
 | `fonte/jogo.html` | Código do jogo (mesma página do artefato "Mete Sarrafo: Modo Festa" no Claude) |
 | `fonte/online.js` | Modo online: cada um no seu celular, via PeerJS (só no site, não funciona dentro do Claude) |
-| `fonte/oficina-3d.html` | Código do artefato "Oficina 3D do Andre" (fluxo da impressão, checklist, diário e correções) |
 | `fonte/central-de-eventos.html` | Código do artefato "Central de Eventos" (publica eventos sem abrir o GitHub) |
 | `fonte/caderno-de-ideias.html` | Código do artefato "Ideias do Jogo do Andre" (caderno + simulação) |
 | `ferramentas/montar.py` | Gera a versão de teste e promove para a oficial |
 | `ferramentas/teste/` | Teste automático do modo online (dois navegadores com conexão imitada) |
-| `ferramentas/blender/` | Script que prepara o personagem baixado do jogo para a impressora 3D |
 | `ideias/` | Regras combinadas e dúvidas em aberto de cada jogo |
 | `sugestoes/` | Sugestões dos amigos (coladas ou lidas do formulário) |
 | `materiais/` | Coisas para imprimir, como o convite com o QR code da Sala do Andre |
-| `roblox/` | Versão do jogo no Roblox Studio (scripts Luau). Veja `ideias/roblox.md` |
 
 ## Fluxo de trabalho
 
@@ -75,8 +73,7 @@ Botão "Criar" na tela inicial: editor de personagens (arrastar peças). Cada pe
 - Dentro do Claude (Modo Festa) os personagens ficam no banco `personagens` (doc = id da ficha, com `em`; apagado vira `{apagado:true}`) e sincronizam entre aparelhos. No site ficam só no aparelho.
 - A aba "Imprimir 3D" fica **escondida** para as crianças (teste interno do pai). Só aparece se ligar nos Ajustes trancados ("Mostrar a aba Imprimir 3D", `G.imprimir3d`, vale só naquele aparelho). O trabalho de impressão vai seguir num repositório separado; aqui o jogo só cria e guarda os personagens.
 - Downloads (no site direto; no Claude pela capacidade `downloads`, com STL e GLB dentro de um .zip): STL para a impressora (`fichaParaSTL`), GLB colorido para o Blender (`fichaParaGLB`) e a ficha JSON.
-- `ferramentas/blender/personagem_para_stl.py`: GLB → peça única fechada, em pé, na altura em mm.
-- Plano, cuidados (venda, Inmetro, segurança, LGPD) e dúvidas: `ideias/personagens-e-impressao-3d.md`. Venda de bonecos é sempre fora do jogo, entre adultos.
+- O preparo da impressão (script do Blender, artefato Oficina 3D, plano e cuidados) fica fora deste repositório, na pasta "Oficina 3D do Andre" do PC do pai. Venda de bonecos é sempre fora do jogo, entre adultos.
 
 ## Times
 
@@ -142,7 +139,6 @@ Os endereços não ficam no repositório. Ache cada um pelo nome na lista de art
 - **Ideias do Jogo do Andre** (caderno de ideias): banco `ideias` (fichas com etapas, chat com o Claude e diário) e `simulacoes/mete-sarrafo` (ajustes da simulação). Código em `fonte/caderno-de-ideias.html`.
 - **Mete Sarrafo: Modo Festa** (jogo dentro do Claude, sem modo online): banco `sugestoes`, `partidas`, `placar/moedas` e `personagens`. Capacidades: db, user, sample, downloads. Publicado a partir de `fonte/jogo.html`.
 - **Central de Eventos** (só do pai): publica avisos, evento de moedas, promoção, código de presente e encerramentos sem abrir o GitHub. Código em `fonte/central-de-eventos.html` (o endereço da própria Central aparece como `ARTEFATO_PENDENTE`; troque só na cópia publicada). Capacidades: `mcp` com o conector "Claude Code Remote", ferramenta `create_session`, e `db` (coleção `pedidos`: histórico igual em todos os aparelhos; cada doc tem `em`, `t1`, `t2`, `acao`, `aparelho` e `status` enviado/publicado/erro, com `obs`). Cada "Publicar" abre uma sessão nova do Claude Code com `source_url` deste repositório e um prompt com as regras + `PEDIDO_JSON: {acao, …, pedido_id}`; ela grava `avisos.json`, faz commit e push na `main` (testado: cerca de 1 a 2 minutos) e, se puder, marca o status do pedido. Não use tarefa agendada (trigger) para isso: sessões de tarefa não recebem o repositório e o push dá 403. As duas tarefas antigas ficaram desligadas.
-- **Oficina 3D do Andre**: banco `preparo/checklist`, `impressoes` (diário) e `pendencias` (correções e dúvidas). Capacidades: db, user. Publicado a partir de `fonte/oficina-3d.html`.
 
 Nos arquivos de `fonte/`, o endereço do Modo Festa aparece como `https://claude.ai/artifact/PENDENTE`. Ao publicar um desses artefatos, troque só na cópia publicada, sem gravar o endereço aqui.
 
