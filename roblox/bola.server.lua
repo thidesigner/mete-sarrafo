@@ -1,13 +1,14 @@
 -- Mete Sarrafo (Roblox): pegar e arremessar a bola
 -- Onde fica no Studio: ServerScriptService > Script
 -- Quem encosta na bola pega; clique / toque / gatilho RT arremessa.
--- Só queima se a bola acertar alguém ainda voando (antes de bater no chão).
+-- Só queima se a bola acertar alguém ainda voando (antes de bater no chão)
+-- e se esse alguém for do outro time.
 local Players = game:GetService("Players")
 
 -- Ajustes (o Andre pode mudar esses números!)
 local VELOCIDADE = 90   -- força do arremesso
 local SUBIDA = 20       -- quanto a bola sobe
-local INICIO = Vector3.new(0, 5, -15)  -- onde a bola aparece
+local INICIO = Vector3.new(0, 5, 0)  -- onde a bola aparece (na linha do meio)
 
 local bola
 local quemJogou = nil
@@ -77,6 +78,9 @@ local function aoTocar(parte)
 
 	if voando then
 		if personagem == quemJogou then return end
+		-- bola em gente do mesmo time não queima: passa direto
+		local jogou = quemJogou and Players:GetPlayerFromCharacter(quemJogou)
+		if jogador and jogou and jogador.Team and jogador.Team == jogou.Team then return end
 		voando = false
 		if jogador and humanoide and humanoide.Health > 0 then
 			mostrarQueimado(personagem)

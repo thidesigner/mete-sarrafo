@@ -11,6 +11,9 @@ Começamos uma versão do jogo no **Roblox Studio** (13/11/2026).
 - Ajustes que o Andre pode mexer: `VELOCIDADE`, `SUBIDA` e o tamanho da bola (`bola.Size`).
 - **Quadra** (13/11/2026): dois campos, vermelho e azul, cada um com o nome pintado no chão, linha branca no meio e nas bordas, e uma mureta baixinha em volta (dá para pular). Mede 100 de comprimento por 60 de largura. A gente nasce do lado de fora, na beira da quadra, e a bola aparece no campo vermelho.
 - A quadra é montada pelo `roblox/quadra.lua` (colar na Barra de Comandos do Studio). Ajustes: `COMPRIMENTO`, `LARGURA`, `LINHA` e `MURETA`. No Studio ela fica em Workspace > Quadra.
+- **Times** (13/11/2026): Vermelho e Azul (no Studio: Teams). Quem entra cai sozinho no time com menos gente e nasce no fundo do próprio campo (placa brilhando da cor do time). Bola em gente do mesmo time não queima: passa direto. A bola agora aparece na linha do meio.
+- Os times são criados pelo `roblox/times.lua` (Barra de Comandos, depois da quadra).
+- Ainda **não** tem regra que prende cada um no próprio campo: dá para atravessar a linha do meio. O Andre decide se quer.
 
 ## Ligação do Claude com o Studio (MCP)
 
@@ -21,7 +24,7 @@ Começamos uma versão do jogo no **Roblox Studio** (13/11/2026).
 ## Próximos passos (o Andre escolhe a ordem)
 
 1. ~~Quadra com dois campos e uma linha no meio.~~ Feito!
-2. Times (vermelho contra azul).
+2. ~~Times (vermelho contra azul).~~ Feito!
 3. Forca: como a palavra secreta entra na queimada (decisão do Andre).
 4. Placar de queimados.
 
