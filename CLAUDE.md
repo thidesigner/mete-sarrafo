@@ -37,6 +37,7 @@ Qualquer pessoa pode ler tudo o que estiver aqui, inclusive o histórico. Por is
 | `ideias/` | Regras combinadas e dúvidas em aberto de cada jogo |
 | `sugestoes/` | Sugestões dos amigos (coladas ou lidas do formulário) |
 | `materiais/` | Coisas para imprimir, como o convite com o QR code da Sala do Andre |
+| `roblox/` | Versão do jogo no Roblox Studio (scripts Luau). Veja `ideias/roblox.md` |
 
 ## Fluxo de trabalho
 

@@ -1,3 +1,6 @@
 ferramentas/teste/vendor/
 ferramentas/teste/saida-*.png
 __pycache__/
+
+# Ligacao com o Roblox Studio (so funciona no PC de casa)
+.mcp.json
