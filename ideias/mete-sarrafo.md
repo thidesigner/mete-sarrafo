@@ -243,3 +243,8 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
 - **Bosses melhorados (pedido do Andre, 13/nov), só no visual:** o Rei Eclipse ganhou mãos de ouro flutuando, sol e lua girando em volta, olhos que piscam e boca que brilha quando ele vai atacar (as mãos sobem). O Senhor da Tempestade virou uma nuvem gigante com coroa de raios, chuva, rabo de tornado e braços de relâmpago. Os dois racham e ficam com olhos vermelhos com menos da metade da vida, tremem quando levam dano e explodem em luz quando são derrotados.
 - **Classificação em qualquer lugar (pedido do Andre, 13/nov):** **Tempo jogando** agora conta todo o tempo com o jogo aberto (tela inicial, loja, Praça, partidas), e **Mais gastou** conta toda moeda gasta (loja, barraquinhas da Praça, loja da Partida do Evento, vida extra…). **Vitórias** contam todas as partidas. Só **Bosses** continua vindo da Partida do Evento.
 - **Correção (16/11):** quem fechava o Chrome dentro da Praça (ou numa sala online) via, ao abrir de novo, só um fundo azul vazio, sem botões. Agora o jogo volta para a tela inicial. A tela de entrar numa sala também mostra em qual passo parou (servidor, sala ou celular de quem abriu), tem botão Cancelar e diz o motivo quando não dá certo.
+
+## Poderes do ADM (16/11)
+
+- Aba nova "Poderes" no Painel de ADM. Primeiro poder: **voar na Praça Central** (botão 🕊️; segurar ⤴ sobe, ⤵ desce). Só aparece no celular onde o ADM ligou.
+- O Andre quer mais poderes nessa aba depois (ainda vai pensar quais).

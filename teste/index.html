@@ -355,6 +355,10 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .pr-painel-c.lobby { background: transparent; }
 .pr-painel-c.lobby::before { display: none; }
 .pr-sub { margin: 0; text-align: center; color: #fff; font-size: 17px; }
+.pr-voar { position: absolute; right: 120px; bottom: 60px; width: 60px; height: 60px; border-radius: 50%; background: #fff; border: 3px solid #0b1b33; box-shadow: 0 4px 0 #0b1b33; font-size: 28px; z-index: 2; cursor: pointer; }
+.pr-voar[aria-pressed="true"] { background: #7fd3ff; box-shadow: 0 0 18px #7fd3ff, 0 4px 0 #0b1b33; }
+.pr-descer { position: absolute; right: 24px; bottom: 140px; width: 84px; height: 64px; border-radius: 32px; background: #ffd23f; border: 3px solid #0b1b33; box-shadow: 0 5px 0 #0b1b33; font-size: 34px; color: #0b1b33; z-index: 2; cursor: pointer; }
+.praca.pr-cena .pr-voar, .praca.pr-cena .pr-descer,
 .praca.pr-cena .pr-joy, .praca.pr-cena .pr-pular, .praca.pr-cena .pr-acao, .praca.pr-cena .pr-dica, .praca.pr-cena .pr-titulo { display: none !important; }
 .pr-faixa { position: absolute; left: 0; right: 0; height: 11%; background: #000; z-index: 3; pointer-events: none; animation: prFaixa .6s ease-out; }
 .pr-faixa-c { top: 0; } .pr-faixa-b { bottom: 0; }
@@ -4870,6 +4874,7 @@ function abrirPraca() {
     <div class="pr-dica" id="pr-dica">Ande com o círculo da esquerda. Arraste a tela para olhar em volta.</div>
     <div class="pr-joy" id="pr-joy" aria-label="Andar"><i></i></div>
     <button type="button" class="pr-pular" id="pr-pular" aria-label="Pular">⤴</button>
+    ${G.admVoar ? `<button type="button" class="pr-voar" id="pr-voar" aria-pressed="false" aria-label="Voar">🕊️</button><button type="button" class="pr-descer" id="pr-descer" hidden aria-label="Descer">⤵</button>` : ""}
     <button type="button" class="pr-acao" id="pr-acao" hidden></button>
     <div class="pr-painel" id="pr-painel" hidden role="dialog" aria-modal="true"><div class="pr-painel-top"><b id="pr-painel-t"></b><button type="button" class="lb-pill" id="pr-fechar" aria-label="Fechar">✕</button></div><div class="pr-painel-c lobby lb-loja" id="pr-painel-c"></div></div>`;
   let r;
@@ -4890,7 +4895,7 @@ function abrirPraca() {
 }
 function fecharPraca(irLobby = true) {
   if (!PRACA.on) return;
-  PRACA.on = false; cancelAnimationFrame(PRACA.raf); PRACA.hist = null;
+  PRACA.on = false; cancelAnimationFrame(PRACA.raf); PRACA.hist = null; PRACA.voando = false; PRACA.sobe = PRACA.desce = false;
   if (typeof PRACA.desconectar === "function") PRACA.desconectar();
   pracaTirarTodos();
   window.removeEventListener("keydown", PRACA.kd); window.removeEventListener("keyup", PRACA.ku);
@@ -4920,6 +4925,9 @@ function ligarControlesPraca(box) {
   const soltaOlhar = e => { if (e.pointerId === olharId) olharId = null; };
   cv.addEventListener("pointerup", soltaOlhar); cv.addEventListener("pointercancel", soltaOlhar);
   $("pr-pular").addEventListener("click", pularPraca);
+  const segura = (id, k) => { const b = $(id); if (!b) return; b.addEventListener("pointerdown", e => { PRACA[k] = true; b.setPointerCapture(e.pointerId); }); ["pointerup", "pointercancel", "lostpointercapture"].forEach(t => b.addEventListener(t, () => { PRACA[k] = false; })); };
+  segura("pr-pular", "sobe"); segura("pr-descer", "desce");
+  if ($("pr-voar")) $("pr-voar").addEventListener("click", () => alternarVoo());
   $("pr-sair").addEventListener("click", () => fecharPraca());
   $("pr-fechar").addEventListener("click", fecharPainelPraca);
   $("pr-acao").addEventListener("click", () => { if (PRACA.perto) PRACA.perto.abrir(); });
@@ -4927,7 +4935,17 @@ function ligarControlesPraca(box) {
   PRACA.ku = e => { PRACA.keys[e.key.toLowerCase()] = false; };
   window.addEventListener("keydown", PRACA.kd); window.addEventListener("keyup", PRACA.ku);
 }
-function pularPraca() { const eu = PRACA.eu; if (eu && eu.y <= .001) { eu.vy = 6.5; bip(660, .05); } }
+function pularPraca() { const eu = PRACA.eu; if (PRACA.voando) return; if (eu && eu.y <= .001) { eu.vy = 6.5; bip(660, .05); } }
+// Poder do ADM: voar na Praça (G.admVoar, ligado no Painel de ADM, aba Poderes)
+function alternarVoo(liga) {
+  PRACA.voando = G.admVoar ? (liga === undefined ? !PRACA.voando : liga) : false;
+  const b = $("pr-voar"), d = $("pr-descer"), p = $("pr-pular");
+  if (b) b.setAttribute("aria-pressed", PRACA.voando);
+  if (d) d.hidden = !PRACA.voando;
+  if (p) { p.textContent = "⤴"; p.setAttribute("aria-label", PRACA.voando ? "Subir" : "Pular"); }
+  if (PRACA.voando && PRACA.eu) { PRACA.eu.vy = 0; PRACA.eu.y = Math.max(PRACA.eu.y, .6); }
+  bip(PRACA.voando ? 880 : 440, .08); toast(PRACA.voando ? "🕊️ Voando! Segure ⤴ para subir e ⤵ para descer" : "Voltou para o chão");
+}
 /* ---------- lugares onde dá para fazer alguma coisa ---------- */
 function lugaresPraca() {
   const l = [];
@@ -4975,15 +4993,19 @@ function quadroPraca(ts) {
   const kx = (k.d || k.arrowright ? 1 : 0) - (k.a || k.arrowleft ? 1 : 0), ky = (k.s || k.arrowdown ? 1 : 0) - (k.w || k.arrowup ? 1 : 0);
   if (kx || ky) { const m = Math.hypot(kx, ky); mx = kx / m; my = ky / m; }
   if (PRACA.painel || PRACA.hist) { mx = 0; my = 0; }
-  const sy = Math.sin(PRACA.yaw), cy = Math.cos(PRACA.yaw), vx = (mx * cy + my * sy) * 6, vz = (-mx * sy + my * cy) * 6;
+  const sy = Math.sin(PRACA.yaw), cy = Math.cos(PRACA.yaw), vel = PRACA.voando ? 9 : 6, vx = (mx * cy + my * sy) * vel, vz = (-mx * sy + my * cy) * vel;
   const anda = Math.hypot(vx, vz) > .1;
   if (anda) {
     let nx = eu.x + vx * dt, nz = eu.z + vz * dt;
     const d = Math.hypot(nx, nz); if (d > PRACA_R) { nx *= PRACA_R / d; nz *= PRACA_R / d; }
-    if (Math.hypot(nx, nz) < 3.2) { const a = Math.atan2(nz, nx); nx = Math.cos(a) * 3.2; nz = Math.sin(a) * 3.2; }   // não entra no chafariz
+    if (Math.hypot(nx, nz) < 3.2 && eu.y < 4) { const a = Math.atan2(nz, nx); nx = Math.cos(a) * 3.2; nz = Math.sin(a) * 3.2; }   // não entra no chafariz
     eu.x = nx; eu.z = nz; eu.r = Math.atan2(-vx, -vz); eu.m.passo += Math.hypot(vx, vz) * dt * 3;
   }
-  eu.vy -= 18 * dt; eu.y = Math.max(0, eu.y + eu.vy * dt); if (eu.y === 0) eu.vy = 0;
+  if (PRACA.voando) {
+    const sobe = PRACA.sobe || k[" "], desce = PRACA.desce || k.shift || k.c;
+    eu.vy = ((sobe ? 1 : 0) - (desce ? 1 : 0)) * 6;
+    eu.y = Math.max(0, Math.min(30, eu.y + eu.vy * dt + (sobe || desce ? 0 : Math.sin(performance.now() / 400) * .004)));
+  } else { eu.vy -= 18 * dt; eu.y = Math.max(0, eu.y + eu.vy * dt); if (eu.y === 0) eu.vy = 0; }
   animarBonecoPraca(eu.m, eu.x, eu.y, eu.z, eu.r, anda, dt);
   // os outros: andam suave até a última posição recebida
   for (const o of PRACA.outros.values()) {
@@ -7212,7 +7234,7 @@ TELAS.adm = () => {
   if (!ajustesAbertos) { setTimeout(() => ir("lobby"), 0); return ""; }
   const jogs = jogadoresDoAparelho();
   if (!ADM.jog || !jogs.includes(ADM.jog)) ADM.jog = jogs.includes(perfil()) ? perfil() : jogs[0];
-  const n = ADM.jog, abas = { moedas: "Moedas", itens: "Itens", limitadas: "Limitadas", aviso: "Aviso", eventos: "Eventos", numeros: "Números" };
+  const n = ADM.jog, abas = { moedas: "Moedas", itens: "Itens", limitadas: "Limitadas", aviso: "Aviso", eventos: "Eventos", poderes: "Poderes", numeros: "Números" };
   const escolherJog = `<div class="chips">${jogs.map(j => `<button type="button" class="chip adm-chip" data-a="admJog" data-n="${esc(j)}" aria-pressed="${j === n}">${esc(j)}</button>`).join("")}</div>`;
   const chipItem = (tem, gratis, tipo, k, rot) => `<button type="button" class="chip adm-chip" data-a="admItem" data-t="${tipo}" data-k="${k}" aria-pressed="${tem}" ${gratis ? "disabled" : ""}>${rot}</button>`;
   let corpo = "";
@@ -7285,6 +7307,11 @@ TELAS.adm = () => {
     <p class="dim" style="font-size:14px">Também dá para falar para o Claude: "manda o aviso: …".</p>`;
   }
   if (ADM.aba === "eventos") corpo = admEventosHTML();
+  if (ADM.aba === "poderes") corpo = `
+    <h3>Poderes do ADM</h3>
+    <div class="chips"><button type="button" class="chip adm-chip" data-a="admVoar" aria-pressed="${!!G.admVoar}">🕊️ Voar na Praça Central: ${G.admVoar ? "ligado" : "desligado"}</button></div>
+    <p class="dim" style="font-size:14px">Aparece o botão 🕊️ na Praça. Segure ⤴ para subir e ⤵ para descer (no PC: espaço sobe, Shift desce).</p>
+    <p class="dim" style="font-size:14px">Vale só neste celular. Os amigos na Praça veem você voando.</p>`;
   if (ADM.aba === "numeros") {
     const hist = G.historico || [], vit = Object.entries(G.vitorias || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
     const ricos = Object.entries(G.banco || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
@@ -7313,6 +7340,7 @@ TELAS.adm = () => {
 };
 Object.assign(acoes, {
   admAba(el) { ADM.aba = el.dataset.aba; render(); },
+  admVoar() { if (!ajustesAbertos) return; G.admVoar = !G.admVoar; if (!G.admVoar) PRACA.voando = false; salvar(); render(); toast(G.admVoar ? "🕊️ Voar na Praça ligado" : "Voar desligado"); },
   admJog(el) { ADM.jog = el.dataset.n; admMudouInv(); },
   admMoedas(el) { const n = ADM.jog; G.banco[n] = Math.max(0, Math.round(((G.banco[n] || 0) + +el.dataset.v) * 10) / 10); admMudouInv(); },
   admDefinir() { const v = Number($("adm-valor").value); if (!isFinite(v) || v < 0) { toast("Digite um número"); return; } G.banco[ADM.jog] = Math.round(Math.min(100000, v) * 10) / 10; admMudouInv(); toast("Moedas definidas"); },
