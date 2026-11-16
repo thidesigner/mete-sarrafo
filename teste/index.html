@@ -8248,6 +8248,7 @@ TELAS.entrar = () => `
         <button type="button" data-a="visaoFp" aria-pressed="${G.visaoOnline !== false}">3D</button><button type="button" data-a="visaoCima" aria-pressed="${G.visaoOnline === false}">De cima</button>
       </span>
       <button class="lb-jogar" type="submit" style="flex:none;min-height:64px;font-size:28px" ${ON.conectando ? "disabled" : ""}>${ON.conectando ? "Entrando…" : "Entrar"}</button>
+      ${ON.conectando ? `<p class="dim" style="text-align:center;margin:0" role="status">${esc(ON.etapa || "")}</p><button type="button" class="lb-pill" data-a="cancelarEntrar" style="align-self:center">Cancelar</button>` : ""}
     </form>
   </section>`;
 TELAS.esperando = () => `
@@ -8274,25 +8275,36 @@ Object.assign(acoes, {
     entrarSala(code, nome);
   },
   sairSala() { sairOnline(); },
+  cancelarEntrar() { clearTimeout(ON.desiste); ON.conectando = false; ON.etapa = ""; try { if (ON.peer) ON.peer.destroy(); } catch {} ON.peer = null; ON.hostConn = null; render(); },
 });
+/* passos da entrada, para saber onde parou (aparecem embaixo do botão "Entrando…") */
+function etapaEntrar(n, txt) { ON.etapaN = n; ON.etapa = `Passo ${n} de 3: ${txt}`; if (G.tela === "entrar" && !$("app").hidden) { const y = window.scrollY; render(); window.scrollTo(0, y); } }
+const MOTIVO_ENTRAR = {
+  1: "Não consegui falar com o servidor de conexão. Pode ser a internet deste celular ou o servidor fora do ar agora. Tente de novo daqui a pouco.",
+  2: "O servidor não respondeu sobre a sala. Tente de novo.",
+  3: "Achei a sala, mas não consegui ligar no celular de quem abriu. Isso acontece em algumas redes (4G, escola). Tentem os dois no mesmo Wi-Fi.",
+};
 function entrarSala(code, nome, naoAbrir = false) {
   if (typeof Peer === "undefined") { toast("A conexão online não carregou. Confira a internet."); return; }
   if (ON.peer) { try { ON.peer.destroy(); } catch {} }
-  ON.host = false; ON.conectando = true; ON.codeEntrar = code; render();
+  ON.host = false; ON.conectando = true; ON.codeEntrar = code; etapaEntrar(1, "ligando no servidor de conexão…"); render();
   const peer = new Peer({ debug: 0 }); ON.peer = peer;
-  const desiste = setTimeout(() => { if (ON.conectando) { ON.conectando = false; toast("Não consegui entrar. Confira a internet e tente de novo."); render(); } }, 15000);
+  clearTimeout(ON.desiste);
+  const desiste = ON.desiste = setTimeout(() => { if (ON.conectando && ON.peer === peer) { const n = ON.etapaN || 1; ON.conectando = false; ON.etapa = ""; try { peer.destroy(); } catch {} ON.peer = null; toast(MOTIVO_ENTRAR[n] || "Não consegui entrar. Tente de novo."); render(); } }, 20000);
   peer.on("open", () => {
+    etapaEntrar(2, "procurando a sala…");
     const conn = peer.connect(PREFIXO + code, { reliable: true, serialization: "json" });
+    setTimeout(() => { if (ON.conectando && ON.peer === peer && ON.etapaN === 2) etapaEntrar(3, "ligando no celular de quem abriu a sala…"); }, 1500);
     ON.hostConn = conn;
-    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome), ficha: personagemDe(nome), amigo: meuCodigoAmigo(), arremesso: arremessoDe(nome), selo: nivelSelo(nome), pet: petDe(nome), rank: code === SALA_EVENTO ? rankAtual() : undefined, bg: code === SALA_EVENTO ? bossGParaEnviar() : undefined }); });
+    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.etapa = ""; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome), ficha: personagemDe(nome), amigo: meuCodigoAmigo(), arremesso: arremessoDe(nome), selo: nivelSelo(nome), pet: petDe(nome), rank: code === SALA_EVENTO ? rankAtual() : undefined, bg: code === SALA_EVENTO ? bossGParaEnviar() : undefined }); });
     conn.on("data", cliRecebe);
     conn.on("close", () => { if (ON.peer === peer) { toast("A conexão com a sala caiu."); sairOnline(); } });
   });
   peer.on("error", e => {
-    clearTimeout(desiste); ON.conectando = false;
+    clearTimeout(desiste); ON.conectando = false; ON.etapa = "";
     // a Sala do Andre está fechada: quem chegou primeiro abre a sala
     if (e.type === "peer-unavailable" && (code === SALA_DO_ANDRE || code === SALA_EVENTO) && !naoAbrir) { criarSala(true, nome, code); return; }
-    toast(e.type === "peer-unavailable" ? "Sala não encontrada. Confira o código." : "Problema na conexão: " + e.type);
+    toast(e.type === "peer-unavailable" ? "Sala não encontrada. Confira o código." : ["network", "server-error", "socket-error", "socket-closed", "browser-incompatible"].includes(e.type) ? MOTIVO_ENTRAR[1] : "Problema na conexão: " + e.type);
     if (G.tela === "entrar") render();
   });
 }

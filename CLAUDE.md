@@ -131,6 +131,7 @@ Botão "Praça" na tela inicial: lugar 3D para andar com o bonequinho (`abrirPra
 - Partida online de ponta a ponta: `ferramentas/teste/teste-online.js` (Playwright). Ele serve a raiz do repositório em `localhost:8765`, troca o PeerJS pela imitação `mockpeer.js` e precisa do three.js em `ferramentas/teste/vendor/three.min.js` (fora do git; baixe com `npm pack three@0.128.0` e copie `package/build/three.min.js`).
 - Amigos (pedido, aceitar, online, convite e entrar na sala): `ferramentas/teste/teste-amigos.js`.
 - Em nuvens com rede restrita, `cdnjs` pode estar bloqueado: o teste já substitui o que precisa.
+- Entrar numa sala mostra o passo (`etapaEntrar`: 1 servidor de conexão, 2 procurando a sala, 3 ligando no celular de quem abriu), um botão Cancelar e, se não der em 20 s, o motivo (`MOTIVO_ENTRAR`). Teste: `ferramentas/teste/teste-entrar.js`. O servidor de conexão é o público e gratuito do PeerJS (`0.peerjs.com`); a nuvem do Claude não consegue chegar nele, então lá só dá para testar com a imitação.
 
 ## Artefatos no Claude (só abrem em sessões do claude.ai com a conta do pai)
 
