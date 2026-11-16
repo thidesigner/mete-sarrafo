@@ -4864,7 +4864,7 @@ function abrirPraca() {
     <div class="pr-dica" id="pr-dica">Ande com o círculo da esquerda. Arraste a tela para olhar em volta.</div>
     <div class="pr-joy" id="pr-joy" aria-label="Andar"><i></i></div>
     <button type="button" class="pr-pular" id="pr-pular" aria-label="Pular">⤴</button>
-    ${G.admVoar ? `<button type="button" class="pr-voar" id="pr-voar" aria-pressed="false" aria-label="Voar">🕊️</button><button type="button" class="pr-descer" id="pr-descer" hidden aria-label="Descer">⤵</button>` : ""}
+    ${podeVoar() ? `<button type="button" class="pr-voar" id="pr-voar" aria-pressed="false" aria-label="Voar">🕊️</button><button type="button" class="pr-descer" id="pr-descer" hidden aria-label="Descer">⤵</button>` : ""}
     <button type="button" class="pr-acao" id="pr-acao" hidden></button>
     <div class="pr-painel" id="pr-painel" hidden role="dialog" aria-modal="true"><div class="pr-painel-top"><b id="pr-painel-t"></b><button type="button" class="lb-pill" id="pr-fechar" aria-label="Fechar">✕</button></div><div class="pr-painel-c lobby lb-loja" id="pr-painel-c"></div></div>`;
   let r;
@@ -4926,9 +4926,10 @@ function ligarControlesPraca(box) {
   window.addEventListener("keydown", PRACA.kd); window.addEventListener("keyup", PRACA.ku);
 }
 function pularPraca() { const eu = PRACA.eu; if (PRACA.voando) return; if (eu && eu.y <= .001) { eu.vy = 6.5; bip(660, .05); } }
-// Poder do ADM: voar na Praça (G.admVoar, ligado no Painel de ADM, aba Poderes)
+// Poder do ADM: voar na Praça. G.admVoar = lista dos perfis que o ADM liberou (aba Poderes); só eles veem o 🕊️.
+function podeVoar() { return Array.isArray(G.admVoar) && G.admVoar.includes(perfil()); }
 function alternarVoo(liga) {
-  PRACA.voando = G.admVoar ? (liga === undefined ? !PRACA.voando : liga) : false;
+  PRACA.voando = podeVoar() ? (liga === undefined ? !PRACA.voando : liga) : false;
   const b = $("pr-voar"), d = $("pr-descer"), p = $("pr-pular");
   if (b) b.setAttribute("aria-pressed", PRACA.voando);
   if (d) d.hidden = !PRACA.voando;
@@ -7299,9 +7300,10 @@ TELAS.adm = () => {
   if (ADM.aba === "eventos") corpo = admEventosHTML();
   if (ADM.aba === "poderes") corpo = `
     <h3>Poderes do ADM</h3>
-    <div class="chips"><button type="button" class="chip adm-chip" data-a="admVoar" aria-pressed="${!!G.admVoar}">🕊️ Voar na Praça Central: ${G.admVoar ? "ligado" : "desligado"}</button></div>
+    <h3>Jogador</h3>${escolherJog}
+    <div class="chips"><button type="button" class="chip adm-chip" data-a="admVoar" aria-pressed="${(G.admVoar || []).includes(n)}">🕊️ ${esc(n)} pode voar na Praça: ${(G.admVoar || []).includes(n) ? "sim" : "não"}</button></div>
     <p class="dim" style="font-size:14px">Aparece o botão 🕊️ na Praça. Segure ⤴ para subir e ⤵ para descer (no PC: espaço sobe, Shift desce).</p>
-    <p class="dim" style="font-size:14px">Vale só neste celular. Os amigos na Praça veem você voando.</p>`;
+    <p class="dim" style="font-size:14px">Só quem o ADM liberar vê o botão. Os outros perfis deste celular e os amigos não podem voar, só veem quem está voando.</p>`;
   if (ADM.aba === "numeros") {
     const hist = G.historico || [], vit = Object.entries(G.vitorias || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
     const ricos = Object.entries(G.banco || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
@@ -7330,7 +7332,7 @@ TELAS.adm = () => {
 };
 Object.assign(acoes, {
   admAba(el) { ADM.aba = el.dataset.aba; render(); },
-  admVoar() { if (!ajustesAbertos) return; G.admVoar = !G.admVoar; if (!G.admVoar) PRACA.voando = false; salvar(); render(); toast(G.admVoar ? "🕊️ Voar na Praça ligado" : "Voar desligado"); },
+  admVoar() { if (!ajustesAbertos) return; const n = ADM.jog, l = Array.isArray(G.admVoar) ? G.admVoar : []; const tem = l.includes(n); G.admVoar = tem ? l.filter(x => x !== n) : [...l, n]; PRACA.voando = false; salvar(); render(); toast(tem ? `${n} não pode mais voar` : `🕊️ ${n} pode voar na Praça`); },
   admJog(el) { ADM.jog = el.dataset.n; admMudouInv(); },
   admMoedas(el) { const n = ADM.jog; G.banco[n] = Math.max(0, Math.round(((G.banco[n] || 0) + +el.dataset.v) * 10) / 10); admMudouInv(); },
   admDefinir() { const v = Number($("adm-valor").value); if (!isFinite(v) || v < 0) { toast("Digite um número"); return; } G.banco[ADM.jog] = Math.round(Math.min(100000, v) * 10) / 10; admMudouInv(); toast("Moedas definidas"); },

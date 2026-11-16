@@ -246,5 +246,5 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
 
 ## Poderes do ADM (16/11)
 
-- Aba nova "Poderes" no Painel de ADM. Primeiro poder: **voar na Praça Central** (botão 🕊️; segurar ⤴ sobe, ⤵ desce). Só aparece no celular onde o ADM ligou.
+- Aba nova "Poderes" no Painel de ADM. Primeiro poder: **voar na Praça Central** (botão 🕊️; segurar ⤴ sobe, ⤵ desce). Só voa quem o ADM liberar (escolhe o perfil na aba Poderes); os outros só veem.
 - O Andre quer mais poderes nessa aba depois (ainda vai pensar quais).

@@ -1,4 +1,4 @@
-// Poder do ADM "Voar na Praça": liga no Painel de ADM (aba Poderes), voa, sobe, desce e o amigo vê a altura.
+// Poder do ADM "Voar na Praça": o ADM libera só o Andre (aba Poderes); ele voa, sobe e desce, o amigo vê a altura e outro perfil não ganha o botão.
 // Uso: na raiz do repositório, rode `python3 -m http.server 8767` e depois `node ferramentas/teste/teste-voar.js <pasta-para-fotos>`.
 const { chromium } = require('playwright'); const fs = require('fs'); const T = '/home/user/mete-sarrafo/ferramentas/teste/';
 (async () => { const S = process.argv[2]; const b = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist'] });
@@ -16,7 +16,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const T = 
   await a.evaluate(() => ir("lobby")); await a.waitForTimeout(200);
   await a.click('[data-a="praca"]'); await a.waitForTimeout(1500);
   const m = await abrir("Maria", false); await m.click('[data-a="praca"]'); await m.waitForTimeout(1500);
-  const temBotao = await a.$("#pr-voar") !== null;
+  const temBotao = await a.$("#pr-voar") !== null, mSemBotao = await m.$("#pr-voar") === null;
   await a.click('#pr-voar', { force: true }); await a.waitForTimeout(300);
   const b0 = await a.$('#pr-pular').then(x => x.boundingBox());
   await a.mouse.move(b0.x + b0.width / 2, b0.y + b0.height / 2); await a.mouse.down(); await a.waitForTimeout(1200); await a.mouse.up();
@@ -30,4 +30,4 @@ const { chromium } = require('playwright'); const fs = require('fs'); const T = 
   const baixo = await a.evaluate(() => PRACA.eu.y);
   await a.click('#pr-voar', { force: true }); await a.waitForTimeout(1500);
   const chao = await a.evaluate(() => ({ y: PRACA.eu.y, voando: PRACA.voando, descer: $("pr-descer").hidden }));
-  console.log(JSON.stringify({ ligado, temBotao, alto, mVe, baixo, chao, errs })); await b.close(); })();
+  console.log(JSON.stringify({ ligado, temBotao, mSemBotao, alto, mVe, baixo, chao, errs })); await b.close(); })();
