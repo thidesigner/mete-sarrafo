@@ -4900,7 +4900,8 @@ function fecharPraca(irLobby = true) {
   $("app").hidden = false; salvar();
   if (irLobby) ir("lobby");
 }
-TELAS.praca = () => `<section class="bgf lobby" aria-label="Praça Central"></section>`;
+// se o jogo foi fechado dentro da Praça, ao abrir de novo volta para a tela inicial (antes ficava só o fundo azul, sem botões)
+TELAS.praca = () => { if (PRACA.on) return `<section class="bgf lobby" aria-label="Praça Central"></section>`; G.tela = "lobby"; salvar(); return TELAS.lobby(); };
 acoes.praca = () => abrirPraca();
 /* ---------- controles: círculo para andar, arrastar para olhar, botão pular, teclado ---------- */
 function ligarControlesPraca(box) {
@@ -9025,6 +9026,10 @@ PRACA.desconectar = () => {
   try { if (PR.peer) PR.peer.destroy(); } catch {}
   PR.peer = null; PR.hostConn = null; PR.dono = false; PR.conns.clear();
 };
+
+/* telas de sala sem conexão (o jogo foi fechado no meio): volta para a tela inicial em vez de ficar numa sala que não existe mais */
+["salaHost", "esperando", "criandoSala"].forEach(k => { const t = TELAS[k]; if (t) TELAS[k] = () => { if (ON.peer) return t(); G.tela = "lobby"; salvar(); return TELAS.lobby(); }; });
+if (["salaHost", "esperando", "criandoSala", "praca"].includes(G.tela) && !ON.peer) { G.tela = "lobby"; salvar(); render(); }
 
 render();
 </script>

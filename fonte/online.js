@@ -1316,3 +1316,7 @@ PRACA.desconectar = () => {
   try { if (PR.peer) PR.peer.destroy(); } catch {}
   PR.peer = null; PR.hostConn = null; PR.dono = false; PR.conns.clear();
 };
+
+/* telas de sala sem conexão (o jogo foi fechado no meio): volta para a tela inicial em vez de ficar numa sala que não existe mais */
+["salaHost", "esperando", "criandoSala"].forEach(k => { const t = TELAS[k]; if (t) TELAS[k] = () => { if (ON.peer) return t(); G.tela = "lobby"; salvar(); return TELAS.lobby(); }; });
+if (["salaHost", "esperando", "criandoSala", "praca"].includes(G.tela) && !ON.peer) { G.tela = "lobby"; salvar(); render(); }
