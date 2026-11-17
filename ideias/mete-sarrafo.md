@@ -248,3 +248,4 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
 
 - Aba nova "Poderes" no Painel de ADM. Primeiro poder: **voar na Praça Central** (botão 🕊️; segurar ⤴ sobe, ⤵ desce). Só voa quem o ADM liberar (escolhe o perfil na aba Poderes); os outros só veem.
 - O Andre quer mais poderes nessa aba depois (ainda vai pensar quais).
+- (17/11) Mais poderes na aba Poderes: ⚡ super velocidade, 🧍 gigante, ✨ teleporte e 🎆 rastro de brilho. Cada um o ADM libera por jogador; os amigos veem o gigante e o brilho.

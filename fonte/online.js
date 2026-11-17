@@ -1219,16 +1219,16 @@ function prInfoLimpa(d) {
   return { nome, skin: skinInfo(String(d.skin || "")).k, pet: d.pet && petInfo(String(d.pet)) ? String(d.pet) : null, ficha: d.ficha ? limparFicha(d.ficha) : null,
     selo: [1, 2, 3].includes(d.selo) ? d.selo : 0, moedas: Math.max(0, Math.min(1e7, Math.round(+d.moedas || 0))), cor: A_CORES[0], pele: A_PELE[0] };
 }
-function prPos(x, z, r, y) {
+function prPos(x, z, r, y, e) {
   PR.t += 1;
   const num = v => Math.round((+v || 0) * 100) / 100;
   if (PR.dono) return;   // o dono manda a posição dele junto com a de todos (prTick)
   if (PR.hostConn && PR.ultimoPs && Date.now() - PR.ultimoPs > 6000) { PR.ultimoPs = 0; prReconectar(); return; }   // o dono sumiu sem avisar
-  if (PR.t % 6 === 0 && PR.hostConn) enviar(PR.hostConn, { t: "p", x: num(x), z: num(z), r: num(r), y: num(y) });
+  if (PR.t % 6 === 0 && PR.hostConn) enviar(PR.hostConn, { t: "p", x: num(x), z: num(z), r: num(r), y: num(y), e: (+e || 0) & 3 });
 }
 function prTick() {
   if (!PR.dono || !PRACA.on) return;
-  const eu = PRACA.eu, num = v => Math.round((+v || 0) * 100) / 100, l = [["h", num(eu.x), num(eu.z), num(eu.r), num(eu.y)]];
+  const eu = PRACA.eu, num = v => Math.round((+v || 0) * 100) / 100, l = [["h", num(eu.x), num(eu.z), num(eu.r), num(eu.y), efeitosPraca()]];
   for (const [id, c] of PR.conns) if (c.pos) l.push([id, ...c.pos]);
   for (const c of PR.conns.values()) enviar(c.conn, { t: "ps", l });
   if (Date.now() - PR.tRank > 4000) { PR.tRank = Date.now(); for (const c of PR.conns.values()) enviar(c.conn, { t: "rk", r: rankAtual(), m: moedasPraca(), bg: bossGParaEnviar() }); }
@@ -1257,7 +1257,7 @@ function prDonoRecebe(conn, d) {
   }
   if (!id) return;
   const c = PR.conns.get(id);
-  if (d.t === "p") { const n = v => Math.max(-40, Math.min(40, +v || 0)); c.pos = [n(d.x), n(d.z), +d.r || 0, Math.max(0, Math.min(5, +d.y || 0))]; pracaPos(id, ...c.pos); }
+  if (d.t === "p") { const n = v => Math.max(-40, Math.min(40, +v || 0)); c.pos = [n(d.x), n(d.z), +d.r || 0, Math.max(0, Math.min(30, +d.y || 0)), (+d.e || 0) & 3]; pracaPos(id, ...c.pos); }
   else if (d.t === "info") { c.info = prInfoLimpa(d.info); pracaOutro(id, c.info); prMandarInfos(); }
   else if (d.t === "rk") { mesclarRank(d.r, d.m); mesclarBossG(d.bg); }
   else if (d.t === "portal" && c.info) { toast(`${c.info.nome} entrou na Partida do Evento! Vá até a porta para jogar junto.`); for (const [k, o] of PR.conns) if (k !== id) enviar(o.conn, { t: "portal", nome: c.info.nome }); }
@@ -1286,7 +1286,7 @@ function prMembroRecebe(d) {
     for (const id of [...PRACA.outros.keys()]) if (!ids.includes(id)) pracaTirar(id);
     prContar();
   }
-  else if (d.t === "ps" && Array.isArray(d.l)) for (const a of d.l.slice(0, 20)) { if (!Array.isArray(a) || a[0] === PR.meuId) continue; const n = v => Math.max(-40, Math.min(40, +v || 0)); pracaPos(String(a[0]), n(a[1]), n(a[2]), +a[3] || 0, Math.max(0, Math.min(5, +a[4] || 0))); }
+  else if (d.t === "ps" && Array.isArray(d.l)) for (const a of d.l.slice(0, 20)) { if (!Array.isArray(a) || a[0] === PR.meuId) continue; const n = v => Math.max(-40, Math.min(40, +v || 0)); pracaPos(String(a[0]), n(a[1]), n(a[2]), +a[3] || 0, Math.max(0, Math.min(30, +a[4] || 0)), (+a[5] || 0) & 3); }
   else if (d.t === "sai") { pracaTirar(String(d.id)); prContar(); }
   else if (d.t === "rk") { mesclarRank(d.r, d.m); mesclarBossG(d.bg); }
   else if (d.t === "portal") toast(`${nomeLimpo(d.nome)} entrou na Partida do Evento! Vá até a porta para jogar junto.`);

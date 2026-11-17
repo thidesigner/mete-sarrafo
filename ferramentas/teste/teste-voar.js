@@ -11,7 +11,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const T = 
     await pg.evaluate(([n, v]) => { G.perfil = n; G.banco[n] = 100; G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 }; G.historias = { vistas: historiasAgora().map(h => h.id) }; if (v) { ajustesAbertos = true; ADM.aba = "poderes"; ir("adm"); } else ir("lobby"); salvar(); }, [nome, voar]); await pg.waitForTimeout(300); return pg; };
   const a = await abrir("Andre", true);
   await a.screenshot({ path: S + '/voar-adm.png' });
-  await a.click('[data-a="admVoar"]'); await a.waitForTimeout(200);
+  await a.click('[data-a="admPoder"][data-k="voar"]'); await a.waitForTimeout(200);
   const ligado = await a.evaluate(() => G.admVoar);
   await a.evaluate(() => ir("lobby")); await a.waitForTimeout(200);
   await a.click('[data-a="praca"]'); await a.waitForTimeout(1500);

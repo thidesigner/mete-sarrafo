@@ -355,10 +355,13 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .pr-painel-c.lobby { background: transparent; }
 .pr-painel-c.lobby::before { display: none; }
 .pr-sub { margin: 0; text-align: center; color: #fff; font-size: 17px; }
-.pr-voar { position: absolute; right: 120px; bottom: 60px; width: 60px; height: 60px; border-radius: 50%; background: #fff; border: 3px solid #0b1b33; box-shadow: 0 4px 0 #0b1b33; font-size: 28px; z-index: 2; cursor: pointer; }
-.pr-voar[aria-pressed="true"] { background: #7fd3ff; box-shadow: 0 0 18px #7fd3ff, 0 4px 0 #0b1b33; }
+.pr-poderes { position: absolute; left: 22px; bottom: 180px; display: flex; flex-direction: column-reverse; gap: 8px; z-index: 2; }
+.pr-pod { width: 54px; height: 54px; border-radius: 50%; background: #fff; border: 3px solid #0b1b33; box-shadow: 0 4px 0 #0b1b33; font-size: 26px; cursor: pointer; padding: 0; }
+.pr-pod[aria-pressed="true"] { background: #7fd3ff; box-shadow: 0 0 18px #7fd3ff, 0 4px 0 #0b1b33; }
+.pr-tele { display: grid; gap: 8px; }
+.pr-tele button { text-align: left; }
 .pr-descer { position: absolute; right: 24px; bottom: 140px; width: 84px; height: 64px; border-radius: 32px; background: #ffd23f; border: 3px solid #0b1b33; box-shadow: 0 5px 0 #0b1b33; font-size: 34px; color: #0b1b33; z-index: 2; cursor: pointer; }
-.praca.pr-cena .pr-voar, .praca.pr-cena .pr-descer,
+.praca.pr-cena .pr-poderes, .praca.pr-cena .pr-descer,
 .praca.pr-cena .pr-joy, .praca.pr-cena .pr-pular, .praca.pr-cena .pr-acao, .praca.pr-cena .pr-dica, .praca.pr-cena .pr-titulo { display: none !important; }
 .pr-faixa { position: absolute; left: 0; right: 0; height: 11%; background: #000; z-index: 3; pointer-events: none; animation: prFaixa .6s ease-out; }
 .pr-faixa-c { top: 0; } .pr-faixa-b { bottom: 0; }
@@ -4859,7 +4862,7 @@ function pracaOutro(id, info) {
   if (info) { o.info = info; anotarMoedas(info.nome, info.moedas); }
   return o;
 }
-function pracaPos(id, x, z, r, y) { const o = PRACA.outros.get(id); if (!o) return; if (!o.alvo) { o.x = x; o.z = z; o.m.g.visible = true; } o.alvo = { x, z, r, y }; }
+function pracaPos(id, x, z, r, y, e) { const o = PRACA.outros.get(id); if (!o) return; if (!o.alvo) { o.x = x; o.z = z; o.m.g.visible = true; } o.alvo = { x, z, r, y, e: (+e || 0) & 3 }; }
 function pracaTirar(id) { const o = PRACA.outros.get(id); if (!o) return; PRACA.cena.remove(o.m.g); PRACA.outros.delete(id); }
 function pracaTirarTodos() { for (const id of [...PRACA.outros.keys()]) pracaTirar(id); }
 /* ---------- abrir e fechar ---------- */
@@ -4874,7 +4877,8 @@ function abrirPraca() {
     <div class="pr-dica" id="pr-dica">Ande com o círculo da esquerda. Arraste a tela para olhar em volta.</div>
     <div class="pr-joy" id="pr-joy" aria-label="Andar"><i></i></div>
     <button type="button" class="pr-pular" id="pr-pular" aria-label="Pular">⤴</button>
-    ${podeVoar() ? `<button type="button" class="pr-voar" id="pr-voar" aria-pressed="false" aria-label="Voar">🕊️</button><button type="button" class="pr-descer" id="pr-descer" hidden aria-label="Descer">⤵</button>` : ""}
+    <div class="pr-poderes" id="pr-poderes">${PODERES.filter(x => temPoder(x.k)).map(x => `<button type="button" class="pr-pod" id="${x.k === "voar" ? "pr-voar" : "pr-p-" + x.k}" data-pod="${x.k}" aria-pressed="false" aria-label="${x.nome}" title="${x.nome}">${x.ic}</button>`).join("")}</div>
+    ${podeVoar() ? `<button type="button" class="pr-descer" id="pr-descer" hidden aria-label="Descer">⤵</button>` : ""}
     <button type="button" class="pr-acao" id="pr-acao" hidden></button>
     <div class="pr-painel" id="pr-painel" hidden role="dialog" aria-modal="true"><div class="pr-painel-top"><b id="pr-painel-t"></b><button type="button" class="lb-pill" id="pr-fechar" aria-label="Fechar">✕</button></div><div class="pr-painel-c lobby lb-loja" id="pr-painel-c"></div></div>`;
   let r;
@@ -4895,7 +4899,7 @@ function abrirPraca() {
 }
 function fecharPraca(irLobby = true) {
   if (!PRACA.on) return;
-  PRACA.on = false; cancelAnimationFrame(PRACA.raf); PRACA.hist = null; PRACA.voando = false; PRACA.sobe = PRACA.desce = false;
+  PRACA.on = false; cancelAnimationFrame(PRACA.raf); PRACA.hist = null; PRACA.voando = PRACA.veloz = PRACA.gigante = PRACA.brilho = false; PRACA.sobe = PRACA.desce = false; PRACA.faiscas = [];
   if (typeof PRACA.desconectar === "function") PRACA.desconectar();
   pracaTirarTodos();
   window.removeEventListener("keydown", PRACA.kd); window.removeEventListener("keyup", PRACA.ku);
@@ -4927,7 +4931,7 @@ function ligarControlesPraca(box) {
   $("pr-pular").addEventListener("click", pularPraca);
   const segura = (id, k) => { const b = $(id); if (!b) return; b.addEventListener("pointerdown", e => { PRACA[k] = true; b.setPointerCapture(e.pointerId); }); ["pointerup", "pointercancel", "lostpointercapture"].forEach(t => b.addEventListener(t, () => { PRACA[k] = false; })); };
   segura("pr-pular", "sobe"); segura("pr-descer", "desce");
-  if ($("pr-voar")) $("pr-voar").addEventListener("click", () => alternarVoo());
+  for (const b of document.querySelectorAll("#pr-poderes [data-pod]")) b.addEventListener("click", () => usarPoder(b.dataset.pod));
   $("pr-sair").addEventListener("click", () => fecharPraca());
   $("pr-fechar").addEventListener("click", fecharPainelPraca);
   $("pr-acao").addEventListener("click", () => { if (PRACA.perto) PRACA.perto.abrir(); });
@@ -4939,6 +4943,53 @@ function pularPraca() { const eu = PRACA.eu; if (PRACA.voando) return; if (eu &&
 // Poder do ADM: voar na Praça. G.admVoar = lista dos perfis que o ADM liberou (aba Poderes); só eles veem o 🕊️.
 function listaVoar() { return Array.isArray(G.admVoar) ? G.admVoar : []; }   // versão antiga guardava true/false: vira lista vazia
 function podeVoar() { return listaVoar().includes(perfil()); }
+// Poderes do ADM (aba Poderes): cada um tem a lista dos perfis liberados. "voar" continua em G.admVoar; os outros em G.admPod[k].
+const PODERES = [
+  { k: "voar", ic: "🕊️", nome: "Voar na Praça", dica: "Segure ⤴ para subir e ⤵ para descer (no PC: espaço sobe, Shift desce)." },
+  { k: "veloz", ic: "⚡", nome: "Super velocidade", dica: "Corre mais que o dobro do normal." },
+  { k: "gigante", ic: "🧍", nome: "Gigante", dica: "Fica enorme. Os amigos na Praça veem você gigante." },
+  { k: "teleporte", ic: "✨", nome: "Teleporte", dica: "Vai direto para as placas, as barracas, o mural ou a porta." },
+  { k: "brilho", ic: "🎆", nome: "Rastro de brilho", dica: "Solta fogos e deixa estrelinhas por onde passa. Os amigos veem." }];
+function listaPoder(k) { if (k === "voar") return listaVoar(); const l = G.admPod && G.admPod[k]; return Array.isArray(l) ? l : []; }
+function temPoder(k, nome = perfil()) { return listaPoder(k).includes(nome); }
+function usarPoder(k) {
+  if (!temPoder(k)) return;
+  if (k === "voar") return alternarVoo();
+  if (k === "teleporte") return abrirPainelPraca("✨ Teleporte", teleporteHTML);
+  PRACA[k] = !PRACA[k];
+  const b = $("pr-p-" + k); if (b) b.setAttribute("aria-pressed", PRACA[k]);
+  const eu = PRACA.eu;
+  if (k === "brilho" && PRACA.brilho && eu) fogosPraca(eu.x, eu.y + 1.5 * (eu.esc || 1), eu.z, 40);
+  bip(PRACA[k] ? 880 : 440, .08);
+  toast({ veloz: ["⚡ Super velocidade!", "Velocidade normal"], gigante: ["🧍 Você ficou gigante!", "Tamanho normal"], brilho: ["🎆 Rastro de brilho!", "Brilho desligado"] }[k][PRACA[k] ? 0 : 1]);
+}
+function lugaresTeleporte() { const vistos = new Set(); return lugaresPraca().filter(l => l.txt && !vistos.has(l.txt) && vistos.add(l.txt)).concat([{ x: 0, z: 6, txt: "⛲ Chafariz (meio da praça)" }]); }
+function teleporteHTML() { return `<p class="pr-sub">Para onde você quer ir?</p><div class="pr-tele">${lugaresTeleporte().map((l, i) => `<button type="button" class="btn ghost small" data-a="pracaTele" data-i="${i}">${esc(l.txt.replace(/^(\S+) Ver /, "$1 "))}</button>`).join("")}</div>`; }
+acoes.pracaTele = el => {
+  const l = lugaresTeleporte()[+el.dataset.i], eu = PRACA.eu; if (!l || !eu || !temPoder("teleporte")) return;
+  fogosPraca(eu.x, eu.y + 1, eu.z, 30); eu.x = l.x; eu.z = l.z; if (!PRACA.voando) eu.y = 0;
+  fecharPainelPraca(); fogosPraca(eu.x, eu.y + 1, eu.z, 30); bip(1200, .1); toast("✨ Teleporte!");
+};
+// estrelinhas da Praça (rastro de brilho, fogos e teleporte)
+const CORES_BRILHO = [0xffd23f, 0xff7ad9, 0x7fd3ff, 0x8affc8, 0xffffff, 0xff9a3c];
+function faiscaPraca(x, y, z, vx, vy, vz, vida) {
+  if (!PRACA.cena) return; PRACA.faiscas = PRACA.faiscas || [];
+  if (PRACA.faiscas.length > 180) { const v = PRACA.faiscas.shift(); PRACA.cena.remove(v.m); v.m.material.dispose(); }
+  PRACA.geoFaisca = PRACA.geoFaisca || new THREE.OctahedronGeometry(.13);
+  const m = new THREE.Mesh(PRACA.geoFaisca, new THREE.MeshBasicMaterial({ color: CORES_BRILHO[Math.floor(Math.random() * CORES_BRILHO.length)], transparent: true }));
+  m.position.set(x, y, z); PRACA.cena.add(m); PRACA.faiscas.push({ m, vx, vy, vz, vida, t: vida });
+}
+function fogosPraca(x, y, z, n) { for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI * 2, u = Math.random() * 2 - 1, v = 3 + Math.random() * 4; faiscaPraca(x, y, z, Math.cos(a) * v * Math.sqrt(1 - u * u), Math.abs(u) * v + 2, Math.sin(a) * v * Math.sqrt(1 - u * u), 1.2); } }
+function rastroPraca(o, dt) { o.tBrilho = (o.tBrilho || 0) - dt; if (o.tBrilho > 0) return; o.tBrilho = .035; const e = o.esc || 1; faiscaPraca(o.x + (Math.random() - .5) * .6 * e, o.y + Math.random() * 1.6 * e, o.z + (Math.random() - .5) * .6 * e, 0, .6, 0, .9); }
+function passoFaiscas(dt) {
+  const l = PRACA.faiscas; if (!l || !l.length) return;
+  for (let i = l.length - 1; i >= 0; i--) { const f = l[i]; f.t -= dt;
+    if (f.t <= 0) { PRACA.cena.remove(f.m); f.m.material.dispose(); l.splice(i, 1); continue; }
+    f.vy -= 4 * dt; f.m.position.x += f.vx * dt; f.m.position.y += f.vy * dt; f.m.position.z += f.vz * dt;
+    f.m.rotation.y += dt * 6; f.m.material.opacity = f.t / f.vida; f.m.scale.setScalar(.5 + f.t / f.vida); }
+}
+const ESC_GIGANTE = 2.6;
+function efeitosPraca() { return (PRACA.gigante ? 1 : 0) | (PRACA.brilho ? 2 : 0); }
 function alternarVoo(liga) {
   PRACA.voando = podeVoar() ? (liga === undefined ? !PRACA.voando : liga) : false;
   const b = $("pr-voar"), d = $("pr-descer"), p = $("pr-pular");
@@ -4995,7 +5046,7 @@ function quadroPraca(ts) {
   const kx = (k.d || k.arrowright ? 1 : 0) - (k.a || k.arrowleft ? 1 : 0), ky = (k.s || k.arrowdown ? 1 : 0) - (k.w || k.arrowup ? 1 : 0);
   if (kx || ky) { const m = Math.hypot(kx, ky); mx = kx / m; my = ky / m; }
   if (PRACA.painel || PRACA.hist) { mx = 0; my = 0; }
-  const sy = Math.sin(PRACA.yaw), cy = Math.cos(PRACA.yaw), vel = PRACA.voando ? 9 : 6, vx = (mx * cy + my * sy) * vel, vz = (-mx * sy + my * cy) * vel;
+  const sy = Math.sin(PRACA.yaw), cy = Math.cos(PRACA.yaw), vel = (PRACA.voando ? 9 : 6) * (PRACA.veloz ? 2.3 : 1) * (PRACA.gigante ? 1.3 : 1), vx = (mx * cy + my * sy) * vel, vz = (-mx * sy + my * cy) * vel;
   const anda = Math.hypot(vx, vz) > .1;
   if (anda) {
     let nx = eu.x + vx * dt, nz = eu.z + vz * dt;
@@ -5008,7 +5059,10 @@ function quadroPraca(ts) {
     eu.vy = ((sobe ? 1 : 0) - (desce ? 1 : 0)) * 6;
     eu.y = Math.max(0, Math.min(30, eu.y + eu.vy * dt + (sobe || desce ? 0 : Math.sin(performance.now() / 400) * .004)));
   } else { eu.vy -= 18 * dt; eu.y = Math.max(0, eu.y + eu.vy * dt); if (eu.y === 0) eu.vy = 0; }
+  eu.esc = (eu.esc || 1) + ((PRACA.gigante ? ESC_GIGANTE : 1) - (eu.esc || 1)) * (1 - Math.exp(-dt * 6)); eu.m.g.scale.setScalar(eu.esc);
   animarBonecoPraca(eu.m, eu.x, eu.y, eu.z, eu.r, anda, dt);
+  if (PRACA.brilho && (anda || PRACA.voando)) rastroPraca(eu, dt);
+  if (PRACA.veloz && anda && Math.random() < .5) faiscaPraca(eu.x, eu.y + .3, eu.z, -Math.sin(eu.r) * -2, .3, -Math.cos(eu.r) * -2, .35);
   // os outros: andam suave até a última posição recebida
   for (const o of PRACA.outros.values()) {
     if (!o.alvo) continue;
@@ -5016,8 +5070,11 @@ function quadroPraca(ts) {
     o.x += (o.alvo.x - o.x) * kk; o.z += (o.alvo.z - o.z) * kk; o.y += ((o.alvo.y || 0) - o.y) * kk;
     let dr = o.alvo.r - o.r; dr = (dr + Math.PI * 3) % (Math.PI * 2) - Math.PI; o.r += dr * kk;
     const v = Math.hypot(o.x - ax, o.z - az) / Math.max(dt, .001); o.m.passo += v * dt * 3;
+    const e = o.alvo.e || 0; o.esc = (o.esc || 1) + ((e & 1 ? ESC_GIGANTE : 1) - (o.esc || 1)) * (1 - Math.exp(-dt * 6)); o.m.g.scale.setScalar(o.esc);
     animarBonecoPraca(o.m, o.x, o.y, o.z, o.r, v > .4, dt);
+    if (e & 2 && (v > .4 || o.y > .3)) rastroPraca(o, dt);
   }
+  passoFaiscas(dt);
   // chafariz, coisas girando e portal piscando
   const t = ts / 1000;
   for (const gt of PRACA.gotas) { gt.f = (gt.f + dt * .7) % 1; const rr = gt.f * 2.1; gt.m.position.set(Math.cos(gt.a) * rr, 2.6 + gt.f * 1.6 - gt.f * gt.f * 3.4, Math.sin(gt.a) * rr); }
@@ -5042,10 +5099,10 @@ function quadroPraca(ts) {
   PRACA.perto = perto;
   // câmera atrás do bonequinho (ou a câmera da história)
   if (PRACA.hist) passoHistoria(dt);
-  else { const dist = 7, alt = 1.2 + PRACA.alt * 7;
+  else { const ee = eu.esc || 1, dist = 7 * (.55 + .45 * ee), alt = (1.2 + PRACA.alt * 7) * (.6 + .4 * ee);
     PRACA.cam.position.set(eu.x + sy * dist, eu.y + alt, eu.z + cy * dist);
-    PRACA.cam.lookAt(eu.x, eu.y + 1.3, eu.z); }
-  if (PRACA.rede && PRACA.rede.pos) PRACA.rede.pos(eu.x, eu.z, eu.r, eu.y);
+    PRACA.cam.lookAt(eu.x, eu.y + 1.3 * ee, eu.z); }
+  if (PRACA.rede && PRACA.rede.pos) PRACA.rede.pos(eu.x, eu.z, eu.r, eu.y, efeitosPraca());
   r.render(PRACA.cena, PRACA.cam);
 }
 /* ---------- Mini história dos eventos: a nave dos robôs Bip e Bop desce na praça e conta o evento ----------
@@ -7312,9 +7369,10 @@ TELAS.adm = () => {
   if (ADM.aba === "poderes") corpo = `
     <h3>Poderes do ADM</h3>
     <h3>Jogador</h3>${escolherJog}
-    <div class="chips"><button type="button" class="chip adm-chip" data-a="admVoar" aria-pressed="${listaVoar().includes(n)}">🕊️ ${esc(n)} pode voar na Praça: ${listaVoar().includes(n) ? "sim" : "não"}</button></div>
-    <p class="dim" style="font-size:14px">Aparece o botão 🕊️ na Praça. Segure ⤴ para subir e ⤵ para descer (no PC: espaço sobe, Shift desce).</p>
-    <p class="dim" style="font-size:14px">Só quem o ADM liberar vê o botão. Os outros perfis deste celular e os amigos não podem voar, só veem quem está voando.</p>`;
+    ${PODERES.map(x => `<div class="chips"><button type="button" class="chip adm-chip" data-a="admPoder" data-k="${x.k}" aria-pressed="${temPoder(x.k, n)}">${x.ic} ${esc(x.nome)}: ${temPoder(x.k, n) ? "sim" : "não"}</button></div>
+    <p class="dim" style="font-size:14px;margin-top:-4px">${x.dica}</p>`).join("")}
+    <p class="dim" style="font-size:14px">Na Praça, os botões dos poderes ficam acima do círculo de andar.</p>
+    <p class="dim" style="font-size:14px">Só quem o ADM liberar vê os botões. Os outros perfis deste celular e os amigos não usam os poderes, só veem.</p>`;
   if (ADM.aba === "numeros") {
     const hist = G.historico || [], vit = Object.entries(G.vitorias || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
     const ricos = Object.entries(G.banco || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
@@ -7343,7 +7401,11 @@ TELAS.adm = () => {
 };
 Object.assign(acoes, {
   admAba(el) { ADM.aba = el.dataset.aba; render(); },
-  admVoar() { if (!ajustesAbertos) return; const n = ADM.jog, l = listaVoar(); const tem = l.includes(n); G.admVoar = tem ? l.filter(x => x !== n) : [...l, n]; PRACA.voando = false; salvar(); render(); toast(tem ? `${n} não pode mais voar` : `🕊️ ${n} pode voar na Praça`); },
+  admVoar() { acoes.admPoder({ dataset: { k: "voar" } }); },
+  admPoder(el) { if (!ajustesAbertos) return; const k = el.dataset.k, pd = PODERES.find(x => x.k === k); if (!pd) return;
+    const n = ADM.jog, l = listaPoder(k), tem = l.includes(n), nova = tem ? l.filter(x => x !== n) : [...l, n];
+    if (k === "voar") { G.admVoar = nova; PRACA.voando = false; } else { G.admPod = G.admPod && typeof G.admPod === "object" ? G.admPod : {}; G.admPod[k] = nova; PRACA[k] = false; }
+    salvar(); render(); toast(tem ? `${n} perdeu: ${pd.nome}` : `${pd.ic} ${n} ganhou: ${pd.nome}`); },
   admJog(el) { ADM.jog = el.dataset.n; admMudouInv(); },
   admMoedas(el) { const n = ADM.jog; G.banco[n] = Math.max(0, Math.round(((G.banco[n] || 0) + +el.dataset.v) * 10) / 10); admMudouInv(); },
   admDefinir() { const v = Number($("adm-valor").value); if (!isFinite(v) || v < 0) { toast("Digite um número"); return; } G.banco[ADM.jog] = Math.round(Math.min(100000, v) * 10) / 10; admMudouInv(); toast("Moedas definidas"); },
@@ -8960,16 +9022,16 @@ function prInfoLimpa(d) {
   return { nome, skin: skinInfo(String(d.skin || "")).k, pet: d.pet && petInfo(String(d.pet)) ? String(d.pet) : null, ficha: d.ficha ? limparFicha(d.ficha) : null,
     selo: [1, 2, 3].includes(d.selo) ? d.selo : 0, moedas: Math.max(0, Math.min(1e7, Math.round(+d.moedas || 0))), cor: A_CORES[0], pele: A_PELE[0] };
 }
-function prPos(x, z, r, y) {
+function prPos(x, z, r, y, e) {
   PR.t += 1;
   const num = v => Math.round((+v || 0) * 100) / 100;
   if (PR.dono) return;   // o dono manda a posição dele junto com a de todos (prTick)
   if (PR.hostConn && PR.ultimoPs && Date.now() - PR.ultimoPs > 6000) { PR.ultimoPs = 0; prReconectar(); return; }   // o dono sumiu sem avisar
-  if (PR.t % 6 === 0 && PR.hostConn) enviar(PR.hostConn, { t: "p", x: num(x), z: num(z), r: num(r), y: num(y) });
+  if (PR.t % 6 === 0 && PR.hostConn) enviar(PR.hostConn, { t: "p", x: num(x), z: num(z), r: num(r), y: num(y), e: (+e || 0) & 3 });
 }
 function prTick() {
   if (!PR.dono || !PRACA.on) return;
-  const eu = PRACA.eu, num = v => Math.round((+v || 0) * 100) / 100, l = [["h", num(eu.x), num(eu.z), num(eu.r), num(eu.y)]];
+  const eu = PRACA.eu, num = v => Math.round((+v || 0) * 100) / 100, l = [["h", num(eu.x), num(eu.z), num(eu.r), num(eu.y), efeitosPraca()]];
   for (const [id, c] of PR.conns) if (c.pos) l.push([id, ...c.pos]);
   for (const c of PR.conns.values()) enviar(c.conn, { t: "ps", l });
   if (Date.now() - PR.tRank > 4000) { PR.tRank = Date.now(); for (const c of PR.conns.values()) enviar(c.conn, { t: "rk", r: rankAtual(), m: moedasPraca(), bg: bossGParaEnviar() }); }
@@ -8998,7 +9060,7 @@ function prDonoRecebe(conn, d) {
   }
   if (!id) return;
   const c = PR.conns.get(id);
-  if (d.t === "p") { const n = v => Math.max(-40, Math.min(40, +v || 0)); c.pos = [n(d.x), n(d.z), +d.r || 0, Math.max(0, Math.min(5, +d.y || 0))]; pracaPos(id, ...c.pos); }
+  if (d.t === "p") { const n = v => Math.max(-40, Math.min(40, +v || 0)); c.pos = [n(d.x), n(d.z), +d.r || 0, Math.max(0, Math.min(30, +d.y || 0)), (+d.e || 0) & 3]; pracaPos(id, ...c.pos); }
   else if (d.t === "info") { c.info = prInfoLimpa(d.info); pracaOutro(id, c.info); prMandarInfos(); }
   else if (d.t === "rk") { mesclarRank(d.r, d.m); mesclarBossG(d.bg); }
   else if (d.t === "portal" && c.info) { toast(`${c.info.nome} entrou na Partida do Evento! Vá até a porta para jogar junto.`); for (const [k, o] of PR.conns) if (k !== id) enviar(o.conn, { t: "portal", nome: c.info.nome }); }
@@ -9027,7 +9089,7 @@ function prMembroRecebe(d) {
     for (const id of [...PRACA.outros.keys()]) if (!ids.includes(id)) pracaTirar(id);
     prContar();
   }
-  else if (d.t === "ps" && Array.isArray(d.l)) for (const a of d.l.slice(0, 20)) { if (!Array.isArray(a) || a[0] === PR.meuId) continue; const n = v => Math.max(-40, Math.min(40, +v || 0)); pracaPos(String(a[0]), n(a[1]), n(a[2]), +a[3] || 0, Math.max(0, Math.min(5, +a[4] || 0))); }
+  else if (d.t === "ps" && Array.isArray(d.l)) for (const a of d.l.slice(0, 20)) { if (!Array.isArray(a) || a[0] === PR.meuId) continue; const n = v => Math.max(-40, Math.min(40, +v || 0)); pracaPos(String(a[0]), n(a[1]), n(a[2]), +a[3] || 0, Math.max(0, Math.min(30, +a[4] || 0)), (+a[5] || 0) & 3); }
   else if (d.t === "sai") { pracaTirar(String(d.id)); prContar(); }
   else if (d.t === "rk") { mesclarRank(d.r, d.m); mesclarBossG(d.bg); }
   else if (d.t === "portal") toast(`${nomeLimpo(d.nome)} entrou na Partida do Evento! Vá até a porta para jogar junto.`);
