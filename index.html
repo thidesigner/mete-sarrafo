@@ -355,6 +355,10 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .pr-painel-c.lobby { background: transparent; }
 .pr-painel-c.lobby::before { display: none; }
 .pr-sub { margin: 0; text-align: center; color: #fff; font-size: 17px; }
+.pr-voar { position: absolute; right: 120px; bottom: 60px; width: 60px; height: 60px; border-radius: 50%; background: #fff; border: 3px solid #0b1b33; box-shadow: 0 4px 0 #0b1b33; font-size: 28px; z-index: 2; cursor: pointer; }
+.pr-voar[aria-pressed="true"] { background: #7fd3ff; box-shadow: 0 0 18px #7fd3ff, 0 4px 0 #0b1b33; }
+.pr-descer { position: absolute; right: 24px; bottom: 140px; width: 84px; height: 64px; border-radius: 32px; background: #ffd23f; border: 3px solid #0b1b33; box-shadow: 0 5px 0 #0b1b33; font-size: 34px; color: #0b1b33; z-index: 2; cursor: pointer; }
+.praca.pr-cena .pr-voar, .praca.pr-cena .pr-descer,
 .praca.pr-cena .pr-joy, .praca.pr-cena .pr-pular, .praca.pr-cena .pr-acao, .praca.pr-cena .pr-dica, .praca.pr-cena .pr-titulo { display: none !important; }
 .pr-faixa { position: absolute; left: 0; right: 0; height: 11%; background: #000; z-index: 3; pointer-events: none; animation: prFaixa .6s ease-out; }
 .pr-faixa-c { top: 0; } .pr-faixa-b { bottom: 0; }
@@ -4869,6 +4873,7 @@ function abrirPraca() {
     <div class="pr-dica" id="pr-dica">Ande com o círculo da esquerda. Arraste a tela para olhar em volta.</div>
     <div class="pr-joy" id="pr-joy" aria-label="Andar"><i></i></div>
     <button type="button" class="pr-pular" id="pr-pular" aria-label="Pular">⤴</button>
+    ${podeVoar() ? `<button type="button" class="pr-voar" id="pr-voar" aria-pressed="false" aria-label="Voar">🕊️</button><button type="button" class="pr-descer" id="pr-descer" hidden aria-label="Descer">⤵</button>` : ""}
     <button type="button" class="pr-acao" id="pr-acao" hidden></button>
     <div class="pr-painel" id="pr-painel" hidden role="dialog" aria-modal="true"><div class="pr-painel-top"><b id="pr-painel-t"></b><button type="button" class="lb-pill" id="pr-fechar" aria-label="Fechar">✕</button></div><div class="pr-painel-c lobby lb-loja" id="pr-painel-c"></div></div>`;
   let r;
@@ -4889,7 +4894,7 @@ function abrirPraca() {
 }
 function fecharPraca(irLobby = true) {
   if (!PRACA.on) return;
-  PRACA.on = false; cancelAnimationFrame(PRACA.raf); PRACA.hist = null;
+  PRACA.on = false; cancelAnimationFrame(PRACA.raf); PRACA.hist = null; PRACA.voando = false; PRACA.sobe = PRACA.desce = false;
   if (typeof PRACA.desconectar === "function") PRACA.desconectar();
   pracaTirarTodos();
   window.removeEventListener("keydown", PRACA.kd); window.removeEventListener("keyup", PRACA.ku);
@@ -4899,7 +4904,8 @@ function fecharPraca(irLobby = true) {
   $("app").hidden = false; salvar();
   if (irLobby) ir("lobby");
 }
-TELAS.praca = () => `<section class="bgf lobby" aria-label="Praça Central"></section>`;
+// se o jogo foi fechado dentro da Praça, ao abrir de novo volta para a tela inicial (antes ficava só o fundo azul, sem botões)
+TELAS.praca = () => { if (PRACA.on) return `<section class="bgf lobby" aria-label="Praça Central"></section>`; G.tela = "lobby"; salvar(); return TELAS.lobby(); };
 acoes.praca = () => abrirPraca();
 /* ---------- controles: círculo para andar, arrastar para olhar, botão pular, teclado ---------- */
 function ligarControlesPraca(box) {
@@ -4918,6 +4924,9 @@ function ligarControlesPraca(box) {
   const soltaOlhar = e => { if (e.pointerId === olharId) olharId = null; };
   cv.addEventListener("pointerup", soltaOlhar); cv.addEventListener("pointercancel", soltaOlhar);
   $("pr-pular").addEventListener("click", pularPraca);
+  const segura = (id, k) => { const b = $(id); if (!b) return; b.addEventListener("pointerdown", e => { PRACA[k] = true; b.setPointerCapture(e.pointerId); }); ["pointerup", "pointercancel", "lostpointercapture"].forEach(t => b.addEventListener(t, () => { PRACA[k] = false; })); };
+  segura("pr-pular", "sobe"); segura("pr-descer", "desce");
+  if ($("pr-voar")) $("pr-voar").addEventListener("click", () => alternarVoo());
   $("pr-sair").addEventListener("click", () => fecharPraca());
   $("pr-fechar").addEventListener("click", fecharPainelPraca);
   $("pr-acao").addEventListener("click", () => { if (PRACA.perto) PRACA.perto.abrir(); });
@@ -4925,7 +4934,18 @@ function ligarControlesPraca(box) {
   PRACA.ku = e => { PRACA.keys[e.key.toLowerCase()] = false; };
   window.addEventListener("keydown", PRACA.kd); window.addEventListener("keyup", PRACA.ku);
 }
-function pularPraca() { const eu = PRACA.eu; if (eu && eu.y <= .001) { eu.vy = 6.5; bip(660, .05); } }
+function pularPraca() { const eu = PRACA.eu; if (PRACA.voando) return; if (eu && eu.y <= .001) { eu.vy = 6.5; bip(660, .05); } }
+// Poder do ADM: voar na Praça. G.admVoar = lista dos perfis que o ADM liberou (aba Poderes); só eles veem o 🕊️.
+function podeVoar() { return Array.isArray(G.admVoar) && G.admVoar.includes(perfil()); }
+function alternarVoo(liga) {
+  PRACA.voando = podeVoar() ? (liga === undefined ? !PRACA.voando : liga) : false;
+  const b = $("pr-voar"), d = $("pr-descer"), p = $("pr-pular");
+  if (b) b.setAttribute("aria-pressed", PRACA.voando);
+  if (d) d.hidden = !PRACA.voando;
+  if (p) { p.textContent = "⤴"; p.setAttribute("aria-label", PRACA.voando ? "Subir" : "Pular"); }
+  if (PRACA.voando && PRACA.eu) { PRACA.eu.vy = 0; PRACA.eu.y = Math.max(PRACA.eu.y, .6); }
+  bip(PRACA.voando ? 880 : 440, .08); toast(PRACA.voando ? "🕊️ Voando! Segure ⤴ para subir e ⤵ para descer" : "Voltou para o chão");
+}
 /* ---------- lugares onde dá para fazer alguma coisa ---------- */
 function lugaresPraca() {
   const l = [];
@@ -4973,15 +4993,19 @@ function quadroPraca(ts) {
   const kx = (k.d || k.arrowright ? 1 : 0) - (k.a || k.arrowleft ? 1 : 0), ky = (k.s || k.arrowdown ? 1 : 0) - (k.w || k.arrowup ? 1 : 0);
   if (kx || ky) { const m = Math.hypot(kx, ky); mx = kx / m; my = ky / m; }
   if (PRACA.painel || PRACA.hist) { mx = 0; my = 0; }
-  const sy = Math.sin(PRACA.yaw), cy = Math.cos(PRACA.yaw), vx = (mx * cy + my * sy) * 6, vz = (-mx * sy + my * cy) * 6;
+  const sy = Math.sin(PRACA.yaw), cy = Math.cos(PRACA.yaw), vel = PRACA.voando ? 9 : 6, vx = (mx * cy + my * sy) * vel, vz = (-mx * sy + my * cy) * vel;
   const anda = Math.hypot(vx, vz) > .1;
   if (anda) {
     let nx = eu.x + vx * dt, nz = eu.z + vz * dt;
     const d = Math.hypot(nx, nz); if (d > PRACA_R) { nx *= PRACA_R / d; nz *= PRACA_R / d; }
-    if (Math.hypot(nx, nz) < 3.2) { const a = Math.atan2(nz, nx); nx = Math.cos(a) * 3.2; nz = Math.sin(a) * 3.2; }   // não entra no chafariz
+    if (Math.hypot(nx, nz) < 3.2 && eu.y < 4) { const a = Math.atan2(nz, nx); nx = Math.cos(a) * 3.2; nz = Math.sin(a) * 3.2; }   // não entra no chafariz
     eu.x = nx; eu.z = nz; eu.r = Math.atan2(-vx, -vz); eu.m.passo += Math.hypot(vx, vz) * dt * 3;
   }
-  eu.vy -= 18 * dt; eu.y = Math.max(0, eu.y + eu.vy * dt); if (eu.y === 0) eu.vy = 0;
+  if (PRACA.voando) {
+    const sobe = PRACA.sobe || k[" "], desce = PRACA.desce || k.shift || k.c;
+    eu.vy = ((sobe ? 1 : 0) - (desce ? 1 : 0)) * 6;
+    eu.y = Math.max(0, Math.min(30, eu.y + eu.vy * dt + (sobe || desce ? 0 : Math.sin(performance.now() / 400) * .004)));
+  } else { eu.vy -= 18 * dt; eu.y = Math.max(0, eu.y + eu.vy * dt); if (eu.y === 0) eu.vy = 0; }
   animarBonecoPraca(eu.m, eu.x, eu.y, eu.z, eu.r, anda, dt);
   // os outros: andam suave até a última posição recebida
   for (const o of PRACA.outros.values()) {
@@ -7210,7 +7234,7 @@ TELAS.adm = () => {
   if (!ajustesAbertos) { setTimeout(() => ir("lobby"), 0); return ""; }
   const jogs = jogadoresDoAparelho();
   if (!ADM.jog || !jogs.includes(ADM.jog)) ADM.jog = jogs.includes(perfil()) ? perfil() : jogs[0];
-  const n = ADM.jog, abas = { moedas: "Moedas", itens: "Itens", limitadas: "Limitadas", aviso: "Aviso", eventos: "Eventos", numeros: "Números" };
+  const n = ADM.jog, abas = { moedas: "Moedas", itens: "Itens", limitadas: "Limitadas", aviso: "Aviso", eventos: "Eventos", poderes: "Poderes", numeros: "Números" };
   const escolherJog = `<div class="chips">${jogs.map(j => `<button type="button" class="chip adm-chip" data-a="admJog" data-n="${esc(j)}" aria-pressed="${j === n}">${esc(j)}</button>`).join("")}</div>`;
   const chipItem = (tem, gratis, tipo, k, rot) => `<button type="button" class="chip adm-chip" data-a="admItem" data-t="${tipo}" data-k="${k}" aria-pressed="${tem}" ${gratis ? "disabled" : ""}>${rot}</button>`;
   let corpo = "";
@@ -7283,6 +7307,12 @@ TELAS.adm = () => {
     <p class="dim" style="font-size:14px">Também dá para falar para o Claude: "manda o aviso: …".</p>`;
   }
   if (ADM.aba === "eventos") corpo = admEventosHTML();
+  if (ADM.aba === "poderes") corpo = `
+    <h3>Poderes do ADM</h3>
+    <h3>Jogador</h3>${escolherJog}
+    <div class="chips"><button type="button" class="chip adm-chip" data-a="admVoar" aria-pressed="${(G.admVoar || []).includes(n)}">🕊️ ${esc(n)} pode voar na Praça: ${(G.admVoar || []).includes(n) ? "sim" : "não"}</button></div>
+    <p class="dim" style="font-size:14px">Aparece o botão 🕊️ na Praça. Segure ⤴ para subir e ⤵ para descer (no PC: espaço sobe, Shift desce).</p>
+    <p class="dim" style="font-size:14px">Só quem o ADM liberar vê o botão. Os outros perfis deste celular e os amigos não podem voar, só veem quem está voando.</p>`;
   if (ADM.aba === "numeros") {
     const hist = G.historico || [], vit = Object.entries(G.vitorias || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
     const ricos = Object.entries(G.banco || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
@@ -7311,6 +7341,7 @@ TELAS.adm = () => {
 };
 Object.assign(acoes, {
   admAba(el) { ADM.aba = el.dataset.aba; render(); },
+  admVoar() { if (!ajustesAbertos) return; const n = ADM.jog, l = Array.isArray(G.admVoar) ? G.admVoar : []; const tem = l.includes(n); G.admVoar = tem ? l.filter(x => x !== n) : [...l, n]; PRACA.voando = false; salvar(); render(); toast(tem ? `${n} não pode mais voar` : `🕊️ ${n} pode voar na Praça`); },
   admJog(el) { ADM.jog = el.dataset.n; admMudouInv(); },
   admMoedas(el) { const n = ADM.jog; G.banco[n] = Math.max(0, Math.round(((G.banco[n] || 0) + +el.dataset.v) * 10) / 10); admMudouInv(); },
   admDefinir() { const v = Number($("adm-valor").value); if (!isFinite(v) || v < 0) { toast("Digite um número"); return; } G.banco[ADM.jog] = Math.round(Math.min(100000, v) * 10) / 10; admMudouInv(); toast("Moedas definidas"); },
@@ -8247,6 +8278,7 @@ TELAS.entrar = () => `
         <button type="button" data-a="visaoFp" aria-pressed="${G.visaoOnline !== false}">3D</button><button type="button" data-a="visaoCima" aria-pressed="${G.visaoOnline === false}">De cima</button>
       </span>
       <button class="lb-jogar" type="submit" style="flex:none;min-height:64px;font-size:28px" ${ON.conectando ? "disabled" : ""}>${ON.conectando ? "Entrando…" : "Entrar"}</button>
+      ${ON.conectando ? `<p class="dim" style="text-align:center;margin:0" role="status">${esc(ON.etapa || "")}</p><button type="button" class="lb-pill" data-a="cancelarEntrar" style="align-self:center">Cancelar</button>` : ""}
     </form>
   </section>`;
 TELAS.esperando = () => `
@@ -8273,25 +8305,36 @@ Object.assign(acoes, {
     entrarSala(code, nome);
   },
   sairSala() { sairOnline(); },
+  cancelarEntrar() { clearTimeout(ON.desiste); ON.conectando = false; ON.etapa = ""; try { if (ON.peer) ON.peer.destroy(); } catch {} ON.peer = null; ON.hostConn = null; render(); },
 });
+/* passos da entrada, para saber onde parou (aparecem embaixo do botão "Entrando…") */
+function etapaEntrar(n, txt) { ON.etapaN = n; ON.etapa = `Passo ${n} de 3: ${txt}`; if (G.tela === "entrar" && !$("app").hidden) { const y = window.scrollY; render(); window.scrollTo(0, y); } }
+const MOTIVO_ENTRAR = {
+  1: "Não consegui falar com o servidor de conexão. Pode ser a internet deste celular ou o servidor fora do ar agora. Tente de novo daqui a pouco.",
+  2: "O servidor não respondeu sobre a sala. Tente de novo.",
+  3: "Achei a sala, mas não consegui ligar no celular de quem abriu. Isso acontece em algumas redes (4G, escola). Tentem os dois no mesmo Wi-Fi.",
+};
 function entrarSala(code, nome, naoAbrir = false) {
   if (typeof Peer === "undefined") { toast("A conexão online não carregou. Confira a internet."); return; }
   if (ON.peer) { try { ON.peer.destroy(); } catch {} }
-  ON.host = false; ON.conectando = true; ON.codeEntrar = code; render();
+  ON.host = false; ON.conectando = true; ON.codeEntrar = code; etapaEntrar(1, "ligando no servidor de conexão…"); render();
   const peer = new Peer({ debug: 0 }); ON.peer = peer;
-  const desiste = setTimeout(() => { if (ON.conectando) { ON.conectando = false; toast("Não consegui entrar. Confira a internet e tente de novo."); render(); } }, 15000);
+  clearTimeout(ON.desiste);
+  const desiste = ON.desiste = setTimeout(() => { if (ON.conectando && ON.peer === peer) { const n = ON.etapaN || 1; ON.conectando = false; ON.etapa = ""; try { peer.destroy(); } catch {} ON.peer = null; toast(MOTIVO_ENTRAR[n] || "Não consegui entrar. Tente de novo."); render(); } }, 20000);
   peer.on("open", () => {
+    etapaEntrar(2, "procurando a sala…");
     const conn = peer.connect(PREFIXO + code, { reliable: true, serialization: "json" });
+    setTimeout(() => { if (ON.conectando && ON.peer === peer && ON.etapaN === 2) etapaEntrar(3, "ligando no celular de quem abriu a sala…"); }, 1500);
     ON.hostConn = conn;
-    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome), ficha: personagemDe(nome), amigo: meuCodigoAmigo(), arremesso: arremessoDe(nome), selo: nivelSelo(nome), pet: petDe(nome), rank: code === SALA_EVENTO ? rankAtual() : undefined, bg: code === SALA_EVENTO ? bossGParaEnviar() : undefined }); });
+    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.etapa = ""; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome), ficha: personagemDe(nome), amigo: meuCodigoAmigo(), arremesso: arremessoDe(nome), selo: nivelSelo(nome), pet: petDe(nome), rank: code === SALA_EVENTO ? rankAtual() : undefined, bg: code === SALA_EVENTO ? bossGParaEnviar() : undefined }); });
     conn.on("data", cliRecebe);
     conn.on("close", () => { if (ON.peer === peer) { toast("A conexão com a sala caiu."); sairOnline(); } });
   });
   peer.on("error", e => {
-    clearTimeout(desiste); ON.conectando = false;
+    clearTimeout(desiste); ON.conectando = false; ON.etapa = "";
     // a Sala do Andre está fechada: quem chegou primeiro abre a sala
     if (e.type === "peer-unavailable" && (code === SALA_DO_ANDRE || code === SALA_EVENTO) && !naoAbrir) { criarSala(true, nome, code); return; }
-    toast(e.type === "peer-unavailable" ? "Sala não encontrada. Confira o código." : "Problema na conexão: " + e.type);
+    toast(e.type === "peer-unavailable" ? "Sala não encontrada. Confira o código." : ["network", "server-error", "socket-error", "socket-closed", "browser-incompatible"].includes(e.type) ? MOTIVO_ENTRAR[1] : "Problema na conexão: " + e.type);
     if (G.tela === "entrar") render();
   });
 }
@@ -9012,6 +9055,10 @@ PRACA.desconectar = () => {
   try { if (PR.peer) PR.peer.destroy(); } catch {}
   PR.peer = null; PR.hostConn = null; PR.dono = false; PR.conns.clear();
 };
+
+/* telas de sala sem conexão (o jogo foi fechado no meio): volta para a tela inicial em vez de ficar numa sala que não existe mais */
+["salaHost", "esperando", "criandoSala"].forEach(k => { const t = TELAS[k]; if (t) TELAS[k] = () => { if (ON.peer) return t(); G.tela = "lobby"; salvar(); return TELAS.lobby(); }; });
+if (["salaHost", "esperando", "criandoSala", "praca"].includes(G.tela) && !ON.peer) { G.tela = "lobby"; salvar(); render(); }
 
 render();
 </script>
