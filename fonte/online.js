@@ -1356,14 +1356,14 @@ function espHostRecebe(conn, d) {
     if (o.lista.length >= 6) { enviar(conn, { t: "enao", motivo: "A sala está cheia (máximo 6 pessoas)." }); return; }
     const inf = d.info || {}, nome = String(inf.nome || "Amigo").replace(/[<>]/g, "").slice(0, 20).trim() || "Amigo";
     id = "c" + o.prox++; o.conns.set(id, { conn });
-    const info = { nome, skin: String(inf.skin || "classico").slice(0, 30), pet: null, ficha: typeof limparFicha === "function" && inf.ficha ? limparFicha(inf.ficha) : null, selo: [1, 2, 3].includes(inf.selo) ? inf.selo : 0 };
+    const info = { nome, pod: ESP_PODERES[inf.pod] ? inf.pod : null, skin: String(inf.skin || "classico").slice(0, 30), pet: null, ficha: typeof limparFicha === "function" && inf.ficha ? limparFicha(inf.ficha) : null, selo: [1, 2, 3].includes(inf.selo) ? inf.selo : 0 };
     o.lista.push({ id, nome, info }); espMandarLista(); bip(880, .08);
     return;
   }
   if (!id || !ESP.E) return;
   const p = ESP.E.P.find(x => x.id === id); if (!p) return;
   if (d.t === "ei") p.inp = { x: espClamp(+d.x || 0, -1, 1), y: espClamp(+d.y || 0, -1, 1) };
-  if (d.t === "ea" && (d.a === "chute" || d.a === "passe")) p.acao = d.a;
+  if (d.t === "ea" && (d.a === "chute" || d.a === "passe" || d.a === "poder")) p.acao = d.a;
 }
 function espHostSaiu(conn) {
   const o = espOnline; let id = null; for (const [k, c] of o.conns) if (c.conn === conn) id = k; if (!id) return;
@@ -1377,12 +1377,12 @@ acoes.espComecarOnline = () => {
   const o = espOnline; if (!o.host) return;
   const tam = Math.max(ESP.tam, Math.ceil(o.lista.length / 2));
   const E = espNovaPartida(ESP.tipo, o.lista.map(x => ({ nome: x.nome, id: x.id, info: x.info })), tam);
-  const P = E.P.map(p => ({ nome: p.nome, time: p.time, skin: p.skin, cor: p.cor, pele: p.pele, ficha: p.ficha || null, humano: p.humano, selo: p.selo || 0 }));
+  const P = E.P.map(p => ({ nome: p.nome, time: p.time, skin: p.skin, cor: p.cor, pele: p.pele, ficha: p.ficha || null, humano: p.humano, selo: p.selo || 0, pod: p.pod || null }));
   for (const [id, c] of o.conns) enviar(c.conn, { t: "einicio", tipo: E.tipo, tam, P, eu: E.P.findIndex(p => p.id === id) });
   espComecar(E, E.P.findIndex(p => p.id === "h"), {
     enviar(dt) { o.tEnvio -= dt; if (o.tEnvio > 0 && !(E.fim && !o.fimMandado)) return; o.tEnvio = .066; if (E.fim) o.fimMandado = true;
-      const b = E.b; espMandarTodos({ t: "es", p: E.P.map(p => [espR(p.x), espR(p.y), Math.round(p.dir * 100) / 100, Math.round(p.passo), p.flash > 0 ? 1 : 0, p.gols]),
-        b: [espR(b.x), espR(b.y), espR(b.z), b.dono, espR(b.h3 || 0)], pl: E.placar, tm: espR(E.t), msg: E.msg || "", fim: E.fim || null }); },
+      const b = E.b; espMandarTodos({ t: "es", p: E.P.map(p => [espR(p.x), espR(p.y), Math.round(p.dir * 100) / 100, Math.round(p.passo), p.flash > 0 ? 1 : 0, p.gols, (p.turbo > 0 ? 1 : 0) | (p.gelo > 0 ? 2 : 0) | (p.fogo > 0 ? 4 : 0), Math.ceil(p.podCd || 0)]),
+        b: [espR(b.x), espR(b.y), espR(b.z), b.dono, espR(b.h3 || 0), b.fogo > 0 ? 1 : 0], fx: (E.fxPod || []).filter(f => !f.env && (f.env = true)).map(f => [f.k, espR(f.x), espR(f.y)]), pl: E.placar, tm: espR(E.t), msg: E.msg || "", fim: E.fim || null }); },
     denovo() { o.fimMandado = false; acoes.espComecarOnline(); },
     sair() { espMandarTodos({ t: "efechou" }); setTimeout(espLimparRede, 200); }
   });
@@ -1413,7 +1413,7 @@ function espCliRecebe(d) {
   if (d.t === "efechou") { toast("Quem abriu a sala saiu."); const jogando = ESP.E; espLimparRede(); if (jogando) espSair(true); else ir("esportes"); return; }
   if (d.t === "einicio" && ESP_TIPOS[d.tipo] && Array.isArray(d.P)) {
     const P = d.P.slice(0, 6).map((x, i) => { const p = { i, nome: String(x.nome || "").slice(0, 20), humano: !!x.humano, time: x.time ? 1 : 0, cor: String(x.cor || "#2f80ed").slice(0, 9), pele: String(x.pele || A_PELE[0]).slice(0, 9),
-      skin: SKINS.some(s => s.k === x.skin) ? x.skin : "classico", selo: [1, 2, 3].includes(x.selo) ? x.selo : 0, vidas: 0, x: ESP_W / 2, y: ESP_H / 2, dir: 0, passo: 0, flash: 0, gols: 0, vx: 0, vy: 0 };
+      pod: ESP_PODERES[x.pod] ? x.pod : null, skin: SKINS.some(s => s.k === x.skin) ? x.skin : "classico", selo: [1, 2, 3].includes(x.selo) ? x.selo : 0, vidas: 0, x: ESP_W / 2, y: ESP_H / 2, dir: 0, passo: 0, flash: 0, gols: 0, vx: 0, vy: 0 };
       if (x.ficha && typeof limparFicha === "function") p.ficha = limparFicha(x.ficha); return p; });
     const E = { tipo: d.tipo, tam: d.tam, t: ESP_TEMPO, placar: [0, 0], P, b: { x: ESP_W / 2, y: ESP_H / 2, z: 0, dono: -1 }, msg: "", fim: null };
     o.alvo = null;
@@ -1422,9 +1422,10 @@ function espCliRecebe(d) {
       passo(dt, inp) {
         o.tInp -= dt; const k = (Math.round(inp.x * 20) / 20) + "," + (Math.round(inp.y * 20) / 20);
         if (o.tInp <= 0 || (k !== o.ultInp && o.tInp < .04)) { o.tInp = k !== o.ultInp ? .066 : .25; o.ultInp = k; enviar(o.hostConn, { t: "ei", x: Math.round(inp.x * 100) / 100, y: Math.round(inp.y * 100) / 100 }); }
+        if (E.fxPod) E.fxPod = E.fxPod.filter(f => (f.t -= dt) > 0);
         const a = o.alvo; if (!a) return; const kk = 1 - Math.exp(-dt * 14);
-        E.P.forEach((p, i) => { const q = a.p[i]; if (!q) return; p.x += (q[0] - p.x) * kk; p.y += (q[1] - p.y) * kk; p.dir = q[2]; p.passo = q[3]; p.flash = q[4] ? 1 : 0; p.gols = q[5] || 0; });
-        E.b.x += (a.b[0] - E.b.x) * kk; E.b.y += (a.b[1] - E.b.y) * kk; E.b.z += (a.b[2] - E.b.z) * kk; E.b.h3 = (E.b.h3 || 0) + (a.b[4] - (E.b.h3 || 0)) * kk; E.b.dono = a.b[3];
+        E.P.forEach((p, i) => { const q = a.p[i]; if (!q) return; p.x += (q[0] - p.x) * kk; p.y += (q[1] - p.y) * kk; p.dir = q[2]; p.passo = q[3]; p.flash = q[4] ? 1 : 0; p.gols = q[5] || 0; p.turbo = q[6] & 1 ? 1 : 0; p.gelo = q[6] & 2 ? 1 : 0; p.fogo = q[6] & 4 ? 1 : 0; p.podCd = q[7] || 0; });
+        E.b.x += (a.b[0] - E.b.x) * kk; E.b.y += (a.b[1] - E.b.y) * kk; E.b.z += (a.b[2] - E.b.z) * kk; E.b.h3 = (E.b.h3 || 0) + (a.b[4] - (E.b.h3 || 0)) * kk; E.b.dono = a.b[3]; E.b.fogo = a.b[5] ? 1 : 0;
       },
       acao(x) { enviar(o.hostConn, { t: "ea", a: x }); },
       sair() { espLimparRede(); }
@@ -1433,7 +1434,8 @@ function espCliRecebe(d) {
   }
   if (d.t === "es" && ESP.E && Array.isArray(d.p) && Array.isArray(d.b)) {
     const E = ESP.E, num = v => espClamp(+v || 0, -50, ESP_H + 50);
-    o.alvo = { p: d.p.slice(0, 6).map(q => [num(q[0]), num(q[1]), +q[2] || 0, +q[3] || 0, q[4] ? 1 : 0, Math.max(0, Math.min(99, +q[5] || 0))]), b: [num(d.b[0]), num(d.b[1]), espClamp(+d.b[2] || 0, 0, 400), Number.isInteger(d.b[3]) ? d.b[3] : -1, espClamp(+d.b[4] || 0, 0, 400)] };
+    o.alvo = { p: d.p.slice(0, 6).map(q => [num(q[0]), num(q[1]), +q[2] || 0, +q[3] || 0, q[4] ? 1 : 0, Math.max(0, Math.min(99, +q[5] || 0)), (+q[6] || 0) & 7, Math.max(0, Math.min(99, +q[7] || 0))]), b: [num(d.b[0]), num(d.b[1]), espClamp(+d.b[2] || 0, 0, 400), Number.isInteger(d.b[3]) ? d.b[3] : -1, espClamp(+d.b[4] || 0, 0, 400), d.b[5] ? 1 : 0] };
+    if (Array.isArray(d.fx)) E.fxPod = (E.fxPod || []).filter(f => (f.t || 0) > 0).concat(d.fx.slice(0, 6).filter(f => Array.isArray(f) && ESP_PODERES[f[0]]).map(f => ({ k: f[0], x: num(f[1]), y: num(f[2]), t: .8 })));
     if (Array.isArray(d.pl)) E.placar = [Math.max(0, +d.pl[0] || 0), Math.max(0, +d.pl[1] || 0)];
     E.t = espClamp(+d.tm || 0, 0, ESP_TEMPO); E.msg = String(d.msg || "").slice(0, 40);
     if (d.fim && !E.fim) { E.fim = { placar: E.placar.slice(), vence: [0, 1, -1].includes(d.fim.vence) ? d.fim.vence : -1 }; E.P.forEach((p, i) => { const q = o.alvo.p[i]; if (q) p.gols = q[5]; }); }

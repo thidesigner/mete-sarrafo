@@ -346,6 +346,10 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .es-chute { right: 20px; bottom: 30px; width: 104px; height: 104px; background: #ffd23f; }
 .es-passe { right: 132px; bottom: 26px; width: 72px; height: 72px; background: #7fd3ff; font-size: 26px; }
 .es-btn:disabled { opacity: .45; }
+.es-poder { right: 30px; bottom: 150px; width: 72px; height: 72px; background: #ff9ad5; font-size: 28px; }
+.es-poder.ativo { box-shadow: 0 0 18px #ffd23f, 0 5px 0 #0b1b33; background: #ffd23f; }
+.es-pods { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.es-sorteio { font-size: 64px; text-align: center; line-height: 1.1; }
 .es-fim { position: absolute; inset: 0; z-index: 4; display: grid; place-items: center; background: rgba(5,10,25,.55); padding: 16px; }
 .es-fim h2 { font-size: 32px; }
 .es-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -7945,8 +7949,18 @@ const ESP = { tipo: G.espTipo || "futebol", tam: G.espTam || 2, E: null, eu: 0, 
 const espDist = (a, b, c, d) => Math.hypot(a - c, b - d);
 const espClamp = (v, a, b) => Math.max(a, Math.min(b, v));
 function espAlvo(time) { return ESP_CESTA[time]; }   // gol/cesta que o time ataca (Azul = em cima)
-function espInfoJogador(nome) {   // o que vai pela rede de cada humano (só aparência)
-  return { nome, skin: skinDe(nome), pet: petDe(nome), ficha: typeof personagemDe === "function" ? personagemDe(nome) : null, selo: nivelSelo(nome) };
+/* Poderes dos Esportes (ideia do Andre): o 1º vem de presente (sorteado), os outros saem na Caixa de poder (moedas do jogo).
+   Cada um leva 1 poder para a partida e usa com o botão; depois espera recarregar (ESP_POD_CD). Robôs ganham um poder sorteado. */
+const ESP_PODERES = {
+  fogo: { ic: "🔥", nome: "Chute de fogo", dica: "O próximo chute vai muito forte e o outro time não segura. No basquete o arremesso quase sempre entra." },
+  turbo: { ic: "⚡", nome: "Turbo", dica: "Corre muito rápido por 4 segundos." },
+  gelo: { ic: "❄️", nome: "Congelar", dica: "Congela os adversários perto de você por 2 segundos." } };
+const ESP_POD_CD = 20, ESP_POD_PRECO = 300;
+function espPoderesDe(nome) { const l = ((G.inv || {})[nome] || {}).espPod; return Array.isArray(l) ? l.filter(k => ESP_PODERES[k]) : []; }
+function espPoderUsado(nome) { const inv = (G.inv || {})[nome] || {}, l = espPoderesDe(nome); return l.includes(inv.espPodUsar) ? inv.espPodUsar : l[0] || null; }
+function espDarPoder(nome, k) { G.inv = G.inv || {}; const inv = G.inv[nome] = G.inv[nome] || { vidas: 0 }; inv.espPod = espPoderesDe(nome); if (!inv.espPod.includes(k)) inv.espPod.push(k); if (!inv.espPodUsar) inv.espPodUsar = k; }
+function espInfoJogador(nome) {   // o que vai pela rede de cada humano (aparência e o poder escolhido)
+  return { nome, skin: skinDe(nome), pet: petDe(nome), ficha: typeof personagemDe === "function" ? personagemDe(nome) : null, selo: nivelSelo(nome), pod: espPoderUsado(nome) };
 }
 /* ---------- montar a partida ---------- */
 function espNovaPartida(tipo, humanos, tam) {
@@ -7956,8 +7970,9 @@ function espNovaPartida(tipo, humanos, tam) {
   const P = lista.map((o, i) => {
     const p = { i, nome: o.nome, id: o.id || null, humano: o.humano, time: o.time, cor: ESP_TIMES[o.time].cor, pele: A_PELE[i % A_PELE.length],
       vidas: 0, x: 0, y: 0, vx: 0, vy: 0, dir: o.time === 0 ? -Math.PI / 2 : Math.PI / 2, passo: 0, flash: 0, inp: { x: 0, y: 0 }, acao: null,
-      cdPegar: 0, cdRoubo: 0, cdIA: 0, gols: 0, vel: ESP_VEL * (o.humano ? 1 : .8 + Math.random() * .08) };
-    if (o.humano) { const f = o.info || espInfoJogador(o.nome); vestir(p, SKINS.some(s => s.k === f.skin) ? f.skin : "classico"); if (f.ficha) p.ficha = f.ficha; p.pet = f.pet || null; p.selo = f.selo || 0; }
+      cdPegar: 0, cdRoubo: 0, cdIA: 0, gols: 0, vel: ESP_VEL * (o.humano ? 1 : .8 + Math.random() * .08),
+      pod: o.humano ? null : aPick(Object.keys(ESP_PODERES)), podCd: 8 + Math.random() * 4, turbo: 0, gelo: 0, fogo: 0 };
+    if (o.humano) { const f = o.info || espInfoJogador(o.nome); vestir(p, SKINS.some(s => s.k === f.skin) ? f.skin : "classico"); if (f.ficha) p.ficha = f.ficha; p.pet = f.pet || null; p.selo = f.selo || 0; p.pod = ESP_PODERES[f.pod] ? f.pod : null; p.podCd = 6; }
     return p;
   });
   vestirRobos(P);
@@ -7981,7 +7996,8 @@ function espSaida(E, time) {
 /* ---------- um passo da simulação (quem roda: o celular sozinho ou quem abriu a sala online) ---------- */
 function espPasso(E, dt) {
   if (E.fim) return;
-  for (const p of E.P) { p.flash = Math.max(0, p.flash - dt * 2); p.cdPegar -= dt; p.cdRoubo -= dt; }
+  for (const p of E.P) { p.flash = Math.max(0, p.flash - dt * 2); p.cdPegar -= dt; p.cdRoubo -= dt; p.podCd = Math.max(0, (p.podCd || 0) - dt); p.turbo = Math.max(0, (p.turbo || 0) - dt); p.gelo = Math.max(0, (p.gelo || 0) - dt); p.fogo = Math.max(0, (p.fogo || 0) - dt); }
+  E.b.fogo = Math.max(0, (E.b.fogo || 0) - dt); if (E.fxPod) E.fxPod = E.fxPod.filter(f => (f.t -= dt) > 0);
   if (E.pausa > 0) { E.pausa -= dt; if (E.pausa <= 0) { E.msg = ""; if (E.depois) { const f = E.depois; E.depois = null; f(); } } return; }
   E.t -= dt;
   if (E.t <= 0) { E.t = 0; E.fim = { placar: E.placar.slice(), vence: E.placar[0] === E.placar[1] ? -1 : E.placar[0] > E.placar[1] ? 0 : 1 }; E.msg = "Fim de jogo!"; return; }
@@ -7989,11 +8005,12 @@ function espPasso(E, dt) {
   for (const p of E.P) {
     if (!p.humano || p.virouRobo) espIA(E, p, dt);
     const m = Math.hypot(p.inp.x, p.inp.y), ix = m > 1 ? p.inp.x / m : p.inp.x, iy = m > 1 ? p.inp.y / m : p.inp.y;
-    const vel = p.vel * (b.dono === p.i ? .9 : 1), k = 1 - Math.exp(-dt * 12);
+    if (p.gelo > 0) { p.inp = { x: 0, y: 0 }; p.acao = null; p.vx = p.vy = 0; continue; }   // congelado: não anda nem chuta
+    const vel = p.vel * (b.dono === p.i ? .9 : 1) * (p.turbo > 0 ? 1.75 : 1), k = 1 - Math.exp(-dt * 12);
     p.vx += (ix * vel - p.vx) * k; p.vy += (iy * vel - p.vy) * k;
     p.x = espClamp(p.x + p.vx * dt, 22, ESP_W - 22); p.y = espClamp(p.y + p.vy * dt, 22, ESP_H - 22);
     const v = Math.hypot(p.vx, p.vy); if (m > .15) p.dir = Math.atan2(iy, ix); p.passo += v * dt * 1.6;
-    if (p.acao) { const a = p.acao; p.acao = null; if (b.dono === p.i) a === "passe" ? espPassar(E, p) : espChutar(E, p); }
+    if (p.acao) { const a = p.acao; p.acao = null; if (a === "poder") espUsarPoder(E, p); else if (b.dono === p.i) a === "passe" ? espPassar(E, p) : espChutar(E, p); }
   }
   // bola
   if (b.voo) {
@@ -8015,14 +8032,17 @@ function espPasso(E, dt) {
     if (E.tipo === "futebol" && noGol && (b.y < 12 || b.y > ESP_H - 12)) return espPonto(E, b.y < 12 ? 0 : 1, 1);
     if (b.y < 12) { b.y = 12; b.vy = Math.abs(b.vy) * .7; } if (b.y > ESP_H - 12) { b.y = ESP_H - 12; b.vy = -Math.abs(b.vy) * .7; }
     let perto = null, pd = 28;
-    for (const p of E.P) { const d = espDist(p.x, p.y, b.x, b.y); if (p.cdPegar <= 0 && d < pd) { pd = d; perto = p; } }
+    for (const p of E.P) { const d = espDist(p.x, p.y, b.x, b.y); if (p.gelo > 0) continue;
+      if (b.fogo > 0 && p.time !== b.fogoTime) { if (d < 26 && p.flash <= 0) { p.flash = 1; bipEsp(180); } continue; }   // bola de fogo: o outro time não segura
+      if (p.cdPegar <= 0 && d < pd) { pd = d; perto = p; } }
     if (perto) { b.dono = perto.i; b.vx = b.vy = 0; }
   }
 }
 function espChutar(E, p) {
   const b = E.b;
   if (E.tipo === "basquete") return espArremessar(E, p);
-  const v = 640; b.dono = -1; b.vx = Math.cos(p.dir) * v + p.vx * .3; b.vy = Math.sin(p.dir) * v + p.vy * .3; b.z = 6; p.cdPegar = .35; bipEsp(520);
+  const fogo = p.fogo > 0, v = fogo ? 1050 : 640; b.dono = -1; b.vx = Math.cos(p.dir) * v + p.vx * .3; b.vy = Math.sin(p.dir) * v + p.vy * .3; b.z = 6; p.cdPegar = .35; bipEsp(fogo ? 260 : 520);
+  if (fogo) { p.fogo = 0; b.fogo = 1.1; b.fogoTime = p.time; }
   b.ultimo = p.i;
 }
 function espPassar(E, p) {
@@ -8037,9 +8057,20 @@ function espArremessar(E, p) {
   const b = E.b, c = espAlvo(p.time), d = espDist(p.x, p.y, c.x, c.y);
   let chance = espClamp(.92 - d / 850, .12, .88);
   if (E.P.some(q => q.time !== p.time && espDist(q.x, q.y, p.x, p.y) < 60)) chance -= .25;   // marcado: mais difícil
+  if (p.fogo > 0) { chance = .95; p.fogo = 0; b.fogo = 1.6; b.fogoTime = p.time; }   // arremesso de fogo
   b.dono = -1; b.ultimo = p.i; p.cdPegar = .5;
   b.voo = { x0: b.x, y0: b.y, hx: c.x, hy: c.y, f: 0, dur: .55 + d / 1300, h: 70 + d / 6, ok: Math.random() < chance, pts: d > 300 ? 3 : 2, time: p.time, quem: p.i };
   bipEsp(600);
+}
+function espUsarPoder(E, p) {
+  if (!p.pod || p.podCd > 0 || p.gelo > 0) return false;
+  p.podCd = ESP_POD_CD;
+  if (p.pod === "turbo") { p.turbo = 4; bipEsp(900); }
+  if (p.pod === "fogo") { p.fogo = 8; bipEsp(300); }
+  if (p.pod === "gelo") { bipEsp(1400);
+    for (const q of E.P) if (q.time !== p.time && espDist(q.x, q.y, p.x, p.y) < 170) { q.gelo = 2; q.turbo = 0; if (E.b.dono === q.i) { E.b.dono = -1; E.b.vx = (Math.random() - .5) * 120; E.b.vy = (Math.random() - .5) * 120; q.cdPegar = 2; } } }
+  E.fxPod = (E.fxPod || []).concat([{ k: p.pod, x: p.x, y: p.y, t: .8 }]).slice(-6);
+  return true;
 }
 function espFimArremesso(E) {
   const b = E.b, f = b.voo; b.voo = null;
@@ -8066,6 +8097,10 @@ function espGoleiro(E, p) {   // o robô do time mais perto do próprio gol (com
 function espIA(E, p, dt) {
   const b = E.b, alvo = espAlvo(p.time), meuGol = espAlvo(1 - p.time);
   const temBola = b.dono === p.i, nossa = b.dono >= 0 && E.P[b.dono].time === p.time;
+  if (p.pod && p.podCd <= 0 && Math.random() < dt * 1.5) {   // robô usa o poder quando faz sentido
+    const perto = E.P.some(q => q.time !== p.time && espDist(q.x, q.y, p.x, p.y) < 120), dGol = espDist(p.x, p.y, alvo.x, alvo.y);
+    if ((p.pod === "turbo" && temBola && dGol > 300) || (p.pod === "gelo" && perto && (temBola || (b.dono >= 0 && !nossa))) || (p.pod === "fogo" && temBola && dGol < 460)) p.acao = "poder";
+  }
   let tx = p.x, ty = p.y;
   if (temBola) {
     const d = espDist(p.x, p.y, alvo.x, alvo.y);
@@ -8146,16 +8181,21 @@ function espDesenhar(c, E, eu, cw, ch, topo = 0) {
   c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = E.tipo === "futebol" ? "#1d6b3a" : "#5b3a1e"; c.fillRect(0, 0, c.canvas.width, c.canvas.height);
   c.setTransform(s, 0, 0, s, ox, oy);
   espDesenharCampo(c, E.tipo);
-  const ph = { k: "esporte" }, ord = E.P.slice().sort((a, b) => a.y - b.y), b = E.b;
+  const ph = { k: "esporte" }, ord = E.P.slice().sort((a, b) => a.y - b.y), b = E.b, tt = performance.now() / 1000;
+  for (const f of E.fxPod || []) if (f.k === "gelo") { c.strokeStyle = "rgba(160,225,255,.7)"; c.lineWidth = 6; c.beginPath(); c.arc(f.x, f.y, 170 * (1 - Math.max(0, f.t) / .8 * .6), 0, Math.PI * 2); c.stroke(); }
+  if (b.fogo > 0) for (let k = 1; k <= 6; k++) { c.fillStyle = `rgba(255,${120 + k * 15},40,${.5 - k * .07})`; c.beginPath(); c.arc(b.x - (b.vx || 0) * k * .012, b.y + 10 - (b.vy || 0) * k * .012, 14 - k, 0, Math.PI * 2); c.fill(); }
   const bolaAtras = b.y - b.z < (E.P[b.dono] || {}).y;
   if (bolaAtras && b.dono >= 0) espDesenharBola(c, E, b.x, b.y + 10, b.z);
   for (const p of ord) {
     c.lineWidth = p.i === eu ? 6 : 4; c.strokeStyle = p.i === eu ? "#ffd23f" : ESP_TIMES[p.time].cor; c.fillStyle = ESP_TIMES[p.time].cor + "55";
     c.beginPath(); c.ellipse(p.x, p.y + 16, 24, 10, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+    if (p.turbo > 0) { c.strokeStyle = "rgba(255,225,80,.8)"; c.lineWidth = 3; for (let k = 0; k < 4; k++) { const a = p.dir + Math.PI + (k - 1.5) * .3; c.beginPath(); c.moveTo(p.x + Math.cos(a) * 26, p.y + Math.sin(a) * 26); c.lineTo(p.x + Math.cos(a) * (46 + Math.sin(tt * 20 + k) * 8), p.y + Math.sin(a) * (46 + Math.sin(tt * 20 + k) * 8)); c.stroke(); } }
+    if (p.fogo > 0) { c.strokeStyle = `rgba(255,120,30,${.6 + .3 * Math.sin(tt * 10)})`; c.lineWidth = 5; c.beginPath(); c.arc(p.x, p.y - 10, 34, 0, Math.PI * 2); c.stroke(); }
     c.save(); c.translate(p.x, p.y); c.scale(ESP_ESC, ESP_ESC);
     const t = espTemp; Object.assign(t, p); t.x = 0; t.y = 0; t.vidas = 0; t.i = p.i + 1000; t.pet = null;
     try { desenharBoneco2(c, t, ph); } catch {}
     c.restore();
+    if (p.gelo > 0) { c.fillStyle = "rgba(170,225,255,.45)"; c.strokeStyle = "rgba(255,255,255,.9)"; c.lineWidth = 3; c.beginPath(); c.roundRect ? c.roundRect(p.x - 22, p.y - 52, 44, 74, 8) : c.rect(p.x - 22, p.y - 52, 44, 74); c.fill(); c.stroke(); }
   }
   if (!bolaAtras || b.dono < 0) espDesenharBola(c, E, b.x, b.y + 10, b.z);
   c.setTransform(1, 0, 0, 1, 0, 0);
@@ -8228,13 +8268,19 @@ function esp3Montar(E, eu) {
     else { c.fillStyle = "#ff7a1a"; c.fillRect(0, 0, 128, 64); c.strokeStyle = "#2a1300"; c.lineWidth = 3; c.beginPath(); c.moveTo(0, 32); c.lineTo(128, 32); for (const x of [32, 96]) { c.moveTo(x, 0); c.lineTo(x, 64); } c.stroke(); } });
   E3.bola = new THREE.Mesh(new THREE.SphereGeometry(futebol ? .24 : .26, 20, 14), new THREE.MeshLambertMaterial({ map: bolaTex })); cena.add(E3.bola);
   E3.sombra = new THREE.Mesh(new THREE.PlaneGeometry(.7, .7), new THREE.MeshBasicMaterial({ map: PRACA.sombraTex, transparent: true, depthWrite: false })); E3.sombra.rotation.x = -Math.PI / 2; E3.sombra.position.y = .02; cena.add(E3.sombra);
-  E3.r = r; E3.cena = cena; E3.cam = new THREE.PerspectiveCamera(55, 1, .1, 200); E3.tipo = E.tipo; E3.placar = E.placar.join("x"); E3.camPos = null; E3.confete = [];
+  E3.r = r; E3.cena = cena; E3.cam = new THREE.PerspectiveCamera(55, 1, .1, 200); E3.tipo = E.tipo; E3.placar = E.placar.join("x"); E3.camPos = null; E3.confete = []; E3.faiscas = [];
   return true;
 }
 function esp3Limpar() {
   if (E3.r) { try { E3.r.dispose(); E3.r.domElement.remove(); } catch {} }
   if (E3.cena) E3.cena.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) [].concat(o.material).forEach(m => { if (m.map) m.map.dispose(); m.dispose(); }); });
-  E3.r = null; E3.cena = null; E3.mods = []; E3.confete = []; E3.torcida = null;
+  E3.r = null; E3.cena = null; E3.mods = []; E3.confete = []; E3.faiscas = []; E3.torcida = null; E3.geoF = null;
+}
+function esp3Faisca(x, y, z, cor, vx = 0, vz = 0) {
+  if (E3.faiscas.length > 160) return;
+  E3.geoF = E3.geoF || new THREE.OctahedronGeometry(.09);
+  const m = new THREE.Mesh(E3.geoF, new THREE.MeshBasicMaterial({ color: cor, transparent: true })); m.position.set(x + (Math.random() - .5) * .3, y, z + (Math.random() - .5) * .3); E3.cena.add(m);
+  E3.faiscas.push({ m, vx: vx + (Math.random() - .5), vy: 1 + Math.random(), vz: vz + (Math.random() - .5), t: .5 });
 }
 function esp3Confete(x, z) {
   const geo = new THREE.PlaneGeometry(.18, .12), cores = [0xffd23f, 0xff4d6d, 0x2f80ed, 0x37d99a, 0xffffff, 0xff7ad9];
@@ -8248,10 +8294,19 @@ function esp3Quadro(E, eu, dt, w, h) {
   // jogadores
   E.P.forEach((p, i) => { const m = E3.mods[i]; if (!m) return; const nx = e3x(p.x), nz = e3z(p.y), v = Math.hypot(nx - m.ux, nz - m.uz) / Math.max(dt, .001);
     m.ux = nx; m.uz = nz; m.passo += v * dt * 3; animarBonecoPraca(m, nx, 0, nz, Math.atan2(-Math.cos(p.dir), -Math.sin(p.dir)), v > .6, dt);
-    m.corpo.rotation.z = p.flash > 0 ? Math.sin(performance.now() / 40) * .15 : 0; });
+    m.corpo.rotation.z = p.flash > 0 && !(p.gelo > 0) ? Math.sin(performance.now() / 40) * .15 : 0;
+    // poderes: bloco de gelo, faíscas do turbo e anel de fogo
+    if (p.gelo > 0 && !m.gelo) { m.gelo = new THREE.Mesh(new THREE.BoxGeometry(1, 2.1, 1), new THREE.MeshLambertMaterial({ color: 0xaee6ff, transparent: true, opacity: .5, emissive: 0x2a6f99 })); m.gelo.position.y = 1; m.g.add(m.gelo); }
+    if (m.gelo) m.gelo.visible = p.gelo > 0;
+    if (!m.fogoAnel) { m.fogoAnel = new THREE.Mesh(new THREE.TorusGeometry(.62, .06, 8, 28), new THREE.MeshBasicMaterial({ color: 0xff7a1a })); m.fogoAnel.rotation.x = Math.PI / 2; m.fogoAnel.position.y = 1; m.g.add(m.fogoAnel); }
+    m.fogoAnel.visible = p.fogo > 0; if (p.fogo > 0) m.fogoAnel.rotation.z += dt * 6;
+    if (p.turbo > 0 && Math.random() < .6) esp3Faisca(nx, .4 + Math.random(), nz, 0xffe14d); });
   // bola (no basquete, o arremesso termina na altura do aro)
   const b = E.b, alt = (b.h3 != null ? b.h3 : b.z) / 40, bx = e3x(b.x), bz = e3z(b.y);
-  E3.bola.position.set(bx, (E.tipo === "futebol" ? .24 : .26) + alt, bz); E3.bola.rotation.x += dt * 6 * (b.dono >= 0 || E.b.vx || E.b.vy ? 1 : 0);
+  E3.bola.position.set(bx, (E.tipo === "futebol" ? .24 : .26) + alt, bz);
+  E3.bola.material.emissive.set(b.fogo > 0 ? 0xff5a00 : 0x000000); if (b.fogo > 0) for (let k = 0; k < 2; k++) esp3Faisca(bx, (E.tipo === "futebol" ? .24 : .26) + alt, bz, k ? 0xffd23f : 0xff5a00);
+  for (const f of E.fxPod || []) if (f.k === "gelo" && !f.v3) { f.v3 = true; for (let k = 0; k < 40; k++) { const a = k / 40 * Math.PI * 2; esp3Faisca(e3x(f.x) + Math.cos(a) * .5, .5, e3z(f.y) + Math.sin(a) * .5, 0xbfe8ff, Math.cos(a) * 6, Math.sin(a) * 6); } }
+  for (let i = E3.faiscas.length - 1; i >= 0; i--) { const f = E3.faiscas[i]; f.t -= dt; f.m.position.x += f.vx * dt; f.m.position.y += f.vy * dt; f.m.position.z += f.vz * dt; f.m.material.opacity = Math.max(0, f.t / .5); if (f.t <= 0) { E3.cena.remove(f.m); f.m.material.dispose(); E3.faiscas.splice(i, 1); } } E3.bola.rotation.x += dt * 6 * (b.dono >= 0 || E.b.vx || E.b.vy ? 1 : 0);
   E3.sombra.position.set(bx, .02, bz); E3.sombra.scale.setScalar(1 / (1 + alt * .3));
   // gol/cesta: confete e torcida pulando
   const pl = E.placar.join("x"); if (pl !== E3.placar) { const antes = E3.placar.split("x").map(Number), t = E.placar[0] > antes[0] ? 0 : 1; E3.placar = pl; E3.pulo = 2.5; const alvo = ESP_CESTA[t]; esp3Confete(e3x(alvo.x), e3z(alvo.y)); }
@@ -8285,6 +8340,7 @@ TELAS.esportes = () => {
       <form class="presente-form" data-a="espEntrarForm" autocomplete="off"><input id="es-code" maxlength="4" placeholder="Código da sala" aria-label="Código da sala" value="${esc(ESP.codeEntrar || "")}"><button class="btn small" type="submit">Entrar</button></form>`
       : `<p class="dim" style="font-size:14px;text-align:center">Para jogar com amigos, abra o jogo no site.</p>`}
     </div>
+    ${espPoderesCard()}
     <div class="card" style="background:rgba(11,27,51,.6)">
       <h3>Como jogar</h3>
       <p>🕹️ Círculo da esquerda: andar. ${ESP_TIPOS[ESP.tipo].ic} <b>${ESP_TIPOS[ESP.tipo].acao}</b>: ${ESP.tipo === "futebol" ? "chuta para onde você está olhando" : "arremessa na cesta (de longe vale 3, mas é mais difícil)"}. ↪️ <b>Passar</b>: manda a bola para o companheiro.</p>
@@ -8292,7 +8348,41 @@ TELAS.esportes = () => {
     </div>
   </section>`;
 };
-acoes.esportes = () => ir("esportes");
+function espPoderesCard() {
+  const nome = perfil(), tem = espPoderesDe(nome), usar = espPoderUsado(nome), faltam = Object.keys(ESP_PODERES).filter(k => !tem.includes(k)), moedas = G.banco[nome] || 0;
+  return `<div class="card" style="background:rgba(11,27,51,.6);text-align:center">
+    <h3>⚡ Meus poderes</h3>
+    ${tem.length ? `<p class="dim" style="font-size:14px">Escolha qual levar para a partida. Use com o botão de poder (no PC: Q).</p>
+      <div class="es-pods">${tem.map(k => `<button type="button" class="chip pick" data-a="espPodUsar" data-k="${k}" aria-pressed="${usar === k}">${ESP_PODERES[k].ic} ${ESP_PODERES[k].nome}</button>`).join("")}</div>
+      ${usar ? `<p style="font-size:15px">${ESP_PODERES[usar].ic} ${ESP_PODERES[usar].dica}</p>` : ""}` : `<p>Você ainda não tem poder.</p>`}
+    ${faltam.length ? `<button type="button" class="lb-comprar" data-a="espCaixa" ${moedas < ESP_POD_PRECO ? "disabled" : ""}>🎁 Caixa de poder <span class="lb-coin" aria-hidden="true">$</span>${ESP_POD_PRECO}</button>
+      <p class="dim" style="font-size:13px">Sorteia um poder que você ainda não tem (${faltam.map(k => ESP_PODERES[k].ic).join(" ")}).</p>` : `<p class="dim" style="font-size:14px">Você já tem todos os poderes! 🏆</p>`}
+  </div>`;
+}
+function espSorteioVer(k, titulo, depois) {   // janela com os ícones girando e o poder que saiu
+  const ics = Object.values(ESP_PODERES).map(x => x.ic), box = document.createElement("div"); box.className = "aviso-adm";
+  box.innerHTML = `<div class="aviso-caixa"><span class="aviso-tag">${esc(titulo)}</span><div class="es-sorteio" id="es-sort">❓</div><p id="es-sort-t">Sorteando…</p><button class="lb-jogar" id="es-sort-ok" hidden>Legal!</button></div>`;
+  document.body.appendChild(box); let i = 0;
+  const giro = setInterval(() => { const e = $("es-sort"); if (e) e.textContent = ics[i++ % ics.length]; bip(500 + (i % 3) * 200, .03); }, 110);
+  setTimeout(() => { clearInterval(giro); const pd = ESP_PODERES[k]; $("es-sort").textContent = pd.ic; $("es-sort-t").innerHTML = `<b>${esc(pd.nome)}</b><br><span class="dim" style="font-size:16px">${esc(pd.dica)}</span>`; $("es-sort-ok").hidden = false;
+    if (typeof tocarNotas === "function") tocarNotas([[72, 72, 0, .1, "square"], [76, 76, .1, .1, "square"], [79, 79, .2, .1, "square"], [84, 84, .3, .3, "square"]]); }, 1600);
+  $("es-sort-ok").addEventListener("click", () => { box.remove(); if (depois) depois(); });
+}
+acoes.espPodUsar = el => { const nome = perfil(); if (!espPoderesDe(nome).includes(el.dataset.k)) return; G.inv[nome].espPodUsar = el.dataset.k; salvar(); render(); };
+acoes.espCaixa = () => {
+  const nome = perfil(), faltam = Object.keys(ESP_PODERES).filter(k => !espPoderesDe(nome).includes(k));
+  if (!faltam.length) return; if ((G.banco[nome] || 0) < ESP_POD_PRECO) { toast("Faltam moedas"); return; }
+  G.banco[nome] = Math.round((G.banco[nome] - ESP_POD_PRECO) * 10) / 10; const k = aPick(faltam); espDarPoder(nome, k); G.inv[nome].espPodUsar = k; salvar();
+  espSorteioVer(k, "🎁 Caixa de poder", () => render());
+};
+// primeira vez nos Esportes: um poder de presente, sorteado
+function espPresentePoder() {
+  const nome = perfil(); G.espPresente = G.espPresente || {};
+  if (G.espPresente[nome] || espPoderesDe(nome).length) return;
+  G.espPresente[nome] = true; const k = aPick(Object.keys(ESP_PODERES)); espDarPoder(nome, k); salvar();
+  setTimeout(() => espSorteioVer(k, "🎁 Presente: seu primeiro poder!", () => render()), 300);
+}
+acoes.esportes = () => { ir("esportes"); espPresentePoder(); };
 acoes.espTipo = el => { ESP.tipo = G.espTipo = el.dataset.k; salvar(); render(); };
 acoes.esp3d = el => { G.esp3d = el.dataset.v === "1"; salvar(); render(); };
 acoes.espTam = el => { ESP.tam = G.espTam = +el.dataset.n; salvar(); render(); };
@@ -8312,6 +8402,7 @@ function espComecar(E, eu, rede) {
     <div class="es-time" id="es-meutime"></div>
     <div class="pr-joy es-joy" id="es-joy" aria-label="Andar"><i></i></div>
     <button type="button" class="es-btn es-passe" id="es-passe">↪️<small>Passar</small></button>
+    ${E.P[eu] && E.P[eu].pod ? `<button type="button" class="es-btn es-poder" id="es-poder">${ESP_PODERES[E.P[eu].pod].ic}<small id="es-podtxt">Poder</small></button>` : ""}
     <button type="button" class="es-btn es-chute" id="es-chute">${t.ic}<small>${t.acao}</small></button>
     <div class="es-fim" id="es-fim" hidden></div>`;
   box.hidden = false; document.body.classList.add("es-aberto");
@@ -8331,10 +8422,11 @@ function espControles() {
   joy.addEventListener("pointerup", solta); joy.addEventListener("pointercancel", solta);
   $("es-chute").addEventListener("pointerdown", e => { e.preventDefault(); espAcao("chute"); });
   $("es-passe").addEventListener("pointerdown", e => { e.preventDefault(); espAcao("passe"); });
+  if ($("es-poder")) $("es-poder").addEventListener("pointerdown", e => { e.preventDefault(); espAcao("poder"); });
   $("es-sair").addEventListener("click", () => espSair());
   if ($("es-visao")) $("es-visao").addEventListener("click", () => { G.esp3d = !ESP.v3; salvar(); if (ESP.v3) { esp3Limpar(); ESP.v3 = false; } else ESP.v3 = esp3Montar(ESP.E, ESP.eu); $("es-visao").textContent = ESP.v3 ? "2D" : "3D"; });
   ESP.kd = e => { if (/INPUT|TEXTAREA/.test((e.target || {}).tagName || "")) return; const k = e.key.toLowerCase(); ESP.keys[k] = true;
-    if (k === " ") { espAcao("chute"); e.preventDefault(); } if (k === "e") espAcao("passe"); if (k.startsWith("arrow")) e.preventDefault(); };
+    if (k === " ") { espAcao("chute"); e.preventDefault(); } if (k === "e") espAcao("passe"); if (k === "q" || k === "shift") espAcao("poder"); if (k.startsWith("arrow")) e.preventDefault(); };
   ESP.ku = e => { ESP.keys[e.key.toLowerCase()] = false; };
   window.addEventListener("keydown", ESP.kd); window.addEventListener("keyup", ESP.ku);
 }
@@ -8364,6 +8456,7 @@ function espHUD() {
   const msg = $("es-msg"), txt = E.msg || ""; if (msg.textContent !== txt) msg.textContent = txt; msg.hidden = !txt || !!E.fim;
   if (E.tMsg > 0) { E.tMsg -= 1 / 60; if (E.tMsg <= 0 && !E.pausa) E.msg = ""; }
   const comBola = E.b.dono === ESP.eu; $("es-chute").disabled = !comBola; $("es-passe").disabled = !comBola || E.tam < 2;
+  const bp = $("es-poder"), me = E.P[ESP.eu]; if (bp && me) { const cd = Math.ceil(me.podCd || 0); bp.disabled = cd > 0 || me.gelo > 0; $("es-podtxt").textContent = me.fogo > 0 ? "Pronto!" : cd > 0 ? cd + "s" : ESP_PODERES[me.pod].nome.split(" ")[0]; bp.classList.toggle("ativo", me.fogo > 0 || me.turbo > 0); }
   if (E.fim && !ESP.ganhou) espFim();
 }
 function espFim() {
