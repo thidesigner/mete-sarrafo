@@ -103,6 +103,10 @@ Abre com **5 toques rápidos no título "Jogo de Pergunta"** da tela inicial e d
 - Tudo vale só no aparelho onde foi feito (não há servidor). Skin limitada nova ou mudança para todos: no código.
 - Não descreva o toque escondido em textos para as crianças. O segredo de verdade é o código de 5 números.
 
+## Partida em 3D (Bonequinhos · 3D)
+
+`init3D`, `montarEstadio3D`, `desenhar3D` em `fonte/jogo.html`. Melhorias pedidas pelo Andre (bloco "Melhorias do 3D da partida", `estadioExtras3D` e `extrasQuadro3D`, ligado por cima de `desenhar3D`): telão de 4 lados no alto do meio (`F.telao`, mostra o tema, a palavra e a frase do `#a-tema`/`#a-word`/`#a-sub`), bandeirinhas entre os refletores, holofotes varrendo o céu, torcida com 520 pessoas que pula forte na festa (`F.festa`), confete quando alguém acerta a palavra e no fim (`confete3D`) e anel pulsando embaixo de quem é a vez de chutar (amarelo) ou de quem está com a bola (laranja), `F.anelVez`.
+
 ## Praça Central (ideia do Andre)
 
 Botão "Praça" na tela inicial: lugar 3D para andar com o bonequinho (`abrirPraca`, bloco "Praça Central" em `fonte/jogo.html`; fica num `div#praca` por cima do `#app`, como a arena).

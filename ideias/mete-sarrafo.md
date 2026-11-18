@@ -263,3 +263,4 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
 
 - Pedido do Andre: melhorar a música. Agora em Dó maior, com partes: introdução, parte A, refrão mais animado, parte calma (ponte) e refrão de novo (cerca de 80 segundos antes de repetir). Tem eco na melodia, arpejo, acordes de fundo, baixo e bateria com virada no fim de cada parte. As músicas da partida e do boss não mudaram.
 - (18/11) Esportes em 3D (pedido do Andre): estádio com torcida, gols com rede, cestas com tabela e aro, confete no ponto. Câmera atrás do seu bonequinho. Dá para trocar para 2D (de cima) a qualquer hora.
+- (18/11) 3D da partida normal melhorado (pedido do Andre): telão no meio com a palavra, bandeirinhas, holofotes, torcida maior que pula na festa, confete quando alguém acerta e no fim, e anel mostrando de quem é a vez.
