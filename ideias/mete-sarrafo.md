@@ -249,3 +249,12 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
 - Aba nova "Poderes" no Painel de ADM. Primeiro poder: **voar na Praça Central** (botão 🕊️; segurar ⤴ sobe, ⤵ desce). Só voa quem o ADM liberar (escolhe o perfil na aba Poderes); os outros só veem.
 - O Andre quer mais poderes nessa aba depois (ainda vai pensar quais).
 - (17/11) Mais poderes na aba Poderes: ⚡ super velocidade, 🧍 gigante, ✨ teleporte e 🎆 rastro de brilho. Cada um o ADM libera por jogador; os amigos veem o gigante e o brilho.
+
+## Mini jogos: Futebol e Basquete (18/11)
+
+- Ideia do Andre: mais opções de jogos. Ele escolheu **mini jogos separados** (sem a forca) e **partida de verdade** nos dois, contra robôs e online.
+- Botão "Esportes" na tela inicial. Times Azul e Vermelho, 1x1 a 3x3, 2 minutos.
+- Futebol: chutar para onde olha, passar, roubar encostando. Robôs têm goleiro.
+- Basquete: arremesso perto vale 2 e de longe (fora do arco) vale 3, mas é mais difícil; marcado de perto erra mais. Errou: rebote.
+- Moedas: vitória 15, empate 8, derrota 4, mais 2 por gol ou ponto seu.
+- Dúvidas para o Andre: o tempo de 2 minutos está bom? Quer pênalti no empate? Quer goleiro controlado por gente?

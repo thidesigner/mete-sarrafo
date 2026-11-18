@@ -1320,3 +1320,146 @@ PRACA.desconectar = () => {
 /* telas de sala sem conexão (o jogo foi fechado no meio): volta para a tela inicial em vez de ficar numa sala que não existe mais */
 ["salaHost", "esperando", "criandoSala"].forEach(k => { const t = TELAS[k]; if (t) TELAS[k] = () => { if (ON.peer) return t(); G.tela = "lobby"; salvar(); return TELAS.lobby(); }; });
 if (["salaHost", "esperando", "criandoSala", "praca"].includes(G.tela) && !ON.peer) { G.tela = "lobby"; salvar(); render(); }
+
+/* ===================== Mini jogos online (Futebol e Basquete) =====================
+   Quem cria a sala vira o anfitrião: PeerJS com id PREFIXO + "esp-" + código de 4 letras.
+   Ele roda a simulação (espPasso, em fonte/jogo.html) e manda o estado ~15 vezes por segundo ("es").
+   Os amigos mandam só o controle ("ei": direção; "ea": chute/passe). Vai pela rede só apelido e aparência. */
+const ESP_PREF = PREFIXO + "esp-";
+const espOnline = { peer: null, host: false, code: "", conns: new Map(), hostConn: null, lista: [], prox: 1, tEnvio: 0, alvo: null, tInp: 0, ultInp: "" };
+const espR = v => Math.round(v * 10) / 10;
+function espLinkSala(code) { return location.origin + location.pathname + "?esporte=" + code; }
+function espLimparRede() {
+  const o = espOnline; try { if (o.peer) o.peer.destroy(); } catch {}
+  o.peer = null; o.host = false; o.conns.clear(); o.hostConn = null; o.lista = []; o.alvo = null; clearTimeout(o.tEntrar);
+}
+function espMandarTodos(msg) { for (const c of espOnline.conns.values()) enviar(c.conn, msg); }
+function espMandarLista() { const o = espOnline; espMandarTodos({ t: "elista", lista: o.lista.map(x => x.nome), tipo: ESP.tipo, tam: ESP.tam }); if (G.tela === "espSala") render(); }
+acoes.espCriarSala = (el, tent = 0) => {
+  espLimparRede(); const o = espOnline, code = gerarCodigo(), nome = perfil();
+  o.host = true; o.code = code; o.lista = [{ id: "h", nome, info: espInfoJogador(nome) }];
+  const peer = new Peer(ESP_PREF + code, { debug: 0 }); o.peer = peer;
+  peer.on("open", () => { if (o.peer === peer) ir("espSala"); });
+  peer.on("error", e => { if (o.peer !== peer) return; if (e.type === "unavailable-id" && tent < 3) return acoes.espCriarSala(null, tent + 1); toast("Não deu para abrir a sala. Confira a internet."); espLimparRede(); });
+  peer.on("connection", conn => {
+    conn.on("data", d => espHostRecebe(conn, d));
+    const sai = () => espHostSaiu(conn); conn.on("close", sai); conn.on("error", sai);
+  });
+  toast("Abrindo a sala…");
+};
+function espHostRecebe(conn, d) {
+  const o = espOnline; if (!d || typeof d !== "object") return;
+  let id = null; for (const [k, c] of o.conns) if (c.conn === conn) id = k;
+  if (d.t === "eola") {
+    if (id) return;
+    if (ESP.E && !ESP.E.fim) { enviar(conn, { t: "enao", motivo: "A partida já começou. Espere acabar e entre de novo." }); return; }
+    if (o.lista.length >= 6) { enviar(conn, { t: "enao", motivo: "A sala está cheia (máximo 6 pessoas)." }); return; }
+    const inf = d.info || {}, nome = String(inf.nome || "Amigo").replace(/[<>]/g, "").slice(0, 20).trim() || "Amigo";
+    id = "c" + o.prox++; o.conns.set(id, { conn });
+    const info = { nome, skin: String(inf.skin || "classico").slice(0, 30), pet: null, ficha: typeof limparFicha === "function" && inf.ficha ? limparFicha(inf.ficha) : null, selo: [1, 2, 3].includes(inf.selo) ? inf.selo : 0 };
+    o.lista.push({ id, nome, info }); espMandarLista(); bip(880, .08);
+    return;
+  }
+  if (!id || !ESP.E) return;
+  const p = ESP.E.P.find(x => x.id === id); if (!p) return;
+  if (d.t === "ei") p.inp = { x: espClamp(+d.x || 0, -1, 1), y: espClamp(+d.y || 0, -1, 1) };
+  if (d.t === "ea" && (d.a === "chute" || d.a === "passe")) p.acao = d.a;
+}
+function espHostSaiu(conn) {
+  const o = espOnline; let id = null; for (const [k, c] of o.conns) if (c.conn === conn) id = k; if (!id) return;
+  o.conns.delete(id); o.lista = o.lista.filter(x => x.id !== id);
+  const p = ESP.E && ESP.E.P.find(x => x.id === id); if (p) { p.virouRobo = true; toast(p.nome + " saiu. Um robô assume."); }
+  espMandarLista();
+}
+acoes.espTipoSala = el => { ESP.tipo = G.espTipo = el.dataset.k; salvar(); espMandarLista(); };
+acoes.espTamSala = el => { ESP.tam = G.espTam = +el.dataset.n; salvar(); espMandarLista(); };
+acoes.espComecarOnline = () => {
+  const o = espOnline; if (!o.host) return;
+  const tam = Math.max(ESP.tam, Math.ceil(o.lista.length / 2));
+  const E = espNovaPartida(ESP.tipo, o.lista.map(x => ({ nome: x.nome, id: x.id, info: x.info })), tam);
+  const P = E.P.map(p => ({ nome: p.nome, time: p.time, skin: p.skin, cor: p.cor, pele: p.pele, ficha: p.ficha || null, humano: p.humano, selo: p.selo || 0 }));
+  for (const [id, c] of o.conns) enviar(c.conn, { t: "einicio", tipo: E.tipo, tam, P, eu: E.P.findIndex(p => p.id === id) });
+  espComecar(E, E.P.findIndex(p => p.id === "h"), {
+    enviar(dt) { o.tEnvio -= dt; if (o.tEnvio > 0 && !(E.fim && !o.fimMandado)) return; o.tEnvio = .066; if (E.fim) o.fimMandado = true;
+      const b = E.b; espMandarTodos({ t: "es", p: E.P.map(p => [espR(p.x), espR(p.y), Math.round(p.dir * 100) / 100, Math.round(p.passo), p.flash > 0 ? 1 : 0, p.gols]),
+        b: [espR(b.x), espR(b.y), espR(b.z), b.dono], pl: E.placar, tm: espR(E.t), msg: E.msg || "", fim: E.fim || null }); },
+    denovo() { o.fimMandado = false; acoes.espComecarOnline(); },
+    sair() { espMandarTodos({ t: "efechou" }); setTimeout(espLimparRede, 200); }
+  });
+  o.fimMandado = false;
+};
+/* ---------- amigo: entrar numa sala ---------- */
+acoes.espEntrarForm = () => { const c = ($("es-code") || {}).value || ""; espEntrarSala(c); };
+function espEntrarSala(codigo) {
+  const code = String(codigo || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4);
+  if (code.length !== 4) { toast("O código da sala tem 4 letras"); return; }
+  espLimparRede(); const o = espOnline; o.code = code; ESP.codeEntrar = code;
+  const peer = new Peer({ debug: 0 }); o.peer = peer; toast("Procurando a sala " + code + "…");
+  o.tEntrar = setTimeout(() => { if (o.peer === peer && !o.entrou) { toast("Não achei a sala " + code + ". Confira o código."); espLimparRede(); } }, 15000);
+  o.entrou = false;
+  peer.on("open", () => {
+    const conn = peer.connect(ESP_PREF + code, { reliable: true }); o.hostConn = conn;
+    conn.on("open", () => { o.entrou = true; clearTimeout(o.tEntrar); enviar(conn, { t: "eola", info: espInfoJogador(perfil()) }); });
+    conn.on("data", espCliRecebe);
+    const caiu = () => { if (o.hostConn !== conn) return; toast("A sala fechou."); const jogando = ESP.E; espLimparRede(); if (jogando) espSair(true); else if (G.tela === "espSala") ir("esportes"); };
+    conn.on("close", caiu); conn.on("error", caiu);
+  });
+  peer.on("error", e => { if (o.peer !== peer) return; if (e.type === "peer-unavailable") toast("Não achei a sala " + code + ". Confira o código."); else toast("Sem conexão com o servidor. Confira a internet."); espLimparRede(); });
+}
+function espCliRecebe(d) {
+  const o = espOnline; if (!d || typeof d !== "object") return;
+  if (d.t === "enao") { toast(d.motivo || "Não deu para entrar."); espLimparRede(); return; }
+  if (d.t === "elista") { o.lista = (d.lista || []).slice(0, 6).map(n => ({ nome: String(n).slice(0, 20) })); if (ESP_TIPOS[d.tipo]) ESP.tipo = d.tipo; if ([1, 2, 3].includes(d.tam)) ESP.tam = d.tam; if (!ESP.E) { if (G.tela !== "espSala") ir("espSala"); else render(); } return; }
+  if (d.t === "efechou") { toast("Quem abriu a sala saiu."); const jogando = ESP.E; espLimparRede(); if (jogando) espSair(true); else ir("esportes"); return; }
+  if (d.t === "einicio" && ESP_TIPOS[d.tipo] && Array.isArray(d.P)) {
+    const P = d.P.slice(0, 6).map((x, i) => { const p = { i, nome: String(x.nome || "").slice(0, 20), humano: !!x.humano, time: x.time ? 1 : 0, cor: String(x.cor || "#2f80ed").slice(0, 9), pele: String(x.pele || A_PELE[0]).slice(0, 9),
+      skin: SKINS.some(s => s.k === x.skin) ? x.skin : "classico", selo: [1, 2, 3].includes(x.selo) ? x.selo : 0, vidas: 0, x: ESP_W / 2, y: ESP_H / 2, dir: 0, passo: 0, flash: 0, gols: 0, vx: 0, vy: 0 };
+      if (x.ficha && typeof limparFicha === "function") p.ficha = limparFicha(x.ficha); return p; });
+    const E = { tipo: d.tipo, tam: d.tam, t: ESP_TEMPO, placar: [0, 0], P, b: { x: ESP_W / 2, y: ESP_H / 2, z: 0, dono: -1 }, msg: "", fim: null };
+    o.alvo = null;
+    espComecar(E, Math.max(0, +d.eu || 0), {
+      cliente: true,
+      passo(dt, inp) {
+        o.tInp -= dt; const k = (Math.round(inp.x * 20) / 20) + "," + (Math.round(inp.y * 20) / 20);
+        if (o.tInp <= 0 || (k !== o.ultInp && o.tInp < .04)) { o.tInp = k !== o.ultInp ? .066 : .25; o.ultInp = k; enviar(o.hostConn, { t: "ei", x: Math.round(inp.x * 100) / 100, y: Math.round(inp.y * 100) / 100 }); }
+        const a = o.alvo; if (!a) return; const kk = 1 - Math.exp(-dt * 14);
+        E.P.forEach((p, i) => { const q = a.p[i]; if (!q) return; p.x += (q[0] - p.x) * kk; p.y += (q[1] - p.y) * kk; p.dir = q[2]; p.passo = q[3]; p.flash = q[4] ? 1 : 0; p.gols = q[5] || 0; });
+        E.b.x += (a.b[0] - E.b.x) * kk; E.b.y += (a.b[1] - E.b.y) * kk; E.b.z += (a.b[2] - E.b.z) * kk; E.b.dono = a.b[3];
+      },
+      acao(x) { enviar(o.hostConn, { t: "ea", a: x }); },
+      sair() { espLimparRede(); }
+    });
+    return;
+  }
+  if (d.t === "es" && ESP.E && Array.isArray(d.p) && Array.isArray(d.b)) {
+    const E = ESP.E, num = v => espClamp(+v || 0, -50, ESP_H + 50);
+    o.alvo = { p: d.p.slice(0, 6).map(q => [num(q[0]), num(q[1]), +q[2] || 0, +q[3] || 0, q[4] ? 1 : 0, Math.max(0, Math.min(99, +q[5] || 0))]), b: [num(d.b[0]), num(d.b[1]), espClamp(+d.b[2] || 0, 0, 400), Number.isInteger(d.b[3]) ? d.b[3] : -1] };
+    if (Array.isArray(d.pl)) E.placar = [Math.max(0, +d.pl[0] || 0), Math.max(0, +d.pl[1] || 0)];
+    E.t = espClamp(+d.tm || 0, 0, ESP_TEMPO); E.msg = String(d.msg || "").slice(0, 40);
+    if (d.fim && !E.fim) { E.fim = { placar: E.placar.slice(), vence: [0, 1, -1].includes(d.fim.vence) ? d.fim.vence : -1 }; E.P.forEach((p, i) => { const q = o.alvo.p[i]; if (q) p.gols = q[5]; }); }
+  }
+}
+/* ---------- a sala de espera ---------- */
+TELAS.espSala = () => {
+  const o = espOnline;
+  if (!o.peer) { G.tela = "esportes"; salvar(); return TELAS.esportes(); }
+  const t = ESP_TIPOS[ESP.tipo], tam = Math.max(ESP.tam, Math.ceil(o.lista.length / 2));
+  const jog = o.lista.map((x, k) => `<span class="chip" style="border-color:${ESP_TIMES[k % 2].cor}">${esc(x.nome)}${x.nome === perfil() ? " (você)" : ""}</span>`).join("");
+  return `
+  <section data-fundo="${fundoAtual()}" class="bgf lobby" aria-label="Sala do mini jogo">
+    <div class="lb-top"><button class="lb-pill" data-a="espSairSala">← Sair</button><span class="lb-pill">${t.ic} ${t.nome}</span></div>
+    <h1 class="lb-title" style="font-size:30px">Sala ${esc(o.code)}</h1>
+    <div class="card" style="background:rgba(11,27,51,.6);text-align:center">
+      ${o.host ? `<p>Seus amigos entram em <b>⚽ Mini jogos</b> e digitam o código:</p><p class="word">${esc(o.code)}</p><p class="url">${esc(espLinkSala(o.code))}</p>` : `<p>Você entrou na sala <b>${esc(o.code)}</b>.</p>`}
+      <h3>Jogadores (${o.lista.length})</h3><div class="chips" style="justify-content:center">${jog}</div>
+      <p class="dim" style="font-size:14px">${tam} x ${tam}. ${o.lista.length < tam * 2 ? "Robôs completam os times." : ""} Os times são sorteados na hora.</p>
+      ${o.host ? `<div class="chips" style="justify-content:center">${Object.keys(ESP_TIPOS).map(k => `<button type="button" class="chip pick" data-a="espTipoSala" data-k="${k}" aria-pressed="${ESP.tipo === k}">${ESP_TIPOS[k].ic} ${ESP_TIPOS[k].nome}</button>`).join("")}</div>
+        <div class="chips" style="justify-content:center">${[1, 2, 3].map(n => `<button type="button" class="chip pick" data-a="espTamSala" data-n="${n}" aria-pressed="${ESP.tam === n}">${n} x ${n}</button>`).join("")}</div>
+        <button class="lb-jogar" data-a="espComecarOnline">Começar</button>` : `<p><b>Esperando quem abriu a sala começar…</b></p>`}
+    </div>
+  </section>`;
+};
+acoes.espSairSala = () => { if (espOnline.host) espMandarTodos({ t: "efechou" }); setTimeout(espLimparRede, 150); ir("esportes"); };
+// link ?esporte=CÓDIGO: abre os mini jogos e entra na sala
+(() => { const q = new URLSearchParams(location.search).get("esporte"); if (!q) return; ESP.codeEntrar = q.toUpperCase().slice(0, 4); G.tela = "esportes"; salvar(); setTimeout(() => espEntrarSala(q), 400); })();
+if (G.tela === "espSala" && !espOnline.peer) { G.tela = "esportes"; salvar(); }

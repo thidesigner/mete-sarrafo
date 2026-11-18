@@ -115,6 +115,14 @@ Botão "Praça" na tela inicial: lugar 3D para andar com o bonequinho (`abrirPra
 - Missão do evento (ideia do Andre): na história da coleção, o eclipse (ou o vapor) se quebra (`quebraEm`) e 10 fragmentos (`FRAG_POS`, 5 de cada lado) aparecem na praça. Quem pega todos vê a história final (`fimFalas`) e ganha (`premiarMissao`): moedas, um item da coleção que ainda não tem (a skin da coleção combinada primeiro) e o item só da missão (`exclusivo`, ex.: gesto `eclipsetotal`, com `missao: true`: não aparece na loja e não se compra). Estado por jogador em `G.missaoEv[nome][id] = {pegos, feito}`; configuração em `HIST_TEMAS[...].missao`; progresso no mural (`missaoMuralHTML`) e no alto da tela (`#pr-missao`).
 - Teste: `ferramentas/teste/teste-praca.js`, `ferramentas/teste/teste-historia.js`, `ferramentas/teste/teste-missao.js` e `ferramentas/teste/teste-saga.js`.
 
+## Mini jogos: Futebol e Basquete (ideia do Andre)
+
+Botão "Esportes" na tela inicial (`TELAS.esportes`). Partida de verdade vista de cima: cada um controla um bonequinho (círculo para andar, botão Chutar/Arremessar e Passar; no PC setas/WASD, espaço e E). Times Azul (ataca para cima) e Vermelho (ataca para baixo), 1x1, 2x2 ou 3x3, robôs completam; 2 minutos (`ESP_TEMPO`), ganha quem fizer mais.
+- Código no último `<script>` de `fonte/jogo.html` (bloco "Mini jogos"): `espNovaPartida`, `espPasso` (simulação), `espIA` (robôs; no futebol o robô mais perto do próprio gol vira goleiro, `espGoleiro`), `espDesenhar`, a tela da partida num `div#esporte` por cima de tudo (`espComecar`/`espSair`). Futebol: bola com atrito, gol quando entra na boca (`ESP_GOL`). Basquete: arremesso com chance pela distância (de longe vale 3, marcado fica mais difícil), errou vira rebote. Encostar em quem está com a bola tenta roubar (`ESP_ROUBO`).
+- Moedas no fim (`espFim`): vitória 15, empate 8, derrota 4, mais 2 por gol/ponto seu (até 20); contam evento de moedas, vitórias da classificação e missões.
+- Online (só no site, `fonte/online.js`, bloco "Mini jogos online"): "Criar sala online" abre a sala `PREFIXO + "esp-" + código` (4 letras); os amigos digitam o código em Esportes ou abrem `?esporte=CÓDIGO`. Até 6 pessoas. Quem abriu roda `espPasso` e manda o estado (`es`, ~15 por segundo); os amigos mandam só o controle (`ei`, `ea`). Quem sai vira robô. Dentro do Claude só contra robôs.
+- Teste: `ferramentas/teste/teste-esportes.js`.
+
 ## Avisos do ADM para todo mundo
 
 `avisos.json` na raiz do site: `{"avisos": [{"id", "texto" (até 200 letras), "de", "ate"}]}` (datas ISO). Todo jogo aberto no site (oficial e teste) lê o arquivo ao abrir e a cada minuto; aviso novo aparece uma vez numa janela "📢 Aviso do ADM" e, enquanto vale, numa faixa que corre na tela inicial. Dentro do Claude não chega.

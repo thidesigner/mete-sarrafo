@@ -331,6 +331,28 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .mi-missao { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,.06); border-radius: 12px; padding: 8px; }
 .mi-missao.pegou { opacity: .6; }
 .ev-item .mi-txt small.ev-fim { color: #ffd23f; font-weight: 700; }
+.esporte { position: fixed; inset: 0; z-index: 55; background: #0b1b33; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+.esporte .es-cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.es-top { position: absolute; top: 8px; left: 8px; right: 8px; display: flex; align-items: center; gap: 8px; z-index: 2; }
+.es-placar { margin-left: auto; margin-right: auto; display: flex; align-items: center; gap: 8px; background: rgba(11,27,51,.85); border: 2px solid #0b1b33; border-radius: 14px; padding: 4px 8px; color: #fff; }
+.es-placar span { min-width: 40px; text-align: center; font-family: var(--display); font-size: 24px; border-radius: 10px; padding: 2px 8px; color: #fff; -webkit-text-stroke: 1px #0b1b33; }
+.es-placar b { font-family: var(--mono); font-size: 18px; min-width: 52px; text-align: center; }
+.es-msg { position: absolute; top: 38%; left: 50%; transform: translate(-50%, -50%); font-family: var(--display); font-size: clamp(30px, 10vw, 52px); color: #ffd23f; -webkit-text-stroke: 2px #0b1b33; text-shadow: 0 4px 0 #0b1b33; white-space: nowrap; pointer-events: none; z-index: 3; animation: esMsg .4s ease-out; }
+@keyframes esMsg { from { transform: translate(-50%, -50%) scale(.4); } }
+.es-time { position: absolute; top: 64px; left: 50%; transform: translateX(-50%); background: rgba(11,27,51,.85); color: #fff; border-radius: 12px; padding: 6px 12px; font-weight: 700; font-size: 15px; z-index: 2; white-space: nowrap; pointer-events: none; }
+.esporte .es-joy { left: 18px; bottom: 26px; background: rgba(11,27,51,.3); }
+.es-btn { position: absolute; z-index: 2; border-radius: 50%; border: 3px solid #0b1b33; box-shadow: 0 5px 0 #0b1b33; display: grid; place-items: center; align-content: center; font-size: 34px; line-height: 1; cursor: pointer; touch-action: none; }
+.es-btn small { font: 800 12px Nunito, sans-serif; color: #0b1b33; margin-top: 2px; }
+.es-chute { right: 20px; bottom: 30px; width: 104px; height: 104px; background: #ffd23f; }
+.es-passe { right: 132px; bottom: 26px; width: 72px; height: 72px; background: #7fd3ff; font-size: 26px; }
+.es-btn:disabled { opacity: .45; }
+.es-fim { position: absolute; inset: 0; z-index: 4; display: grid; place-items: center; background: rgba(5,10,25,.55); padding: 16px; }
+.es-fim h2 { font-size: 32px; }
+.es-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.es-card { display: grid; justify-items: center; gap: 6px; padding: 18px 8px; border-radius: 18px; border: 3px solid #0b1b33; background: rgba(11,27,51,.6); color: #fff; box-shadow: 0 5px 0 #0b1b33; cursor: pointer; }
+.es-card span { font-size: 54px; line-height: 1; } .es-card b { font-family: var(--display); font-size: 20px; }
+.es-card.on { background: #ffd23f; color: #0b1b33; }
+@media (prefers-reduced-motion: reduce) { .es-msg { animation: none; } }
 .praca { position: fixed; inset: 0; z-index: 50; background: #9fd3ff; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
 .praca .pr-cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .pr-top { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; gap: 8px; align-items: center; justify-content: space-between; z-index: 2; }
@@ -4506,6 +4528,7 @@ TELAS.lobby = () => {
         <button class="lb-btn" data-a="mais">${ICONES.regras}<span>Regras</span>${sugestoes.length ? `<i class="lb-badge">${sugestoes.length}</i>` : ""}</button>
         <button class="lb-btn" data-a="missoes"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="#ff4d6d" stroke="#0b1b33" stroke-width="1.5"/><circle cx="12" cy="12" r="6" fill="#f4f7fb" stroke="#0b1b33" stroke-width="1.2"/><circle cx="12" cy="12" r="3" fill="#ff4d6d" stroke="#0b1b33" stroke-width="1.2"/><path d="M12 12l7-7M17 3.5l2 1.5 1.5 2" stroke="#0b1b33" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>Missões</span>${temAlgoPraPegar(nome) ? `<i class="lb-tag">🎁!</i>` : ""}</button>
         <button class="lb-btn" data-a="praca" aria-label="Praça Central"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="19" rx="9" ry="3" fill="#e9dcc4" stroke="#0b1b33" stroke-width="1.5"/><path d="M6 18.5v-3h12v3" fill="#d8d2c4" stroke="#0b1b33" stroke-width="1.5" stroke-linejoin="round"/><path d="M12 15.5V9" stroke="#0b1b33" stroke-width="2"/><path d="M12 9c-3 0-4.5 2-4.5 3.5M12 9c3 0 4.5 2 4.5 3.5M12 9V4" fill="none" stroke="#3dd9ff" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="4" r="1.6" fill="#3dd9ff" stroke="#0b1b33" stroke-width="1"/></svg><span>Praça</span>${typeof qtdEventos === "function" && qtdEventos() ? `<i class="lb-badge">${qtdEventos()}</i>` : ""}</button>
+        <button class="lb-btn" data-a="esportes" aria-label="Mini jogos: futebol e basquete"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="#f4f7fb" stroke="#0b1b33" stroke-width="1.5"/><path d="M12 8.2l3.2 2.3-1.2 3.8h-4l-1.2-3.8z" fill="#0b1b33"/><path d="M12 3v5.2M15.2 10.5l5-1.6M14 14.3l3 4.2M10 14.3l-3 4.2M8.8 10.5l-5-1.6" stroke="#0b1b33" stroke-width="1.2"/></svg><span>Esportes</span></button>
       </div>
       <button type="button" class="lb-boneco" data-a="minhasSkins" aria-label="Trocar a skin de ${esc(nome)}"><canvas id="lb-canvas" aria-hidden="true"></canvas><span class="lb-trocar" aria-hidden="true">👕</span></button>
       <div class="lb-nome">${esc(nome)}${nivelSelo(nome) ? ` <span class="selo-col" title="Selo de colecionador ${SELO_NOMES[nivelSelo(nome)]}" aria-label="Selo de colecionador ${SELO_NOMES[nivelSelo(nome)]}">${SELOS[nivelSelo(nome)]}</span>` : ""}</div>
@@ -7788,4 +7811,361 @@ Object.assign(acoes, {
   },
 });
 acoes.admLimparAvisos = () => { ADM.avisoJSON = JSON.stringify({ avisos: [] }, null, 2); ADM.avisoTexto = ""; const y = window.scrollY; render(); window.scrollTo(0, y); };
+</script>
+<script>
+/* ===================== Mini jogos: Futebol e Basquete (ideia do Andre) =====================
+   Partida de verdade vista de cima: cada um controla um bonequinho (círculo para andar, botão para chutar/arremessar e passar).
+   Times Azul (ataca para cima) e Vermelho (ataca para baixo); robôs completam os times. 2 minutos; ganha quem fizer mais.
+   Contra robôs funciona em qualquer lugar (inclusive no Claude). Online (só no site) fica em fonte/online.js, bloco "Mini jogos online":
+   lá quem abre a sala roda esta mesma simulação (espPasso) e manda o estado para os amigos. */
+const ESP_W = 640, ESP_H = 1000, ESP_TEMPO = 120, ESP_VEL = 240, ESP_GOL = 180, ESP_ESC = .75;
+let ESP_ROUBO = .3;
+const ESP_TIPOS = {
+  futebol: { nome: "Futebol", ic: "⚽", acao: "Chutar", ponto: "GOOOL!" },
+  basquete: { nome: "Basquete", ic: "🏀", acao: "Arremessar", ponto: "CESTA!" } };
+const ESP_TIMES = [{ nome: "Azul", cor: "#2f80ed" }, { nome: "Vermelho", cor: "#e4572e" }];
+const ESP_CESTA = [{ x: ESP_W / 2, y: 78 }, { x: ESP_W / 2, y: ESP_H - 78 }];   // cesta que cada time ataca
+const ESP = { tipo: G.espTipo || "futebol", tam: G.espTam || 2, E: null, eu: 0, joy: { x: 0, y: 0 }, keys: {}, raf: 0, rede: null };
+const espDist = (a, b, c, d) => Math.hypot(a - c, b - d);
+const espClamp = (v, a, b) => Math.max(a, Math.min(b, v));
+function espAlvo(time) { return ESP_CESTA[time]; }   // gol/cesta que o time ataca (Azul = em cima)
+function espInfoJogador(nome) {   // o que vai pela rede de cada humano (só aparência)
+  return { nome, skin: skinDe(nome), pet: petDe(nome), ficha: typeof personagemDe === "function" ? personagemDe(nome) : null, selo: nivelSelo(nome) };
+}
+/* ---------- montar a partida ---------- */
+function espNovaPartida(tipo, humanos, tam) {
+  // humanos: [{nome, id, info}] (o primeiro é quem abriu); completa com robôs até tam x tam
+  const lista = humanos.slice(0, tam * 2).map((h, k) => ({ ...h, humano: true, time: k % 2 }));
+  let r = 1; for (let t = 0; t < 2; t++) while (lista.filter(x => x.time === t).length < tam) lista.push({ nome: "Robô " + r++, humano: false, time: t });
+  const P = lista.map((o, i) => {
+    const p = { i, nome: o.nome, id: o.id || null, humano: o.humano, time: o.time, cor: ESP_TIMES[o.time].cor, pele: A_PELE[i % A_PELE.length],
+      vidas: 0, x: 0, y: 0, vx: 0, vy: 0, dir: o.time === 0 ? -Math.PI / 2 : Math.PI / 2, passo: 0, flash: 0, inp: { x: 0, y: 0 }, acao: null,
+      cdPegar: 0, cdRoubo: 0, cdIA: 0, gols: 0, vel: ESP_VEL * (o.humano ? 1 : .8 + Math.random() * .08) };
+    if (o.humano) { const f = o.info || espInfoJogador(o.nome); vestir(p, SKINS.some(s => s.k === f.skin) ? f.skin : "classico"); if (f.ficha) p.ficha = f.ficha; p.pet = f.pet || null; p.selo = f.selo || 0; }
+    return p;
+  });
+  vestirRobos(P);
+  const E = { tipo, tam, t: ESP_TEMPO, placar: [0, 0], P, b: { x: ESP_W / 2, y: ESP_H / 2, z: 0, vx: 0, vy: 0, dono: -1, voo: null }, pausa: 0, msg: "", fim: null, saque: 0 };
+  espSaida(E, Math.random() < .5 ? 0 : 1);
+  return E;
+}
+/* todo mundo no seu lado e a bola com o time que sai */
+function espSaida(E, time) {
+  const POS = [[[0, .2]], [[-.22, .16], [.22, .3]], [[0, .12], [-.3, .28], [.3, .28]]];
+  for (let t = 0; t < 2; t++) {
+    const meus = E.P.filter(p => p.time === t), forma = POS[Math.min(meus.length, 3) - 1] || POS[2];
+    meus.forEach((p, k) => { const f = forma[k % forma.length], dy = (f[1] + Math.floor(k / 3) * .08) * ESP_H;
+      p.x = ESP_W / 2 + f[0] * ESP_W; p.y = t === 0 ? ESP_H / 2 + dy : ESP_H / 2 - dy; p.vx = p.vy = 0; p.dir = t === 0 ? -Math.PI / 2 : Math.PI / 2; p.cdPegar = 0; p.acao = null; });
+  }
+  const quem = E.P.filter(p => p.time === time).sort((a, b) => Math.abs(a.y - ESP_H / 2) - Math.abs(b.y - ESP_H / 2))[0];
+  quem.x = ESP_W / 2; quem.y = ESP_H / 2 + (time === 0 ? 30 : -30);
+  Object.assign(E.b, { x: quem.x, y: quem.y, z: 0, vx: 0, vy: 0, dono: quem.i, voo: null });
+  E.saque = time;
+}
+/* ---------- um passo da simulação (quem roda: o celular sozinho ou quem abriu a sala online) ---------- */
+function espPasso(E, dt) {
+  if (E.fim) return;
+  for (const p of E.P) { p.flash = Math.max(0, p.flash - dt * 2); p.cdPegar -= dt; p.cdRoubo -= dt; }
+  if (E.pausa > 0) { E.pausa -= dt; if (E.pausa <= 0) { E.msg = ""; if (E.depois) { const f = E.depois; E.depois = null; f(); } } return; }
+  E.t -= dt;
+  if (E.t <= 0) { E.t = 0; E.fim = { placar: E.placar.slice(), vence: E.placar[0] === E.placar[1] ? -1 : E.placar[0] > E.placar[1] ? 0 : 1 }; E.msg = "Fim de jogo!"; return; }
+  const b = E.b;
+  for (const p of E.P) {
+    if (!p.humano || p.virouRobo) espIA(E, p, dt);
+    const m = Math.hypot(p.inp.x, p.inp.y), ix = m > 1 ? p.inp.x / m : p.inp.x, iy = m > 1 ? p.inp.y / m : p.inp.y;
+    const vel = p.vel * (b.dono === p.i ? .9 : 1), k = 1 - Math.exp(-dt * 12);
+    p.vx += (ix * vel - p.vx) * k; p.vy += (iy * vel - p.vy) * k;
+    p.x = espClamp(p.x + p.vx * dt, 22, ESP_W - 22); p.y = espClamp(p.y + p.vy * dt, 22, ESP_H - 22);
+    const v = Math.hypot(p.vx, p.vy); if (m > .15) p.dir = Math.atan2(iy, ix); p.passo += v * dt * 1.6;
+    if (p.acao) { const a = p.acao; p.acao = null; if (b.dono === p.i) a === "passe" ? espPassar(E, p) : espChutar(E, p); }
+  }
+  // bola
+  if (b.voo) {
+    const f = b.voo; f.f += dt / f.dur; const u = Math.min(1, f.f);
+    b.x = f.x0 + (f.hx - f.x0) * u; b.y = f.y0 + (f.hy - f.y0) * u; b.z = 4 * f.h * u * (1 - u);
+    if (u >= 1) espFimArremesso(E);
+  } else if (b.dono >= 0) {
+    const d = E.P[b.dono]; b.x = d.x + Math.cos(d.dir) * 20; b.y = d.y + Math.sin(d.dir) * 20;
+    b.z = E.tipo === "basquete" ? Math.abs(Math.sin(d.passo / 9)) * 16 : 0;
+    // roubada: adversário encosta em quem está com a bola
+    for (const q of E.P) if (q.time !== d.time && q.cdRoubo <= 0 && espDist(q.x, q.y, d.x, d.y) < 30) {
+      q.cdRoubo = 1.1; if (Math.random() < ESP_ROUBO) { b.dono = q.i; d.cdPegar = .7; d.flash = 1; bipEsp(330); }
+    }
+  } else {
+    b.x += b.vx * dt; b.y += b.vy * dt; const fr = Math.exp(-dt * (E.tipo === "futebol" ? 1.1 : 1.6)); b.vx *= fr; b.vy *= fr;
+    b.z = Math.max(0, b.z - dt * 60);
+    if (b.x < 12) { b.x = 12; b.vx = Math.abs(b.vx) * .7; } if (b.x > ESP_W - 12) { b.x = ESP_W - 12; b.vx = -Math.abs(b.vx) * .7; }
+    const noGol = Math.abs(b.x - ESP_W / 2) < ESP_GOL / 2;
+    if (E.tipo === "futebol" && noGol && (b.y < 12 || b.y > ESP_H - 12)) return espPonto(E, b.y < 12 ? 0 : 1, 1);
+    if (b.y < 12) { b.y = 12; b.vy = Math.abs(b.vy) * .7; } if (b.y > ESP_H - 12) { b.y = ESP_H - 12; b.vy = -Math.abs(b.vy) * .7; }
+    let perto = null, pd = 28;
+    for (const p of E.P) { const d = espDist(p.x, p.y, b.x, b.y); if (p.cdPegar <= 0 && d < pd) { pd = d; perto = p; } }
+    if (perto) { b.dono = perto.i; b.vx = b.vy = 0; }
+  }
+}
+function espChutar(E, p) {
+  const b = E.b;
+  if (E.tipo === "basquete") return espArremessar(E, p);
+  const v = 640; b.dono = -1; b.vx = Math.cos(p.dir) * v + p.vx * .3; b.vy = Math.sin(p.dir) * v + p.vy * .3; b.z = 6; p.cdPegar = .35; bipEsp(520);
+  b.ultimo = p.i;
+}
+function espPassar(E, p) {
+  const b = E.b, cand = E.P.filter(q => q.time === p.time && q !== p);
+  if (!cand.length) return espChutar(E, p);
+  // o companheiro mais à frente na direção que olha (ou o mais perto)
+  const alvo = cand.map(q => { const a = Math.atan2(q.y - p.y, q.x - p.x), d = espDist(p.x, p.y, q.x, q.y), da = Math.abs(((a - p.dir) + Math.PI * 3) % (Math.PI * 2) - Math.PI); return { q, n: d / 300 + da }; }).sort((a, c) => a.n - c.n)[0].q;
+  const dx = alvo.x + alvo.vx * .25 - p.x, dy = alvo.y + alvo.vy * .25 - p.y, d = Math.hypot(dx, dy) || 1, v = Math.min(620, d * 2 + 220);
+  b.dono = -1; b.vx = dx / d * v; b.vy = dy / d * v; b.z = 4; p.cdPegar = .35; b.ultimo = p.i; bipEsp(700);
+}
+function espArremessar(E, p) {
+  const b = E.b, c = espAlvo(p.time), d = espDist(p.x, p.y, c.x, c.y);
+  let chance = espClamp(.92 - d / 850, .12, .88);
+  if (E.P.some(q => q.time !== p.time && espDist(q.x, q.y, p.x, p.y) < 60)) chance -= .25;   // marcado: mais difícil
+  b.dono = -1; b.ultimo = p.i; p.cdPegar = .5;
+  b.voo = { x0: b.x, y0: b.y, hx: c.x, hy: c.y, f: 0, dur: .55 + d / 1300, h: 70 + d / 6, ok: Math.random() < chance, pts: d > 300 ? 3 : 2, time: p.time, quem: p.i };
+  bipEsp(600);
+}
+function espFimArremesso(E) {
+  const b = E.b, f = b.voo; b.voo = null;
+  if (f.ok) { E.P[f.quem].gols += f.pts; return espPonto(E, f.time, f.pts); }
+  // bateu no aro: rebote
+  const a = Math.random() * Math.PI * 2; b.z = 10; b.vx = Math.cos(a) * 260; b.vy = Math.sin(a) * 200 + (f.time === 0 ? 160 : -160); bipEsp(220);
+  E.msg = "Errou! Rebote!"; E.tMsg = 1;
+}
+function espPonto(E, time, pts) {
+  const b = E.b;
+  E.placar[time] += pts; if (E.tipo === "futebol" && b.ultimo != null && E.P[b.ultimo] && E.P[b.ultimo].time === time) E.P[b.ultimo].gols += 1;
+  b.dono = -1; b.vx = b.vy = 0; b.voo = null;
+  E.msg = (ESP_TIPOS[E.tipo].ponto) + (E.tipo === "basquete" ? ` +${pts}` : "") + " " + ESP_TIMES[time].nome; E.pausa = 1.6; E.marcou = time;
+  E.depois = () => espSaida(E, 1 - time);
+  if (typeof tocarNotas === "function") tocarNotas([[72, 72, 0, .1, "square"], [76, 76, .1, .1, "square"], [79, 79, .2, .25, "square"]]);
+}
+function bipEsp(f) { try { bip(f, .05); } catch {} }
+/* ---------- robôs ---------- */
+function espGoleiro(E, p) {   // o robô do time mais perto do próprio gol (com 2 ou mais por time)
+  const meuGol = espAlvo(1 - p.time), robos = E.P.filter(q => q.time === p.time && (!q.humano || q.virouRobo));
+  if (robos.length < (E.P.some(q => q.time === p.time && q.humano && !q.virouRobo) ? 1 : 2)) return false;
+  return robos.sort((a, c) => Math.abs(a.y - meuGol.y) - Math.abs(c.y - meuGol.y))[0] === p;
+}
+function espIA(E, p, dt) {
+  const b = E.b, alvo = espAlvo(p.time), meuGol = espAlvo(1 - p.time);
+  const temBola = b.dono === p.i, nossa = b.dono >= 0 && E.P[b.dono].time === p.time;
+  let tx = p.x, ty = p.y;
+  if (temBola) {
+    const d = espDist(p.x, p.y, alvo.x, alvo.y);
+    tx = alvo.x + Math.sin(E.t * 1.3 + p.i) * 80; ty = alvo.y;
+    const marc = E.P.filter(q => q.time !== p.time && espDist(q.x, q.y, p.x, p.y) < 70);
+    p.cdIA -= dt;
+    if (p.cdIA <= 0) { p.cdIA = .25;
+      if (E.tipo === "futebol" && d < 380 && Math.random() < .45) { p.dir = Math.atan2(alvo.y - p.y, alvo.x - p.x + (Math.random() - .5) * ESP_GOL * .9); p.acao = "chute"; }
+      else if (E.tipo === "basquete" && (d < 230 || (d < 380 && Math.random() < .2)) && Math.random() < .7) p.acao = "chute";
+      else if (marc.length && E.P.some(q => q.time === p.time && q !== p) && Math.random() < .3) p.acao = "passe";
+    }
+  } else if (nossa) {   // companheiro com a bola: vai para a frente e abre espaço
+    const d = E.P[b.dono], lado = p.x < ESP_W / 2 ? -1 : 1;
+    tx = espClamp(d.x + lado * 170, 40, ESP_W - 40); ty = d.y + (alvo.y < ESP_H / 2 ? -150 : 150);
+  } else if (E.tipo === "futebol" && E.tam >= 2 && espGoleiro(E, p) && Math.abs(b.y - meuGol.y) < ESP_H * .55) {
+    // goleiro: o robô mais perto do próprio gol fica na frente dele
+    tx = espClamp(b.x, ESP_W / 2 - ESP_GOL / 2 + 10, ESP_W / 2 + ESP_GOL / 2 - 10); ty = meuGol.y + (p.time === 0 ? -1 : 1) * -40 + (meuGol.y < ESP_H / 2 ? -40 : 40);
+    if (espDist(p.x, p.y, b.x, b.y) < 130 && b.dono < 0) { tx = b.x; ty = b.y; }
+  } else {
+    const time = E.P.filter(q => q.time === p.time && (!q.humano || q.virouRobo));
+    const maisPerto = time.sort((a, c) => espDist(a.x, a.y, b.x, b.y) - espDist(c.x, c.y, b.x, b.y))[0];
+    if (maisPerto === p || !E.P.some(q => q.time === p.time && q.humano && !q.virouRobo && espDist(q.x, q.y, b.x, b.y) < espDist(p.x, p.y, b.x, b.y))) {
+      if (maisPerto === p) { tx = b.voo ? b.voo.hx : b.x; ty = b.voo ? b.voo.hy + (p.time === 0 ? 60 : -60) : b.y; }
+      else { tx = (b.x + meuGol.x) / 2 + (p.i % 2 ? 90 : -90); ty = (b.y + meuGol.y) / 2; }
+    } else { tx = (b.x + meuGol.x) / 2 + (p.i % 2 ? 90 : -90); ty = (b.y + meuGol.y) / 2; }
+  }
+  const dx = tx - p.x, dy = ty - p.y, d = Math.hypot(dx, dy);
+  p.inp = d < 10 ? { x: 0, y: 0 } : { x: dx / d, y: dy / d };
+}
+/* ---------- desenho ---------- */
+function espDesenharCampo(c, tipo) {
+  const W = ESP_W, H = ESP_H;
+  c.lineWidth = 5; c.strokeStyle = "rgba(255,255,255,.85)";
+  if (tipo === "futebol") {
+    for (let i = 0; i < 10; i++) { c.fillStyle = i % 2 ? "#2e9e55" : "#35ad5f"; c.fillRect(0, i * H / 10, W, H / 10); }
+    c.strokeRect(8, 8, W - 16, H - 16);
+    c.beginPath(); c.moveTo(8, H / 2); c.lineTo(W - 8, H / 2); c.stroke();
+    c.beginPath(); c.arc(W / 2, H / 2, 90, 0, Math.PI * 2); c.stroke();
+    c.fillStyle = "#fff"; c.beginPath(); c.arc(W / 2, H / 2, 6, 0, Math.PI * 2); c.fill();
+    for (const y of [8, H - 8]) { const s = y < H / 2 ? 1 : -1;
+      c.strokeRect(W / 2 - 160, y, 320, s * 150); c.strokeRect(W / 2 - 80, y, 160, s * 60);
+      c.beginPath(); c.arc(W / 2, y + s * 110, 5, 0, Math.PI * 2); c.fill();
+      // gol com rede
+      c.strokeStyle = "#fff"; c.lineWidth = 8; c.beginPath(); c.moveTo(W / 2 - ESP_GOL / 2, y); c.lineTo(W / 2 + ESP_GOL / 2, y); c.stroke();
+      c.lineWidth = 2; c.strokeStyle = "rgba(255,255,255,.5)";
+      for (let x = W / 2 - ESP_GOL / 2; x <= W / 2 + ESP_GOL / 2; x += 18) { c.beginPath(); c.moveTo(x, y); c.lineTo(x, y - s * 8); c.stroke(); }
+      c.lineWidth = 5; c.strokeStyle = "rgba(255,255,255,.85)"; }
+  } else {
+    for (let i = 0; i < 16; i++) { c.fillStyle = i % 2 ? "#d9a35b" : "#e2ae67"; c.fillRect(i * W / 16, 0, W / 16, H); }
+    c.strokeRect(8, 8, W - 16, H - 16);
+    c.beginPath(); c.moveTo(8, H / 2); c.lineTo(W - 8, H / 2); c.stroke();
+    c.beginPath(); c.arc(W / 2, H / 2, 70, 0, Math.PI * 2); c.stroke();
+    for (const k of [0, 1]) { const h = ESP_CESTA[k], s = k === 0 ? 1 : -1;
+      c.fillStyle = k === 0 ? "rgba(47,128,237,.35)" : "rgba(228,87,46,.35)"; c.fillRect(W / 2 - 80, k === 0 ? 8 : H - 8 - 200, 160, 200);
+      c.strokeRect(W / 2 - 80, k === 0 ? 8 : H - 8 - 200, 160, 200);
+      c.beginPath(); c.arc(W / 2, k === 0 ? 208 : H - 208, 60, k === 0 ? 0 : Math.PI, k === 0 ? Math.PI : Math.PI * 2); c.stroke();
+      c.beginPath(); c.arc(h.x, h.y, 300, k === 0 ? .08 : Math.PI + .08, k === 0 ? Math.PI - .08 : Math.PI * 2 - .08); c.stroke();
+      // tabela e aro
+      c.fillStyle = "#fff"; c.fillRect(W / 2 - 50, h.y - s * 40 - 4, 100, 8);
+      c.strokeStyle = "#ff6a00"; c.lineWidth = 6; c.beginPath(); c.arc(h.x, h.y, 20, 0, Math.PI * 2); c.stroke();
+      c.strokeStyle = "rgba(255,255,255,.85)"; c.lineWidth = 5; }
+  }
+}
+function espDesenharBola(c, E, x, y, z) {
+  c.fillStyle = "rgba(0,0,0,.3)"; c.beginPath(); c.ellipse(x, y + 4, 11, 5, 0, 0, Math.PI * 2); c.fill();
+  const r = 11 + z / 14, by = y - z;
+  if (E.tipo === "futebol") {
+    c.fillStyle = "#fff"; c.strokeStyle = "#111"; c.lineWidth = 2; c.beginPath(); c.arc(x, by, r, 0, Math.PI * 2); c.fill(); c.stroke();
+    c.fillStyle = "#111"; c.beginPath(); for (let k = 0; k < 5; k++) { const a = k * Math.PI * 2 / 5 - Math.PI / 2; c.lineTo(x + Math.cos(a) * r * .38, by + Math.sin(a) * r * .38); } c.fill();
+  } else {
+    c.fillStyle = "#ff7a1a"; c.strokeStyle = "#2a1300"; c.lineWidth = 2; c.beginPath(); c.arc(x, by, r, 0, Math.PI * 2); c.fill(); c.stroke();
+    c.beginPath(); c.moveTo(x - r, by); c.lineTo(x + r, by); c.moveTo(x, by - r); c.lineTo(x, by + r); c.stroke();
+  }
+}
+function espDesenhar(c, E, eu, cw, ch, topo = 0) {
+  const s = Math.min(cw / ESP_W, (ch - topo) / ESP_H), ox = (cw - ESP_W * s) / 2, oy = topo + (ch - topo - ESP_H * s) / 2;
+  c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = E.tipo === "futebol" ? "#1d6b3a" : "#5b3a1e"; c.fillRect(0, 0, c.canvas.width, c.canvas.height);
+  c.setTransform(s, 0, 0, s, ox, oy);
+  espDesenharCampo(c, E.tipo);
+  const ph = { k: "esporte" }, ord = E.P.slice().sort((a, b) => a.y - b.y), b = E.b;
+  const bolaAtras = b.y - b.z < (E.P[b.dono] || {}).y;
+  if (bolaAtras && b.dono >= 0) espDesenharBola(c, E, b.x, b.y + 10, b.z);
+  for (const p of ord) {
+    c.lineWidth = p.i === eu ? 6 : 4; c.strokeStyle = p.i === eu ? "#ffd23f" : ESP_TIMES[p.time].cor; c.fillStyle = ESP_TIMES[p.time].cor + "55";
+    c.beginPath(); c.ellipse(p.x, p.y + 16, 24, 10, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+    c.save(); c.translate(p.x, p.y); c.scale(ESP_ESC, ESP_ESC);
+    const t = espTemp; Object.assign(t, p); t.x = 0; t.y = 0; t.vidas = 0; t.i = p.i + 1000; t.pet = null;
+    try { desenharBoneco2(c, t, ph); } catch {}
+    c.restore();
+  }
+  if (!bolaAtras || b.dono < 0) espDesenharBola(c, E, b.x, b.y + 10, b.z);
+  c.setTransform(1, 0, 0, 1, 0, 0);
+}
+const espTemp = {};
+/* ---------- tela de escolha ---------- */
+TELAS.esportes = () => {
+  const on = typeof espOnline === "object";
+  const card = (k) => { const t = ESP_TIPOS[k]; return `<button type="button" class="es-card${ESP.tipo === k ? " on" : ""}" data-a="espTipo" data-k="${k}" aria-pressed="${ESP.tipo === k}"><span>${t.ic}</span><b>${t.nome}</b></button>`; };
+  return `
+  <section data-fundo="${fundoAtual()}" class="bgf lobby" aria-label="Mini jogos">
+    <div class="lb-top"><button class="lb-pill" data-a="voltarLobby">← Voltar</button><span class="lb-pill">⚽ 🏀</span></div>
+    <h1 class="lb-title" style="font-size:34px">Mini jogos</h1>
+    <div class="es-cards">${card("futebol")}${card("basquete")}</div>
+    <div class="card" style="background:rgba(11,27,51,.6)">
+      <h3>Tamanho dos times</h3>
+      <div class="chips" style="justify-content:center">${[1, 2, 3].map(n => `<button type="button" class="chip pick" data-a="espTam" data-n="${n}" aria-pressed="${ESP.tam === n}">${n} x ${n}</button>`).join("")}</div>
+      <p class="dim" style="font-size:14px;text-align:center">Partida de 2 minutos. Ganha o time que fizer mais ${ESP.tipo === "futebol" ? "gols" : "pontos"}. Robôs completam os times.</p>
+      <button class="lb-jogar" data-a="espJogar">Jogar contra robôs</button>
+      ${on ? `<button class="btn ok" data-a="espCriarSala">🌐 Criar sala online</button>
+      <form class="presente-form" data-a="espEntrarForm" autocomplete="off"><input id="es-code" maxlength="4" placeholder="Código da sala" aria-label="Código da sala" value="${esc(ESP.codeEntrar || "")}"><button class="btn small" type="submit">Entrar</button></form>`
+      : `<p class="dim" style="font-size:14px;text-align:center">Para jogar com amigos, abra o jogo no site.</p>`}
+    </div>
+    <div class="card" style="background:rgba(11,27,51,.6)">
+      <h3>Como jogar</h3>
+      <p>🕹️ Círculo da esquerda: andar. ${ESP_TIPOS[ESP.tipo].ic} <b>${ESP_TIPOS[ESP.tipo].acao}</b>: ${ESP.tipo === "futebol" ? "chuta para onde você está olhando" : "arremessa na cesta (de longe vale 3, mas é mais difícil)"}. ↪️ <b>Passar</b>: manda a bola para o companheiro.</p>
+      <p>Encoste em quem está com a bola para tentar roubar. No PC: setas ou WASD para andar, espaço para ${ESP_TIPOS[ESP.tipo].acao.toLowerCase()} e E para passar.</p>
+    </div>
+  </section>`;
+};
+acoes.esportes = () => ir("esportes");
+acoes.espTipo = el => { ESP.tipo = G.espTipo = el.dataset.k; salvar(); render(); };
+acoes.espTam = el => { ESP.tam = G.espTam = +el.dataset.n; salvar(); render(); };
+acoes.espJogar = () => { const nome = perfil(); espComecar(espNovaPartida(ESP.tipo, [{ nome, info: espInfoJogador(nome) }], ESP.tam), 0, null); };
+/* ---------- a partida na tela (por cima de tudo, como a Praça) ---------- */
+function espComecar(E, eu, rede) {
+  ESP.E = E; ESP.eu = eu; ESP.rede = rede; ESP.joy = { x: 0, y: 0 }; ESP.keys = {}; ESP.ganhou = false;
+  let box = $("esporte");
+  if (!box) { box = document.createElement("div"); box.id = "esporte"; box.className = "esporte"; document.body.appendChild(box); }
+  const t = ESP_TIPOS[E.tipo];
+  box.innerHTML = `
+    <canvas class="es-cv" id="es-cv"></canvas>
+    <div class="es-top"><button type="button" class="lb-pill" id="es-sair">← Sair</button>
+      <div class="es-placar"><span style="background:${ESP_TIMES[0].cor}" id="es-p0">0</span><b id="es-tempo">2:00</b><span style="background:${ESP_TIMES[1].cor}" id="es-p1">0</span></div></div>
+    <div class="es-msg" id="es-msg" hidden></div>
+    <div class="es-time" id="es-meutime"></div>
+    <div class="pr-joy es-joy" id="es-joy" aria-label="Andar"><i></i></div>
+    <button type="button" class="es-btn es-passe" id="es-passe">↪️<small>Passar</small></button>
+    <button type="button" class="es-btn es-chute" id="es-chute">${t.ic}<small>${t.acao}</small></button>
+    <div class="es-fim" id="es-fim" hidden></div>`;
+  box.hidden = false; document.body.classList.add("es-aberto");
+  const meu = E.P[eu]; $("es-meutime").innerHTML = `Você é do time <b style="color:${ESP_TIMES[meu.time].cor}">${ESP_TIMES[meu.time].nome}</b> e ataca para ${meu.time === 0 ? "cima ⬆️" : "baixo ⬇️"}`;
+  setTimeout(() => { const m = $("es-meutime"); if (m) m.hidden = true; }, 4000);
+  espControles();
+  cancelAnimationFrame(ESP.raf); ESP.ult = performance.now(); ESP.raf = requestAnimationFrame(espQuadro);
+}
+function espControles() {
+  const joy = $("es-joy"), bola = joy.querySelector("i"); let id = null;
+  const mexe = e => { const r = joy.getBoundingClientRect(), R = r.width / 2; let dx = (e.clientX - r.left - R) / R, dy = (e.clientY - r.top - R) / R; const m = Math.hypot(dx, dy); if (m > 1) { dx /= m; dy /= m; }
+    ESP.joy = { x: dx, y: dy }; bola.style.transform = `translate(${dx * R * .6}px, ${dy * R * .6}px)`; };
+  joy.addEventListener("pointerdown", e => { id = e.pointerId; joy.setPointerCapture(id); mexe(e); e.preventDefault(); });
+  joy.addEventListener("pointermove", e => { if (e.pointerId === id) mexe(e); });
+  const solta = e => { if (e.pointerId !== id) return; id = null; ESP.joy = { x: 0, y: 0 }; bola.style.transform = ""; };
+  joy.addEventListener("pointerup", solta); joy.addEventListener("pointercancel", solta);
+  $("es-chute").addEventListener("pointerdown", e => { e.preventDefault(); espAcao("chute"); });
+  $("es-passe").addEventListener("pointerdown", e => { e.preventDefault(); espAcao("passe"); });
+  $("es-sair").addEventListener("click", () => espSair());
+  ESP.kd = e => { if (/INPUT|TEXTAREA/.test((e.target || {}).tagName || "")) return; const k = e.key.toLowerCase(); ESP.keys[k] = true;
+    if (k === " ") { espAcao("chute"); e.preventDefault(); } if (k === "e") espAcao("passe"); if (k.startsWith("arrow")) e.preventDefault(); };
+  ESP.ku = e => { ESP.keys[e.key.toLowerCase()] = false; };
+  window.addEventListener("keydown", ESP.kd); window.addEventListener("keyup", ESP.ku);
+}
+function espAcao(a) { const E = ESP.E; if (!E || E.fim) return; if (ESP.rede && ESP.rede.acao) ESP.rede.acao(a); else if (E.P[ESP.eu]) E.P[ESP.eu].acao = a; }
+function espEntrada() {
+  const k = ESP.keys, kx = (k.d || k.arrowright ? 1 : 0) - (k.a || k.arrowleft ? 1 : 0), ky = (k.s || k.arrowdown ? 1 : 0) - (k.w || k.arrowup ? 1 : 0);
+  return kx || ky ? { x: kx, y: ky } : { x: ESP.joy.x, y: ESP.joy.y };
+}
+function espQuadro(ts) {
+  const box = $("esporte"); if (!box || box.hidden) return;
+  ESP.raf = requestAnimationFrame(espQuadro);
+  const dt = Math.min(.05, (ts - ESP.ult) / 1000); ESP.ult = ts;
+  const E = ESP.E, inp = espEntrada();
+  if (ESP.rede && ESP.rede.cliente) ESP.rede.passo(dt, inp);   // amigo: só manda o controle e recebe o estado
+  else { if (E.P[ESP.eu]) E.P[ESP.eu].inp = inp; espPasso(E, dt); if (ESP.rede && ESP.rede.enviar) ESP.rede.enviar(dt); }
+  const cv = $("es-cv"), w = innerWidth, h = innerHeight, dpr = Math.min(2, devicePixelRatio || 1);
+  if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+  espDesenhar(cv.getContext("2d"), ESP.E, ESP.eu, cv.width, cv.height - (h > 560 ? 130 * dpr : 0), 64 * dpr);
+  espHUD();
+}
+function espHUD() {
+  const E = ESP.E, mm = Math.floor(Math.ceil(E.t) / 60), ss = Math.ceil(E.t) % 60;
+  $("es-p0").textContent = E.placar[0]; $("es-p1").textContent = E.placar[1]; $("es-tempo").textContent = `${mm}:${String(ss).padStart(2, "0")}`;
+  const msg = $("es-msg"), txt = E.msg || ""; if (msg.textContent !== txt) msg.textContent = txt; msg.hidden = !txt || !!E.fim;
+  if (E.tMsg > 0) { E.tMsg -= 1 / 60; if (E.tMsg <= 0 && !E.pausa) E.msg = ""; }
+  const comBola = E.b.dono === ESP.eu; $("es-chute").disabled = !comBola; $("es-passe").disabled = !comBola || E.tam < 2;
+  if (E.fim && !ESP.ganhou) espFim();
+}
+function espFim() {
+  ESP.ganhou = true;
+  const E = ESP.E, eu = E.P[ESP.eu], nome = perfil(), vence = E.fim.vence, meu = eu ? eu.time : 0;
+  const res = vence === -1 ? "empate" : vence === meu ? "vitoria" : "derrota";
+  let moedas = { vitoria: 15, empate: 8, derrota: 4 }[res] + Math.min(20, (eu ? eu.gols : 0) * 2);
+  moedas = typeof comEvento === "function" ? comEvento(moedas) : moedas;
+  G.banco[nome] = Math.round(((G.banco[nome] || 0) + moedas) * 10) / 10;
+  if (typeof rankSomar === "function") rankSomar(nome, { v: res === "vitoria" });
+  if (typeof fimDePartidaMissao === "function") fimDePartidaMissao(nome, moedas, res === "vitoria");
+  salvar();
+  const f = $("es-fim"), t = ESP_TIPOS[E.tipo];
+  f.innerHTML = `<div class="aviso-caixa">
+    <span class="aviso-tag">${t.ic} ${t.nome}</span>
+    <h2>${res === "vitoria" ? "🏆 Vitória!" : res === "empate" ? "🤝 Empate!" : "Não foi dessa vez!"}</h2>
+    <p><span style="color:${ESP_TIMES[0].cor}">Azul ${E.placar[0]}</span> x <span style="color:${ESP_TIMES[1].cor}">${E.placar[1]} Vermelho</span></p>
+    <p class="dim" style="font-size:16px">Você fez ${eu ? eu.gols : 0} ${E.tipo === "futebol" ? (eu && eu.gols === 1 ? "gol" : "gols") : "pontos"} e ganhou <b style="color:#ffd23f">${fmtM(moedas)} moedas</b>.</p>
+    ${ESP.rede ? (ESP.rede.cliente ? `<p class="dim" style="font-size:15px">Esperando quem abriu a sala começar outra…</p>` : `<button class="lb-jogar" id="es-denovo">Jogar de novo</button>`) : `<button class="lb-jogar" id="es-denovo">Jogar de novo</button>`}
+    <button class="btn ghost" id="es-sair2">Sair</button></div>`;
+  f.hidden = false;
+  if ($("es-denovo")) $("es-denovo").addEventListener("click", () => { if (ESP.rede && ESP.rede.denovo) ESP.rede.denovo(); else acoes.espJogar(); });
+  $("es-sair2").addEventListener("click", () => espSair());
+  if (typeof tocarNotas === "function" && res === "vitoria") tocarNotas([[72, 72, 0, .12, "square"], [76, 76, .12, .12, "square"], [79, 79, .24, .12, "square"], [84, 84, .36, .4, "square"]]);
+}
+function espSair(semAvisar) {
+  cancelAnimationFrame(ESP.raf);
+  if (ESP.kd) { window.removeEventListener("keydown", ESP.kd); window.removeEventListener("keyup", ESP.ku); }
+  const box = $("esporte"); if (box) { box.hidden = true; box.innerHTML = ""; }
+  document.body.classList.remove("es-aberto");
+  if (ESP.rede && ESP.rede.sair && !semAvisar) ESP.rede.sair();
+  ESP.rede = null; ESP.E = null;
+  G.tela = "esportes"; salvar(); render();
+}
 </script>
