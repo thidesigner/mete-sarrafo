@@ -416,6 +416,9 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 @media (prefers-reduced-motion: reduce) { .stage-wrap.tremor, .a-boss.alerta { animation: none; } }
 .pr-missao { position: absolute; top: 100px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; background: rgba(11,27,51,.82); color: #fff; border: 2px solid #ffd23f; border-radius: 14px; padding: 6px 12px; font: 700 15px Nunito, sans-serif; z-index: 2; white-space: nowrap; pointer-events: none; }
 .pr-missao b { color: #ffd23f; }
+.pr-tesouro { top: auto; bottom: 178px; left: auto; right: 14px; transform: none; font-size: 13px; padding: 4px 10px; }
+.pr-corrida { top: 136px; font-size: 20px; border-color: #37d99a; }
+.praca.pr-cena .pr-tesouro, .praca.pr-cena .pr-corrida { display: none !important; }
 .praca.pr-cena .pr-missao { display: none !important; }
 .pr-premios { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .pr-premios li { background: rgba(255,210,63,.15); border: 2px solid #ffd23f; border-radius: 12px; padding: 10px; color: #fff; font-weight: 700; }
@@ -4884,7 +4887,8 @@ function montarPraca3D() {
     add(new THREE.CylinderGeometry(.22, .3, 1.6, 8), "#8a5a2b", x, .8, z); const copa = add(new THREE.SphereGeometry(1.5, 10, 8), i % 3 ? "#3f9d3a" : "#4fb446", x, 2.6, z); copa.scale.y = 1.15; }
   for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2 + Math.PI / 8, r = 5.2, x = Math.cos(a) * r, z = Math.sin(a) * r, b = new THREE.Group(); b.position.set(x, 0, z); b.rotation.y = -a + Math.PI / 2; s.add(b);
     add(new THREE.BoxGeometry(1.6, .12, .5), "#c0763a", 0, .5, 0, b); add(new THREE.BoxGeometry(1.6, .5, .1), "#c0763a", 0, .8, .22, b); [-.7, .7].forEach(dx => add(new THREE.BoxGeometry(.1, .5, .45), "#3a3a48", dx, .25, 0, b)); }
-  for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2, r = PRACA_R - .6, x = Math.cos(a) * r, z = Math.sin(a) * r;
+  for (let i = 0; i < 6; i++) { if (i === 0) continue;   // sem poste na passagem para o Parque
+    const a = i / 6 * Math.PI * 2, r = PRACA_R - .6, x = Math.cos(a) * r, z = Math.sin(a) * r;
     add(new THREE.CylinderGeometry(.08, .1, 3, 8), "#2b2f3a", x, 1.5, z); add(new THREE.SphereGeometry(.28, 12, 10), new THREE.MeshBasicMaterial({ color: "#fff3b0" }), x, 3.1, z); }
   // placas de classificação
   PRACA.placas = PRACA_PLACAS.map(pl => {
@@ -4924,7 +4928,184 @@ function montarPraca3D() {
     PRACA.portal = portal; }
   // sombra redondinha
   PRACA.sombraTex = texturaCanvas(64, 64, (c) => { const g = c.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, "rgba(0,0,0,.45)"); g.addColorStop(1, "rgba(0,0,0,0)"); c.fillStyle = g; c.fillRect(0, 0, 64, 64); });
+  montarParque3D(s);
   return s;
+}
+/* ---------- Parque da Praça (ideias do Andre): corrida de obstáculos, roda-gigante, caça ao tesouro do dia e dia/noite ----------
+   O Parque fica do lado direito (leste), saindo da Praça por uma passagem. Área andável: o círculo da Praça, a passagem e o retângulo do Parque. */
+const PARQUE = { x0: 21, x1: 47, z0: -17, z1: 17, passagem: 2.4 };
+const RODA = { x: 40, z: -8, r: 6.2, h: 7.4, n: 8, volta: 24 };   // roda-gigante: centro, raio, altura do eixo, cabines, segundos por volta
+// corrida de obstáculos: plataformas {x, z, w, d, y (altura do topo)}; a primeira é a largada e a última a chegada
+const PK_PLAT = [
+  { x: 25, z: 9, w: 3, d: 3, y: .25 },
+  { x: 28.2, z: 9, w: 1.6, d: 1.6, y: .9 }, { x: 30.8, z: 10.2, w: 1.5, d: 1.5, y: 1.6 }, { x: 33.4, z: 9, w: 1.5, d: 1.5, y: 2.3 },
+  { x: 36, z: 10.4, w: 1.4, d: 1.4, y: 3 }, { x: 38.6, z: 9, w: 1.4, d: 1.4, y: 3.6 }, { x: 41.2, z: 10.6, w: 1.4, d: 1.4, y: 4.2 },
+  { x: 43.6, z: 12.8, w: 1.4, d: 1.4, y: 4.8 }, { x: 41.4, z: 14.6, w: 1.4, d: 1.4, y: 5.4 }, { x: 38.4, z: 14.4, w: 1.3, d: 1.3, y: 6 },
+  { x: 35.6, z: 13.2, w: 1.3, d: 1.3, y: 6.6 }, { x: 32.6, z: 14.2, w: 1.3, d: 1.3, y: 7.2 }, { x: 29.4, z: 13.4, w: 3, d: 3, y: 7.8 } ];
+// lugares onde o tesouro do dia pode aparecer (5 por dia, sorteados pela data)
+const TES_LUGARES = [[-15, -2], [-6, 16], [14, 13], [16, -12], [-14, -12], [3, 6], [-3, -6], [9, -1], [-9, 1], [12, 8], [0, -17], [-17, 7],
+  [26, -12], [32, 3], [44, -14], [45, 3], [28, -3], [36, -15], [23, 14], [41, 0]];
+function pracaLivre(x, z) {   // pode andar ali?
+  if (Math.hypot(x, z) <= PRACA_R) return true;
+  if (x > 0 && Math.abs(z) <= PARQUE.passagem && x <= PARQUE.x0 + .5) return true;
+  return x >= PARQUE.x0 && x <= PARQUE.x1 && z >= PARQUE.z0 && z <= PARQUE.z1;
+}
+function alturaChaoPraca(x, z, y) {   // topo da plataforma embaixo (se estiver por cima dela)
+  let h = 0; for (const p of PK_PLAT) if (Math.abs(x - p.x) <= p.w / 2 + .15 && Math.abs(z - p.z) <= p.d / 2 + .15 && y >= p.y - .45) h = Math.max(h, p.y); return h;
+}
+function montarParque3D(s) {
+  const mat = cor => new THREE.MeshLambertMaterial({ color: cor }), add = (geo, cor, x, y, z, pai = s) => { const m = new THREE.Mesh(geo, typeof cor === "string" ? mat(cor) : cor); m.position.set(x, y, z); pai.add(m); return m; };
+  // chão do parque e caminho da passagem
+  const piso = texturaCanvas(256, 256, (c, w) => { c.fillStyle = "#d9c8a6"; c.fillRect(0, 0, w, w); c.strokeStyle = "#c2ad84"; c.lineWidth = 3; for (let k = 0; k <= w; k += 32) { c.beginPath(); c.moveTo(k, 0); c.lineTo(k, w); c.moveTo(0, k); c.lineTo(w, k); c.stroke(); } });
+  piso.wrapS = piso.wrapT = THREE.RepeatWrapping; piso.repeat.set(6, 8);
+  const chao = new THREE.Mesh(new THREE.PlaneGeometry(PARQUE.x1 - PARQUE.x0 + 1, PARQUE.z1 - PARQUE.z0 + 1), new THREE.MeshLambertMaterial({ map: piso })); chao.rotation.x = -Math.PI / 2; chao.position.set((PARQUE.x0 + PARQUE.x1) / 2, .012, 0); s.add(chao);
+  const cam = new THREE.Mesh(new THREE.PlaneGeometry(4, PARQUE.passagem * 2), new THREE.MeshLambertMaterial({ map: piso })); cam.rotation.x = -Math.PI / 2; cam.position.set(PARQUE.x0 - 1.5, .013, 0); s.add(cam);
+  // cerquinha em volta do parque (com a entrada aberta)
+  const cerca = mat("#ffffff");
+  const lado = (x1, z1, x2, z2) => { const n = Math.ceil(Math.hypot(x2 - x1, z2 - z1) / 1.2); for (let i = 0; i <= n; i++) { const f = i / n; add(new THREE.BoxGeometry(.12, .8, .12), cerca, x1 + (x2 - x1) * f, .4, z1 + (z2 - z1) * f); }
+    const tr = add(new THREE.BoxGeometry(Math.hypot(x2 - x1, z2 - z1), .1, .08), cerca, (x1 + x2) / 2, .65, (z1 + z2) / 2); tr.rotation.y = -Math.atan2(z2 - z1, x2 - x1); };
+  lado(PARQUE.x0, PARQUE.z0, PARQUE.x1, PARQUE.z0); lado(PARQUE.x0, PARQUE.z1, PARQUE.x1, PARQUE.z1); lado(PARQUE.x1, PARQUE.z0, PARQUE.x1, PARQUE.z1);
+  lado(PARQUE.x0, PARQUE.z0, PARQUE.x0, -PARQUE.passagem - .4); lado(PARQUE.x0, PARQUE.passagem + .4, PARQUE.x0, PARQUE.z1);
+  // arco de entrada "Parque"
+  { const g = new THREE.Group(); g.position.set(PARQUE.x0 - .3, 0, 0); g.rotation.y = -Math.PI / 2; s.add(g);
+    [-2.8, 2.8].forEach(dx => add(new THREE.BoxGeometry(.4, 4, .4), "#ff8a1f", dx, 2, 0, g)); add(new THREE.BoxGeometry(6.2, .9, .4), "#ff8a1f", 0, 4.2, 0, g);
+    add(new THREE.PlaneGeometry(5.6, .75), new THREE.MeshBasicMaterial({ map: texTexto("🎡 PARQUE", "#ffffff", "#ff8a1f", 512, 80, 48) }), 0, 4.2, .21, g);
+    const pl = add(new THREE.PlaneGeometry(5.6, .75), new THREE.MeshBasicMaterial({ map: texTexto("🎡 PARQUE", "#ffffff", "#ff8a1f", 512, 80, 48) }), 0, 4.2, -.21, g); pl.rotation.y = Math.PI; }
+  // placa na Praça apontando para o parque
+  { const g = new THREE.Group(); g.position.set(16.5, 0, -2.8); s.add(g); add(new THREE.BoxGeometry(.12, 2, .12), "#8a5a2b", 0, 1, 0, g);
+    const pl = add(new THREE.PlaneGeometry(2.2, .55), new THREE.MeshBasicMaterial({ map: texTexto("🎡 Parque ➜", "#0b1b33", "#ffd23f", 512, 128, 64), side: THREE.DoubleSide }), 0, 1.9, 0, g); pl.rotation.y = -Math.PI / 2; }
+  // corrida de obstáculos: plataformas coloridas, largada e bandeira de chegada
+  const cores = ["#ff4d6d", "#ffd23f", "#37d99a", "#2f80ed", "#9b5de5", "#ff8a1f"];
+  PK_PLAT.forEach((p, i) => {
+    const alto = i === 0 ? .25 : .4, bloco = add(new THREE.BoxGeometry(p.w, alto, p.d), i === 0 ? "#37d99a" : i === PK_PLAT.length - 1 ? "#ffd23f" : cores[i % cores.length], p.x, p.y - alto / 2, p.z);
+    if (i > 0 && i < PK_PLAT.length - 1) add(new THREE.CylinderGeometry(.06, .06, p.y - alto), "#9aa7b8", p.x, (p.y - alto) / 2, p.z);   // pezinho
+  });
+  { const l = PK_PLAT[0], f = PK_PLAT[PK_PLAT.length - 1];
+    add(new THREE.PlaneGeometry(2.6, .6), new THREE.MeshBasicMaterial({ map: texTexto("🏁 LARGADA", "#0b1b33", "#37d99a", 512, 120, 60), side: THREE.DoubleSide }), l.x, 1.6, l.z - 1.6).rotation.y = 0;
+    add(new THREE.CylinderGeometry(.06, .06, 2.2), "#ffffff", f.x + 1, f.y + 1.1, f.z);
+    const ban = add(new THREE.PlaneGeometry(1.1, .7), new THREE.MeshBasicMaterial({ map: texturaCanvas(64, 40, (c) => { for (let a = 0; a < 8; a++) for (let b = 0; b < 5; b++) { c.fillStyle = (a + b) % 2 ? "#111" : "#fff"; c.fillRect(a * 8, b * 8, 8, 8); } }), side: THREE.DoubleSide }), f.x + 1.55, f.y + 1.9, f.z); PRACA.bandeira = ban; }
+  // placa do recorde da corrida
+  { const g = new THREE.Group(); g.position.set(24, 0, 14.5); g.rotation.y = Math.PI * .85; s.add(g);
+    [-1.2, 1.2].forEach(dx => add(new THREE.BoxGeometry(.14, 3.2, .14), "#3a3a48", dx, 1.6, 0, g)); add(new THREE.BoxGeometry(2.7, 2.4, .12), "#37d99a", 0, 2.2, 0, g);
+    PRACA.pkTela = add(new THREE.PlaneGeometry(2.5, 2.2), new THREE.MeshBasicMaterial({ map: texRecordes() }), 0, 2.2, .07, g); PRACA.pkChave = ""; }
+  // roda-gigante: duas pernas em A, eixo e a roda girando com cabines
+  { const g = new THREE.Group(); g.position.set(RODA.x, 0, RODA.z); s.add(g);
+    for (const sz of [-.9, .9]) for (const sx of [-1, 1]) { const perna = add(new THREE.BoxGeometry(.25, RODA.h * 1.08, .25), "#d8dde6", sx * 2.1, RODA.h / 2, sz, g); perna.rotation.z = -sx * .28; }
+    add(new THREE.CylinderGeometry(.18, .18, 2.2, 10), "#9aa7b8", 0, RODA.h, 0, g).rotation.x = Math.PI / 2;
+    const roda = new THREE.Group(); roda.position.y = RODA.h; g.add(roda);
+    for (const sz of [-.55, .55]) { const aro = add(new THREE.TorusGeometry(RODA.r, .09, 8, 48), "#ff4d6d", 0, 0, sz, roda);
+      for (let i = 0; i < RODA.n; i++) { const a = i / RODA.n * Math.PI * 2, raio = add(new THREE.BoxGeometry(.07, RODA.r, .07), "#ffffff", Math.cos(a) * RODA.r / 2, Math.sin(a) * RODA.r / 2, sz, roda); raio.rotation.z = a - Math.PI / 2; } }
+    PRACA.cabines = [];
+    for (let i = 0; i < RODA.n; i++) { const c = new THREE.Group(); s.add(c);
+      add(new THREE.BoxGeometry(1.3, .9, 1.1), cores[i % cores.length], 0, -.45, 0, c); add(new THREE.BoxGeometry(1.4, .1, 1.2), "#ffffff", 0, .05, 0, c); add(new THREE.CylinderGeometry(.03, .03, .5), "#ffffff", 0, .3, 0, c);
+      PRACA.cabines.push(c); }
+    PRACA.roda = roda; PRACA.rodaAng = 0;
+    add(new THREE.PlaneGeometry(2.8, .6), new THREE.MeshBasicMaterial({ map: texTexto("🎡 Roda-gigante", "#ffffff", "#ff4d6d", 512, 110, 56), side: THREE.DoubleSide }), 0, 1.3, 1.9, g); }
+  // céu da noite (aparece por cima do céu do dia quando escurece) e luzinhas
+  const noite = texturaCanvas(512, 256, (c, w, h) => { const gr = c.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, "#030716"); gr.addColorStop(.55, "#0d1d48"); gr.addColorStop(1, "#24335f"); c.fillStyle = gr; c.fillRect(0, 0, w, h);
+    for (let i = 0; i < 260; i++) { c.fillStyle = `rgba(255,255,255,${.4 + Math.random() * .6})`; c.fillRect(Math.random() * w, Math.random() * h * .55, Math.random() < .2 ? 2 : 1, Math.random() < .2 ? 2 : 1); } });
+  PRACA.ceuNoite = new THREE.Mesh(new THREE.SphereGeometry(59, 24, 12), new THREE.MeshBasicMaterial({ map: noite, side: THREE.BackSide, fog: false, transparent: true, opacity: 0, depthWrite: false })); s.add(PRACA.ceuNoite);
+  PRACA.lua = add(new THREE.SphereGeometry(2.2, 16, 12), new THREE.MeshBasicMaterial({ color: "#f4f1de", fog: false, transparent: true, opacity: 0 }), -30, 34, -38);
+  const halo = new THREE.SpriteMaterial({ map: brilhoTextura("rgba(255,240,180,1)"), color: "#fff1b0", transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0 });
+  PRACA.halos = [];
+  for (let i = 0; i < 6; i++) { if (i === 0) continue; const a = i / 6 * Math.PI * 2, sp = new THREE.Sprite(halo); sp.scale.set(2.6, 2.6, 1); sp.position.set(Math.cos(a) * (PRACA_R - .6), 3.1, Math.sin(a) * (PRACA_R - .6)); s.add(sp); PRACA.halos.push(sp); }
+  PRACA.haloMat = halo;
+  PRACA.luzinhas = [];   // lâmpadas coloridas na roda-gigante (acendem à noite)
+  for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2, l = add(new THREE.SphereGeometry(.13, 8, 6), new THREE.MeshBasicMaterial({ color: cores[i % cores.length] }), Math.cos(a) * RODA.r, Math.sin(a) * RODA.r, .65, PRACA.roda); PRACA.luzinhas.push(l); }
+  PRACA.luzesBase = PRACA.luzes.map(([l, v]) => v); PRACA.tDia = 0;
+  PRACA.tesouros = [];
+}
+/* placa de recordes da corrida (melhores tempos deste celular e de quem a classificação trouxe) */
+function recordesPk() { const r = G.pkRec || {}; return Object.entries(r).map(([n, s]) => ({ n, s })).sort((a, b) => a.s - b.s).slice(0, 6); }
+function texRecordes() {
+  return texturaCanvas(256, 224, (c, w, h) => { c.fillStyle = "#0f3057"; c.fillRect(0, 0, w, h); c.fillStyle = "#ffd23f"; c.font = "800 24px Nunito, sans-serif"; c.textAlign = "center"; c.fillText("🏁 Recordes da corrida", w / 2, 32);
+    const l = recordesPk(); c.font = "700 20px Nunito, sans-serif";
+    if (!l.length) { c.fillStyle = "#cfe0f5"; c.fillText("Ninguém ainda!", w / 2, 110); return; }
+    l.forEach((e, i) => { c.textAlign = "left"; c.fillStyle = i === 0 ? "#ffd23f" : "#ffffff"; c.fillText(`${i + 1}º ${e.n.slice(0, 12)}`, 16, 70 + i * 26); c.textAlign = "right"; c.fillText(e.s.toFixed(1) + " s", w - 16, 70 + i * 26); }); });
+}
+/* ---------- dia e noite pelo relógio (horário de Brasília) ---------- */
+function horaPraca() { if (typeof PRACA_HORA_TESTE === "number") return PRACA_HORA_TESTE; const d = new Date(Date.now() - 3 * 3600000); return d.getUTCHours() + d.getUTCMinutes() / 60; }
+function noiteFator(h) {   // 0 = dia, 1 = noite (amanhece 5h30–7h, escurece 17h30–19h)
+  if (h >= 7 && h <= 17.5) return 0; if (h >= 19 || h <= 5.5) return 1;
+  return h < 12 ? 1 - (h - 5.5) / 1.5 : (h - 17.5) / 1.5;
+}
+function passoDiaNoite(dt) {
+  PRACA.tDia -= dt; if (PRACA.tDia > 0) return; PRACA.tDia = 2;
+  const n = noiteFator(horaPraca());
+  PRACA.ceuNoite.material.opacity = n; PRACA.ceuNoite.visible = n > .01; PRACA.lua.material.opacity = n; PRACA.haloMat.opacity = n;
+  PRACA.luzes.forEach((e, i) => { e[1] = PRACA.luzesBase[i] * (1 - .62 * n); if (!PRACA.climaBoss) e[0].intensity = e[1]; });
+  const ceuCor = new THREE.Color("#cfe9ff").lerp(new THREE.Color("#0d1d48"), n); if (PRACA.cena.fog) PRACA.cena.fog.color.copy(ceuCor);
+  PRACA.noite = n;
+}
+/* ---------- caça ao tesouro do dia ---------- */
+function tesouroDoDia() {
+  const dia = diaBR(); let s = 0; for (const ch of dia + "tesouro") s = (s * 31 + ch.charCodeAt(0)) >>> 0;
+  const idx = [...TES_LUGARES.keys()], esc = []; while (esc.length < 5) { s = (s * 1103515245 + 12345) >>> 0; esc.push(idx.splice(s % idx.length, 1)[0]); }
+  return { dia, lugares: esc };
+}
+function estadoTesouro() { const td = tesouroDoDia(), nome = perfil(); G.tesouro = G.tesouro && G.tesouro.dia === td.dia ? G.tesouro : { dia: td.dia, por: {} }; G.tesouro.por[nome] = G.tesouro.por[nome] || []; return { td, pegos: G.tesouro.por[nome] }; }
+function montarTesouros() {
+  for (const t of PRACA.tesouros || []) PRACA.cena.remove(t.g); PRACA.tesouros = [];
+  const { td, pegos } = estadoTesouro();
+  td.lugares.forEach(i => { if (pegos.includes(i)) return; const [x, z] = TES_LUGARES[i], g = new THREE.Group(); g.position.set(x, 1, z); PRACA.cena.add(g);
+    const moeda = new THREE.Mesh(new THREE.CylinderGeometry(.42, .42, .12, 24), new THREE.MeshLambertMaterial({ color: "#ffd23f", emissive: "#6b4e00" })); moeda.rotation.x = Math.PI / 2; g.add(moeda);
+    const sim = new THREE.Mesh(new THREE.PlaneGeometry(.5, .5), new THREE.MeshBasicMaterial({ map: texTexto("$", "#8a5a00", "rgba(0,0,0,0)", 64, 64, 54), transparent: true, side: THREE.DoubleSide })); sim.position.z = .07; g.add(sim);
+    const brilho = new THREE.Sprite(new THREE.SpriteMaterial({ map: brilhoTextura("rgba(255,220,90,1)"), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); brilho.scale.set(1.8, 1.8, 1); g.add(brilho);
+    PRACA.tesouros.push({ i, x, z, g }); });
+  atualizarHudTesouro();
+}
+function atualizarHudTesouro() { const el = $("pr-tesouro"); if (!el) return; const { pegos } = estadoTesouro(); el.textContent = pegos.length >= 5 ? "🪙 Tesouro do dia: completo! ✅" : `🪙 Tesouro do dia: ${pegos.length}/5`; }
+function pegarTesouro(t) {
+  const { pegos } = estadoTesouro(), nome = perfil(); if (pegos.includes(t.i)) return;
+  pegos.push(t.i); PRACA.cena.remove(t.g); PRACA.tesouros = PRACA.tesouros.filter(x => x !== t);
+  let v = 10; if (pegos.length === 5) v += 25;
+  G.banco[nome] = Math.round(((G.banco[nome] || 0) + v) * 10) / 10; salvar();
+  if (typeof fogosPraca === "function") fogosPraca(t.x, 1.2, t.z, 25);
+  if (typeof tocarNotas === "function") tocarNotas([[84, 84, 0, .08, "triangle"], [91, 91, .08, .2, "triangle"]]);
+  toast(pegos.length === 5 ? `🎉 Achou os 5 tesouros de hoje! +${v} moedas` : `🪙 Tesouro! +${v} moedas (${pegos.length}/5)`); atualizarHudTesouro();
+}
+/* ---------- roda-gigante: sentar numa cabine, dar uma volta e descer ---------- */
+function posCabine(i, ang) { const a = ang + i / RODA.n * Math.PI * 2; return { x: RODA.x + Math.cos(a) * RODA.r, y: RODA.h + Math.sin(a) * RODA.r, z: RODA.z }; }
+function subirRoda() {
+  if (PRACA.naRoda) return; let melhor = 0, my = 99;
+  for (let i = 0; i < RODA.n; i++) { const p = posCabine(i, PRACA.rodaAng); if (p.y < my) { my = p.y; melhor = i; } }
+  PRACA.naRoda = { cab: melhor, t: 0 }; PRACA.voando = false; toast("🎡 Segura firme! A volta dura uns 25 segundos."); bip(700, .08);
+}
+function descerRoda() { if (!PRACA.naRoda) return; PRACA.naRoda = null; const eu = PRACA.eu; eu.x = RODA.x; eu.z = RODA.z + 3; eu.y = 0; eu.vy = 0; }
+/* ---------- corrida de obstáculos ---------- */
+function passoCorrida(dt) {
+  const eu = PRACA.eu, l = PK_PLAT[0], f = PK_PLAT[PK_PLAT.length - 1], el = $("pr-corrida");
+  const naLargada = Math.abs(eu.x - l.x) < l.w / 2 && Math.abs(eu.z - l.z) < l.d / 2 && eu.y < l.y + .3;
+  const naChegada = Math.abs(eu.x - f.x) < f.w / 2 + .1 && Math.abs(eu.z - f.z) < f.d / 2 + .1 && eu.y >= f.y - .1;
+  if (naLargada) { if (!PRACA.pk || PRACA.pk.t > 0) PRACA.pk = { t: 0, pronto: true }; }
+  else if (PRACA.pk && PRACA.pk.pronto && !PRACA.pk.fim) {
+    PRACA.pk.t += dt;
+    if (PRACA.voando || PRACA.naRoda) { PRACA.pk = null; }
+    else if (eu.y <= .01 && PRACA.pk.t > .4) { PRACA.pk = null; toast("Caiu! Volte para a largada 🏁 e tente de novo."); }
+    else if (naChegada) { const s = Math.round(PRACA.pk.t * 10) / 10, nome = nomeLimpo(perfil()); G.pkRec = G.pkRec || {}; const rec = !G.pkRec[nome] || s < G.pkRec[nome];
+      if (rec) G.pkRec[nome] = s; PRACA.pk.fim = s; salvar(); if (typeof fogosPraca === "function") fogosPraca(f.x, f.y + 1, f.z, 40);
+      if (typeof tocarNotas === "function") tocarNotas([[72, 72, 0, .1, "square"], [76, 76, .1, .1, "square"], [79, 79, .2, .1, "square"], [84, 84, .3, .3, "square"]]);
+      if (!G.pkPremio || G.pkPremio[nome] !== diaBR()) { G.pkPremio = { ...(G.pkPremio || {}), [nome]: diaBR() }; G.banco[perfil()] = Math.round(((G.banco[perfil()] || 0) + 20) * 10) / 10; salvar(); toast(`🏁 Chegou em ${s} s${rec ? " — recorde seu!" : ""} +20 moedas (1 vez por dia)`); }
+      else toast(`🏁 Chegou em ${s} s${rec ? " — recorde seu!" : "!"}`); }
+  }
+  if (el) { const txt = PRACA.pk && PRACA.pk.fim ? `🏁 ${PRACA.pk.fim} s` : PRACA.pk && PRACA.pk.pronto && PRACA.pk.t > 0 ? `⏱️ ${PRACA.pk.t.toFixed(1)} s` : PRACA.pk && PRACA.pk.pronto ? "🏁 Valendo! Pule nas plataformas" : "";
+    el.hidden = !txt; if (el.textContent !== txt) el.textContent = txt; }
+  const ch = JSON.stringify(recordesPk()); if (PRACA.pkTela && ch !== PRACA.pkChave) { PRACA.pkChave = ch; const v = PRACA.pkTela.material.map; PRACA.pkTela.material.map = texRecordes(); PRACA.pkTela.material.needsUpdate = true; if (v) v.dispose(); }
+}
+/* ---------- tudo do parque a cada quadro ---------- */
+function passoParque(dt, t) {
+  if (!PRACA.roda) return;
+  // roda girando e cabines penduradas sempre de pé
+  PRACA.rodaAng += dt * Math.PI * 2 / RODA.volta; PRACA.roda.rotation.z = PRACA.rodaAng;
+  PRACA.cabines.forEach((c, i) => { const p = posCabine(i, PRACA.rodaAng); c.position.set(p.x, p.y, p.z); });
+  if (PRACA.luzinhas) PRACA.luzinhas.forEach((l, i) => l.visible = (PRACA.noite || 0) > .3 ? (Math.floor(t * 4) + i) % 3 !== 0 : false);
+  if (PRACA.bandeira) PRACA.bandeira.rotation.y = Math.sin(t * 3) * .3;
+  // tesouros girando; pega quando encosta
+  const eu = PRACA.eu;
+  for (const tz of [...(PRACA.tesouros || [])]) { tz.g.rotation.y += dt * 2.5; tz.g.position.y = 1 + Math.sin(t * 2 + tz.i) * .15;
+    if (!PRACA.hist && !PRACA.painel && Math.hypot(eu.x - tz.x, eu.z - tz.z) < 1.2 && eu.y < 2.4) pegarTesouro(tz); }
+  if (estadoTesouro().td.dia !== PRACA.tesDia) { PRACA.tesDia = estadoTesouro().td.dia; montarTesouros(); }
+  passoCorrida(dt); passoDiaNoite(dt);
 }
 /* bonequinho da praça (o seu e o dos outros): mesmo modelo do 3D da partida */
 function pracaModelo(info) {
@@ -4972,6 +5153,8 @@ function abrirPraca() {
     <div class="pr-top"><button type="button" class="lb-pill" id="pr-sair">← Sair</button><span class="lb-pill" id="pr-gente">👥 1</span><span class="lb-pill lb-moedas"><span class="lb-coin" aria-hidden="true">$</span><b id="pr-moedas"></b></span></div>
     <div class="pr-titulo">Praça Central</div>
     <div class="pr-missao" id="pr-missao" hidden></div>
+    <div class="pr-missao pr-tesouro" id="pr-tesouro"></div>
+    <div class="pr-missao pr-corrida" id="pr-corrida" hidden></div>
     <div class="pr-dica" id="pr-dica">Ande com o círculo da esquerda. Arraste a tela para olhar em volta.</div>
     <div class="pr-joy" id="pr-joy" aria-label="Andar"><i></i></div>
     <button type="button" class="pr-pular" id="pr-pular" aria-label="Pular">⤴</button>
@@ -4997,7 +5180,7 @@ function abrirPraca() {
 }
 function fecharPraca(irLobby = true) {
   if (!PRACA.on) return;
-  PRACA.on = false; cancelAnimationFrame(PRACA.raf); PRACA.hist = null; PRACA.voando = PRACA.veloz = PRACA.gigante = PRACA.brilho = false; PRACA.sobe = PRACA.desce = false; PRACA.faiscas = [];
+  PRACA.on = false; cancelAnimationFrame(PRACA.raf); PRACA.hist = null; PRACA.voando = PRACA.veloz = PRACA.gigante = PRACA.brilho = false; PRACA.naRoda = null; PRACA.pk = null; PRACA.tesDia = null; PRACA.sobe = PRACA.desce = false; PRACA.faiscas = [];
   if (typeof PRACA.desconectar === "function") PRACA.desconectar();
   pracaTirarTodos();
   window.removeEventListener("keydown", PRACA.kd); window.removeEventListener("keyup", PRACA.ku);
@@ -5037,7 +5220,7 @@ function ligarControlesPraca(box) {
   PRACA.ku = e => { PRACA.keys[e.key.toLowerCase()] = false; };
   window.addEventListener("keydown", PRACA.kd); window.addEventListener("keyup", PRACA.ku);
 }
-function pularPraca() { const eu = PRACA.eu; if (PRACA.voando) return; if (eu && eu.y <= .001) { eu.vy = 6.5; bip(660, .05); } }
+function pularPraca() { const eu = PRACA.eu; if (PRACA.voando || PRACA.naRoda) return; if (eu && eu.y <= alturaChaoPraca(eu.x, eu.z, eu.y) + .001) { eu.vy = 6.5; bip(660, .05); } }
 // Poder do ADM: voar na Praça. G.admVoar = lista dos perfis que o ADM liberou (aba Poderes); só eles veem o 🕊️.
 function listaVoar() { return Array.isArray(G.admVoar) ? G.admVoar : []; }   // versão antiga guardava true/false: vira lista vazia
 function podeVoar() { return listaVoar().includes(perfil()); }
@@ -5099,7 +5282,8 @@ function alternarVoo(liga) {
 }
 /* ---------- lugares onde dá para fazer alguma coisa ---------- */
 function lugaresPraca() {
-  const l = [];
+  if (PRACA.naRoda) return [{ x: PRACA.eu.x, z: PRACA.eu.z, r: 99, txt: "⬇️ Descer da roda", abrir: descerRoda }];
+  const l = [{ x: RODA.x, z: RODA.z + 2.6, r: 2.4, txt: "🎡 Andar na roda-gigante", abrir: subirRoda }];
   PRACA_PLACAS.forEach(pl => l.push({ x: pl.x * .8, z: pl.z * .8, r: 3, txt: `🏆 Ver classificação`, abrir: () => abrirPainelPraca("🏆 Classificação", () => { PRACA.rankAba = PRACA.rankAba || pl.k; return rankingHTML(); }, pl.k) }));
   PRACA_BARRACAS.forEach(b => l.push({ x: b.x * .82, z: b.z, r: 2.6, txt: `${b.ic} Barraca de ${b.t}`, abrir: () => abrirPainelPraca(`${b.ic} Barraca de ${b.t}`, () => lojaSecHTML(b.k)) }));
   l.push({ x: PRACA_MURAL.x * .85, z: PRACA_MURAL.z * .85, r: 2.6, txt: "📢 Ver eventos", abrir: () => abrirPainelPraca("📢 Eventos", () => missaoMuralHTML() + (historiasAgora().length ? `<button class="lb-comprar" data-a="verHistorias">🎬 Ver a história dos robôs de novo</button>` : "") + muralEventosHTML()) });
@@ -5143,12 +5327,12 @@ function quadroPraca(ts) {
   let mx = PRACA.mov.x, my = PRACA.mov.y;
   const kx = (k.d || k.arrowright ? 1 : 0) - (k.a || k.arrowleft ? 1 : 0), ky = (k.s || k.arrowdown ? 1 : 0) - (k.w || k.arrowup ? 1 : 0);
   if (kx || ky) { const m = Math.hypot(kx, ky); mx = kx / m; my = ky / m; }
-  if (PRACA.painel || PRACA.hist) { mx = 0; my = 0; }
+  if (PRACA.painel || PRACA.hist || PRACA.naRoda) { mx = 0; my = 0; }
   const sy = Math.sin(PRACA.yaw), cy = Math.cos(PRACA.yaw), vel = (PRACA.voando ? 9 : 6) * (PRACA.veloz ? 2.3 : 1) * (PRACA.gigante ? 1.3 : 1), vx = (mx * cy + my * sy) * vel, vz = (-mx * sy + my * cy) * vel;
   const anda = Math.hypot(vx, vz) > .1;
   if (anda) {
     let nx = eu.x + vx * dt, nz = eu.z + vz * dt;
-    const d = Math.hypot(nx, nz); if (d > PRACA_R) { nx *= PRACA_R / d; nz *= PRACA_R / d; }
+    if (!pracaLivre(nx, nz)) { if (pracaLivre(nx, eu.z)) nz = eu.z; else if (pracaLivre(eu.x, nz)) nx = eu.x; else { nx = eu.x; nz = eu.z; } }
     if (Math.hypot(nx, nz) < 3.2 && eu.y < 4) { const a = Math.atan2(nz, nx); nx = Math.cos(a) * 3.2; nz = Math.sin(a) * 3.2; }   // não entra no chafariz
     eu.x = nx; eu.z = nz; eu.r = Math.atan2(-vx, -vz); eu.m.passo += Math.hypot(vx, vz) * dt * 3;
   }
@@ -5156,7 +5340,11 @@ function quadroPraca(ts) {
     const sobe = PRACA.sobe || k[" "], desce = PRACA.desce || k.shift || k.c;
     eu.vy = ((sobe ? 1 : 0) - (desce ? 1 : 0)) * 6;
     eu.y = Math.max(0, Math.min(30, eu.y + eu.vy * dt + (sobe || desce ? 0 : Math.sin(performance.now() / 400) * .004)));
-  } else { eu.vy -= 18 * dt; eu.y = Math.max(0, eu.y + eu.vy * dt); if (eu.y === 0) eu.vy = 0; }
+  } else { const chao = alturaChaoPraca(eu.x, eu.z, eu.y); eu.vy -= 18 * dt; eu.y = Math.max(chao, eu.y + eu.vy * dt); if (eu.y <= chao && eu.vy < 0) eu.vy = 0; }
+  if (PRACA.naRoda) {   // sentado na cabine da roda-gigante
+    const nr = PRACA.naRoda, pc = posCabine(nr.cab, PRACA.rodaAng); nr.t += dt; eu.x = pc.x; eu.y = pc.y - .9; eu.z = pc.z + .1; eu.vy = 0;
+    if (nr.t > RODA.volta + 1 && pc.y < RODA.h - RODA.r + .6) { descerRoda(); toast("🎡 Que passeio! Volte quando quiser."); }
+  }
   eu.esc = (eu.esc || 1) + ((PRACA.gigante ? ESC_GIGANTE : 1) - (eu.esc || 1)) * (1 - Math.exp(-dt * 6)); eu.m.g.scale.setScalar(eu.esc);
   animarBonecoPraca(eu.m, eu.x, eu.y, eu.z, eu.r, anda, dt);
   if (PRACA.brilho && (anda || PRACA.voando)) rastroPraca(eu, dt);
@@ -5179,6 +5367,7 @@ function quadroPraca(ts) {
   PRACA.jato.scale.y = 1 + .12 * Math.sin(t * 6);
   for (const o of PRACA.gira) o.rotation.y += o.userData.gira * dt;
   passoFragmentos(dt, t);
+  passoParque(dt, t);
   PRACA.portal.material.opacity = .35 + .15 * Math.sin(t * 3);
   // placas: redesenha quando a classificação muda
   PRACA.tPlaca -= dt;
@@ -9765,7 +9954,7 @@ function prDonoRecebe(conn, d) {
   }
   if (!id) return;
   const c = PR.conns.get(id);
-  if (d.t === "p") { const n = v => Math.max(-40, Math.min(40, +v || 0)); c.pos = [n(d.x), n(d.z), +d.r || 0, Math.max(0, Math.min(30, +d.y || 0)), (+d.e || 0) & 3]; pracaPos(id, ...c.pos); }
+  if (d.t === "p") { const n = v => Math.max(-60, Math.min(60, +v || 0)); c.pos = [n(d.x), n(d.z), +d.r || 0, Math.max(0, Math.min(30, +d.y || 0)), (+d.e || 0) & 3]; pracaPos(id, ...c.pos); }
   else if (d.t === "info") { c.info = prInfoLimpa(d.info); pracaOutro(id, c.info); prMandarInfos(); }
   else if (d.t === "rk") { mesclarRank(d.r, d.m); mesclarBossG(d.bg); }
   else if (d.t === "portal" && c.info) { toast(`${c.info.nome} entrou na Partida do Evento! Vá até a porta para jogar junto.`); for (const [k, o] of PR.conns) if (k !== id) enviar(o.conn, { t: "portal", nome: c.info.nome }); }
@@ -9794,7 +9983,7 @@ function prMembroRecebe(d) {
     for (const id of [...PRACA.outros.keys()]) if (!ids.includes(id)) pracaTirar(id);
     prContar();
   }
-  else if (d.t === "ps" && Array.isArray(d.l)) for (const a of d.l.slice(0, 20)) { if (!Array.isArray(a) || a[0] === PR.meuId) continue; const n = v => Math.max(-40, Math.min(40, +v || 0)); pracaPos(String(a[0]), n(a[1]), n(a[2]), +a[3] || 0, Math.max(0, Math.min(30, +a[4] || 0)), (+a[5] || 0) & 3); }
+  else if (d.t === "ps" && Array.isArray(d.l)) for (const a of d.l.slice(0, 20)) { if (!Array.isArray(a) || a[0] === PR.meuId) continue; const n = v => Math.max(-60, Math.min(60, +v || 0)); pracaPos(String(a[0]), n(a[1]), n(a[2]), +a[3] || 0, Math.max(0, Math.min(30, +a[4] || 0)), (+a[5] || 0) & 3); }
   else if (d.t === "sai") { pracaTirar(String(d.id)); prContar(); }
   else if (d.t === "rk") { mesclarRank(d.r, d.m); mesclarBossG(d.bg); }
   else if (d.t === "portal") toast(`${nomeLimpo(d.nome)} entrou na Partida do Evento! Vá até a porta para jogar junto.`);

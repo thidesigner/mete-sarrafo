@@ -267,3 +267,12 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
 - (18/11) Poderes nos Esportes (ideia do Andre): 🔥 Chute de fogo, ⚡ Turbo e ❄️ Congelar. Na primeira vez em Esportes ganha um poder sorteado para sempre; os outros saem na Caixa de poder (300 moedas, sorteia um que ainda não tem). Leva 1 poder para a partida e usa com o botão; recarrega em 20 segundos. Robôs também têm poder.
 - (18/11) Ranking online (pedido do Andre): a classificação da Praça vai mostrar qualquer pessoa, mesmo quem nunca jogou junto. Código pronto; liga quando o pai criar o banco no Firebase (passo a passo em ferramentas/ranking-online/LEIA.md).
 - (18/11) O Andre escolheu a classificação **sem servidor**: agora ela passa em todo encontro (Praça, qualquer sala, Esportes e amigos online), e vai passando de celular em celular. O ranking online pelo Firebase ficou desligado.
+
+## Parque da Praça (18/11)
+
+- Ideias do Andre: corrida de obstáculos, caça ao tesouro do dia, roda-gigante e dia e noite.
+- O Parque fica do lado direito da Praça (siga a placa "🎡 Parque ➜").
+- Corrida: suba na largada verde, pule pelas plataformas até a bandeira. Caiu no chão, volta para a largada. Recorde na placa; 20 moedas uma vez por dia.
+- Tesouro do dia: 5 moedas escondidas que mudam todo dia (10 cada, +25 achando as 5).
+- Roda-gigante: uma volta de uns 25 segundos, ou desce quando quiser.
+- Dia e noite pelo relógio: à noite estrelas, lua e luzes acesas.
