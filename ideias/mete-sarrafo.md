@@ -258,3 +258,7 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
 - Basquete: arremesso perto vale 2 e de longe (fora do arco) vale 3, mas é mais difícil; marcado de perto erra mais. Errou: rebote.
 - Moedas: vitória 15, empate 8, derrota 4, mais 2 por gol ou ponto seu.
 - Dúvidas para o Andre: o tempo de 2 minutos está bom? Quer pênalti no empate? Quer goleiro controlado por gente?
+
+## Música nova da tela inicial (18/11)
+
+- Pedido do Andre: melhorar a música. Agora em Dó maior, com partes: introdução, parte A, refrão mais animado, parte calma (ponte) e refrão de novo (cerca de 80 segundos antes de repetir). Tem eco na melodia, arpejo, acordes de fundo, baixo e bateria com virada no fim de cada parte. As músicas da partida e do boss não mudaram.

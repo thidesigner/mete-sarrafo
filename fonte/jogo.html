@@ -5726,22 +5726,46 @@ function musCtx() {
   } catch { return null; }
 }
 
-/* G – Em – C – D, 16 passos por compasso */
-const ACORDES = [[55, 59, 62], [52, 55, 59], [48, 52, 55], [50, 54, 57]];
-const BAIXO = [43, 40, 36, 38];
-const MELODIA = [
-  [67, null, 71, null, 74, null, 71, null, 72, 74, null, 71, null, 67, null, null],
-  [64, null, 67, null, 71, null, 67, null, 69, 71, null, 67, null, 64, null, null],
-  [64, null, 67, null, 72, null, 76, null, 74, 72, null, 71, null, 72, null, null],
-  [74, null, null, 72, null, 71, null, 69, 66, null, 69, null, 74, null, null, null],
-];
-const RESPOSTA = [
-  [79, 78, 79, null, 74, null, null, null, 76, null, 74, null, 71, null, null, null],
-  [76, 74, 76, null, 71, null, null, null, 72, null, 71, null, 67, null, null, null],
-  [76, null, 79, null, 84, null, 83, null, 81, null, 79, null, 76, null, 79, null],
-  [81, null, 79, null, 78, null, 76, null, 74, null, 76, null, 78, 79, 81, 83],
-];
-
+/* Música da tela inicial (versão 2): em Dó maior, com partes diferentes para não cansar.
+   Introdução (4 compassos, só arpejo e acordes) e depois, em volta: A (8), Refrão (8), A (8), Ponte calma (4), Refrão (8).
+   16 passos por compasso. null = pausa. */
+const AC_LOBBY = { C: [60, 64, 67], G: [59, 62, 67], Am: [57, 60, 64], F: [57, 60, 65], Em: [55, 59, 64] };
+const BX_LOBBY = { C: 36, G: 43, Am: 45, F: 41, Em: 40 };
+const _ = null;
+const PARTES_LOBBY = {
+  I: { acordes: ["C", "G", "Am", "F"], mel: null },
+  A: { acordes: ["C", "G", "Am", "F", "C", "G", "F", "G"], mel: [
+    [72, _, 76, _, 79, _, 76, _, 77, 76, _, 74, _, 72, _, _], [74, _, 71, _, 67, _, 71, _, 74, _, 76, _, 74, _, _, _],
+    [72, _, 69, _, 72, _, 76, _, 79, _, 77, 76, _, 74, _, _], [72, _, _, _, 69, _, 72, _, 74, _, 72, _, 69, _, _, _],
+    [72, _, 76, _, 79, _, 76, _, 77, 76, _, 74, _, 72, _, _], [74, _, 71, _, 67, _, 71, _, 74, _, 79, _, 77, _, 76, _],
+    [77, _, 76, _, 74, _, 72, _, 74, _, 76, _, 77, _, _, _], [79, _, _, _, 74, _, _, _, 71, _, 74, _, 79, _, _, _]] },
+  R: { acordes: ["F", "G", "Em", "Am", "F", "G", "C", "C"], mel: [
+    [81, _, 81, 79, _, 77, _, 79, _, 81, _, 84, _, 81, _, _], [79, _, 79, 77, _, 76, _, 77, _, 79, _, 83, _, 79, _, _],
+    [76, _, 76, 74, _, 72, _, 74, _, 76, _, 79, _, 76, _, _], [81, _, _, 79, _, 76, _, 72, _, 74, _, 76, _, _, _, _],
+    [81, _, 81, 79, _, 77, _, 79, _, 81, _, 84, _, 81, _, _], [79, _, 79, 77, _, 76, _, 77, _, 79, _, 83, _, 86, _, _],
+    [84, _, 83, _, 81, _, 79, _, 76, _, 79, _, 84, _, _, _], [84, _, _, _, _, _, _, _, 79, _, 76, _, 72, _, _, _]] },
+  P: { acordes: ["Am", "F", "C", "G"], calma: true, mel: [
+    [76, _, _, _, _, _, 72, _, _, _, 74, _, 76, _, _, _], [77, _, _, _, _, _, 72, _, _, _, 69, _, 72, _, _, _],
+    [76, _, _, _, 79, _, _, _, 84, _, _, _, 79, _, _, _], [79, _, _, _, _, _, _, _, 74, _, 76, _, 77, _, 79, _]] } };
+const ORDEM_LOBBY = ["A", "R", "A", "P", "R"];
+function parteLobby(compasso) {   // qual parte e qual compasso dela
+  if (compasso < 4) return { k: "I", c: compasso, ultimo: compasso === 3 };
+  let n = (compasso - 4) % ORDEM_LOBBY.reduce((s, k) => s + PARTES_LOBBY[k].acordes.length, 0);
+  for (const k of ORDEM_LOBBY) { const len = PARTES_LOBBY[k].acordes.length; if (n < len) return { k, c: n, ultimo: n === len - 1, primeiro: n === 0 }; n -= len; }
+  return { k: "A", c: 0 };
+}
+/* eco e compressor só para deixar o som mais cheio (criados uma vez) */
+function musEfeitos() {
+  const c = MUS.ctx; if (!c || MUS.eco) return;
+  try {
+    const comp = c.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 3;
+    MUS.master.disconnect(); MUS.master.connect(comp); comp.connect(c.destination);
+    const d = c.createDelay(1), fb = c.createGain(), wet = c.createGain(), f = c.createBiquadFilter();
+    d.delayTime.value = .38; fb.gain.value = .32; wet.gain.value = .28; f.type = "lowpass"; f.frequency.value = 2600;
+    d.connect(f); f.connect(fb); fb.connect(d); f.connect(wet); wet.connect(MUS.master);
+    MUS.eco = d;
+  } catch { MUS.eco = null; }
+}
 function nota(t, freq, dur, tipo, vol, opts = {}) {
   const c = MUS.ctx, o = c.createOscillator(), g = c.createGain();
   o.type = tipo; o.frequency.setValueAtTime(freq, t);
@@ -5753,7 +5777,8 @@ function nota(t, freq, dur, tipo, vol, opts = {}) {
   }
   let saida = o;
   if (opts.filtro) { const f = c.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = opts.filtro; o.connect(f); saida = f; }
-  saida.connect(g); g.connect(MUS.master);
+  if (opts.det) o.detune.value = opts.det;
+  saida.connect(g); g.connect(MUS.master); if (opts.eco && MUS.eco) g.connect(MUS.eco);
   g.gain.setValueAtTime(0.0001, t);
   g.gain.exponentialRampToValueAtTime(vol, t + (opts.ataque || .008));
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
@@ -5768,22 +5793,42 @@ function ruido(t, dur, vol, tipo, freq) {
 }
 function bumbo(t) { nota(t, 150, .22, "sine", .9, { slide: .3, ataque: .002 }); }
 function palma(t) { ruido(t, .14, .5, "bandpass", 1500); ruido(t + .012, .1, .35, "bandpass", 1100); }
-function chimbal(t, aberto) { ruido(t, aberto ? .18 : .045, aberto ? .18 : .14, "highpass", 7000); }
+function chimbal(t, aberto, forte) { ruido(t, aberto ? .18 : .045, (aberto ? .18 : .14) * (forte ? 1.3 : 1), "highpass", 7000); }
 
 function tocarPasso(i, t) {
-  const compasso = Math.floor(i / 16) % 4, p = i % 16, frase = Math.floor(i / 64) % 2;
-  const ac = ACORDES[compasso], b = BAIXO[compasso];
-  if (p === 0 || p === 8 || (p === 10 && compasso === 3)) bumbo(t);
-  if (p === 4 || p === 12) palma(t);
-  if (p % 2 === 0) chimbal(t, p === 14);
-  if ([0, 3, 6, 8, 11, 14].includes(p)) nota(t, hz(b + (p === 3 || p === 11 ? 12 : 0)), .2, "triangle", .55, { filtro: 900 });
-  if (p % 4 === 2) ac.forEach(m => nota(t, hz(m + 12), .12, "square", .045, { filtro: 2400 }));
-  const mel = (frase === 0 ? MELODIA : RESPOSTA)[compasso][p];
+  musEfeitos();
+  const compasso = Math.floor(i / 16), p = i % 16, pt = parteLobby(compasso), parte = PARTES_LOBBY[pt.k];
+  const nome = parte.acordes[pt.c], ac = AC_LOBBY[nome], b = BX_LOBBY[nome], intro = pt.k === "I", calma = !!parte.calma, refrao = pt.k === "R";
+  // prato no começo de cada parte (menos na introdução)
+  if (p === 0 && pt.primeiro && !calma) ruido(t, 1.2, .22, "highpass", 5000);
+  // bateria
+  if (!intro) {
+    if (calma) { if (p === 0) bumbo(t); if (p === 8) palma(t); if (p % 4 === 2) chimbal(t, false); }
+    else {
+      const virada = pt.ultimo && p >= 12;
+      if (p === 0 || p === 8 || p === 10 && refrao || (p === 6 && pt.c % 2 === 1)) bumbo(t);
+      if (p === 4 || p === 12) palma(t);
+      if (virada) { nota(t, hz(50 + (p - 12) * 3), .12, "triangle", .35, { slide: .5 }); ruido(t, .08, .25, "bandpass", 1800 + (p - 12) * 300); }
+      else if (p % 2 === 0 || refrao) chimbal(t, p === 14, p % 4 === 0);
+    }
+  } else if (pt.ultimo && p >= 8 && p % 2 === 0) chimbal(t, false);
+  // baixo pulando (oitava) — na ponte só segura a nota
+  if (calma) { if (p === 0) nota(t, hz(b), 1.6, "triangle", .45, { filtro: 600 }); }
+  else if (!intro || pt.c >= 2) { if ([0, 3, 6, 8, 11, 14].includes(p)) nota(t, hz(b + (p === 3 || p === 11 ? 12 : 0)), .2, "triangle", .5, { filtro: 900 }); }
+  // acordes de fundo suaves (pad) no começo do compasso
+  if (p === 0) ac.forEach((m, k) => nota(t, hz(m), 1.9, "sawtooth", calma ? .035 : intro ? .045 : .022, { filtro: calma ? 900 : 1400, ataque: .25, det: k * 4 - 4 }));
+  // arpejo (sobe e desce nas notas do acorde)
+  const arp = [0, 1, 2, 1, 0, 1, 2, 3][p % 8], nArp = arp === 3 ? ac[0] + 12 : ac[arp];
+  if (intro || calma ? p % 2 === 0 : p % 2 === 1 || refrao) nota(t, hz(nArp + 12), .14, "triangle", intro ? .2 : calma ? .1 : .06, { filtro: 3000, eco: intro || calma });
+  // acordes curtos no contratempo (no A e no refrão)
+  if (!intro && !calma && p % 4 === 2) ac.forEach(m => nota(t, hz(m + 12), .1, "square", .03, { filtro: 2200 }));
+  // melodia
+  const mel = parte.mel && parte.mel[pt.c][p];
   if (mel) {
-    if (frase === 0) nota(t, hz(mel), .26, "square", .09, { filtro: 3200 });
-    else nota(t, hz(mel), .3, "sine", .16, { vibrato: true, ataque: .02 });
+    if (calma) nota(t, hz(mel), .7, "sine", .17, { vibrato: true, ataque: .04, eco: true });
+    else if (refrao) { nota(t, hz(mel), .28, "square", .07, { filtro: 3400, eco: true }); nota(t, hz(mel), .28, "sawtooth", .035, { filtro: 2600, det: 8 }); }
+    else nota(t, hz(mel), .26, "square", .08, { filtro: 3000, eco: true });
   }
-  if (i % 128 === 127) { ruido(t, .5, .25, "highpass", 3000); }
 }
 function agendar() {
   const c = MUS.ctx, dur = 60 / MUS.bpm / 4;
