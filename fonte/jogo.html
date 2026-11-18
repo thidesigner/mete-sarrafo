@@ -409,6 +409,8 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 @media (prefers-reduced-motion: reduce) { .stage-wrap.tremor, .a-boss.alerta { animation: none; } }
 .pr-missao { position: absolute; top: 100px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; background: rgba(11,27,51,.82); color: #fff; border: 2px solid #ffd23f; border-radius: 14px; padding: 6px 12px; font: 700 15px Nunito, sans-serif; z-index: 2; white-space: nowrap; pointer-events: none; }
 .pr-missao b { color: #ffd23f; }
+.pr-flash { position: absolute; inset: 0; background: #fff; z-index: 5; pointer-events: none; animation: prFlash .5s ease-out forwards; }
+@keyframes prFlash { from { opacity: .9; } to { opacity: 0; } }
 .pr-tesouro { top: auto; bottom: 178px; left: auto; right: 14px; transform: none; font-size: 13px; padding: 4px 10px; }
 .pr-corrida { top: 136px; font-size: 20px; border-color: #37d99a; }
 .praca.pr-cena .pr-tesouro, .praca.pr-cena .pr-corrida { display: none !important; }
@@ -4918,7 +4920,7 @@ function montarPraca3D() {
     PRACA.portal = portal; }
   // sombra redondinha
   PRACA.sombraTex = texturaCanvas(64, 64, (c) => { const g = c.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, "rgba(0,0,0,.45)"); g.addColorStop(1, "rgba(0,0,0,0)"); c.fillStyle = g; c.fillRect(0, 0, 64, 64); });
-  montarParque3D(s);
+  montarParque3D(s); montarPraca2(s);
   return s;
 }
 /* ---------- Parque da Praça (ideias do Andre): corrida de obstáculos, roda-gigante, caça ao tesouro do dia e dia/noite ----------
@@ -5094,8 +5096,265 @@ function passoParque(dt, t) {
   const eu = PRACA.eu;
   for (const tz of [...(PRACA.tesouros || [])]) { tz.g.rotation.y += dt * 2.5; tz.g.position.y = 1 + Math.sin(t * 2 + tz.i) * .15;
     if (!PRACA.hist && !PRACA.painel && Math.hypot(eu.x - tz.x, eu.z - tz.z) < 1.2 && eu.y < 2.4) pegarTesouro(tz); }
-  if (estadoTesouro().td.dia !== PRACA.tesDia) { PRACA.tesDia = estadoTesouro().td.dia; montarTesouros(); }
+  if (estadoTesouro().td.dia !== PRACA.tesDia) { PRACA.tesDia = estadoTesouro().td.dia; montarTesouros(); if (typeof montarObjMissao === "function") montarObjMissao(); }
   passoCorrida(dt); passoDiaNoite(dt);
+}
+/* ---------- Mais coisas na Praça (ideias 2, 4, 5, 7, 8, 10, 11, 12 e 13 do Andre) ----------
+   Campinho, trampolim e escorregador, palco de dança, casinha (no Parque); fonte dos desejos (chafariz), Bip e Bop andando com missão do dia,
+   pega-pega (com amigos pela rede, ou com o Bip quando está sozinho), clima da coleção da semana e máquina de foto. */
+const CAMPO = { x0: 23.5, x1: 32.5, z0: -15.5, z1: -4, gol: 3.2 };
+const TRAMP = { x: 25, z: 3.4, r: 1.25 };
+const ESCADA = [{ x: 37.6, z: 1.3, w: 1.4, d: 1, y: .75 }, { x: 37.6, z: 2.3, w: 1.4, d: 1, y: 1.5 }, { x: 37.6, z: 3.3, w: 1.4, d: 1, y: 2.25 }, { x: 37.6, z: 4.4, w: 1.6, d: 1.4, y: 3 }];
+const RAMPA = { xa: 36.8, xb: 30.6, z0: 3.6, z1: 5.2, h: 3 };
+const PALCO = { x: 43.2, z: -.6, w: 5, d: 4.2, y: .5 };
+const CASA = { x: 43.6, z: -14.4, porta: { x: 41.2, z: -14.4 } };
+const CASA_CORES = ["#ffd6e0", "#ffe9a8", "#c8f7dc", "#cfe3ff", "#e3d4ff", "#ffffff"];
+const CHAO_EXTRA = [...ESCADA, { x: PALCO.x, z: PALCO.z, w: PALCO.w, d: PALCO.d, y: PALCO.y }];   // escada do escorregador e o palco também são chão
+const _alturaChaoSemRampa = alturaChaoPraca;
+alturaChaoPraca = function (x, z, y) {   // + a rampa do escorregador e o trampolim
+  let h = _alturaChaoSemRampa(x, z, y);
+  for (const p of CHAO_EXTRA) if (Math.abs(x - p.x) <= p.w / 2 + .15 && Math.abs(z - p.z) <= p.d / 2 + .15 && y >= p.y - .45) h = Math.max(h, p.y);
+  if (z >= RAMPA.z0 && z <= RAMPA.z1 && x <= RAMPA.xa + .3 && x >= RAMPA.xb) { const hr = RAMPA.h * (x - RAMPA.xb) / (RAMPA.xa - RAMPA.xb); if (y >= hr - .6) h = Math.max(h, hr); }
+  if (Math.hypot(x - TRAMP.x, z - TRAMP.z) <= TRAMP.r && y >= .25) h = Math.max(h, .35);
+  return h;
+};
+function montarPraca2(s) {
+  const mat = cor => new THREE.MeshLambertMaterial({ color: cor }), add = (geo, cor, x, y, z, pai = s) => { const m = new THREE.Mesh(geo, typeof cor === "string" ? mat(cor) : cor); m.position.set(x, y, z); pai.add(m); return m; };
+  // campinho com gol e rede, e a bola
+  { const cx = (CAMPO.x0 + CAMPO.x1) / 2, cz = (CAMPO.z0 + CAMPO.z1) / 2, w = CAMPO.x1 - CAMPO.x0, d = CAMPO.z1 - CAMPO.z0;
+    const tex = texturaCanvas(256, 320, (c, W, H) => { for (let i = 0; i < 8; i++) { c.fillStyle = i % 2 ? "#3aa95a" : "#45b766"; c.fillRect(0, i * H / 8, W, H / 8); }
+      c.strokeStyle = "#fff"; c.lineWidth = 5; c.strokeRect(4, 4, W - 8, H - 8); c.beginPath(); c.arc(W / 2, H * .7, 34, 0, Math.PI * 2); c.stroke(); c.strokeRect(W / 2 - 60, 4, 120, 60); });
+    const gr = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshLambertMaterial({ map: tex })); gr.rotation.x = -Math.PI / 2; gr.position.set(cx, .02, cz); s.add(gr);
+    const b = mat("#ffffff"), gx = cx; [-1, 1].forEach(sx => add(new THREE.CylinderGeometry(.07, .07, 1.4, 8), b, gx + sx * CAMPO.gol / 2, .7, CAMPO.z0)); const tr = add(new THREE.CylinderGeometry(.07, .07, CAMPO.gol, 8), b, gx, 1.4, CAMPO.z0); tr.rotation.z = Math.PI / 2;
+    add(new THREE.PlaneGeometry(CAMPO.gol, 1.4), new THREE.MeshBasicMaterial({ color: "#ffffff", transparent: true, opacity: .35, side: THREE.DoubleSide }), gx, .7, CAMPO.z0 - .7);
+    add(new THREE.PlaneGeometry(2.6, .55), new THREE.MeshBasicMaterial({ map: texTexto("⚽ Campinho", "#ffffff", "#2e9e55", 512, 110, 56), side: THREE.DoubleSide }), CAMPO.x1 + .2, 1.6, cz).rotation.y = Math.PI / 2;
+    const bt = texturaCanvas(64, 32, (c) => { c.fillStyle = "#fff"; c.fillRect(0, 0, 64, 32); c.fillStyle = "#111"; for (const [x, y] of [[10, 10], [32, 6], [54, 12], [20, 24], [44, 24]]) { c.beginPath(); c.arc(x, y, 5, 0, Math.PI * 2); c.fill(); } });
+    PRACA.bola = add(new THREE.SphereGeometry(.32, 16, 12), new THREE.MeshLambertMaterial({ map: bt }), gx, .32, CAMPO.z1 - 3); PRACA.bolaV = { x: 0, z: 0 }; }
+  // trampolim
+  { add(new THREE.CylinderGeometry(TRAMP.r + .1, TRAMP.r + .1, .3, 24), "#2f80ed", TRAMP.x, .15, TRAMP.z); PRACA.lona = add(new THREE.CylinderGeometry(TRAMP.r, TRAMP.r, .05, 24), "#0b1b33", TRAMP.x, .33, TRAMP.z);
+    for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; add(new THREE.CylinderGeometry(.05, .05, .3), "#9aa7b8", TRAMP.x + Math.cos(a) * TRAMP.r, .1, TRAMP.z + Math.sin(a) * TRAMP.r); } }
+  // escorregador: escada, plataforma e rampa
+  { ESCADA.forEach((p, i) => add(new THREE.BoxGeometry(p.w, p.y, p.d), i === 3 ? "#ffd23f" : "#ff8a1f", p.x, p.y / 2, p.z));
+    const L = RAMPA.xa - RAMPA.xb, ang = Math.atan2(RAMPA.h, L), rampa = add(new THREE.BoxGeometry(Math.hypot(L, RAMPA.h), .12, RAMPA.z1 - RAMPA.z0), "#ff4d6d", (RAMPA.xa + RAMPA.xb) / 2, RAMPA.h / 2, (RAMPA.z0 + RAMPA.z1) / 2); rampa.rotation.z = ang;
+    for (const z of [RAMPA.z0, RAMPA.z1]) { const lado = add(new THREE.BoxGeometry(Math.hypot(L, RAMPA.h), .35, .08), "#ffd23f", (RAMPA.xa + RAMPA.xb) / 2, RAMPA.h / 2 + .15, z); lado.rotation.z = ang; } }
+  // palco de dança: piso que acende, caixas de som e luzes girando
+  { const g = new THREE.Group(); g.position.set(PALCO.x, 0, PALCO.z); s.add(g);
+    add(new THREE.BoxGeometry(PALCO.w, PALCO.y, PALCO.d), "#2b2f3a", 0, PALCO.y / 2, 0, g);
+    PRACA.pisoDanca = [];
+    for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) { const q = add(new THREE.PlaneGeometry(PALCO.w / 4 - .08, PALCO.d / 4 - .08), new THREE.MeshBasicMaterial({ color: "#333" }), -PALCO.w / 2 + (i + .5) * PALCO.w / 4, PALCO.y + .01, -PALCO.d / 2 + (j + .5) * PALCO.d / 4, g); q.rotation.x = -Math.PI / 2; PRACA.pisoDanca.push(q); }
+    [-1, 1].forEach(sz => { add(new THREE.BoxGeometry(.8, 1.4, .8), "#111318", PALCO.w / 2 - .4, PALCO.y + .7, sz * (PALCO.d / 2 - .4), g); add(new THREE.CylinderGeometry(.25, .25, .05, 16), "#555", PALCO.w / 2 - .82, PALCO.y + .9, sz * (PALCO.d / 2 - .4), g).rotation.z = Math.PI / 2; });
+    const feixe = new THREE.MeshBasicMaterial({ color: "#ffffff", transparent: true, opacity: .16, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+    PRACA.discoLuzes = ["#ff4d6d", "#37d99a", "#3dd9ff", "#ffd23f"].map((cor, i) => { const piv = new THREE.Group(); piv.position.set((i - 1.5) * 1.2, 4, 0); g.add(piv); const m = feixe.clone(); m.color.set(cor);
+      const cone = new THREE.Mesh(new THREE.ConeGeometry(.7, 3.6, 12, 1, true), m); cone.position.y = -1.8; piv.add(cone); return piv; });
+    add(new THREE.PlaneGeometry(3, .6), new THREE.MeshBasicMaterial({ map: texTexto("🎤 Palco de dança", "#ffffff", "#9b5de5", 512, 110, 52), side: THREE.DoubleSide }), -PALCO.w / 2 - .1, 1.6, 0, g).rotation.y = -Math.PI / 2; }
+  // casinha
+  { const g = new THREE.Group(); g.position.set(CASA.x, 0, CASA.z); s.add(g); PRACA.casa = g;
+    PRACA.casaParede = add(new THREE.BoxGeometry(4, 2.4, 3.2), "#ffd6e0", 0, 1.2, 0, g);
+    const tel = add(new THREE.ConeGeometry(3, 1.4, 4), "#e4572e", 0, 3.1, 0, g); tel.rotation.y = Math.PI / 4;
+    add(new THREE.BoxGeometry(.08, 1.6, 1), "#8a5a2b", -2.01, .8, 0, g);
+    PRACA.casaQuadro = add(new THREE.PlaneGeometry(1.2, .8), new THREE.MeshBasicMaterial({ color: "#ffffff" }), -2.02, 1.6, -1.05, g); PRACA.casaQuadro.rotation.y = -Math.PI / 2;
+    PRACA.casaPlaca = add(new THREE.PlaneGeometry(1.8, .45), new THREE.MeshBasicMaterial({ color: "#ffffff" }), -2.02, 2.15, .4, g); PRACA.casaPlaca.rotation.y = -Math.PI / 2;
+    PRACA.casaEnfeites = new THREE.Group(); g.add(PRACA.casaEnfeites); PRACA.casaChave = ""; }
+  // Bip e Bop passeando
+  PRACA.npcs = [{ nome: "Bip", cor: "#3dd9ff", fase: 0 }, { nome: "Bop", cor: "#ff8a1f", fase: Math.PI }].map(n => {
+    const m = roboHistoria(n.nome, n.cor); m.giram = m.giram || []; s.add(m.g);   // os mesmos robôs das histórias
+    return { ...n, m, x: Math.cos(n.fase) * 8.5, z: Math.sin(n.fase) * 8.5, ang: 0, r: 0 };
+  });
+  // clima da coleção da semana (chuva, neve ou brilho do sol)
+  PRACA.clima = climaDaColecao();
+  if (PRACA.clima) { const N = PRACA.clima === "chuva" ? 500 : 300, pos = new Float32Array(N * 3); for (let i = 0; i < N; i++) { pos[i * 3] = (Math.random() - .5) * 40; pos[i * 3 + 1] = Math.random() * 20; pos[i * 3 + 2] = (Math.random() - .5) * 40; }
+    const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    const cor = { chuva: "#9fd3ff", neve: "#ffffff", sol: "#ffe58a", fogo: "#ff8a1f" }[PRACA.clima];
+    PRACA.climaPts = new THREE.Points(geo, new THREE.PointsMaterial({ color: cor, size: PRACA.clima === "chuva" ? .09 : .2, transparent: true, opacity: .85, depthWrite: false })); s.add(PRACA.climaPts); }
+  PRACA.objMissao = null;
+}
+function climaDaColecao() {
+  const ids = typeof colecoesNaLoja === "function" ? colecoesNaLoja(perfil()).map(c => c.id) : [];
+  if (ids.some(k => ["raio", "furacao", "tempestade"].includes(k))) return "chuva";
+  if (ids.some(k => ["gelo", "gelofogo"].includes(k))) return "neve";
+  if (ids.includes("fogo")) return "fogo";
+  if (ids.some(k => ["sol", "lua", "eclipse"].includes(k))) return "sol";
+  return null;
+}
+/* ---------- campinho ---------- */
+function passoCampinho(dt) {
+  const b = PRACA.bola, v = PRACA.bolaV, eu = PRACA.eu; if (!b) return;
+  const dx = b.position.x - eu.x, dz = b.position.z - eu.z, d = Math.hypot(dx, dz);
+  if (d < .75 && eu.y < 1) { const f = 7 + Math.hypot(PRACA.mov.x, PRACA.mov.y) * 5; v.x = dx / (d || 1) * f; v.z = dz / (d || 1) * f; bip(300, .03); }
+  for (const o of PRACA.outros.values()) { const ox = b.position.x - o.x, oz = b.position.z - o.z, od = Math.hypot(ox, oz); if (od < .7) { v.x = ox / (od || 1) * 7; v.z = oz / (od || 1) * 7; } }
+  b.position.x += v.x * dt; b.position.z += v.z * dt; const fr = Math.exp(-dt * 1.3); v.x *= fr; v.z *= fr;
+  b.rotation.x += v.z * dt * 3; b.rotation.z -= v.x * dt * 3;
+  const cx = (CAMPO.x0 + CAMPO.x1) / 2;
+  if (b.position.z < CAMPO.z0 + .3) { if (Math.abs(b.position.x - cx) < CAMPO.gol / 2 - .2) { fogosPraca(cx, 1.4, CAMPO.z0, 40); tocarNotas && tocarNotas([[72, 72, 0, .1, "square"], [79, 79, .1, .25, "square"]]); toast("⚽ GOOOL!"); b.position.set(cx, .32, CAMPO.z1 - 3); v.x = v.z = 0; return; } b.position.z = CAMPO.z0 + .3; v.z = Math.abs(v.z) * .7; }
+  if (b.position.z > CAMPO.z1 - .3) { b.position.z = CAMPO.z1 - .3; v.z = -Math.abs(v.z) * .7; }
+  if (b.position.x < CAMPO.x0 + .3) { b.position.x = CAMPO.x0 + .3; v.x = Math.abs(v.x) * .7; } if (b.position.x > CAMPO.x1 - .3) { b.position.x = CAMPO.x1 - .3; v.x = -Math.abs(v.x) * .7; }
+}
+/* ---------- fonte dos desejos ---------- */
+const DESEJOS_DIA = 5, DESEJO_PRECO = 5;
+function desejosHoje() { const n = perfil(); G.desejos = G.desejos && G.desejos.dia === diaBR() ? G.desejos : { dia: diaBR(), por: {} }; return G.desejos.por[n] || 0; }
+function fonteHTML() {
+  const feitos = desejosHoje(), moedas = G.banco[perfil()] || 0;
+  return `<p class="pr-sub">Jogue uma moeda na fonte e faça um pedido! Às vezes ela devolve mais moedas. ✨</p>
+    <p class="pr-sub" style="font-size:15px">Hoje: ${feitos}/${DESEJOS_DIA} pedidos</p>
+    <button type="button" class="lb-comprar" data-a="pracaDesejo" ${feitos >= DESEJOS_DIA || moedas < DESEJO_PRECO ? "disabled" : ""}>🪙 Jogar uma moeda <span class="lb-coin" aria-hidden="true">$</span>${DESEJO_PRECO}</button>
+    ${PRACA.desejoRes ? `<p class="pr-sub" style="font-size:20px;margin-top:8px">${PRACA.desejoRes}</p>` : ""}`;
+}
+acoes.pracaDesejo = () => {
+  const n = perfil(); if (desejosHoje() >= DESEJOS_DIA || (G.banco[n] || 0) < DESEJO_PRECO) return;
+  G.banco[n] = Math.round((G.banco[n] - DESEJO_PRECO) * 10) / 10; G.desejos.por[n] = desejosHoje() + 1;
+  const r = Math.random(), v = r < .01 ? 100 : r < .06 ? 25 : r < .21 ? 10 : r < .51 ? 5 : 0;
+  if (v) G.banco[n] = Math.round((G.banco[n] + v) * 10) / 10; salvar();
+  PRACA.desejoRes = v >= 100 ? "🌟 UAU! A fonte te deu 100 moedas!" : v >= 25 ? "✨ A fonte brilhou: +25 moedas!" : v >= 10 ? "💧 Saíram 10 moedas da água!" : v ? "💧 A fonte devolveu sua moeda." : "💦 Splash! Seu pedido foi feito.";
+  fogosPraca(0, 2.4, 0, v >= 25 ? 50 : 15); bip(v ? 990 : 420, .1);
+};
+/* ---------- Bip e Bop: passeiam pela Praça e dão uma missãozinha por dia ---------- */
+const MISSOES_NPC = { Bip: { obj: "🔩", nome: "parafuso", premio: 15 }, Bop: { obj: "📡", nome: "antena", premio: 15 } };
+function missaoNpc(nome) { G.npcMissao = G.npcMissao && G.npcMissao.dia === diaBR() ? G.npcMissao : { dia: diaBR(), por: {} }; const k = perfil() + "|" + nome; return G.npcMissao.por[k] || (G.npcMissao.por[k] = { aceita: false, feita: false }); }
+function lugarObjNpc(nome) { let s = 7; for (const ch of diaBR() + nome) s = (s * 31 + ch.charCodeAt(0)) >>> 0; const l = TES_LUGARES[s % TES_LUGARES.length]; return { x: l[0] + 1.5, z: l[1] - 1.5 }; }
+function npcHTML(nome) {
+  const m = MISSOES_NPC[nome], st = missaoNpc(nome), sozinho = PRACA.outros.size === 0;
+  const fala = st.feita ? `Valeu demais! Volta amanhã que eu perco outra coisa. 😅` : st.aceita ? `Achou meu ${m.nome} ${m.obj}? Ele está brilhando em algum lugar da Praça ou do Parque!` : `Oi! Eu perdi meu ${m.nome} ${m.obj}. Me ajuda a achar? Dou ${m.premio} moedas!`;
+  return `<p class="pr-sub" style="font-size:18px">🤖 <b>${nome}:</b> ${fala}</p>
+    ${!st.aceita && !st.feita ? `<button type="button" class="lb-comprar" data-a="npcAceitar" data-n="${nome}">🔎 Vou procurar!</button>` : ""}
+    <button type="button" class="btn ghost small" data-a="pegaComecar" style="margin-top:8px">🏃 Brincar de pega-pega${sozinho ? " com o " + nome : " com todo mundo"}</button>`;
+}
+acoes.npcAceitar = el => { const st = missaoNpc(el.dataset.n); st.aceita = true; salvar(); montarObjMissao(); toast("🔎 Procure o objeto brilhando!"); };
+function montarObjMissao() {
+  if (PRACA.objMissao) { PRACA.cena.remove(PRACA.objMissao.g); PRACA.objMissao = null; }
+  const nome = Object.keys(MISSOES_NPC).find(n => { const st = missaoNpc(n); return st.aceita && !st.feita; }); if (!nome) return;
+  const l = lugarObjNpc(nome), g = new THREE.Group(); g.position.set(l.x, 1, l.z); PRACA.cena.add(g);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTexto(MISSOES_NPC[nome].obj, "#000", "rgba(0,0,0,0)", 128, 128, 100), transparent: true })); sp.scale.set(1, 1, 1); g.add(sp);
+  const br = new THREE.Sprite(new THREE.SpriteMaterial({ map: brilhoTextura("rgba(150,220,255,1)"), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); br.scale.set(2, 2, 1); g.add(br);
+  PRACA.objMissao = { g, nome, x: l.x, z: l.z };
+}
+function passoNpcs(dt, t) {
+  if (!PRACA.npcs) return; const eu = PRACA.eu;
+  for (const n of PRACA.npcs) {
+    let tx, tz;
+    if (PRACA.pegaNpc && PRACA.pegaNpc.npc === n) {   // pega-pega com o Bip: foge (ou persegue, se ele for o pegador)
+      const P = PRACA.pegaNpc, dx = n.x - eu.x, dz = n.z - eu.z, d = Math.hypot(dx, dz) || 1;
+      if (P.bipPega) { tx = eu.x; tz = eu.z; } else { tx = n.x + dx / d * 3; tz = n.z + dz / d * 3; if (!pracaLivre(tx, tz)) { const a = Math.atan2(dz, dx) + 1.4; tx = n.x + Math.cos(a) * 3; tz = n.z + Math.sin(a) * 3; } }
+      const vel = P.bipPega ? 4.6 : 5.2, md = Math.hypot(tx - n.x, tz - n.z) || 1, nx = n.x + (tx - n.x) / md * vel * dt, nz = n.z + (tz - n.z) / md * vel * dt;
+      if (pracaLivre(nx, nz) && Math.hypot(nx, nz) > 3.2) { n.x = nx; n.z = nz; } n.r = Math.atan2(-(tx - n.x), -(tz - n.z)); n.m.passo += vel * dt * 3;
+    } else {   // passeio em volta do chafariz
+      n.ang += dt * .12; const rr = 8.5 + Math.sin(n.ang * 2 + n.fase) * 1.5; tx = Math.cos(n.ang + n.fase) * rr; tz = Math.sin(n.ang + n.fase) * rr;
+      const perto = Math.hypot(eu.x - n.x, eu.z - n.z) < 2.6;
+      if (!perto) { const dx = tx - n.x, dz = tz - n.z, d = Math.hypot(dx, dz); if (d > .05) { const st = Math.min(d, 2.2 * dt); n.x += dx / d * st; n.z += dz / d * st; n.r = Math.atan2(-dx, -dz); n.m.passo += st * 3; } }
+      else n.r = Math.atan2(-(eu.x - n.x), -(eu.z - n.z));
+    }
+    animarBonecoPraca(n.m, n.x, 0, n.z, n.r, true, dt);
+  }
+  if (PRACA.objMissao) { const o = PRACA.objMissao; o.g.position.y = 1 + Math.sin(t * 3) * .2;
+    if (Math.hypot(eu.x - o.x, eu.z - o.z) < 1.3 && eu.y < 2.4) { const st = missaoNpc(o.nome), m = MISSOES_NPC[o.nome]; st.feita = true; G.banco[perfil()] = Math.round(((G.banco[perfil()] || 0) + m.premio) * 10) / 10; salvar();
+      fogosPraca(o.x, 1.2, o.z, 30); toast(`${m.obj} Achou o ${m.nome} do ${o.nome}! +${m.premio} moedas`); montarObjMissao(); } }
+  passoPegaNpc(dt);
+}
+/* ---------- pega-pega ---------- */
+acoes.pegaComecar = () => {
+  fecharPainelPraca();
+  if (PRACA.outros.size && PRACA.rede && PRACA.rede.pega) { PRACA.pega = true; PRACA.pegaImune = 0; toast("🏃 Você é o PEGADOR! Encoste em alguém."); return; }
+  const npc = PRACA.npcs[0]; PRACA.pegaNpc = { npc, t: 30, bipPega: false }; toast("🏃 Pegue o Bip em 30 segundos!");
+};
+function passoPegaNpc(dt) {
+  const P = PRACA.pegaNpc; if (!P) return; const eu = PRACA.eu, n = P.npc, d = Math.hypot(eu.x - n.x, eu.z - n.z);
+  P.t -= dt; P.imune = Math.max(0, (P.imune || 0) - dt);
+  const el = $("pr-corrida"); if (el) { el.hidden = false; el.textContent = P.bipPega ? `😱 O Bip está te pegando! Fuja: ${Math.ceil(P.t)} s` : `🏃 Pegue o Bip: ${Math.ceil(P.t)} s`; }
+  if (d < 1.1 && P.imune <= 0) {
+    if (!P.bipPega) { P.bipPega = true; P.t = 15; P.imune = 1.5; bip(880, .1); toast("👋 Pegou! Agora o Bip vai te pegar. Fuja por 15 segundos!"); }
+    else { PRACA.pegaNpc = null; toast("😅 O Bip te pegou! Tente de novo com ele."); if (el) el.hidden = true; }
+  } else if (P.t <= 0) {
+    PRACA.pegaNpc = null; if (el) el.hidden = true;
+    if (P.bipPega) { G.banco[perfil()] = Math.round(((G.banco[perfil()] || 0) + 15) * 10) / 10; salvar(); fogosPraca(eu.x, 1.5, eu.z, 40); toast("🏆 Você fugiu do Bip! +15 moedas"); }
+    else toast("⏰ O Bip escapou! Tente de novo.");
+  }
+}
+function passoPega(dt) {   // pega-pega com os amigos (o pegador é quem está com o anel vermelho)
+  PRACA.pegaImune = Math.max(0, (PRACA.pegaImune || 0) - dt);
+  if (!PRACA.pega || PRACA.pegaImune > 0) return; const eu = PRACA.eu;
+  for (const [id, o] of PRACA.outros) if (Math.hypot(eu.x - o.x, eu.z - o.z) < 1.2 && Math.abs(eu.y - o.y) < 1.5) { PRACA.pega = false; if (PRACA.rede && PRACA.rede.pega) PRACA.rede.pega(id); toast(`👋 Pegou ${o.info ? o.info.nome : "alguém"}!`); bip(880, .1); break; }
+}
+function pracaPegaRecebe(deNome, paraEu, paraNome) {   // chamado pela rede: alguém pegou alguém
+  if (paraEu) { PRACA.pega = true; PRACA.pegaImune = 2; toast(`😱 ${deNome} te pegou! Agora VOCÊ é o pegador!`); vibrar && vibrar([60, 40, 60]); }
+  else if (paraNome) toast(`🏃 ${deNome} pegou ${paraNome}!`);
+}
+/* ---------- palco de dança ---------- */
+function noPalco() { const eu = PRACA.eu; return Math.abs(eu.x - PALCO.x) < PALCO.w / 2 && Math.abs(eu.z - PALCO.z) < PALCO.d / 2 && eu.y >= PALCO.y - .05 && eu.y < PALCO.y + .5; }
+function passoPalco(dt, t) {
+  if (!PRACA.pisoDanca) return; const on = noPalco(), cores = ["#ff4d6d", "#ffd23f", "#37d99a", "#3dd9ff", "#9b5de5", "#ff8a1f"];
+  const passo = Math.floor(t * 4);
+  PRACA.pisoDanca.forEach((q, i) => q.material.color.set(on || (passo + i) % 5 === 0 ? cores[(passo + i * 7) % cores.length] : "#33363f"));
+  PRACA.discoLuzes.forEach((l, i) => { l.rotation.z = Math.sin(t * 1.6 + i) * .6; l.rotation.x = Math.cos(t * 1.3 + i * 2) * .5; l.visible = on || (PRACA.noite || 0) > .3; });
+  if (on) {   // dança: pulinho, gira e braços para cima no ritmo
+    const eu = PRACA.eu, b = Math.abs(Math.sin(t * Math.PI * 2)); eu.m.corpo.position.y = b * .25; eu.m.corpo.rotation.y = eu.r + Math.sin(t * 2.2) * 1.2;
+    eu.m.bracoE.rotation.x = eu.m.bracoD.rotation.x = -2.6 + b * .6;
+    PRACA.tBatida = (PRACA.tBatida || 0) - dt;
+    if (PRACA.tBatida <= 0 && typeof nota === "function" && musCtx()) { PRACA.tBatida = .25; const c = MUS.ctx.currentTime, k = PRACA.batida = ((PRACA.batida || 0) + 1) % 16;
+      if (k % 4 === 0) nota(c, 150, .2, "sine", .5, { slide: .3, ataque: .002 }); if (k % 4 === 2 && typeof ruido === "function") ruido(c, .05, .12, "highpass", 7000);
+      if ([0, 3, 6, 10, 12].includes(k)) nota(c, 440 * Math.pow(2, ([60, 64, 67, 72, 67][[0, 3, 6, 10, 12].indexOf(k)] - 69) / 12), .18, "square", .05, { filtro: 2400 }); }
+    if (!PRACA.noPalcoAntes) { toast("🕺 Dance! Use os gestos também."); if (typeof MUS !== "undefined" && MUS.master && musCtx()) { MUS.master.gain.cancelScheduledValues(MUS.ctx.currentTime); MUS.master.gain.setValueAtTime(.5, MUS.ctx.currentTime); } }
+  } else if (PRACA.noPalcoAntes) { PRACA.eu.m.corpo.position.y = 0; if (typeof MUS !== "undefined" && MUS.master && !MUS.tocando && MUS.ctx) MUS.master.gain.setValueAtTime(0, MUS.ctx.currentTime); }
+  PRACA.noPalcoAntes = on;
+}
+/* ---------- casinha ---------- */
+function casaDe(nome) { G.casa = G.casa || {}; return G.casa[nome] = G.casa[nome] || { cor: CASA_CORES[0], pet: null, fundo: null }; }
+function casaHTML() {
+  const nome = perfil(), c = casaDe(nome), pets = (G.inv[nome] && G.inv[nome].pets || []).filter(k => petInfo(k)), fundos = FUNDOS.filter(([k]) => temFundo(nome, k));
+  return `<p class="pr-sub">A casinha de ${esc(nome)}! Enfeite do seu jeito.</p>
+    <h3 style="color:#fff">🎨 Cor da parede</h3><div class="chips">${CASA_CORES.map(k => `<button type="button" class="chip pick" data-a="casaCor" data-k="${k}" aria-pressed="${c.cor === k}" style="background:${k};color:#0b1b33">⬤</button>`).join("")}</div>
+    <h3 style="color:#fff">🐾 Pet na varanda</h3><div class="chips">${pets.length ? [["", "Nenhum"]].concat(pets.map(k => [k, petInfo(k).icone + " " + petInfo(k).nome])).map(([k, t]) => `<button type="button" class="chip pick" data-a="casaPet" data-k="${k}" aria-pressed="${(c.pet || "") === k}">${esc(t)}</button>`).join("") : `<span class="dim">Compre um pet na loja para enfeitar.</span>`}</div>
+    <h3 style="color:#fff">🖼️ Quadro na parede</h3><div class="chips">${fundos.map(([k, t]) => `<button type="button" class="chip pick" data-a="casaFundo" data-k="${k}" aria-pressed="${c.fundo === k}">${esc(t)}</button>`).join("")}</div>
+    <p class="pr-sub" style="font-size:14px">🏆 Os troféus na frente da casa são as suas vitórias.</p>`;
+}
+acoes.casaCor = el => { casaDe(perfil()).cor = el.dataset.k; salvar(); };
+acoes.casaPet = el => { casaDe(perfil()).pet = el.dataset.k || null; salvar(); };
+acoes.casaFundo = el => { casaDe(perfil()).fundo = el.dataset.k; salvar(); };
+function atualizarCasa() {
+  if (!PRACA.casa) return; const nome = perfil(), c = casaDe(nome), vit = (G.vitorias || {})[nome] || 0, ch = JSON.stringify([nome, c, Math.min(vit, 6)]);
+  if (ch === PRACA.casaChave) return; PRACA.casaChave = ch;
+  PRACA.casaParede.material.color.set(c.cor);
+  const troca = (m, tex) => { if (m.material.map) m.material.map.dispose(); m.material.map = tex; m.material.color.set("#ffffff"); m.material.needsUpdate = true; };
+  troca(PRACA.casaPlaca, texTexto("🏠 Casa de " + nome.slice(0, 12), "#0b1b33", "#ffd23f", 512, 128, 48));
+  const f = c.fundo && FUNDOS.find(x => x[0] === c.fundo); troca(PRACA.casaQuadro, texTexto(f ? "🖼️ " + f[1] : "🖼️", "#ffffff", "#7b2cbf", 256, 170, 30));
+  const e = PRACA.casaEnfeites; while (e.children.length) e.remove(e.children[0]);
+  if (c.pet && typeof pet3D === "function") { const pg = pet3D(c.pet, skinDe(nome)); if (pg) { pg.position.set(-2.6, 0, 1); pg.scale.setScalar(1.4); e.add(pg); } }
+  for (let i = 0; i < Math.min(vit, 6); i++) { const tr = new THREE.Group(); tr.position.set(-2.4, 0, -1.4 + i * .45); e.add(tr);
+    const ouro = new THREE.MeshLambertMaterial({ color: "#ffd23f", emissive: "#5a4200" }); const copa = new THREE.Mesh(new THREE.CylinderGeometry(.14, .06, .22, 10), ouro); copa.position.y = .32; tr.add(copa); const pe = new THREE.Mesh(new THREE.BoxGeometry(.16, .14, .16), ouro); pe.position.y = .07; tr.add(pe); }
+}
+/* ---------- máquina de foto (só a tela do jogo, sem câmera do celular) ---------- */
+async function pracaFoto() {
+  const r = PRACA.r; if (!r) return;
+  r.render(PRACA.cena, PRACA.cam);
+  const src = r.domElement, cv = document.createElement("canvas"); cv.width = src.width; cv.height = src.height + 70; const c = cv.getContext("2d");
+  c.drawImage(src, 0, 0); c.fillStyle = "#0b1b33"; c.fillRect(0, src.height, cv.width, 70);
+  c.fillStyle = "#ffd23f"; c.font = "900 30px Bungee, Arial Black, sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("Jogo de Pergunta · Praça Central", cv.width / 2, src.height + 26);
+  c.fillStyle = "#cfe0f5"; c.font = "700 20px Nunito, sans-serif"; c.fillText(perfil() + " · " + new Date().toLocaleDateString("pt-BR"), cv.width / 2, src.height + 54);
+  const fl = document.createElement("div"); fl.className = "pr-flash"; $("praca").appendChild(fl); setTimeout(() => fl.remove(), 500); bip(1200, .05);
+  const blob = await new Promise(ok => cv.toBlob(ok, "image/png"));
+  try { await baixarArquivo(blob, "praca-" + Date.now() + ".png"); toast("📷 Foto salva!"); } catch (e) { if (!e || e.code !== "declined") toast("Não deu para salvar a foto"); }
+}
+/* ---------- clima da coleção ---------- */
+function passoClimaPraca(dt, t) {
+  const p = PRACA.climaPts; if (!p) return; const a = p.geometry.attributes.position, eu = PRACA.eu, cl = PRACA.clima;
+  const vy = cl === "chuva" ? 14 : cl === "neve" ? 1.4 : cl === "fogo" ? -1.2 : -.6;
+  for (let i = 0; i < a.count; i++) { let y = a.getY(i) - vy * dt; let x = a.getX(i) + (cl === "neve" ? Math.sin(t + i) * .3 * dt : 0);
+    if (y < 0) y += 20; if (y > 20) y -= 20; a.setY(i, y); a.setX(i, x); }
+  a.needsUpdate = true; p.position.set(eu.x, 0, eu.z);
+  if (cl === "chuva") { PRACA.tRaio = (PRACA.tRaio ?? 8) - dt; if (PRACA.tRaio <= 0) { PRACA.tRaio = 9 + Math.random() * 10; const fl = document.createElement("div"); fl.className = "pr-flash"; fl.style.opacity = ".5"; $("praca").appendChild(fl); setTimeout(() => fl.remove(), 300); if (typeof ruido === "function" && musCtx()) ruido(MUS.ctx.currentTime + .4, 1.2, .25, "lowpass", 200); } }
+}
+/* ---------- tudo a cada quadro ---------- */
+function passoPraca2(dt, t) {
+  if (!PRACA.npcs) return;
+  passoCampinho(dt); passoNpcs(dt, t); passoPega(dt); passoPalco(dt, t); atualizarCasa(); passoClimaPraca(dt, t);
+  // trampolim: cair na lona joga para o alto
+  const eu = PRACA.eu; if (!PRACA.voando && Math.hypot(eu.x - TRAMP.x, eu.z - TRAMP.z) <= TRAMP.r && eu.y <= .36 && eu.vy <= 0) { eu.vy = 11; bip(500 + Math.random() * 200, .06); PRACA.lona.scale.y = 3; }
+  if (PRACA.lona) PRACA.lona.scale.y += (1 - PRACA.lona.scale.y) * .2;
+  // escorregador: na rampa, desliza para baixo
+  if (eu.z >= RAMPA.z0 && eu.z <= RAMPA.z1 && eu.x <= RAMPA.xa && eu.x > RAMPA.xb) { const hr = RAMPA.h * (eu.x - RAMPA.xb) / (RAMPA.xa - RAMPA.xb); if (Math.abs(eu.y - hr) < .25) { eu.x -= 7 * dt; eu.r = Math.PI / 2; } }
+  // anel vermelho de quem é o pegador
+  if (!PRACA.anelPega) { PRACA.anelPega = new THREE.Mesh(new THREE.RingGeometry(.6, .8, 30), new THREE.MeshBasicMaterial({ color: "#ff2d55", side: THREE.DoubleSide, transparent: true, opacity: .9 })); PRACA.anelPega.rotation.x = -Math.PI / 2; PRACA.cena.add(PRACA.anelPega); }
+  let pegador = PRACA.pega ? eu : null; for (const o of PRACA.outros.values()) if (o.alvo && o.alvo.e & 4) pegador = o;
+  if (PRACA.pegaNpc && PRACA.pegaNpc.bipPega) pegador = PRACA.pegaNpc.npc;
+  PRACA.anelPega.visible = !!pegador; if (pegador) { PRACA.anelPega.position.set(pegador.x, (pegador.y || 0) + .05, pegador.z); PRACA.anelPega.scale.setScalar(1 + Math.sin(t * 8) * .1); }
 }
 /* bonequinho da praça (o seu e o dos outros): mesmo modelo do 3D da partida */
 function pracaModelo(info) {
@@ -5131,7 +5390,7 @@ function pracaOutro(id, info) {
   if (info) { o.info = info; anotarMoedas(info.nome, info.moedas); }
   return o;
 }
-function pracaPos(id, x, z, r, y, e) { const o = PRACA.outros.get(id); if (!o) return; if (!o.alvo) { o.x = x; o.z = z; o.m.g.visible = true; } o.alvo = { x, z, r, y, e: (+e || 0) & 3 }; }
+function pracaPos(id, x, z, r, y, e) { const o = PRACA.outros.get(id); if (!o) return; if (!o.alvo) { o.x = x; o.z = z; o.m.g.visible = true; } o.alvo = { x, z, r, y, e: (+e || 0) & 7 }; }
 function pracaTirar(id) { const o = PRACA.outros.get(id); if (!o) return; PRACA.cena.remove(o.m.g); PRACA.outros.delete(id); }
 function pracaTirarTodos() { for (const id of [...PRACA.outros.keys()]) pracaTirar(id); }
 /* ---------- abrir e fechar ---------- */
@@ -5140,7 +5399,7 @@ function abrirPraca() {
   let box = $("praca");
   if (!box) { box = document.createElement("div"); box.id = "praca"; box.className = "praca"; box.hidden = true; document.body.appendChild(box); }
   box.innerHTML = `
-    <div class="pr-top"><button type="button" class="lb-pill" id="pr-sair">← Sair</button><span class="lb-pill" id="pr-gente">👥 1</span><span class="lb-pill lb-moedas"><span class="lb-coin" aria-hidden="true">$</span><b id="pr-moedas"></b></span></div>
+    <div class="pr-top"><button type="button" class="lb-pill" id="pr-sair">← Sair</button><button type="button" class="lb-pill" id="pr-foto" aria-label="Tirar foto">📷</button><span class="lb-pill" id="pr-gente">👥 1</span><span class="lb-pill lb-moedas"><span class="lb-coin" aria-hidden="true">$</span><b id="pr-moedas"></b></span></div>
     <div class="pr-titulo">Praça Central</div>
     <div class="pr-missao" id="pr-missao" hidden></div>
     <div class="pr-missao pr-tesouro" id="pr-tesouro"></div>
@@ -5170,7 +5429,7 @@ function abrirPraca() {
 }
 function fecharPraca(irLobby = true) {
   if (!PRACA.on) return;
-  PRACA.on = false; cancelAnimationFrame(PRACA.raf); PRACA.hist = null; PRACA.voando = PRACA.veloz = PRACA.gigante = PRACA.brilho = false; PRACA.naRoda = null; PRACA.pk = null; PRACA.tesDia = null; PRACA.sobe = PRACA.desce = false; PRACA.faiscas = [];
+  PRACA.on = false; cancelAnimationFrame(PRACA.raf); PRACA.hist = null; PRACA.voando = PRACA.veloz = PRACA.gigante = PRACA.brilho = false; PRACA.naRoda = null; PRACA.pk = null; PRACA.tesDia = null; PRACA.pega = false; PRACA.pegaNpc = null; PRACA.objMissao = null; PRACA.anelPega = null; PRACA.noPalcoAntes = false; PRACA.sobe = PRACA.desce = false; PRACA.faiscas = [];
   if (typeof PRACA.desconectar === "function") PRACA.desconectar();
   pracaTirarTodos();
   window.removeEventListener("keydown", PRACA.kd); window.removeEventListener("keyup", PRACA.ku);
@@ -5204,6 +5463,7 @@ function ligarControlesPraca(box) {
   segura("pr-pular", "sobe"); segura("pr-descer", "desce");
   for (const b of document.querySelectorAll("#pr-poderes [data-pod]")) b.addEventListener("click", () => usarPoder(b.dataset.pod));
   $("pr-sair").addEventListener("click", () => fecharPraca());
+  $("pr-foto").addEventListener("click", () => pracaFoto());
   $("pr-fechar").addEventListener("click", fecharPainelPraca);
   $("pr-acao").addEventListener("click", () => { if (PRACA.perto) PRACA.perto.abrir(); });
   PRACA.kd = e => { if (!PRACA.on || PRACA.painel) return; if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return; PRACA.keys[e.key.toLowerCase()] = true; if (e.key === " ") { pularPraca(); e.preventDefault(); } if (e.key === "Enter" && PRACA.perto) PRACA.perto.abrir(); };
@@ -5260,7 +5520,7 @@ function passoFaiscas(dt) {
     f.m.rotation.y += dt * 6; f.m.material.opacity = f.t / f.vida; f.m.scale.setScalar(.5 + f.t / f.vida); }
 }
 const ESC_GIGANTE = 2.6;
-function efeitosPraca() { return (PRACA.gigante ? 1 : 0) | (PRACA.brilho ? 2 : 0); }
+function efeitosPraca() { return (PRACA.gigante ? 1 : 0) | (PRACA.brilho ? 2 : 0) | (PRACA.pega ? 4 : 0); }
 function alternarVoo(liga) {
   PRACA.voando = podeVoar() ? (liga === undefined ? !PRACA.voando : liga) : false;
   const b = $("pr-voar"), d = $("pr-descer"), p = $("pr-pular");
@@ -5274,6 +5534,9 @@ function alternarVoo(liga) {
 function lugaresPraca() {
   if (PRACA.naRoda) return [{ x: PRACA.eu.x, z: PRACA.eu.z, r: 99, txt: "⬇️ Descer da roda", abrir: descerRoda }];
   const l = [{ x: RODA.x, z: RODA.z + 2.6, r: 2.4, txt: "🎡 Andar na roda-gigante", abrir: subirRoda }];
+  for (const n of PRACA.npcs || []) l.push({ x: n.x, z: n.z, r: 2.2, txt: `🤖 Falar com ${n.nome}`, abrir: () => abrirPainelPraca(`🤖 ${n.nome}`, () => npcHTML(n.nome)) });
+  l.push({ x: CASA.porta.x, z: CASA.porta.z, r: 2, txt: "🏠 Minha casinha", abrir: () => abrirPainelPraca("🏠 Minha casinha", casaHTML) });
+  l.push({ x: 0, z: 0, r: 4.3, txt: "🪙 Fonte dos desejos", abrir: () => { PRACA.desejoRes = ""; abrirPainelPraca("🪙 Fonte dos desejos", fonteHTML); } });
   PRACA_PLACAS.forEach(pl => l.push({ x: pl.x * .8, z: pl.z * .8, r: 3, txt: `🏆 Ver classificação`, abrir: () => abrirPainelPraca("🏆 Classificação", () => { PRACA.rankAba = PRACA.rankAba || pl.k; return rankingHTML(); }, pl.k) }));
   PRACA_BARRACAS.forEach(b => l.push({ x: b.x * .82, z: b.z, r: 2.6, txt: `${b.ic} Barraca de ${b.t}`, abrir: () => abrirPainelPraca(`${b.ic} Barraca de ${b.t}`, () => lojaSecHTML(b.k)) }));
   l.push({ x: PRACA_MURAL.x * .85, z: PRACA_MURAL.z * .85, r: 2.6, txt: "📢 Ver eventos", abrir: () => abrirPainelPraca("📢 Eventos", () => missaoMuralHTML() + (historiasAgora().length ? `<button class="lb-comprar" data-a="verHistorias">🎬 Ver a história dos robôs de novo</button>` : "") + muralEventosHTML()) });
@@ -5357,7 +5620,7 @@ function quadroPraca(ts) {
   PRACA.jato.scale.y = 1 + .12 * Math.sin(t * 6);
   for (const o of PRACA.gira) o.rotation.y += o.userData.gira * dt;
   passoFragmentos(dt, t);
-  passoParque(dt, t);
+  passoParque(dt, t); passoPraca2(dt, t);
   PRACA.portal.material.opacity = .35 + .15 * Math.sin(t * 3);
   // placas: redesenha quando a classificação muda
   PRACA.tPlaca -= dt;

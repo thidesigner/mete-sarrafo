@@ -125,7 +125,17 @@ Botão "Praça" na tela inicial: lugar 3D para andar com o bonequinho (`abrirPra
   - **Caça ao tesouro do dia**: 5 moedas por dia em lugares sorteados pela data (`tesouroDoDia`, `TES_LUGARES`), 10 moedas cada e +25 ao achar as 5; progresso em `G.tesouro = {dia, por: {nome: [lugares]}}` e no canto da tela (`#pr-tesouro`).
   - **Dia e noite** pelo relógio de Brasília (`noiteFator`, `passoDiaNoite`): à noite aparece o céu estrelado (`PRACA.ceuNoite`), a lua, o brilho dos postes e as luzinhas da roda; as luzes ficam mais fracas (mexe na base de `PRACA.luzes`, então o clima do boss continua funcionando). Para testar: `window.PRACA_HORA_TESTE`.
   - Na rede a posição vai até ±60 (antes ±40), para os amigos verem quem está no Parque.
-- Teste: `ferramentas/teste/teste-praca.js`, `ferramentas/teste/teste-historia.js`, `ferramentas/teste/teste-missao.js`, `ferramentas/teste/teste-saga.js` e `ferramentas/teste/teste-parque.js`.
+- **Mais coisas na Praça** (ideias 2, 4, 5, 7, 8, 10, 11, 12 e 13 do Andre), bloco "Mais coisas na Praça" (`montarPraca2`, `passoPraca2`):
+  - **Campinho** no Parque (`CAMPO`): bola que se chuta encostando (`passoCampinho`), gol com festa.
+  - **Trampolim** (`TRAMP`, joga para o alto) e **escorregador** (`ESCADA` + `RAMPA`; na rampa desliza). Escada e palco entram como chão em `CHAO_EXTRA` (por cima de `alturaChaoPraca`).
+  - **Palco de dança** (`PALCO`): piso que acende, luzes girando, o bonequinho dança e toca uma batida enquanto está em cima (`passoPalco`).
+  - **Casinha** (`CASA`): botão "🏠 Minha casinha" escolhe cor da parede, pet na varanda e quadro (dos fundos que tem); troféus = vitórias. Guardado em `G.casa[nome]` (só no aparelho).
+  - **Fonte dos desejos** no chafariz: 5 moedas por pedido, até 5 por dia (`G.desejos`); às vezes devolve 5, 10, 25 ou 100 (média perto do que gasta; só moedas do jogo).
+  - **Bip e Bop** passeiam (`PRACA.npcs`, modelo `roboHistoria`); falar com eles dá a missão do dia (achar o parafuso 🔩 ou a antena 📡, 15 moedas, `G.npcMissao`).
+  - **Pega-pega**: pelo Bip. Com amigos na Praça, quem começa é o pegador (anel vermelho; vai na rede no bit 4 de `e`); encostou, manda `pg` ao dono, que avisa todos (`pracaPegaRecebe`). Sozinho: pega-pega com o Bip (pegar em 30 s e depois fugir 15 s = 15 moedas).
+  - **Clima da coleção** (`climaDaColecao`): chuva com relâmpago na Tempestade, neve no Gelo, brasas no Fogo, brilho no Sol/Lua/Eclipse.
+  - **Máquina de foto** (📷 no alto): salva um PNG só da tela do jogo, com o nome e a data (`pracaFoto`); não usa a câmera do celular.
+- Teste: `ferramentas/teste/teste-praca.js`, `ferramentas/teste/teste-historia.js`, `ferramentas/teste/teste-missao.js`, `ferramentas/teste/teste-saga.js`, `ferramentas/teste/teste-parque.js` e `ferramentas/teste/teste-praca-mais.js`.
 
 ## Mini jogos: Futebol e Basquete (ideia do Andre)
 

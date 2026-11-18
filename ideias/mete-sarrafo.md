@@ -276,3 +276,4 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
 - Tesouro do dia: 5 moedas escondidas que mudam todo dia (10 cada, +25 achando as 5).
 - Roda-gigante: uma volta de uns 25 segundos, ou desce quando quiser.
 - Dia e noite pelo relógio: à noite estrelas, lua e luzes acesas.
+- (18/11) O Andre quis as 13 ideias da Praça. Além das 4 de cima, agora tem: pega-pega (com amigos, ou com o Bip quando está sozinho), campinho com gol, trampolim e escorregador, palco de dança, fonte dos desejos (até 5 pedidos por dia), clima da coleção da semana, Bip e Bop passeando com uma missão por dia, a casinha para enfeitar e a máquina de foto 📷.

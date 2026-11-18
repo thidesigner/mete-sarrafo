@@ -1225,7 +1225,7 @@ function prPos(x, z, r, y, e) {
   const num = v => Math.round((+v || 0) * 100) / 100;
   if (PR.dono) return;   // o dono manda a posição dele junto com a de todos (prTick)
   if (PR.hostConn && PR.ultimoPs && Date.now() - PR.ultimoPs > 6000) { PR.ultimoPs = 0; prReconectar(); return; }   // o dono sumiu sem avisar
-  if (PR.t % 6 === 0 && PR.hostConn) enviar(PR.hostConn, { t: "p", x: num(x), z: num(z), r: num(r), y: num(y), e: (+e || 0) & 3 });
+  if (PR.t % 6 === 0 && PR.hostConn) enviar(PR.hostConn, { t: "p", x: num(x), z: num(z), r: num(r), y: num(y), e: (+e || 0) & 7 });
 }
 function prTick() {
   if (!PR.dono || !PRACA.on) return;
@@ -1258,9 +1258,13 @@ function prDonoRecebe(conn, d) {
   }
   if (!id) return;
   const c = PR.conns.get(id);
-  if (d.t === "p") { const n = v => Math.max(-60, Math.min(60, +v || 0)); c.pos = [n(d.x), n(d.z), +d.r || 0, Math.max(0, Math.min(30, +d.y || 0)), (+d.e || 0) & 3]; pracaPos(id, ...c.pos); }
+  if (d.t === "p") { const n = v => Math.max(-60, Math.min(60, +v || 0)); c.pos = [n(d.x), n(d.z), +d.r || 0, Math.max(0, Math.min(30, +d.y || 0)), (+d.e || 0) & 7]; pracaPos(id, ...c.pos); }
   else if (d.t === "info") { c.info = prInfoLimpa(d.info); pracaOutro(id, c.info); prMandarInfos(); }
   else if (d.t === "rk") { mesclarRank(d.r, d.m); mesclarBossG(d.bg); }
+  else if (d.t === "pg") {   // pega-pega: quem pegou manda para o dono, que avisa todo mundo
+    const para = String(d.para || ""), de = c.info ? c.info.nome : "Alguém", pn = para === "h" ? PR.info.nome : (PR.conns.get(para) || {}).info ? PR.conns.get(para).info.nome : "";
+    pracaPegaRecebe(de, para === "h", pn); for (const o of PR.conns.values()) enviar(o.conn, { t: "pg", para, dn: de, pn });
+  }
   else if (d.t === "portal" && c.info) { toast(`${c.info.nome} entrou na Partida do Evento! Vá até a porta para jogar junto.`); for (const [k, o] of PR.conns) if (k !== id) enviar(o.conn, { t: "portal", nome: c.info.nome }); }
 }
 function prEntrar() {
@@ -1287,10 +1291,11 @@ function prMembroRecebe(d) {
     for (const id of [...PRACA.outros.keys()]) if (!ids.includes(id)) pracaTirar(id);
     prContar();
   }
-  else if (d.t === "ps" && Array.isArray(d.l)) for (const a of d.l.slice(0, 20)) { if (!Array.isArray(a) || a[0] === PR.meuId) continue; const n = v => Math.max(-60, Math.min(60, +v || 0)); pracaPos(String(a[0]), n(a[1]), n(a[2]), +a[3] || 0, Math.max(0, Math.min(30, +a[4] || 0)), (+a[5] || 0) & 3); }
+  else if (d.t === "ps" && Array.isArray(d.l)) for (const a of d.l.slice(0, 20)) { if (!Array.isArray(a) || a[0] === PR.meuId) continue; const n = v => Math.max(-60, Math.min(60, +v || 0)); pracaPos(String(a[0]), n(a[1]), n(a[2]), +a[3] || 0, Math.max(0, Math.min(30, +a[4] || 0)), (+a[5] || 0) & 7); }
   else if (d.t === "sai") { pracaTirar(String(d.id)); prContar(); }
   else if (d.t === "rk") { mesclarRank(d.r, d.m); mesclarBossG(d.bg); }
   else if (d.t === "portal") toast(`${nomeLimpo(d.nome)} entrou na Partida do Evento! Vá até a porta para jogar junto.`);
+  else if (d.t === "pg") { const para = String(d.para || ""); if (nomeLimpo(d.dn) !== nomeLimpo(PR.info && PR.info.nome) || para === PR.meuId) pracaPegaRecebe(nomeLimpo(d.dn), para === PR.meuId, nomeLimpo(d.pn)); }
   else if (d.t === "cheia") toast("A praça está cheia agora. Você está passeando sozinho.");
 }
 function prReconectar() {
@@ -1304,6 +1309,10 @@ PRACA.rede = {
   pos: prPos,
   info(i) { PR.info = prInfoLimpa(i); if (PR.dono) { prMandarInfos(); } else if (PR.hostConn) enviar(PR.hostConn, { t: "info", info: PR.info }); },
   portal() { if (PR.dono) { for (const c of PR.conns.values()) enviar(c.conn, { t: "portal", nome: PR.info.nome }); } else if (PR.hostConn) enviar(PR.hostConn, { t: "portal" }); },
+  pega(id) {   // eu peguei alguém (id dele na praça)
+    if (PR.dono) { const c = PR.conns.get(id), pn = c && c.info ? c.info.nome : ""; for (const o of PR.conns.values()) enviar(o.conn, { t: "pg", para: id, dn: PR.info.nome, pn }); }
+    else if (PR.hostConn) enviar(PR.hostConn, { t: "pg", para: id });
+  },
   contar() { const n = 1 + PRACA.outros.size; return n === 1 ? "👤 Só você aqui" : `👥 ${n} na praça`; },
 };
 PRACA.conectar = info => {
