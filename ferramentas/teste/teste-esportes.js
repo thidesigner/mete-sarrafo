@@ -8,7 +8,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const T = 
   await ctx.route(u => u.pathname.endsWith('/avisos.json'), r => r.fulfill({ contentType: 'application/json', body: '{"avisos":[]}' }));
   const errs = [], abrir = async nome => { const pg = await ctx.newPage(); pg.on('pageerror', e => errs.push(nome + ': ' + e.message));
     await pg.goto('http://localhost:8767/teste/'); { const ab = await pg.$('#abertura'); if (ab) await ab.click(); }
-    await pg.evaluate(n => { G.perfil = n; G.banco[n] = 100; G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 }; salvar(); ir("lobby"); }, nome); await pg.waitForTimeout(300); return pg; };
+    await pg.evaluate(n => { G.perfil = n; G.banco[n] = 100; G.inv = G.inv || {}; G.inv[n] = G.inv[n] || { vidas: 0 }; G.espPresente = { ...(G.espPresente || {}), [n]: true }; salvar(); ir("lobby"); }, nome); await pg.waitForTimeout(300); return pg; };
   const a = await abrir("Andre");
   await a.screenshot({ path: S + '/es-lobby.png' });
   await a.click('[data-a="esportes"]'); await a.waitForTimeout(300); await a.screenshot({ path: S + '/es-escolha.png', fullPage: true });

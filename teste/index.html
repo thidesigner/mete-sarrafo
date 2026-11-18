@@ -8554,8 +8554,8 @@ function criarSala(fixa = usarSalaFixa(), auto = null, codigoFixo = SALA_DO_ANDR
 function enviarSala() {
   const nomes = [perfil(), ...ON.sala.map(s => s.nome)];
   const codigos = { [perfil()]: meuCodigoAmigo() }; ON.sala.forEach(s => { if (s.codigo) codigos[s.nome] = s.codigo; });
-  const rank = ON.code === SALA_EVENTO ? rankAtual() : undefined, bg = ON.code === SALA_EVENTO ? bossGParaEnviar() : undefined;
-  ON.sala.forEach(s => enviar(s.conn, { t: "sala", nomes, robos: ON.robos, code: ON.code, codigos, rank, bg }));
+  const rank = rankAtual(), mo = moedasPraca(), bg = ON.code === SALA_EVENTO ? bossGParaEnviar() : undefined;
+  ON.sala.forEach(s => enviar(s.conn, { t: "sala", nomes, robos: ON.robos, code: ON.code, codigos, rank, mo, bg }));
 }
 TELAS.criandoSala = () => `
   <section data-fundo="${fundoAtual()}" class="bgf lobby"><h1 class="lb-title" style="font-size:40px">Criando sala…</h1><p class="lb-sub">Conectando ao servidor.</p>
@@ -8614,7 +8614,7 @@ function hostRecebe(conn, d) {
     const usados = [perfil(), ...ON.sala.map(s => s.nome)];
     let nome = base, k = 2; while (usados.some(u => u.toLowerCase() === nome.toLowerCase())) nome = base + " " + (k++);
     ON.sala.push({ conn, nome, moedas: Math.max(0, +d.moedas || 0), vidasInv: Math.max(0, Math.floor(+d.vidas || 0)), skin: skinInfo(d.skin).k, ficha: limparFicha(d.ficha), codigo: limparCodigoAmigo(d.amigo), arremesso: arremessoInfo(String(d.arremesso || "")).k, selo: [1, 2, 3].includes(d.selo) ? d.selo : 0, pet: petInfo(String(d.pet || "")) ? String(d.pet) : null });
-    if (ON.code === SALA_EVENTO) { mesclarRank(d.rank); mesclarBossG(d.bg); }
+    mesclarRank(d.rank, d.mo); if (ON.code === SALA_EVENTO) mesclarBossG(d.bg);   // a classificação vai em toda sala
     enviar(conn, { t: "bemvindo", nome, code: ON.code });
     enviarSala(); toast(`${nome} entrou na sala`); bip(880, .08);
     if (G.tela === "salaHost") render();
@@ -9094,7 +9094,7 @@ function entrarSala(code, nome, naoAbrir = false) {
     const conn = peer.connect(PREFIXO + code, { reliable: true, serialization: "json" });
     setTimeout(() => { if (ON.conectando && ON.peer === peer && ON.etapaN === 2) etapaEntrar(3, "ligando no celular de quem abriu a sala…"); }, 1500);
     ON.hostConn = conn;
-    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.etapa = ""; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome), ficha: personagemDe(nome), amigo: meuCodigoAmigo(), arremesso: arremessoDe(nome), selo: nivelSelo(nome), pet: petDe(nome), rank: code === SALA_EVENTO ? rankAtual() : undefined, bg: code === SALA_EVENTO ? bossGParaEnviar() : undefined }); });
+    conn.on("open", () => { clearTimeout(desiste); ON.conectando = false; ON.etapa = ""; ON.meuNome = nome; enviar(conn, { t: "hello", nome, moedas: G.banco[nome] || 0, vidas: invVidas(nome), skin: skinDe(nome), ficha: personagemDe(nome), amigo: meuCodigoAmigo(), arremesso: arremessoDe(nome), selo: nivelSelo(nome), pet: petDe(nome), rank: rankAtual(), mo: moedasPraca(), bg: code === SALA_EVENTO ? bossGParaEnviar() : undefined }); });
     conn.on("data", cliRecebe);
     conn.on("close", () => { if (ON.peer === peer) { toast("A conexão com a sala caiu."); sairOnline(); } });
   });
@@ -9115,7 +9115,7 @@ function cliRecebe(d) {
     case "bossG": mesclarBossG(d.bg); break;
     case "lojaOk": { const it = LOJA_EV[d.k]; if (!it) break; G.banco[ON.meuNome] = Math.round(((G.banco[ON.meuNome] || 0) - it.preco) * 10) / 10; salvar(); toast(`${it.ic} ${it.nome}!`); bip(990, .08); renderAct(); break; }
     case "lojaNao": toast(String(d.msg || "Não deu para comprar.").slice(0, 80)); renderAct(); break;
-    case "sala": if (d.rank) mesclarRank(d.rank); if (d.bg) mesclarBossG(d.bg); ON.salaNomes = Array.isArray(d.nomes) ? d.nomes.map(String) : []; ON.robos = +d.robos || 0; ON.salaCodigos = d.codigos && typeof d.codigos === "object" ? d.codigos : {}; if (G.tela === "esperando") render(); break;
+    case "sala": if (d.rank) mesclarRank(d.rank, d.mo); if (d.bg) mesclarBossG(d.bg); ON.salaNomes = Array.isArray(d.nomes) ? d.nomes.map(String) : []; ON.robos = +d.robos || 0; ON.salaCodigos = d.codigos && typeof d.codigos === "object" ? d.codigos : {}; if (G.tela === "esperando") render(); break;
     case "fora": toast(d.msg || "Não deu para entrar."); sairOnline(); break;
     case "start": iniciarCliente(d); break;
     case "st": if (ON.on) aplicarEstado(d); break;
@@ -9296,7 +9296,7 @@ function falarComAmigo(codigo, msg) {
 async function verQuemEstaOnline() {
   if (AMG.buscando || !AMG.peer || !AMG.peer.open) return;
   AMG.buscando = true;
-  await Promise.all(amigos().map(a => falarComAmigo(a.codigo, { t: "oi" })));
+  await Promise.all(amigos().map(a => falarComAmigo(a.codigo, { t: "oi", rk: rankAtual(), mo: moedasPraca() })));
   AMG.buscando = false; reRender();
 }
 setInterval(() => { if (!document.hidden && telaAmigosAberta()) verQuemEstaOnline(); }, 25000);
@@ -9311,7 +9311,8 @@ function amigoRecebe(conn, d) {
   // foto de perfil do amigo: só ícone e cor da lista do jogo
   const av = d.av && typeof d.av === "object" && avValido(d.av.i) && AV_CORES.includes(d.av.cor) ? { i: d.av.i, cor: d.av.cor } : null;
   if (amigo && av && JSON.stringify(amigo.av) !== JSON.stringify(av)) { amigo.av = av; salvar(); }
-  if (d.t === "oi") { if (amigo) reRender(); return; }
+  if (d.t === "oi") { if (amigo) { if (d.rk) mesclarRank(d.rk, d.mo); enviar(conn, { t: "rkAmg", de: meuCodigoAmigo(), nome: perfil(), av: avatarDe(perfil()), rk: rankAtual(), mo: moedasPraca() }); reRender(); } return; }
+  if (d.t === "rkAmg") { if (amigo && d.rk) mesclarRank(d.rk, d.mo); return; }   // a classificação passa de amigo para amigo
   if (d.t === "pedido") {
     if (amigo) { enviar(conn, { t: "aceito", de: meuCodigoAmigo(), nome: perfil(), av: avatarDe(perfil()) }); return; }   // já somos amigos
     if (!pedidos().some(p => p.codigo === de)) { pedidos().unshift({ codigo: de, nome: nome || "Alguém", em: Date.now(), av }); G.amigoPedidos = pedidos().slice(0, 10); salvar(); }
@@ -9841,7 +9842,7 @@ function espLimparRede() {
   o.peer = null; o.host = false; o.conns.clear(); o.hostConn = null; o.lista = []; o.alvo = null; clearTimeout(o.tEntrar);
 }
 function espMandarTodos(msg) { for (const c of espOnline.conns.values()) enviar(c.conn, msg); }
-function espMandarLista() { const o = espOnline; espMandarTodos({ t: "elista", lista: o.lista.map(x => x.nome), tipo: ESP.tipo, tam: ESP.tam }); if (G.tela === "espSala") render(); }
+function espMandarLista() { const o = espOnline; espMandarTodos({ t: "elista", lista: o.lista.map(x => x.nome), tipo: ESP.tipo, tam: ESP.tam, rk: rankAtual(), mo: moedasPraca() }); if (G.tela === "espSala") render(); }
 acoes.espCriarSala = (el, tent = 0) => {
   espLimparRede(); const o = espOnline, code = gerarCodigo(), nome = perfil();
   o.host = true; o.code = code; o.lista = [{ id: "h", nome, info: espInfoJogador(nome) }];
@@ -9859,6 +9860,7 @@ function espHostRecebe(conn, d) {
   let id = null; for (const [k, c] of o.conns) if (c.conn === conn) id = k;
   if (d.t === "eola") {
     if (id) return;
+    mesclarRank(d.rk, d.mo);   // a classificação vai junto
     if (ESP.E && !ESP.E.fim) { enviar(conn, { t: "enao", motivo: "A partida já começou. Espere acabar e entre de novo." }); return; }
     if (o.lista.length >= 6) { enviar(conn, { t: "enao", motivo: "A sala está cheia (máximo 6 pessoas)." }); return; }
     const inf = d.info || {}, nome = String(inf.nome || "Amigo").replace(/[<>]/g, "").slice(0, 20).trim() || "Amigo";
@@ -9906,7 +9908,7 @@ function espEntrarSala(codigo) {
   o.entrou = false;
   peer.on("open", () => {
     const conn = peer.connect(ESP_PREF + code, { reliable: true }); o.hostConn = conn;
-    conn.on("open", () => { o.entrou = true; clearTimeout(o.tEntrar); enviar(conn, { t: "eola", info: espInfoJogador(perfil()) }); });
+    conn.on("open", () => { o.entrou = true; clearTimeout(o.tEntrar); enviar(conn, { t: "eola", info: espInfoJogador(perfil()), rk: rankAtual(), mo: moedasPraca() }); });
     conn.on("data", espCliRecebe);
     const caiu = () => { if (o.hostConn !== conn) return; toast("A sala fechou."); const jogando = ESP.E; espLimparRede(); if (jogando) espSair(true); else if (G.tela === "espSala") ir("esportes"); };
     conn.on("close", caiu); conn.on("error", caiu);
@@ -9916,7 +9918,7 @@ function espEntrarSala(codigo) {
 function espCliRecebe(d) {
   const o = espOnline; if (!d || typeof d !== "object") return;
   if (d.t === "enao") { toast(d.motivo || "Não deu para entrar."); espLimparRede(); return; }
-  if (d.t === "elista") { o.lista = (d.lista || []).slice(0, 6).map(n => ({ nome: String(n).slice(0, 20) })); if (ESP_TIPOS[d.tipo]) ESP.tipo = d.tipo; if ([1, 2, 3].includes(d.tam)) ESP.tam = d.tam; if (!ESP.E) { if (G.tela !== "espSala") ir("espSala"); else render(); } return; }
+  if (d.t === "elista") { if (d.rk) mesclarRank(d.rk, d.mo); o.lista = (d.lista || []).slice(0, 6).map(n => ({ nome: String(n).slice(0, 20) })); if (ESP_TIPOS[d.tipo]) ESP.tipo = d.tipo; if ([1, 2, 3].includes(d.tam)) ESP.tam = d.tam; if (!ESP.E) { if (G.tela !== "espSala") ir("espSala"); else render(); } return; }
   if (d.t === "efechou") { toast("Quem abriu a sala saiu."); const jogando = ESP.E; espLimparRede(); if (jogando) espSair(true); else ir("esportes"); return; }
   if (d.t === "einicio" && ESP_TIPOS[d.tipo] && Array.isArray(d.P)) {
     const P = d.P.slice(0, 6).map((x, i) => { const p = { i, nome: String(x.nome || "").slice(0, 20), humano: !!x.humano, time: x.time ? 1 : 0, cor: String(x.cor || "#2f80ed").slice(0, 9), pele: String(x.pele || A_PELE[0]).slice(0, 9),
