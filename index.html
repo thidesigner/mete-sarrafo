@@ -3857,7 +3857,7 @@ function montarEstadio3D(s) {
     const topo = new THREE.Mesh(new THREE.RingGeometry(r, r + .7, 64), new THREE.MeshLambertMaterial({ color: k % 2 ? "#22497c" : "#1d4171", side: THREE.DoubleSide }));
     topo.rotation.x = -Math.PI / 2; topo.position.y = .8 + k * .55; s.add(topo);
   }
-  const N = 260, torcida = new THREE.InstancedMesh(new THREE.BoxGeometry(.22, .34, .18), new THREE.MeshLambertMaterial({ color: "#ffffff" }), N);
+  const N = 520, torcida = new THREE.InstancedMesh(new THREE.BoxGeometry(.22, .34, .18), new THREE.MeshLambertMaterial({ color: "#ffffff" }), N);
   const cores = ["#ff4d6d", "#ffd23f", "#37d99a", "#2f80ed", "#9b51e0", "#f4a261", "#e9eef5", "#e4572e"], mtx = new THREE.Matrix4(), cor = new THREE.Color();
   F.torcida = [];
   for (let i = 0; i < N; i++) {
@@ -3877,7 +3877,78 @@ function montarEstadio3D(s) {
   }
   F.sombraTex = brilhoTextura("rgba(0,0,0,.55)");
   F.faiscas = [];
+  estadioExtras3D(s);
 }
+/* ---------- Melhorias do 3D da partida (pedido do Andre): telão, bandeirinhas, holofotes, festa e anel da vez ---------- */
+function estadioExtras3D(s) {
+  // telão de 4 lados no alto do meio da quadra
+  const cv = document.createElement("canvas"); cv.width = 512; cv.height = 256;
+  const tex = new THREE.CanvasTexture(cv), tela = new THREE.MeshBasicMaterial({ map: tex, fog: false }), caixa = new THREE.MeshLambertMaterial({ color: "#0b1b33" });
+  const telao = new THREE.Group(); telao.position.y = 5.2;
+  const cubo = new THREE.Mesh(new THREE.BoxGeometry(2.7, 1.45, 2.7), [tela, tela, caixa, caixa, tela, tela]); telao.add(cubo);
+  const borda = new THREE.Mesh(new THREE.BoxGeometry(2.85, .12, 2.85), new THREE.MeshLambertMaterial({ color: "#ffd23f" })); borda.position.y = .78; telao.add(borda);
+  const borda2 = borda.clone(); borda2.position.y = -.78; telao.add(borda2);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) { const cabo = new THREE.Mesh(new THREE.CylinderGeometry(.015, .015, 6), new THREE.MeshBasicMaterial({ color: "#5b6b84" })); cabo.position.set(sx * 1.2, 3.6, sz * 1.2); telao.add(cabo); }
+  s.add(telao); F.telao = { g: telao, cv, tex, txt: "" };
+  // bandeirinhas entre os refletores (balançam)
+  const cores = ["#ff4d6d", "#ffd23f", "#37d99a", "#2f80ed", "#9b51e0", "#ff8a1f"], geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.Float32BufferAttribute([-.14, 0, 0, .14, 0, 0, 0, -.32, 0], 3)); geo.computeVertexNormals();
+  F.bandeiras = [];
+  for (let i = 0; i < 8; i++) {
+    const a1 = i / 8 * Math.PI * 2 + .2, a2 = (i + 1) / 8 * Math.PI * 2 + .2, x1 = Math.cos(a1) * 10.8, z1 = Math.sin(a1) * 10.8, x2 = Math.cos(a2) * 10.8, z2 = Math.sin(a2) * 10.8;
+    for (let k = 1; k < 14; k++) { const f = k / 14, x = x1 + (x2 - x1) * f, z = z1 + (z2 - z1) * f, y = 5.8 - Math.sin(f * Math.PI) * 1.1;
+      const b = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: cores[(i + k) % cores.length], side: THREE.DoubleSide })); b.position.set(x, y, z); b.lookAt(0, y, 0); s.add(b); F.bandeiras.push({ b, fase: i * 2 + k }); }
+  }
+  // holofotes varrendo o céu
+  const feixeMat = new THREE.MeshBasicMaterial({ color: "#bfe3ff", transparent: true, opacity: .12, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+  F.feixes = [];
+  for (let i = 0; i < 4; i++) { const g = new THREE.Group(), a = i / 4 * Math.PI * 2 + .6; g.position.set(Math.cos(a) * 12.5, 0, Math.sin(a) * 12.5);
+    const cone = new THREE.Mesh(new THREE.ConeGeometry(1.6, 22, 16, 1, true), feixeMat); cone.position.y = 11; g.add(cone); s.add(g); F.feixes.push({ g, fase: i * 1.7 }); }
+  // anel pulsando embaixo de quem é a vez
+  F.anelVez = new THREE.Mesh(new THREE.RingGeometry(.55, .75, 40), new THREE.MeshBasicMaterial({ color: "#ffd23f", transparent: true, opacity: .9, side: THREE.DoubleSide, depthWrite: false }));
+  F.anelVez.rotation.x = -Math.PI / 2; F.anelVez.position.y = .04; F.anelVez.visible = false; s.add(F.anelVez);
+  F.confete = []; F.festa = 0; F.festaK = "";
+}
+function telaoDesenhar() {
+  const T = F.telao; if (!T) return;
+  const tema = ($("a-tema") || {}).textContent || "", word = ($("a-word") || {}).textContent || "", sub = ($("a-sub") || {}).textContent || "";
+  const txt = tema + "|" + word + "|" + sub; if (txt === T.txt) return; T.txt = txt;
+  const c = T.cv.getContext("2d"), w = 512, h = 256;
+  const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, "#0f3057"); g.addColorStop(1, "#071a33"); c.fillStyle = g; c.fillRect(0, 0, w, h);
+  c.fillStyle = "rgba(255,255,255,.05)"; for (let y = 0; y < h; y += 4) c.fillRect(0, y, w, 1);
+  c.textAlign = "center"; c.textBaseline = "middle";
+  c.fillStyle = "#ffd23f"; c.font = "800 30px Nunito, sans-serif"; c.fillText((tema || "JOGO DE PERGUNTA").toUpperCase().slice(0, 28), w / 2, 40);
+  let fs = 84; c.font = `900 ${fs}px Bungee, "Arial Black", sans-serif`;
+  while (c.measureText(word).width > w - 30 && fs > 26) { fs -= 4; c.font = `900 ${fs}px Bungee, "Arial Black", sans-serif`; }
+  c.fillStyle = "#ffffff"; c.fillText(word || "★", w / 2, 128);
+  c.fillStyle = "#9fd3ff"; c.font = "700 24px Nunito, sans-serif"; c.fillText(sub.slice(0, 40), w / 2, 214);
+  T.tex.needsUpdate = true;
+}
+function confete3D(n, alto) {
+  const geo = new THREE.PlaneGeometry(.22, .15), cores = ["#ffd23f", "#ff4d6d", "#2f80ed", "#37d99a", "#ffffff", "#ff7ad9", "#9b51e0"];
+  for (let i = 0; i < n; i++) { const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: cores[i % cores.length], side: THREE.DoubleSide }));
+    const a = Math.random() * Math.PI * 2, r = Math.sqrt(Math.random()) * 7; m.position.set(Math.cos(a) * r, alto - 2 + Math.random() * 4, Math.sin(a) * r); F.scene.add(m);
+    F.confete.push({ m, vx: (Math.random() - .5) * 1.5, vy: -.4 - Math.random(), vz: (Math.random() - .5) * 1.5, giro: Math.random() * 8, t: 5 }); }
+}
+function extrasQuadro3D() {
+  if (!F.telao) return;
+  const t = performance.now() / 1000, ph = A.ph || {}, dt = 1 / 60;
+  telaoDesenhar(); F.telao.g.rotation.y = t * .25;
+  for (const b of F.bandeiras) b.b.rotation.z = Math.sin(t * 3 + b.fase) * .25;
+  for (const f of F.feixes) { f.g.rotation.z = Math.sin(t * .5 + f.fase) * .5; f.g.rotation.x = Math.cos(t * .4 + f.fase) * .35; }
+  // festa: alguém acertou a palavra (fase da bola) ou a partida acabou
+  const k = A.fim ? "fim" : ph.k === "bola" ? "bola" + (ph.atir ? ph.atir.i : "") : "";
+  if (k && k !== F.festaK) { F.festa = k === "fim" ? 6 : 2.5; confete3D(k === "fim" ? 220 : 90, 4.5); }
+  F.festaK = k; F.festa = Math.max(0, F.festa - dt);
+  for (let i = F.confete.length - 1; i >= 0; i--) { const c = F.confete[i]; c.t -= dt; c.m.position.x += (c.vx + Math.sin(t * 3 + i) * .4) * dt; c.m.position.y += c.vy * dt; c.m.position.z += c.vz * dt; c.m.rotation.x += c.giro * dt; c.m.rotation.y += c.giro * .7 * dt;
+    if (c.t <= 0 || c.m.position.y < 0) { F.scene.remove(c.m); c.m.material.dispose(); F.confete.splice(i, 1); } }
+  // anel de quem é a vez de chutar (ou de quem está com a bola)
+  const vez = ph.k === "pergunta" && ph.ordem ? ph.ordem[ph.idx] : ph.k === "bola" ? ph.atir : null;
+  F.anelVez.visible = !!(vez && vez.vivo);
+  if (F.anelVez.visible) { F.anelVez.position.x = W3(vez.x); F.anelVez.position.z = W3(vez.y); const s = 1 + Math.sin(t * 6) * .12; F.anelVez.scale.set(s, s, s); F.anelVez.material.color.set(ph.k === "bola" ? "#ff8a1f" : "#ffd23f"); }
+}
+const _desenhar3DSemExtras = desenhar3D;
+desenhar3D = function () { try { extrasQuadro3D(); } catch {} return _desenhar3DSemExtras(); };
 /* cara de desenho animado: sombreado em faixas e contorno preto (só nas peças maiores) */
 let GRADIENTE_TOON = null;
 function deixarDesenho(g, corpoMat) {
@@ -4439,8 +4510,8 @@ function desenhar3D() {
   });
   // torcida pulando de leve (mais animada na hora da bola)
   if (F.torcidaMesh) {
-    const forca = ph.k === "bola" ? .12 : .04, t = performance.now() / 1000, mtx = new THREE.Matrix4();
-    F.torcida.forEach((q, i) => { if (i % 2 && ph.k !== "bola") return; mtx.makeRotationY(-q.a + Math.PI / 2); mtx.setPosition(Math.cos(q.a) * q.r, q.y + Math.max(0, Math.sin(t * 6 + q.fase)) * forca, Math.sin(q.a) * q.r); F.torcidaMesh.setMatrixAt(i, mtx); });
+    const forca = F.festa > 0 ? .32 : ph.k === "bola" ? .12 : .04, t = performance.now() / 1000, mtx = new THREE.Matrix4();
+    F.torcida.forEach((q, i) => { if (i % 2 && ph.k !== "bola" && !(F.festa > 0)) return; mtx.makeRotationY(-q.a + Math.PI / 2); mtx.setPosition(Math.cos(q.a) * q.r, q.y + Math.max(0, Math.sin(t * 6 + q.fase)) * forca, Math.sin(q.a) * q.r); F.torcidaMesh.setMatrixAt(i, mtx); });
     F.torcidaMesh.instanceMatrix.needsUpdate = true;
   }
   // câmera
