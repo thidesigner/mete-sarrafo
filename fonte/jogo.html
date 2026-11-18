@@ -7927,18 +7927,18 @@ function espPasso(E, dt) {
   // bola
   if (b.voo) {
     const f = b.voo; f.f += dt / f.dur; const u = Math.min(1, f.f);
-    b.x = f.x0 + (f.hx - f.x0) * u; b.y = f.y0 + (f.hy - f.y0) * u; b.z = 4 * f.h * u * (1 - u);
+    b.x = f.x0 + (f.hx - f.x0) * u; b.y = f.y0 + (f.hy - f.y0) * u; b.z = 4 * f.h * u * (1 - u); b.h3 = b.z + E3_ARO * 40 * u;
     if (u >= 1) espFimArremesso(E);
   } else if (b.dono >= 0) {
     const d = E.P[b.dono]; b.x = d.x + Math.cos(d.dir) * 20; b.y = d.y + Math.sin(d.dir) * 20;
-    b.z = E.tipo === "basquete" ? Math.abs(Math.sin(d.passo / 9)) * 16 : 0;
+    b.z = E.tipo === "basquete" ? Math.abs(Math.sin(d.passo / 9)) * 16 : 0; b.h3 = b.z;
     // roubada: adversário encosta em quem está com a bola
     for (const q of E.P) if (q.time !== d.time && q.cdRoubo <= 0 && espDist(q.x, q.y, d.x, d.y) < 30) {
       q.cdRoubo = 1.1; if (Math.random() < ESP_ROUBO) { b.dono = q.i; d.cdPegar = .7; d.flash = 1; bipEsp(330); }
     }
   } else {
     b.x += b.vx * dt; b.y += b.vy * dt; const fr = Math.exp(-dt * (E.tipo === "futebol" ? 1.1 : 1.6)); b.vx *= fr; b.vy *= fr;
-    b.z = Math.max(0, b.z - dt * 60);
+    b.z = Math.max(0, b.z - dt * 60); b.h3 = Math.max(b.z, (b.h3 || 0) - dt * 160);
     if (b.x < 12) { b.x = 12; b.vx = Math.abs(b.vx) * .7; } if (b.x > ESP_W - 12) { b.x = ESP_W - 12; b.vx = -Math.abs(b.vx) * .7; }
     const noGol = Math.abs(b.x - ESP_W / 2) < ESP_GOL / 2;
     if (E.tipo === "futebol" && noGol && (b.y < 12 || b.y > ESP_H - 12)) return espPonto(E, b.y < 12 ? 0 : 1, 1);
@@ -7974,7 +7974,7 @@ function espFimArremesso(E) {
   const b = E.b, f = b.voo; b.voo = null;
   if (f.ok) { E.P[f.quem].gols += f.pts; return espPonto(E, f.time, f.pts); }
   // bateu no aro: rebote
-  const a = Math.random() * Math.PI * 2; b.z = 10; b.vx = Math.cos(a) * 260; b.vy = Math.sin(a) * 200 + (f.time === 0 ? 160 : -160); bipEsp(220);
+  const a = Math.random() * Math.PI * 2; b.z = 10; b.h3 = E3_ARO * 40; b.vx = Math.cos(a) * 260; b.vy = Math.sin(a) * 200 + (f.time === 0 ? 160 : -160); bipEsp(220);
   E.msg = "Errou! Rebote!"; E.tMsg = 1;
 }
 function espPonto(E, time, pts) {
@@ -8025,7 +8025,7 @@ function espIA(E, p, dt) {
   p.inp = d < 10 ? { x: 0, y: 0 } : { x: dx / d, y: dy / d };
 }
 /* ---------- desenho ---------- */
-function espDesenharCampo(c, tipo) {
+function espDesenharCampo(c, tipo, so3d) {
   const W = ESP_W, H = ESP_H;
   c.lineWidth = 5; c.strokeStyle = "rgba(255,255,255,.85)";
   if (tipo === "futebol") {
@@ -8052,6 +8052,7 @@ function espDesenharCampo(c, tipo) {
       c.strokeRect(W / 2 - 80, k === 0 ? 8 : H - 8 - 200, 160, 200);
       c.beginPath(); c.arc(W / 2, k === 0 ? 208 : H - 208, 60, k === 0 ? 0 : Math.PI, k === 0 ? Math.PI : Math.PI * 2); c.stroke();
       c.beginPath(); c.arc(h.x, h.y, 300, k === 0 ? .08 : Math.PI + .08, k === 0 ? Math.PI - .08 : Math.PI * 2 - .08); c.stroke();
+      if (so3d) continue;   // no 3D a tabela e o aro são de verdade
       // tabela e aro
       c.fillStyle = "#fff"; c.fillRect(W / 2 - 50, h.y - s * 40 - 4, 100, 8);
       c.strokeStyle = "#ff6a00"; c.lineWidth = 6; c.beginPath(); c.arc(h.x, h.y, 20, 0, Math.PI * 2); c.stroke();
@@ -8089,6 +8090,111 @@ function espDesenhar(c, E, eu, cw, ch, topo = 0) {
   c.setTransform(1, 0, 0, 1, 0, 0);
 }
 const espTemp = {};
+/* ---------- Mini jogos em 3D (pedido do Andre): a mesma partida, desenhada com three.js ----------
+   Campo/quadra com a pintura do 2D, gols ou cestas de verdade, arquibancada com torcida, placas e refletores.
+   Câmera atrás de quem joga, olhando para o lado que o seu time ataca (no time Vermelho o controle gira junto). */
+const E3 = { r: null, cena: null, cam: null, mods: [], bola: null, sombra: null, torcida: null, confete: [], tipo: "", placar: "0x0", pulo: 0, camPos: null };
+const e3x = x => (x - ESP_W / 2) / 40, e3z = y => (y - ESP_H / 2) / 40;
+const E3_ARO = 3.0;   // altura do aro (o bonequinho tem ~1,8)
+function esp3Pode() { return typeof THREE !== "undefined"; }
+function esp3Usar() { return esp3Pode() && G.esp3d !== false; }
+function esp3Montar(E, eu) {
+  esp3Limpar();
+  let r; try { r = new THREE.WebGLRenderer({ antialias: true }); } catch { return false; }
+  r.setPixelRatio(Math.min(1.75, devicePixelRatio || 1)); r.domElement.className = "es-cv es-cv3"; $("esporte").prepend(r.domElement);
+  const futebol = E.tipo === "futebol", cena = new THREE.Scene();
+  cena.background = new THREE.Color(futebol ? 0x8ec9ff : 0x1c2238); cena.fog = new THREE.Fog(cena.background, 40, 90);
+  cena.add(new THREE.HemisphereLight(0xffffff, futebol ? 0x3c6e3c : 0x5a4030, futebol ? .62 : .5));
+  const sol = new THREE.DirectionalLight(0xffffff, futebol ? .55 : .45); sol.position.set(8, 20, 6); cena.add(sol);
+  if (!PRACA.sombraTex) PRACA.sombraTex = texturaCanvas(64, 64, c => { const g = c.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, "rgba(0,0,0,.45)"); g.addColorStop(1, "rgba(0,0,0,0)"); c.fillStyle = g; c.fillRect(0, 0, 64, 64); });
+  const W = ESP_W / 40, H = ESP_H / 40, mat = (cor, o = {}) => new THREE.MeshLambertMaterial({ color: cor, ...o });
+  // chão em volta e o campo com a pintura do 2D
+  const chao = new THREE.Mesh(new THREE.PlaneGeometry(90, 90), mat(futebol ? 0x2a7d43 : 0x3a2a20)); chao.rotation.x = -Math.PI / 2; chao.position.y = -.02; cena.add(chao);
+  const tex = texturaCanvas(640, 1000, c => espDesenharCampo(c, E.tipo, true));
+  const campo = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.MeshLambertMaterial({ map: tex })); campo.rotation.x = -Math.PI / 2; cena.add(campo);
+  // placas de propaganda em volta
+  const placaTex = texturaCanvas(512, 64, c => { const gr = c.createLinearGradient(0, 0, 512, 0); gr.addColorStop(0, "#2f80ed"); gr.addColorStop(.5, "#9b51e0"); gr.addColorStop(1, "#e4572e"); c.fillStyle = gr; c.fillRect(0, 0, 512, 64);
+    c.font = "900 38px Bungee, Arial Black, sans-serif"; c.fillStyle = "#ffd23f"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("JOGO DE PERGUNTA", 256, 34); });
+  const placa = (w, x, z, ry) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, .7, .1), [mat(0x0b1b33), mat(0x0b1b33), mat(0x0b1b33), mat(0x0b1b33), new THREE.MeshBasicMaterial({ map: placaTex }), new THREE.MeshBasicMaterial({ map: placaTex })]); m.position.set(x, .35, z); m.rotation.y = ry; cena.add(m); };
+  for (const s of [-1, 1]) { for (let k = -1; k <= 1; k++) placa(W / 3 - .3, k * W / 3, s * (H / 2 + 1.2), 0); for (let k = -2; k <= 2; k++) placa(H / 5 - .3, s * (W / 2 + 1.2), k * H / 5, Math.PI / 2); }
+  // arquibancada com torcida (degraus + cabecinhas que pulam no gol)
+  const degrau = mat(0x5b6b84), cores = [0x2f80ed, 0xe4572e, 0xffd23f, 0x37d99a, 0xffffff, 0xff7ad9, 0x9b51e0], torc = [];
+  const geoT = new THREE.BoxGeometry(.32, .45, .32);
+  const lado = (larg, cx, cz, ry) => { const g = new THREE.Group(); g.position.set(cx, 0, cz); g.rotation.y = ry; cena.add(g);
+    for (let f = 0; f < 4; f++) { const d = new THREE.Mesh(new THREE.BoxGeometry(larg, .5 + f * .6, 1.1), degrau); d.position.set(0, (.5 + f * .6) / 2, f * 1.1); g.add(d);
+      for (let x = -larg / 2 + .4; x < larg / 2 - .2; x += .55) if (Math.random() < .8) { const t = new THREE.Mesh(geoT, mat(cores[Math.floor(Math.random() * cores.length)])); const y0 = .5 + f * .6 + .22; t.position.set(x + (Math.random() - .5) * .15, y0, f * 1.1); t.userData = { y0, fase: Math.random() * 6 }; g.add(t); torc.push(t); } } };
+  lado(W + 4, 0, -(H / 2 + 2.6), Math.PI); lado(W + 4, 0, H / 2 + 2.6, 0); lado(H + 2, -(W / 2 + 2.6), 0, -Math.PI / 2); lado(H + 2, W / 2 + 2.6, 0, Math.PI / 2);
+  E3.torcida = torc;
+  // refletores nos cantos
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) { const poste = new THREE.Mesh(new THREE.CylinderGeometry(.12, .16, 12, 8), mat(0x9aa7b8)); poste.position.set(sx * (W / 2 + 6), 6, sz * (H / 2 + 6)); cena.add(poste);
+    const luz = new THREE.Mesh(new THREE.BoxGeometry(1.6, .9, .3), new THREE.MeshBasicMaterial({ color: 0xfff6c8 })); luz.position.set(sx * (W / 2 + 6), 12.2, sz * (H / 2 + 6)); luz.lookAt(0, 0, 0); cena.add(luz); }
+  if (futebol) {   // gols com trave e rede
+    const branco = mat(0xffffff), gw = ESP_GOL / 40, gh = 1.7, prof = 1.1;
+    const redeTex = texturaCanvas(64, 64, c => { c.strokeStyle = "rgba(255,255,255,.9)"; c.lineWidth = 3; for (let i = 0; i <= 64; i += 16) { c.beginPath(); c.moveTo(i, 0); c.lineTo(i, 64); c.moveTo(0, i); c.lineTo(64, i); c.stroke(); } });
+    redeTex.wrapS = redeTex.wrapT = THREE.RepeatWrapping; redeTex.repeat.set(6, 3);
+    const redeMat = new THREE.MeshBasicMaterial({ map: redeTex, transparent: true, side: THREE.DoubleSide, depthWrite: false });
+    for (const s of [-1, 1]) { const g = new THREE.Group(); g.position.z = s * H / 2; cena.add(g);
+      const poste = (x) => { const p = new THREE.Mesh(new THREE.CylinderGeometry(.08, .08, gh, 10), branco); p.position.set(x, gh / 2, 0); g.add(p); };
+      poste(-gw / 2); poste(gw / 2); const tr = new THREE.Mesh(new THREE.CylinderGeometry(.08, .08, gw + .16, 10), branco); tr.rotation.z = Math.PI / 2; tr.position.y = gh; g.add(tr);
+      const fundo = new THREE.Mesh(new THREE.PlaneGeometry(gw, gh), redeMat); fundo.position.set(0, gh / 2, s * prof); g.add(fundo);
+      const teto = new THREE.Mesh(new THREE.PlaneGeometry(gw, prof), redeMat); teto.rotation.x = Math.PI / 2; teto.position.set(0, gh, s * prof / 2); g.add(teto);
+      for (const x of [-gw / 2, gw / 2]) { const l = new THREE.Mesh(new THREE.PlaneGeometry(prof, gh), redeMat); l.rotation.y = Math.PI / 2; l.position.set(x, gh / 2, s * prof / 2); g.add(l); } }
+  } else {   // cestas: poste, tabela, aro e rede
+    for (const k of [0, 1]) { const h = ESP_CESTA[k], hx = e3x(h.x), hz = e3z(h.y), s = k === 0 ? -1 : 1;
+      const poste = new THREE.Mesh(new THREE.CylinderGeometry(.13, .13, E3_ARO + .6, 10), mat(0x2b3245)); poste.position.set(hx, (E3_ARO + .6) / 2, hz + s * 1.6); cena.add(poste);
+      const braco = new THREE.Mesh(new THREE.BoxGeometry(.15, .15, 1.1), mat(0x2b3245)); braco.position.set(hx, E3_ARO + .5, hz + s * 1.05); cena.add(braco);
+      const tabTex = texturaCanvas(128, 80, c => { c.fillStyle = "rgba(255,255,255,.9)"; c.fillRect(0, 0, 128, 80); c.strokeStyle = "#e4572e"; c.lineWidth = 6; c.strokeRect(3, 3, 122, 74); c.strokeRect(40, 34, 48, 36); });
+      const tab = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.1, .08), new THREE.MeshLambertMaterial({ map: tabTex })); tab.position.set(hx, E3_ARO + .45, hz + s * .5); cena.add(tab);
+      const aro = new THREE.Mesh(new THREE.TorusGeometry(.32, .04, 8, 24), mat(0xff6a00)); aro.rotation.x = Math.PI / 2; aro.position.set(hx, E3_ARO, hz); cena.add(aro);
+      const rede = new THREE.Mesh(new THREE.CylinderGeometry(.32, .2, .5, 12, 2, true), new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true, opacity: .8 })); rede.position.set(hx, E3_ARO - .25, hz); cena.add(rede); }
+  }
+  // jogadores (o mesmo bonequinho da Praça) com anel do time embaixo
+  E3.mods = E.P.map(p => { const m = pracaModelo({ nome: p.nome, skin: p.skin, ficha: p.ficha, selo: p.selo, pet: null, cor: p.cor, pele: p.pele });
+    const anel = new THREE.Mesh(new THREE.RingGeometry(.42, p.i === eu ? .6 : .52, 28), new THREE.MeshBasicMaterial({ color: p.i === eu ? 0xffd23f : new THREE.Color(ESP_TIMES[p.time].cor), transparent: true, opacity: .9, side: THREE.DoubleSide }));
+    anel.rotation.x = -Math.PI / 2; anel.position.y = .03; m.g.add(anel); cena.add(m.g); m.ux = e3x(p.x); m.uz = e3z(p.y); return m; });
+  // bola
+  const bolaTex = texturaCanvas(128, 64, c => { if (futebol) { c.fillStyle = "#fff"; c.fillRect(0, 0, 128, 64); c.fillStyle = "#111"; for (const [x, y] of [[16, 16], [56, 10], [96, 18], [32, 46], [76, 44], [116, 50]]) { c.beginPath(); for (let k = 0; k < 5; k++) { const a = k * 1.2566; c.lineTo(x + Math.cos(a) * 9, y + Math.sin(a) * 9); } c.fill(); } }
+    else { c.fillStyle = "#ff7a1a"; c.fillRect(0, 0, 128, 64); c.strokeStyle = "#2a1300"; c.lineWidth = 3; c.beginPath(); c.moveTo(0, 32); c.lineTo(128, 32); for (const x of [32, 96]) { c.moveTo(x, 0); c.lineTo(x, 64); } c.stroke(); } });
+  E3.bola = new THREE.Mesh(new THREE.SphereGeometry(futebol ? .24 : .26, 20, 14), new THREE.MeshLambertMaterial({ map: bolaTex })); cena.add(E3.bola);
+  E3.sombra = new THREE.Mesh(new THREE.PlaneGeometry(.7, .7), new THREE.MeshBasicMaterial({ map: PRACA.sombraTex, transparent: true, depthWrite: false })); E3.sombra.rotation.x = -Math.PI / 2; E3.sombra.position.y = .02; cena.add(E3.sombra);
+  E3.r = r; E3.cena = cena; E3.cam = new THREE.PerspectiveCamera(55, 1, .1, 200); E3.tipo = E.tipo; E3.placar = E.placar.join("x"); E3.camPos = null; E3.confete = [];
+  return true;
+}
+function esp3Limpar() {
+  if (E3.r) { try { E3.r.dispose(); E3.r.domElement.remove(); } catch {} }
+  if (E3.cena) E3.cena.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) [].concat(o.material).forEach(m => { if (m.map) m.map.dispose(); m.dispose(); }); });
+  E3.r = null; E3.cena = null; E3.mods = []; E3.confete = []; E3.torcida = null;
+}
+function esp3Confete(x, z) {
+  const geo = new THREE.PlaneGeometry(.18, .12), cores = [0xffd23f, 0xff4d6d, 0x2f80ed, 0x37d99a, 0xffffff, 0xff7ad9];
+  for (let i = 0; i < 70; i++) { const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: cores[i % cores.length], side: THREE.DoubleSide }));
+    m.position.set(x + (Math.random() - .5) * 2, 2 + Math.random(), z + (Math.random() - .5) * 2); E3.cena.add(m);
+    E3.confete.push({ m, vx: (Math.random() - .5) * 6, vy: 4 + Math.random() * 6, vz: (Math.random() - .5) * 6, t: 2.4 }); }
+}
+function esp3Quadro(E, eu, dt, w, h) {
+  if (!E3.r) return;
+  const r = E3.r; if (r.domElement.width !== Math.round(w * r.getPixelRatio()) || r.domElement.height !== Math.round(h * r.getPixelRatio())) { r.setSize(w, h, false); E3.cam.aspect = w / h; E3.cam.updateProjectionMatrix(); }
+  // jogadores
+  E.P.forEach((p, i) => { const m = E3.mods[i]; if (!m) return; const nx = e3x(p.x), nz = e3z(p.y), v = Math.hypot(nx - m.ux, nz - m.uz) / Math.max(dt, .001);
+    m.ux = nx; m.uz = nz; m.passo += v * dt * 3; animarBonecoPraca(m, nx, 0, nz, Math.atan2(-Math.cos(p.dir), -Math.sin(p.dir)), v > .6, dt);
+    m.corpo.rotation.z = p.flash > 0 ? Math.sin(performance.now() / 40) * .15 : 0; });
+  // bola (no basquete, o arremesso termina na altura do aro)
+  const b = E.b, alt = (b.h3 != null ? b.h3 : b.z) / 40, bx = e3x(b.x), bz = e3z(b.y);
+  E3.bola.position.set(bx, (E.tipo === "futebol" ? .24 : .26) + alt, bz); E3.bola.rotation.x += dt * 6 * (b.dono >= 0 || E.b.vx || E.b.vy ? 1 : 0);
+  E3.sombra.position.set(bx, .02, bz); E3.sombra.scale.setScalar(1 / (1 + alt * .3));
+  // gol/cesta: confete e torcida pulando
+  const pl = E.placar.join("x"); if (pl !== E3.placar) { const antes = E3.placar.split("x").map(Number), t = E.placar[0] > antes[0] ? 0 : 1; E3.placar = pl; E3.pulo = 2.5; const alvo = ESP_CESTA[t]; esp3Confete(e3x(alvo.x), e3z(alvo.y)); }
+  E3.pulo = Math.max(0, E3.pulo - dt); const tt = performance.now() / 1000;
+  if (E3.torcida) for (const t of E3.torcida) t.position.y = t.userData.y0 + (E3.pulo > 0 ? Math.abs(Math.sin(tt * 9 + t.userData.fase)) * .35 : Math.abs(Math.sin(tt * 1.5 + t.userData.fase)) * .04);
+  for (let i = E3.confete.length - 1; i >= 0; i--) { const c = E3.confete[i]; c.t -= dt; c.vy -= 9 * dt; c.m.position.x += c.vx * dt; c.m.position.y += c.vy * dt; c.m.position.z += c.vz * dt; c.m.rotation.x += dt * 8; c.m.rotation.y += dt * 5;
+    if (c.t <= 0 || c.m.position.y < 0) { E3.cena.remove(c.m); c.m.material.dispose(); E3.confete.splice(i, 1); } }
+  // câmera atrás de mim, olhando para onde o meu time ataca
+  const me = E.P[eu] || E.P[0], s = me.time === 0 ? -1 : 1, mx = e3x(me.x), mz = e3z(me.y);
+  const alvoCam = new THREE.Vector3(mx * .55, 9.5, mz - s * 10.5), olhar = new THREE.Vector3(mx * .5 + bx * .2, 0, mz + s * 4);
+  if (!E3.camPos) E3.camPos = alvoCam.clone(); E3.camPos.lerp(alvoCam, 1 - Math.exp(-dt * 4));
+  E3.cam.position.copy(E3.camPos); E3.cam.lookAt(olhar);
+  r.render(E3.cena, E3.cam);
+}
 /* ---------- tela de escolha ---------- */
 TELAS.esportes = () => {
   const on = typeof espOnline === "object";
@@ -8101,6 +8207,7 @@ TELAS.esportes = () => {
     <div class="card" style="background:rgba(11,27,51,.6)">
       <h3>Tamanho dos times</h3>
       <div class="chips" style="justify-content:center">${[1, 2, 3].map(n => `<button type="button" class="chip pick" data-a="espTam" data-n="${n}" aria-pressed="${ESP.tam === n}">${n} x ${n}</button>`).join("")}</div>
+      ${esp3Pode() ? `<h3>Visão</h3><div class="chips" style="justify-content:center"><button type="button" class="chip pick" data-a="esp3d" data-v="1" aria-pressed="${esp3Usar()}">🏟️ 3D</button><button type="button" class="chip pick" data-a="esp3d" data-v="0" aria-pressed="${!esp3Usar()}">🗺️ 2D (de cima)</button></div>` : ""}
       <p class="dim" style="font-size:14px;text-align:center">Partida de 2 minutos. Ganha o time que fizer mais ${ESP.tipo === "futebol" ? "gols" : "pontos"}. Robôs completam os times.</p>
       <button class="lb-jogar" data-a="espJogar">Jogar contra robôs</button>
       ${on ? `<button class="btn ok" data-a="espCriarSala">🌐 Criar sala online</button>
@@ -8116,10 +8223,12 @@ TELAS.esportes = () => {
 };
 acoes.esportes = () => ir("esportes");
 acoes.espTipo = el => { ESP.tipo = G.espTipo = el.dataset.k; salvar(); render(); };
+acoes.esp3d = el => { G.esp3d = el.dataset.v === "1"; salvar(); render(); };
 acoes.espTam = el => { ESP.tam = G.espTam = +el.dataset.n; salvar(); render(); };
 acoes.espJogar = () => { const nome = perfil(); espComecar(espNovaPartida(ESP.tipo, [{ nome, info: espInfoJogador(nome) }], ESP.tam), 0, null); };
 /* ---------- a partida na tela (por cima de tudo, como a Praça) ---------- */
 function espComecar(E, eu, rede) {
+  esp3Limpar();
   ESP.E = E; ESP.eu = eu; ESP.rede = rede; ESP.joy = { x: 0, y: 0 }; ESP.keys = {}; ESP.ganhou = false;
   let box = $("esporte");
   if (!box) { box = document.createElement("div"); box.id = "esporte"; box.className = "esporte"; document.body.appendChild(box); }
@@ -8127,7 +8236,7 @@ function espComecar(E, eu, rede) {
   box.innerHTML = `
     <canvas class="es-cv" id="es-cv"></canvas>
     <div class="es-top"><button type="button" class="lb-pill" id="es-sair">← Sair</button>
-      <div class="es-placar"><span style="background:${ESP_TIMES[0].cor}" id="es-p0">0</span><b id="es-tempo">2:00</b><span style="background:${ESP_TIMES[1].cor}" id="es-p1">0</span></div></div>
+      <div class="es-placar"><span style="background:${ESP_TIMES[0].cor}" id="es-p0">0</span><b id="es-tempo">2:00</b><span style="background:${ESP_TIMES[1].cor}" id="es-p1">0</span></div>${esp3Pode() ? `<button type="button" class="lb-pill" id="es-visao" aria-label="Trocar a visão">${esp3Usar() ? "2D" : "3D"}</button>` : ""}</div>
     <div class="es-msg" id="es-msg" hidden></div>
     <div class="es-time" id="es-meutime"></div>
     <div class="pr-joy es-joy" id="es-joy" aria-label="Andar"><i></i></div>
@@ -8135,7 +8244,8 @@ function espComecar(E, eu, rede) {
     <button type="button" class="es-btn es-chute" id="es-chute">${t.ic}<small>${t.acao}</small></button>
     <div class="es-fim" id="es-fim" hidden></div>`;
   box.hidden = false; document.body.classList.add("es-aberto");
-  const meu = E.P[eu]; $("es-meutime").innerHTML = `Você é do time <b style="color:${ESP_TIMES[meu.time].cor}">${ESP_TIMES[meu.time].nome}</b> e ataca para ${meu.time === 0 ? "cima ⬆️" : "baixo ⬇️"}`;
+  ESP.v3 = esp3Usar() && esp3Montar(E, eu);
+  const meu = E.P[eu]; $("es-meutime").innerHTML = `Você é do time <b style="color:${ESP_TIMES[meu.time].cor}">${ESP_TIMES[meu.time].nome}</b> e ataca para ${ESP.v3 ? "frente ⬆️" : meu.time === 0 ? "cima ⬆️" : "baixo ⬇️"}`;
   setTimeout(() => { const m = $("es-meutime"); if (m) m.hidden = true; }, 4000);
   espControles();
   cancelAnimationFrame(ESP.raf); ESP.ult = performance.now(); ESP.raf = requestAnimationFrame(espQuadro);
@@ -8151,6 +8261,7 @@ function espControles() {
   $("es-chute").addEventListener("pointerdown", e => { e.preventDefault(); espAcao("chute"); });
   $("es-passe").addEventListener("pointerdown", e => { e.preventDefault(); espAcao("passe"); });
   $("es-sair").addEventListener("click", () => espSair());
+  if ($("es-visao")) $("es-visao").addEventListener("click", () => { G.esp3d = !ESP.v3; salvar(); if (ESP.v3) { esp3Limpar(); ESP.v3 = false; } else ESP.v3 = esp3Montar(ESP.E, ESP.eu); $("es-visao").textContent = ESP.v3 ? "2D" : "3D"; });
   ESP.kd = e => { if (/INPUT|TEXTAREA/.test((e.target || {}).tagName || "")) return; const k = e.key.toLowerCase(); ESP.keys[k] = true;
     if (k === " ") { espAcao("chute"); e.preventDefault(); } if (k === "e") espAcao("passe"); if (k.startsWith("arrow")) e.preventDefault(); };
   ESP.ku = e => { ESP.keys[e.key.toLowerCase()] = false; };
@@ -8159,7 +8270,9 @@ function espControles() {
 function espAcao(a) { const E = ESP.E; if (!E || E.fim) return; if (ESP.rede && ESP.rede.acao) ESP.rede.acao(a); else if (E.P[ESP.eu]) E.P[ESP.eu].acao = a; }
 function espEntrada() {
   const k = ESP.keys, kx = (k.d || k.arrowright ? 1 : 0) - (k.a || k.arrowleft ? 1 : 0), ky = (k.s || k.arrowdown ? 1 : 0) - (k.w || k.arrowup ? 1 : 0);
-  return kx || ky ? { x: kx, y: ky } : { x: ESP.joy.x, y: ESP.joy.y };
+  const v = kx || ky ? { x: kx, y: ky } : { x: ESP.joy.x, y: ESP.joy.y };
+  const me = ESP.E && ESP.E.P[ESP.eu];   // no 3D do time Vermelho a câmera olha para o outro lado: o controle gira junto
+  return ESP.v3 && me && me.time === 1 ? { x: -v.x, y: -v.y } : v;
 }
 function espQuadro(ts) {
   const box = $("esporte"); if (!box || box.hidden) return;
@@ -8170,7 +8283,8 @@ function espQuadro(ts) {
   else { if (E.P[ESP.eu]) E.P[ESP.eu].inp = inp; espPasso(E, dt); if (ESP.rede && ESP.rede.enviar) ESP.rede.enviar(dt); }
   const cv = $("es-cv"), w = innerWidth, h = innerHeight, dpr = Math.min(2, devicePixelRatio || 1);
   if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
-  espDesenhar(cv.getContext("2d"), ESP.E, ESP.eu, cv.width, cv.height - (h > 560 ? 130 * dpr : 0), 64 * dpr);
+  if (ESP.v3) { cv.hidden = true; esp3Quadro(ESP.E, ESP.eu, dt, w, h); }
+  else { cv.hidden = false; espDesenhar(cv.getContext("2d"), ESP.E, ESP.eu, cv.width, cv.height - (h > 560 ? 130 * dpr : 0), 64 * dpr); }
   espHUD();
 }
 function espHUD() {
@@ -8207,6 +8321,7 @@ function espFim() {
 function espSair(semAvisar) {
   cancelAnimationFrame(ESP.raf);
   if (ESP.kd) { window.removeEventListener("keydown", ESP.kd); window.removeEventListener("keyup", ESP.ku); }
+  esp3Limpar(); ESP.v3 = false;
   const box = $("esporte"); if (box) { box.hidden = true; box.innerHTML = ""; }
   document.body.classList.remove("es-aberto");
   if (ESP.rede && ESP.rede.sair && !semAvisar) ESP.rede.sair();

@@ -1382,7 +1382,7 @@ acoes.espComecarOnline = () => {
   espComecar(E, E.P.findIndex(p => p.id === "h"), {
     enviar(dt) { o.tEnvio -= dt; if (o.tEnvio > 0 && !(E.fim && !o.fimMandado)) return; o.tEnvio = .066; if (E.fim) o.fimMandado = true;
       const b = E.b; espMandarTodos({ t: "es", p: E.P.map(p => [espR(p.x), espR(p.y), Math.round(p.dir * 100) / 100, Math.round(p.passo), p.flash > 0 ? 1 : 0, p.gols]),
-        b: [espR(b.x), espR(b.y), espR(b.z), b.dono], pl: E.placar, tm: espR(E.t), msg: E.msg || "", fim: E.fim || null }); },
+        b: [espR(b.x), espR(b.y), espR(b.z), b.dono, espR(b.h3 || 0)], pl: E.placar, tm: espR(E.t), msg: E.msg || "", fim: E.fim || null }); },
     denovo() { o.fimMandado = false; acoes.espComecarOnline(); },
     sair() { espMandarTodos({ t: "efechou" }); setTimeout(espLimparRede, 200); }
   });
@@ -1424,7 +1424,7 @@ function espCliRecebe(d) {
         if (o.tInp <= 0 || (k !== o.ultInp && o.tInp < .04)) { o.tInp = k !== o.ultInp ? .066 : .25; o.ultInp = k; enviar(o.hostConn, { t: "ei", x: Math.round(inp.x * 100) / 100, y: Math.round(inp.y * 100) / 100 }); }
         const a = o.alvo; if (!a) return; const kk = 1 - Math.exp(-dt * 14);
         E.P.forEach((p, i) => { const q = a.p[i]; if (!q) return; p.x += (q[0] - p.x) * kk; p.y += (q[1] - p.y) * kk; p.dir = q[2]; p.passo = q[3]; p.flash = q[4] ? 1 : 0; p.gols = q[5] || 0; });
-        E.b.x += (a.b[0] - E.b.x) * kk; E.b.y += (a.b[1] - E.b.y) * kk; E.b.z += (a.b[2] - E.b.z) * kk; E.b.dono = a.b[3];
+        E.b.x += (a.b[0] - E.b.x) * kk; E.b.y += (a.b[1] - E.b.y) * kk; E.b.z += (a.b[2] - E.b.z) * kk; E.b.h3 = (E.b.h3 || 0) + (a.b[4] - (E.b.h3 || 0)) * kk; E.b.dono = a.b[3];
       },
       acao(x) { enviar(o.hostConn, { t: "ea", a: x }); },
       sair() { espLimparRede(); }
@@ -1433,7 +1433,7 @@ function espCliRecebe(d) {
   }
   if (d.t === "es" && ESP.E && Array.isArray(d.p) && Array.isArray(d.b)) {
     const E = ESP.E, num = v => espClamp(+v || 0, -50, ESP_H + 50);
-    o.alvo = { p: d.p.slice(0, 6).map(q => [num(q[0]), num(q[1]), +q[2] || 0, +q[3] || 0, q[4] ? 1 : 0, Math.max(0, Math.min(99, +q[5] || 0))]), b: [num(d.b[0]), num(d.b[1]), espClamp(+d.b[2] || 0, 0, 400), Number.isInteger(d.b[3]) ? d.b[3] : -1] };
+    o.alvo = { p: d.p.slice(0, 6).map(q => [num(q[0]), num(q[1]), +q[2] || 0, +q[3] || 0, q[4] ? 1 : 0, Math.max(0, Math.min(99, +q[5] || 0))]), b: [num(d.b[0]), num(d.b[1]), espClamp(+d.b[2] || 0, 0, 400), Number.isInteger(d.b[3]) ? d.b[3] : -1, espClamp(+d.b[4] || 0, 0, 400)] };
     if (Array.isArray(d.pl)) E.placar = [Math.max(0, +d.pl[0] || 0), Math.max(0, +d.pl[1] || 0)];
     E.t = espClamp(+d.tm || 0, 0, ESP_TEMPO); E.msg = String(d.msg || "").slice(0, 40);
     if (d.fim && !E.fim) { E.fim = { placar: E.placar.slice(), vence: [0, 1, -1].includes(d.fim.vence) ? d.fim.vence : -1 }; E.P.forEach((p, i) => { const q = o.alvo.p[i]; if (q) p.gols = q[5]; }); }
