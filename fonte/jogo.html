@@ -4781,21 +4781,21 @@ function mesclarRank(r, m) {
   const num = x => Math.max(0, Math.min(1e7, Math.round(+x || 0)));
   if (r && typeof r === "object" && r.j && typeof r.j === "object") {   // junta com qualquer tabela (de qualquer semana)
     const meu = rankAtual();
-    for (const [n0, e] of Object.entries(r.j).slice(0, 80)) {
+    for (const [n0, e] of Object.entries(r.j).slice(0, 400)) {
       const n = nomeLimpo(n0); if (!n || !e || typeof e !== "object") continue;
       const a = meu.j[n] || { g: 0, t: 0, v: 0, b: 0 };
       meu.j[n] = { g: Math.max(a.g, num(e.g)), t: Math.max(a.t, num(e.t)), v: Math.max(a.v, num(e.v)), b: Math.max(a.b || 0, num(e.b)) };
     }
     const nomes = Object.keys(meu.j), peso = n => meu.j[n].v * 100000 + meu.j[n].t + meu.j[n].g;
-    if (nomes.length > 60) nomes.sort((x, y) => peso(y) - peso(x)).slice(60).forEach(n => delete meu.j[n]);
+    if (nomes.length > 200) nomes.sort((x, y) => peso(y) - peso(x)).slice(200).forEach(n => delete meu.j[n]);
   }
   if (m && typeof m === "object" && m.j && typeof m.j === "object") {
     const meu = moedasPraca();
-    for (const [n0, e] of Object.entries(m.j).slice(0, 80)) {
+    for (const [n0, e] of Object.entries(m.j).slice(0, 400)) {
       const n = nomeLimpo(n0); if (!n || !e || typeof e !== "object") continue;
       const em = Math.min(Date.now(), num(e.em)); if (!meu.j[n] || meu.j[n].em < em) meu.j[n] = { m: num(e.m), em };
     }
-    const nomes = Object.keys(meu.j); if (nomes.length > 60) nomes.sort((x, y) => meu.j[y].m - meu.j[x].m).slice(60).forEach(n => delete meu.j[n]);
+    const nomes = Object.keys(meu.j); if (nomes.length > 200) nomes.sort((x, y) => meu.j[y].m - meu.j[x].m).slice(200).forEach(n => delete meu.j[n]);
   }
   salvar();
 }

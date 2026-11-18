@@ -1465,3 +1465,36 @@ acoes.espSairSala = () => { if (espOnline.host) espMandarTodos({ t: "efechou" })
 // link ?esporte=CÓDIGO: abre os mini jogos e entra na sala
 (() => { const q = new URLSearchParams(location.search).get("esporte"); if (!q) return; ESP.codeEntrar = q.toUpperCase().slice(0, 4); G.tela = "esportes"; salvar(); setTimeout(() => espEntrarSala(q), 400); })();
 if (G.tela === "espSala" && !espOnline.peer) { G.tela = "esportes"; salvar(); }
+
+/* ===================== Ranking online (pedido do Andre: aparecer qualquer pessoa na classificação) =====================
+   Lista igual para todo mundo, guardada num Realtime Database do Firebase (conta gratuita do pai). Vai só apelido e números.
+   Enquanto RANK_ONLINE estiver vazio fica desligado e a classificação continua passando de celular em celular.
+   As regras do banco (ferramentas/ranking-online/regras.json) só deixam os números subirem, nunca apagar nem diminuir. */
+const RANK_ONLINE = "";
+const RK = { ultimo: {}, rodando: false };
+const rankChave = n => nomeLimpo(n).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9_-]/g, "_").slice(0, 24);
+function rankOnlineLigado() { return /^https:\/\/[a-z0-9-]+(-default-rtdb)?\.([a-z0-9-]+\.)?firebase(io\.com|database\.app)\/?$/.test(RANK_ONLINE); }
+async function rankOnlineSincronizar() {
+  if (!rankOnlineLigado() || RK.rodando || (typeof navigator !== "undefined" && navigator.onLine === false)) return;
+  RK.rodando = true; const base = RANK_ONLINE.replace(/\/$/, "");
+  try {
+    // 1) baixa a lista de todo mundo e junta com a deste celular (o maior número vale)
+    const r = await fetch(base + "/rank.json", { cache: "no-store" });
+    if (r.ok) { const d = await r.json() || {}, j = {}, m = {};
+      for (const e of Object.values(d).slice(0, 400)) { if (!e || typeof e.n !== "string") continue; j[e.n] = { g: e.g, t: e.t, v: e.v, b: e.b }; if (e.m) m[e.n] = { m: e.m, em: e.em }; }
+      mesclarRank({ sem: "sempre", j }, { j: m }); RK.ok = Date.now(); }
+    // 2) manda os perfis deste celular (só quando mudou)
+    const meu = rankAtual(), num = x => Math.max(0, Math.min(1e7, Math.round(+x || 0)));
+    for (const nome of jogadoresDoAparelho()) {
+      const n = nomeLimpo(nome), k = rankChave(n); if (!n || !k || /^Robô/.test(n)) continue;
+      const e = meu.j[n] || {}, corpo = { n, g: num(e.g), t: num(e.t), v: num(e.v), b: num(e.b), m: num(G.banco && G.banco[nome]) };
+      if (!corpo.g && !corpo.t && !corpo.v && !corpo.b) continue;
+      const ch = JSON.stringify(corpo); if (RK.ultimo[k] === ch) continue;
+      const w = await fetch(base + "/rank/" + k + ".json", { method: "PUT", body: JSON.stringify({ ...corpo, em: Date.now() }) });
+      if (w.ok) RK.ultimo[k] = ch;
+    }
+  } catch {}
+  RK.rodando = false;
+}
+if (rankOnlineLigado()) { setTimeout(rankOnlineSincronizar, 3000); setInterval(rankOnlineSincronizar, 60000); }
+

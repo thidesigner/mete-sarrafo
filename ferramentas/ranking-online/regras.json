@@ -1,0 +1,21 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "rank": {
+      ".read": true,
+      "$k": {
+        ".write": "newData.exists() && $k.length <= 24",
+        ".validate": "newData.hasChildren(['n', 'g', 't', 'v', 'b', 'm', 'em'])",
+        "n": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 20" },
+        "v": { ".validate": "newData.isNumber() && newData.val() >= (data.exists() ? data.val() : 0) && newData.val() <= (data.exists() ? data.val() : 0) + 500" },
+        "g": { ".validate": "newData.isNumber() && newData.val() >= (data.exists() ? data.val() : 0) && newData.val() <= (data.exists() ? data.val() : 0) + 100000" },
+        "t": { ".validate": "newData.isNumber() && newData.val() >= (data.exists() ? data.val() : 0) && newData.val() <= (data.exists() ? data.val() : 0) + 604800" },
+        "b": { ".validate": "newData.isNumber() && newData.val() >= (data.exists() ? data.val() : 0) && newData.val() <= (data.exists() ? data.val() : 0) + 50" },
+        "m": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10000000" },
+        "em": { ".validate": "newData.isNumber()" },
+        "$outro": { ".validate": false }
+      }
+    }
+  }
+}
