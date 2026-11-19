@@ -364,6 +364,14 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .es-card span { font-size: 54px; line-height: 1; } .es-card b { font-family: var(--display); font-size: 20px; }
 .es-card.on { background: #ffd23f; color: #0b1b33; }
 @media (prefers-reduced-motion: reduce) { .es-msg { animation: none; } }
+.mb-paleta { position: absolute; left: 8px; right: 8px; top: 66px; z-index: 3; display: grid; gap: 6px; justify-items: center; pointer-events: none; }
+.mb-paleta > * { pointer-events: auto; }
+.mb-linha { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; background: rgba(11,27,51,.7); border-radius: 14px; padding: 5px; }
+.mb-tipo { width: 42px; height: 42px; border-radius: 10px; border: 2px solid #0b1b33; background: #fff; font-size: 22px; padding: 0; cursor: pointer; }
+.mb-tipo[aria-pressed="true"] { background: #ffd23f; box-shadow: 0 0 10px #ffd23f; }
+.mb-cor { width: 30px; height: 30px; border-radius: 50%; border: 3px solid #0b1b33; cursor: pointer; padding: 0; }
+.mb-cor[aria-pressed="true"] { outline: 3px solid #ffd23f; }
+.mb-dica { color: #fff; font: 700 13px Nunito, sans-serif; background: rgba(11,27,51,.7); border-radius: 10px; padding: 3px 10px; }
 .praca { position: fixed; inset: 0; z-index: 50; background: #9fd3ff; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
 .praca .pr-cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .pr-top { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; gap: 8px; align-items: center; justify-content: space-between; z-index: 2; }
@@ -4613,6 +4621,7 @@ TELAS.lobby = () => {
         <button class="lb-btn" data-a="loja">${ICONES.loja}<span>Loja</span><i class="lb-tag">${SKINS.some(s => s.limitada && naVenda(s) && !temSkin(nome, s.k)) || FUNDOS_LIM.some(f => naVenda(f) && !temFundo(nome, f.k)) || EMOJIS.some(e => e.limitada && naVenda(e) && !temEmoji(nome, e.k)) || GESTOS.some(g => g.limitada && naVenda(g) && !temGesto(nome, g.k)) || AV_ESPECIAIS.some(x => x.limitada && naVenda(x) && !temAvatar(nome, x.k)) || ARREMESSOS.some(a => a.limitada && naVenda(a) && !temArremesso(nome, a.k)) ? "limitada!" : "novo!"}</i></button>
         <button class="lb-btn" data-a="personagens"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4" fill="#f1c27d" stroke="#0b1b33" stroke-width="1.5"/><path d="M5 21v-3a7 7 0 0 1 14 0v3z" fill="#2f80ed" stroke="#0b1b33" stroke-width="1.5" stroke-linejoin="round"/><path d="M18 3l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" fill="#ffd23f" stroke="#0b1b33" stroke-width="1"/></svg><span>Criar</span></button>
         <button class="lb-btn" data-a="fundos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.3 0 1.9-.8 1.9-1.7 0-1.2-1-1.5-1-2.6 0-1 .8-1.7 1.9-1.7h2.1a3.6 3.6 0 0 0 3.6-3.6C20.5 6.6 16.7 3.5 12 3.5z" fill="#f4f7fb" stroke="#0b1b33" stroke-width="1.6"/><circle cx="7.8" cy="11" r="1.5" fill="#ff4d6d"/><circle cx="10.2" cy="7.4" r="1.5" fill="#ffd23f"/><circle cx="14.6" cy="7.4" r="1.5" fill="#37d99a"/><circle cx="17" cy="11" r="1.5" fill="#2f80ed"/></svg><span>Fundo</span></button>
+        <button class="lb-btn" data-a="mundos" aria-label="Criar mundo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z" fill="#37d99a" stroke="#0b1b33" stroke-width="1.5" stroke-linejoin="round"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9" fill="none" stroke="#0b1b33" stroke-width="1.5"/><path d="M12 12l8-4.5v9L12 21z" fill="#2bb57a"/></svg><span>Mundo</span></button>
       </div>
       <div class="lb-side lb-side-d"><!--lado-direito-->
         <button class="lb-btn" data-a="mais">${ICONES.regras}<span>Regras</span>${sugestoes.length ? `<i class="lb-badge">${sugestoes.length}</i>` : ""}</button>
@@ -8953,6 +8962,218 @@ function espSair(semAvisar) {
   if (ESP.rede && ESP.rede.sair && !semAvisar) ESP.rede.sair();
   ESP.rede = null; ESP.E = null;
   G.tela = "esportes"; salvar(); render();
+}
+</script>
+<script>
+/* ===================== Criar Mundo (ideia do Andre) =====================
+   Mundo plano e vazio: no modo Construir você voa e toca na tela para pôr blocos; no modo Jogar tem gravidade,
+   largada, chegada com cronômetro, lava, mola e moedas (só pontos dentro do mundo, não valem moedas do jogo).
+   Mundos ficam só no aparelho: G.mundos[nome] = [{id, nome, b: [[x, y, z, tipo, cor]], rec}] (até 4 por perfil). */
+const MUNDO_TAM = 40, MUNDO_MAX = 1500, MUNDOS_MAX = 4;
+const MB_CORES = ["#ff4d6d", "#ff8a1f", "#ffd23f", "#37d99a", "#2f80ed", "#9b5de5", "#ffffff", "#3a3a48"];
+const MB_TIPOS = [
+  { k: "bloco", ic: "🧱", nome: "Bloco" }, { k: "largada", ic: "🏁", nome: "Largada" }, { k: "chegada", ic: "🏆", nome: "Chegada" },
+  { k: "lava", ic: "🔥", nome: "Lava" }, { k: "mola", ic: "🟢", nome: "Mola" }, { k: "moeda", ic: "🪙", nome: "Moeda" },
+  { k: "luz", ic: "💡", nome: "Luz" }, { k: "arvore", ic: "🌳", nome: "Árvore" } ];
+const MB = { on: false, modo: "construir", tipo: 0, cor: 0, apagar: false, mundo: null, blocos: new Map(), r: null, cena: null, cam: null, eu: null, yaw: Math.PI, alt: .45, mov: { x: 0, y: 0 }, keys: {}, sobe: false, desce: false };
+const mbChave = (x, y, z) => x + "," + y + "," + z;
+function mundosDe(nome) { G.mundos = G.mundos || {}; return G.mundos[nome] = Array.isArray(G.mundos[nome]) ? G.mundos[nome] : []; }
+/* ---------- tela com a lista de mundos ---------- */
+TELAS.mundos = () => {
+  const l = mundosDe(perfil());
+  return `<section data-fundo="${fundoAtual()}" class="bgf lobby" aria-label="Criar mundo">
+    <div class="lb-top"><button class="lb-pill" data-a="voltarLobby">← Voltar</button><span class="lb-pill">🧱 Criar</span></div>
+    <h1 class="lb-title" style="font-size:34px">Meus mundos</h1>
+    <div class="card" style="background:rgba(11,27,51,.6)">
+      <p>Um mundo plano e vazio para você construir <b>o que quiser</b>: parkour, labirinto, castelo, pista… Depois toque em ▶️ Jogar para testar.</p>
+      ${l.length < MUNDOS_MAX ? `<form class="presente-form" data-a="mundoNovo" autocomplete="off"><input id="mb-nome" maxlength="20" placeholder="Nome do mundo" aria-label="Nome do mundo"><button class="btn small" type="submit">Criar</button></form>` : `<p class="dim">Você já tem ${MUNDOS_MAX} mundos. Apague um para criar outro.</p>`}
+    </div>
+    ${l.map(m => `<div class="card" style="background:rgba(11,27,51,.6)">
+      <h3>🌍 ${esc(m.nome)}</h3><p class="dim" style="font-size:14px">${m.b.length} blocos${m.rec ? ` · recorde ${m.rec.toFixed(1)} s` : ""}</p>
+      <div class="row"><button class="btn small" data-a="mundoAbrir" data-id="${m.id}" data-modo="construir">🧱 Construir</button><button class="btn ok small" data-a="mundoAbrir" data-id="${m.id}" data-modo="jogar">▶️ Jogar</button></div>
+      <button class="link" data-a="mundoApagar" data-id="${m.id}">${MB.apagarId === m.id ? "Toque de novo para apagar de vez" : "Apagar este mundo"}</button>
+    </div>`).join("")}
+  </section>`;
+};
+acoes.mundos = () => ir("mundos");
+acoes.mundoNovo = () => {
+  const nome = (($("mb-nome") || {}).value || "").replace(/[<>]/g, "").trim().slice(0, 20) || "Meu mundo", l = mundosDe(perfil());
+  if (l.length >= MUNDOS_MAX) return;
+  const m = { id: "m" + Date.now().toString(36), nome, b: [[0, 0, 0, 1, 3]] }; l.push(m); salvar(); mundoAbrir(m, "construir");
+};
+acoes.mundoAbrir = el => { const m = mundosDe(perfil()).find(x => x.id === el.dataset.id); if (m) mundoAbrir(m, el.dataset.modo); };
+acoes.mundoApagar = el => { const id = el.dataset.id; if (MB.apagarId !== id) { MB.apagarId = id; render(); return; } G.mundos[perfil()] = mundosDe(perfil()).filter(x => x.id !== id); MB.apagarId = null; salvar(); render(); };
+/* ---------- montar o mundo em 3D ---------- */
+const MB_GEO = {}, MB_MAT = {};
+function mbMaterial(t, c) {
+  const k = t + ":" + c; if (MB_MAT[k]) return MB_MAT[k];
+  const T = MB_TIPOS[t].k, cor = { largada: "#37d99a", chegada: "#ffd23f", lava: "#ff5a1f", mola: "#2bd96b", luz: "#fff3b0" }[T] || MB_CORES[c] || "#ffffff";
+  const ex = { lava: "#a52a00", luz: "#d9c25a", chegada: "#5a4200" }[T];
+  let map = null;
+  if (T === "largada" || T === "chegada" || T === "mola") map = texturaCanvas(64, 64, (g) => { g.fillStyle = cor; g.fillRect(0, 0, 64, 64); g.font = "40px sans-serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(T === "largada" ? "🏁" : T === "chegada" ? "🏆" : "⬆", 32, 36); g.strokeStyle = "rgba(0,0,0,.25)"; g.lineWidth = 4; g.strokeRect(2, 2, 60, 60); });
+  else if (T === "bloco") map = texturaCanvas(32, 32, (g) => { g.fillStyle = cor; g.fillRect(0, 0, 32, 32); g.strokeStyle = "rgba(0,0,0,.18)"; g.lineWidth = 2; g.strokeRect(1, 1, 30, 30); });
+  return MB_MAT[k] = new THREE.MeshLambertMaterial({ color: map ? "#ffffff" : cor, map, emissive: ex || "#000000" });
+}
+function mbMesh(x, y, z, t, c) {
+  const T = MB_TIPOS[t].k; let m;
+  if (T === "moeda") { MB_GEO.moeda = MB_GEO.moeda || new THREE.CylinderGeometry(.32, .32, .08, 20); m = new THREE.Mesh(MB_GEO.moeda, MB_MAT.moeda = MB_MAT.moeda || new THREE.MeshLambertMaterial({ color: "#ffd23f", emissive: "#6b4e00" })); m.rotation.x = Math.PI / 2; }
+  else if (T === "arvore") { m = new THREE.Group(); const tr = new THREE.Mesh(new THREE.CylinderGeometry(.12, .16, .7, 8), new THREE.MeshLambertMaterial({ color: "#8a5a2b" })); tr.position.y = -.15; m.add(tr); const co = new THREE.Mesh(new THREE.SphereGeometry(.42, 10, 8), new THREE.MeshLambertMaterial({ color: "#3f9d3a" })); co.position.y = .3; m.add(co); }
+  else { MB_GEO.cubo = MB_GEO.cubo || new THREE.BoxGeometry(1, 1, 1); m = new THREE.Mesh(MB_GEO.cubo, mbMaterial(t, c)); if (T === "mola") m.scale.y = .5; }
+  m.position.set(x, y + .5 - (T === "mola" ? .25 : 0), z); m.userData.bloco = [x, y, z]; MB.cena.add(m);
+  if (T === "luz") { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: brilhoTextura("rgba(255,240,170,1)"), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); sp.scale.set(2.4, 2.4, 1); m.add(sp); }
+  return m;
+}
+function mbPor(x, y, z, t, c, salvarJa = true) {
+  if (Math.abs(x) > MUNDO_TAM / 2 || Math.abs(z) > MUNDO_TAM / 2 || y < 0 || y > 30) return false;
+  const k = mbChave(x, y, z); if (MB.blocos.has(k)) return false;
+  if (MB.blocos.size >= MUNDO_MAX) { toast(`O mundo pode ter até ${MUNDO_MAX} blocos`); return false; }
+  if (MB_TIPOS[t].k === "largada") for (const [kk, b] of MB.blocos) if (MB_TIPOS[b.t].k === "largada") mbTirar(...b.p, false);   // só uma largada
+  MB.blocos.set(k, { p: [x, y, z], t, c, m: mbMesh(x, y, z, t, c) }); if (salvarJa) mbGuardar(); return true;
+}
+function mbTirar(x, y, z, salvarJa = true) { const k = mbChave(x, y, z), b = MB.blocos.get(k); if (!b) return; MB.cena.remove(b.m); MB.blocos.delete(k); if (salvarJa) mbGuardar(); }
+function mbGuardar() { if (!MB.mundo) return; MB.mundo.b = [...MB.blocos.values()].map(b => [...b.p, b.t, b.c]); salvar(); }
+function mbSolido(x, y, z) { const b = MB.blocos.get(mbChave(Math.round(x), Math.floor(y), Math.round(z))); if (!b) return null; const T = MB_TIPOS[b.t].k; return T === "moeda" || T === "luz" ? null : b; }
+function mundoAbrir(m, modo) {
+  if (typeof THREE === "undefined") { toast("O 3D não carregou. Confira a internet."); return; }
+  mundoFechar(true); MB.mundo = m; MB.modo = modo; MB.blocos = new Map();
+  let box = $("mundo"); if (!box) { box = document.createElement("div"); box.id = "mundo"; box.className = "praca mundo"; document.body.appendChild(box); }
+  box.innerHTML = `
+    <div class="pr-top"><button type="button" class="lb-pill" id="mb-sair">← Sair</button><span class="lb-pill" id="mb-info"></span><button type="button" class="lb-pill" id="mb-modo"></button></div>
+    <div class="pr-missao" id="mb-hud" hidden></div>
+    <div class="mb-paleta" id="mb-paleta"></div>
+    <div class="pr-joy" id="mb-joy" aria-label="Andar"><i></i></div>
+    <button type="button" class="pr-pular" id="mb-pular" aria-label="Pular ou subir">⤴</button>
+    <button type="button" class="pr-descer" id="mb-descer" aria-label="Descer">⤵</button>
+    <div class="es-fim" id="mb-fim" hidden></div>`;
+  box.hidden = false;
+  const r = new THREE.WebGLRenderer({ antialias: true }); r.setPixelRatio(Math.min(1.75, devicePixelRatio || 1)); r.domElement.className = "pr-cv"; box.prepend(r.domElement); MB.r = r;
+  const s = new THREE.Scene(); MB.cena = s; s.background = new THREE.Color("#9fd3ff"); s.fog = new THREE.Fog("#cfe9ff", 40, 80);
+  s.add(new THREE.HemisphereLight("#ffffff", "#5f8f4a", .85)); const sol = new THREE.DirectionalLight("#fff4dd", .65); sol.position.set(8, 14, 6); s.add(sol);
+  const grade = texturaCanvas(64, 64, (g) => { g.fillStyle = "#6fcd5c"; g.fillRect(0, 0, 64, 64); g.strokeStyle = "rgba(0,0,0,.12)"; g.lineWidth = 2; g.strokeRect(0, 0, 64, 64); });
+  grade.wrapS = grade.wrapT = THREE.RepeatWrapping; grade.repeat.set(MUNDO_TAM + 1, MUNDO_TAM + 1);
+  const chao = new THREE.Mesh(new THREE.PlaneGeometry(MUNDO_TAM + 1, MUNDO_TAM + 1), new THREE.MeshLambertMaterial({ map: grade })); chao.rotation.x = -Math.PI / 2; chao.userData.chao = true; s.add(chao); MB.chao = chao;
+  const borda = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshLambertMaterial({ color: "#4e9a43" })); borda.rotation.x = -Math.PI / 2; borda.position.y = -.02; s.add(borda);
+  MB.cam = new THREE.PerspectiveCamera(60, 1, .1, 200);
+  for (const b of m.b) if (Array.isArray(b) && MB_TIPOS[b[3]]) mbPor(b[0], b[1], b[2], b[3], b[4] || 0, false);
+  const info = meuInfoPraca(), mod = pracaModelo(info); s.add(mod.g);
+  MB.eu = { m: mod, x: 0, y: 1, z: 3, vy: 0, r: 0 };
+  // marcador de onde o bloco vai entrar
+  MB.mira = new THREE.Mesh(new THREE.BoxGeometry(1.02, 1.02, 1.02), new THREE.MeshBasicMaterial({ color: "#ffffff", wireframe: true, transparent: true, opacity: .7 })); MB.mira.visible = false; s.add(MB.mira);
+  mbMudarModo(modo); mbControles(box); MB.on = true; MB.ult = performance.now(); MB.raf = requestAnimationFrame(mbQuadro);
+}
+function mbPaleta() {
+  const p = $("mb-paleta"); if (!p) return; p.hidden = MB.modo !== "construir";
+  p.innerHTML = `<div class="mb-linha">${MB_TIPOS.map((t, i) => `<button type="button" class="mb-tipo" data-t="${i}" aria-pressed="${!MB.apagar && MB.tipo === i}" title="${t.nome}">${t.ic}</button>`).join("")}<button type="button" class="mb-tipo" data-apagar="1" aria-pressed="${MB.apagar}" title="Apagar">🧽</button></div>
+    ${MB_TIPOS[MB.tipo].k === "bloco" && !MB.apagar ? `<div class="mb-linha">${MB_CORES.map((c, i) => `<button type="button" class="mb-cor" data-c="${i}" aria-pressed="${MB.cor === i}" style="background:${c}" aria-label="Cor ${i + 1}"></button>`).join("")}</div>` : ""}
+    <div class="mb-dica">${MB.apagar ? "Toque num bloco para apagar" : "Toque no chão ou num bloco para pôr " + MB_TIPOS[MB.tipo].nome}</div>`;
+  p.querySelectorAll("[data-t]").forEach(b => b.addEventListener("click", () => { MB.tipo = +b.dataset.t; MB.apagar = false; mbPaleta(); }));
+  p.querySelectorAll("[data-c]").forEach(b => b.addEventListener("click", () => { MB.cor = +b.dataset.c; mbPaleta(); }));
+  p.querySelectorAll("[data-apagar]").forEach(b => b.addEventListener("click", () => { MB.apagar = !MB.apagar; mbPaleta(); }));
+}
+function mbMudarModo(modo) {
+  MB.modo = modo; const jogar = modo === "jogar";
+  $("mb-modo").textContent = jogar ? "🧱 Construir" : "▶️ Jogar"; $("mb-descer").hidden = jogar; $("mb-hud").hidden = !jogar; $("mb-fim").hidden = true;
+  $("mb-info").textContent = "🌍 " + MB.mundo.nome; MB.mira.visible = false; mbPaleta();
+  // moedas voltam e o bonequinho vai para a largada
+  for (const b of MB.blocos.values()) b.m.visible = true;
+  const larg = [...MB.blocos.values()].find(b => MB_TIPOS[b.t].k === "largada"), eu = MB.eu;
+  if (jogar) { if (larg) { eu.x = larg.p[0]; eu.z = larg.p[2]; eu.y = larg.p[1] + 1; } MB.jogo = { t: 0, moedas: 0, total: [...MB.blocos.values()].filter(b => MB_TIPOS[b.t].k === "moeda").length, fim: false, ini: { x: eu.x, y: eu.y, z: eu.z } }; eu.vy = 0;
+    if (!larg) toast("Dica: ponha uma 🏁 Largada para escolher onde começa."); }
+}
+function mbControles(box) {
+  const joy = $("mb-joy"), bola = joy.querySelector("i"); let joyId = null, olhar = null, ox = 0, oy = 0, t0 = 0, mov = 0;
+  const mexe = e => { const b = joy.getBoundingClientRect(), R = b.width / 2; let dx = (e.clientX - b.left - R) / R, dy = (e.clientY - b.top - R) / R; const m = Math.hypot(dx, dy); if (m > 1) { dx /= m; dy /= m; } MB.mov = { x: dx, y: dy }; bola.style.transform = `translate(${dx * R * .6}px, ${dy * R * .6}px)`; };
+  joy.addEventListener("pointerdown", e => { joyId = e.pointerId; joy.setPointerCapture(joyId); mexe(e); e.preventDefault(); });
+  joy.addEventListener("pointermove", e => { if (e.pointerId === joyId) mexe(e); });
+  const solta = e => { if (e.pointerId !== joyId) return; joyId = null; MB.mov = { x: 0, y: 0 }; bola.style.transform = ""; }; joy.addEventListener("pointerup", solta); joy.addEventListener("pointercancel", solta);
+  const cv = MB.r.domElement;
+  cv.addEventListener("pointerdown", e => { olhar = e.pointerId; ox = e.clientX; oy = e.clientY; t0 = performance.now(); mov = 0; cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener("pointermove", e => { if (e.pointerId !== olhar) { if (MB.modo === "construir" && e.pointerType === "mouse") mbMirar(e); return; } const dx = e.clientX - ox, dy = e.clientY - oy; mov += Math.abs(dx) + Math.abs(dy); MB.yaw -= dx * .008; MB.alt = Math.max(.08, Math.min(.9, MB.alt + dy * .003)); ox = e.clientX; oy = e.clientY; });
+  cv.addEventListener("pointerup", e => { if (e.pointerId !== olhar) return; olhar = null; if (mov < 10 && performance.now() - t0 < 400 && MB.modo === "construir") mbTocar(e); });
+  const segura = (id, k) => { const b = $(id); b.addEventListener("pointerdown", e => { MB[k] = true; b.setPointerCapture(e.pointerId); if (k === "sobe") mbPular(); }); ["pointerup", "pointercancel", "lostpointercapture"].forEach(t => b.addEventListener(t, () => { MB[k] = false; })); };
+  segura("mb-pular", "sobe"); segura("mb-descer", "desce");
+  $("mb-sair").addEventListener("click", () => mundoFechar());
+  $("mb-modo").addEventListener("click", () => mbMudarModo(MB.modo === "jogar" ? "construir" : "jogar"));
+  MB.kd = e => { if (!MB.on) return; const k = e.key.toLowerCase(); MB.keys[k] = true; if (k === " ") { MB.sobe = true; mbPular(); e.preventDefault(); } if (k === "shift") MB.desce = true; };
+  MB.ku = e => { const k = e.key.toLowerCase(); MB.keys[k] = false; if (k === " ") MB.sobe = false; if (k === "shift") MB.desce = false; };
+  addEventListener("keydown", MB.kd); addEventListener("keyup", MB.ku);
+}
+function mbRaio(e) {
+  const cv = MB.r.domElement, b = cv.getBoundingClientRect(), v = new THREE.Vector2((e.clientX - b.left) / b.width * 2 - 1, -((e.clientY - b.top) / b.height) * 2 + 1);
+  const rc = new THREE.Raycaster(); rc.setFromCamera(v, MB.cam);
+  const alvos = [MB.chao, ...[...MB.blocos.values()].map(x => x.m)], hit = rc.intersectObjects(alvos, true)[0]; if (!hit) return null;
+  let o = hit.object; while (o && !o.userData.bloco && !o.userData.chao) o = o.parent;
+  return { hit, bloco: o && o.userData.bloco, chao: o && o.userData.chao };
+}
+function mbOnde(rr) {
+  if (!rr) return null;
+  if (rr.chao) return [Math.round(rr.hit.point.x), 0, Math.round(rr.hit.point.z)];
+  const [x, y, z] = rr.bloco, n = rr.hit.face ? rr.hit.face.normal.clone().transformDirection(rr.hit.object.matrixWorld) : new THREE.Vector3(0, 1, 0);
+  return [x + Math.round(n.x), y + Math.round(n.y), z + Math.round(n.z)];
+}
+function mbMirar(e) { const rr = mbRaio(e), p = MB.apagar ? rr && rr.bloco : mbOnde(rr); MB.mira.visible = !!p; if (p) MB.mira.position.set(p[0], p[1] + .5, p[2]); }
+function mbTocar(e) {
+  const rr = mbRaio(e); if (!rr) return;
+  if (MB.apagar) { if (rr.bloco) { mbTirar(...rr.bloco); bip(300, .04); } return; }
+  const p = mbOnde(rr); if (!p) return; const eu = MB.eu;
+  if (Math.abs(p[0] - eu.x) < .8 && Math.abs(p[2] - eu.z) < .8 && p[1] + 1 > eu.y && p[1] < eu.y + 1.8) { toast("Esse lugar é onde você está!"); return; }
+  if (mbPor(p[0], p[1], p[2], MB.tipo, MB.cor)) { bip(600 + p[1] * 20, .04); MB.mira.visible = true; MB.mira.position.set(p[0], p[1] + .5, p[2]); }
+}
+function mbPular() { const eu = MB.eu; if (MB.modo === "jogar" && eu && eu.noChao) { eu.vy = 7.6; eu.noChao = false; bip(660, .05); } }
+function mbColide(x, y, z) {   // o bonequinho (0,6 de largura, 1,7 de altura) bate em algum bloco sólido?
+  for (const dx of [-.3, .3]) for (const dz of [-.3, .3]) for (const dy of [.05, .9, 1.65]) if (mbSolido(x + dx, y + dy, z + dz)) return true; return false;
+}
+function mbQuadro(ts) {
+  if (!MB.on) return; MB.raf = requestAnimationFrame(mbQuadro);
+  const dt = Math.min(.05, (ts - MB.ult) / 1000); MB.ult = ts;
+  const r = MB.r, cv = r.domElement, w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return;
+  if (cv.width !== Math.round(w * r.getPixelRatio()) || cv.height !== Math.round(h * r.getPixelRatio())) { r.setSize(w, h, false); MB.cam.aspect = w / h; MB.cam.updateProjectionMatrix(); }
+  const eu = MB.eu, k = MB.keys, jogar = MB.modo === "jogar", J = MB.jogo, parado = jogar && J && J.fim;
+  let mx = MB.mov.x, my = MB.mov.y; const kx = (k.d || k.arrowright ? 1 : 0) - (k.a || k.arrowleft ? 1 : 0), ky = (k.s || k.arrowdown ? 1 : 0) - (k.w || k.arrowup ? 1 : 0);
+  if (kx || ky) { const m = Math.hypot(kx, ky); mx = kx / m; my = ky / m; } if (parado) mx = my = 0;
+  const sy = Math.sin(MB.yaw), cy = Math.cos(MB.yaw), vel = jogar ? 5.5 : 7, vx = (mx * cy + my * sy) * vel, vz = (-mx * sy + my * cy) * vel, anda = Math.hypot(vx, vz) > .1;
+  const lim = MUNDO_TAM / 2 + .4, cl = v => Math.max(-lim, Math.min(lim, v));
+  if (anda) { const nx = cl(eu.x + vx * dt), nz = cl(eu.z + vz * dt);
+    if (!jogar || !mbColide(nx, eu.y, eu.z)) eu.x = nx; if (!jogar || !mbColide(eu.x, eu.y, nz)) eu.z = nz; eu.r = Math.atan2(-vx, -vz); eu.m.passo += Math.hypot(vx, vz) * dt * 3; }
+  if (!jogar) { eu.y = Math.max(0, Math.min(32, eu.y + ((MB.sobe ? 1 : 0) - (MB.desce ? 1 : 0)) * 6 * dt)); }
+  else if (!parado) {
+    eu.vy -= 20 * dt; let ny = eu.y + eu.vy * dt; eu.noChao = false;
+    if (eu.vy <= 0) { if (ny <= 0) { ny = 0; eu.vy = 0; eu.noChao = true; } else if (mbColide(eu.x, ny, eu.z)) { const topo = Math.floor(ny + .05) + 1; ny = topo - ny < .7 && !mbColide(eu.x, topo, eu.z) ? topo : eu.y; eu.vy = 0; eu.noChao = true; } }
+    else if (mbColide(eu.x, ny, eu.z)) { ny = eu.y; eu.vy = 0; }
+    eu.y = ny;
+    // o que está embaixo dos pés
+    const pe = MB.blocos.get(mbChave(Math.round(eu.x), Math.round(eu.y) - 1, Math.round(eu.z)));
+    if (pe && eu.noChao) { const T = MB_TIPOS[pe.t].k;
+      if (T === "mola") { eu.vy = 13; eu.noChao = false; bip(500, .06); }
+      if (T === "lava") mbVoltar("🔥 Lava! Voltou para a largada.");
+      if (T === "chegada" && !J.fim) mbChegou(); }
+    for (const b of MB.blocos.values()) { const T = MB_TIPOS[b.t].k;
+      if (T === "lava" && Math.abs(eu.x - b.p[0]) < .75 && Math.abs(eu.z - b.p[2]) < .75 && eu.y < b.p[1] + 1.05 && eu.y + 1.7 > b.p[1]) mbVoltar("🔥 Lava! Voltou para a largada.");
+      if (T === "moeda" && b.m.visible && Math.abs(eu.x - b.p[0]) < .7 && Math.abs(eu.z - b.p[2]) < .7 && Math.abs(eu.y + .5 - (b.p[1] + .5)) < 1.1) { b.m.visible = false; J.moedas++; bip(1200, .05); } }
+    if (!J.fim) J.t += dt;
+    $("mb-hud").textContent = `⏱️ ${J.t.toFixed(1)} s · 🪙 ${J.moedas}/${J.total}`;
+  }
+  for (const b of MB.blocos.values()) { const T = MB_TIPOS[b.t].k; if (T === "moeda") b.m.rotation.z += dt * 3; else if (T === "lava") b.m.material.emissive.setHSL(.03, 1, .25 + .1 * Math.sin(ts / 200)); }
+  animarBonecoPraca(eu.m, eu.x, eu.y, eu.z, eu.r, anda, dt);
+  const dist = 7, alt = 1.2 + MB.alt * 8; MB.cam.position.set(eu.x + sy * dist, eu.y + alt, eu.z + cy * dist); MB.cam.lookAt(eu.x, eu.y + 1.2, eu.z);
+  r.render(MB.cena, MB.cam);
+}
+function mbVoltar(msg) { const J = MB.jogo, eu = MB.eu; if (!J || J.voltou > performance.now() - 600) return; J.voltou = performance.now(); eu.x = J.ini.x; eu.y = J.ini.y; eu.z = J.ini.z; eu.vy = 0; toast(msg); bip(200, .12); }
+function mbChegou() {
+  const J = MB.jogo, m = MB.mundo; J.fim = true; const s = Math.round(J.t * 10) / 10, rec = !m.rec || s < m.rec; if (rec) { m.rec = s; salvar(); }
+  if (typeof tocarNotas === "function") tocarNotas([[72, 72, 0, .1, "square"], [76, 76, .1, .1, "square"], [79, 79, .2, .1, "square"], [84, 84, .3, .3, "square"]]);
+  const f = $("mb-fim"); f.hidden = false;
+  f.innerHTML = `<div class="aviso-caixa"><span class="aviso-tag">🌍 ${esc(m.nome)}</span><h2>🏆 Chegou!</h2><p>Tempo: <b>${s} s</b>${rec ? " — recorde! 🎉" : ` (recorde ${m.rec} s)`}</p><p>🪙 Moedas: ${J.moedas}/${J.total}</p>
+    <button class="lb-jogar" id="mb-denovo">Jogar de novo</button><button class="btn ghost" id="mb-editar">🧱 Voltar a construir</button></div>`;
+  $("mb-denovo").addEventListener("click", () => mbMudarModo("jogar")); $("mb-editar").addEventListener("click", () => mbMudarModo("construir"));
+}
+function mundoFechar(semTela) {
+  const estavaAberto = MB.on; cancelAnimationFrame(MB.raf); MB.on = false;
+  if (MB.kd) { removeEventListener("keydown", MB.kd); removeEventListener("keyup", MB.ku); }
+  if (MB.r) { try { MB.r.dispose(); } catch {} } MB.r = null;
+  const box = $("mundo"); if (box) { box.hidden = true; box.innerHTML = ""; }
+  if (MB.mundo && estavaAberto) mbGuardar(); MB.mundo = null; MB.cena = null; MB.blocos = new Map(); for (const k in MB_MAT) delete MB_MAT[k];
+  if (!semTela) { G.tela = "mundos"; salvar(); render(); }
 }
 </script>
 

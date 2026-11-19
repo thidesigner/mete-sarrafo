@@ -277,3 +277,12 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
 - Roda-gigante: uma volta de uns 25 segundos, ou desce quando quiser.
 - Dia e noite pelo relógio: à noite estrelas, lua e luzes acesas.
 - (18/11) O Andre quis as 13 ideias da Praça. Além das 4 de cima, agora tem: pega-pega (com amigos, ou com o Bip quando está sozinho), campinho com gol, trampolim e escorregador, palco de dança, fonte dos desejos (até 5 pedidos por dia), clima da coleção da semana, Bip e Bop passeando com uma missão por dia, a casinha para enfeitar e a máquina de foto 📷.
+
+## Criar Mundo (19/11)
+
+- Ideia do Andre: um mundo plano e vazio para criar parkour ou jogo de qualquer coisa.
+- Botão "Mundo" na tela inicial. Até 4 mundos por pessoa, guardados no celular.
+- Construir: voa e toca na tela para pôr blocos de 8 cores, largada, chegada, lava, mola, moeda, luz e árvore. A esponja apaga.
+- Jogar: começa na largada, lava volta para o começo, mola pula alto, moedas contam pontos, chegada mostra o tempo e o recorde.
+- As moedas do mundo são só pontos (não viram moedas do jogo).
+- Ideia para depois: mandar o seu mundo para um amigo jogar.

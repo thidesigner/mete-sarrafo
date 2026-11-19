@@ -147,6 +147,14 @@ Botão "Esportes" na tela inicial (`TELAS.esportes`). Partida de verdade vista d
 - **Poderes** (ideia do Andre; só moedas do jogo): `ESP_PODERES` (🔥 `fogo`: próximo chute a 1050 e o outro time não segura a bola enquanto `b.fogo`; no basquete o arremesso tem 95%; ⚡ `turbo`: 1,75x de velocidade por 4 s; ❄️ `gelo`: adversários a até 170 ficam parados 2 s e soltam a bola). Guardados em `G.inv[nome].espPod` (lista) e `espPodUsar` (o que leva). Na 1ª vez em Esportes ganha 1 sorteado (`espPresentePoder`, `G.espPresente`); os outros saem na Caixa de poder (`acoes.espCaixa`, `ESP_POD_PRECO` = 300, sorteia um que ainda não tem). Na partida: botão de poder (no PC Q), recarga `ESP_POD_CD` = 20 s (`espUsarPoder`); robôs ganham um poder sorteado e usam quando faz sentido. Online: o poder vai no `eola` (`pod`), o amigo manda `ea` "poder", e o estado leva os efeitos (`fx` de cada jogador, `b[5]` bola de fogo e `fx` do gelo).
 - Teste: `ferramentas/teste/teste-esportes.js`, `ferramentas/teste/teste-esportes3d.js` e `ferramentas/teste/teste-esportes-poderes.js`.
 
+## Criar Mundo (ideia do Andre)
+
+Botão "Mundo" na tela inicial (`TELAS.mundos`): mundo plano e vazio (40x40) para construir qualquer coisa e jogar nele. Bloco "Criar Mundo" no último `<script>` de `fonte/jogo.html` (`MB`, `mundoAbrir`, `mbQuadro`, `mundoFechar`), num `div#mundo` por cima de tudo (mesmo estilo da Praça).
+- **Construir**: voa (⤴ sobe, ⤵ desce; no PC espaço e Shift), toca na tela para pôr o bloco escolhido (raio da câmera; em cima ou do lado do bloco tocado, `mbOnde`), 🧽 apaga. Tipos `MB_TIPOS`: bloco (8 cores `MB_CORES`), 🏁 largada (só uma), 🏆 chegada, 🔥 lava, 🟢 mola, 🪙 moeda, 💡 luz e 🌳 árvore. Até `MUNDO_MAX` = 1500 blocos.
+- **Jogar**: gravidade, pulo, colisão com os blocos (`mbColide`), começa na largada; lava volta para a largada, mola joga para o alto, moedas contam pontos (**não dão moedas do jogo**, para ninguém construir moedas infinitas), chegada mostra o tempo e guarda o recorde do mundo (`m.rec`).
+- Guardado só no aparelho: `G.mundos[nome] = [{id, nome, b: [[x, y, z, tipo, cor]], rec}]`, até `MUNDOS_MAX` = 4 por perfil.
+- Teste: `ferramentas/teste/teste-mundo.js`.
+
 ## Avisos do ADM para todo mundo
 
 `avisos.json` na raiz do site: `{"avisos": [{"id", "texto" (até 200 letras), "de", "ate"}]}` (datas ISO). Todo jogo aberto no site (oficial e teste) lê o arquivo ao abrir e a cada minuto; aviso novo aparece uma vez numa janela "📢 Aviso do ADM" e, enquanto vale, numa faixa que corre na tela inicial. Dentro do Claude não chega.
