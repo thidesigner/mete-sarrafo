@@ -286,3 +286,4 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
 - Jogar: começa na largada, lava volta para o começo, mola pula alto, moedas contam pontos, chegada mostra o tempo e o recorde.
 - As moedas do mundo são só pontos (não viram moedas do jogo).
 - Ideia para depois: mandar o seu mundo para um amigo jogar.
+- (19/11) Criar Mundo, parte 2 (ideias do Andre): formas livres tipo Blender (esfera, cilindro, cone, rampa e placa, com tamanho, giro e cor), blocos de poder (turbo, super pulo, voar, escudo), tipos de jogo (Corrida, Caça às moedas, Sobrevivência com lava subindo, Livre), mandar o mundo para um amigo e a loja do mundo: o criador escolhe o preço dos poderes e, quando um amigo compra no mundo dele, as moedas vão para o criador.

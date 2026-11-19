@@ -805,7 +805,19 @@ function amigoRecebe(conn, d) {
   const av = d.av && typeof d.av === "object" && avValido(d.av.i) && AV_CORES.includes(d.av.cor) ? { i: d.av.i, cor: d.av.cor } : null;
   if (amigo && av && JSON.stringify(amigo.av) !== JSON.stringify(av)) { amigo.av = av; salvar(); }
   if (d.t === "oi") { if (amigo) { if (d.rk) mesclarRank(d.rk, d.mo); enviar(conn, { t: "rkAmg", de: meuCodigoAmigo(), nome: perfil(), av: avatarDe(perfil()), rk: rankAtual(), mo: moedasPraca() }); reRender(); } return; }
-  if (d.t === "rkAmg") { if (amigo && d.rk) mesclarRank(d.rk, d.mo); return; }   // a classificação passa de amigo para amigo
+  if (d.t === "rkAmg") { if (amigo && d.rk) mesclarRank(d.rk, d.mo); return; }
+  if (d.t === "mundo" && amigo && typeof limparMundo === "function") {   // um amigo mandou um mundo para jogar
+    const m = limparMundo(d.m, { nome: amigo.nome, codigo: de }); if (!m) return;
+    G.mundosAmigos = [m, ...mundosAmigos().filter(x => !(x.id === m.id && x.autor.codigo === de))].slice(0, 8); salvar();
+    toast(`🌍 ${amigo.nome} te mandou o mundo "${m.nome}"!`, "Jogar", () => ir("mundos")); bip(880, .08); return;
+  }
+  if (d.t === "pag" && amigo) {   // alguém comprou na loja do meu mundo
+    const id = String(d.id || "").slice(0, 30), v = Math.max(0, Math.min(100, +d.v || 0)); G.pagRecebidos = G.pagRecebidos || [];
+    if (!id || !v || G.pagRecebidos.includes(id)) return; G.pagRecebidos = [id, ...G.pagRecebidos].slice(0, 300);
+    const meu = mundosDe(perfil()).find(x => x.id === d.mundo), dono = jogadoresDoAparelho().find(n => mundosDe(n).some(x => x.id === d.mundo)) || perfil();
+    G.banco[dono] = Math.round(((G.banco[dono] || 0) + v) * 10) / 10; salvar();
+    toast(`🛒 ${amigo.nome} comprou ${(MB_PODERES[d.k] || {}).ic || ""} no seu mundo "${(meu || {}).nome || "mundo"}": +${v} moedas!`); return;
+  }   // a classificação passa de amigo para amigo
   if (d.t === "pedido") {
     if (amigo) { enviar(conn, { t: "aceito", de: meuCodigoAmigo(), nome: perfil(), av: avatarDe(perfil()) }); return; }   // já somos amigos
     if (!pedidos().some(p => p.codigo === de)) { pedidos().unshift({ codigo: de, nome: nome || "Alguém", em: Date.now(), av }); G.amigoPedidos = pedidos().slice(0, 10); salvar(); }
@@ -1508,4 +1520,28 @@ async function rankOnlineSincronizar() {
   RK.rodando = false;
 }
 if (rankOnlineLigado()) { setTimeout(rankOnlineSincronizar, 3000); setInterval(rankOnlineSincronizar, 60000); }
+
+/* ===================== Mundos dos amigos (Criar Mundo) =====================
+   Mandar um mundo para um amigo (pelo código de amigo) e pagar o criador quando alguém compra na loja do mundo dele.
+   Fica esperando no aparelho (G.mundoPend, G.pagPend) até os dois estarem online; quem recebe confere tudo (limparMundo) e não conta duas vezes (G.pagRecebidos). */
+function mandarMundoAmigo(codigo, m) {
+  G.mundoPend = (G.mundoPend || []).filter(x => !(x.para === codigo && x.id === m.id));
+  G.mundoPend.push({ para: codigo, id: m.id }); salvar(); toast("📤 Mandando… chega quando o amigo estiver online."); entregarMundos();
+}
+function pagarCriador(m, k, v) {
+  if (!m.autor || !m.autor.codigo) return;
+  G.pagPend = G.pagPend || []; G.pagPend.push({ para: m.autor.codigo, id: meuCodigoAmigo() + "-" + Date.now().toString(36), v, k, mundo: m.id }); salvar(); entregarMundos();
+}
+async function entregarMundos() {
+  if (AMG.entregandoMundos || !AMG.peer || !AMG.peer.open) return; AMG.entregandoMundos = true;
+  try {
+    for (const p of [...(G.mundoPend || [])]) { const m = mundosDe(perfil()).find(x => x.id === p.id); if (!m) { G.mundoPend = G.mundoPend.filter(x => x !== p); continue; }
+      const env = { id: m.id, nome: m.nome, b: m.b, f: m.f || [], modo: m.modo, tempo: m.tempo, loja: m.loja || {} };
+      if (await falarComAmigo(p.para, { t: "mundo", m: env })) { G.mundoPend = G.mundoPend.filter(x => x !== p); const a = amigos().find(x => x.codigo === p.para); toast(`📤 Mundo "${m.nome}" entregue para ${a ? a.nome : "o amigo"}!`); } }
+    for (const p of [...(G.pagPend || [])]) if (await falarComAmigo(p.para, { t: "pag", id: p.id, v: p.v, k: p.k, mundo: p.mundo })) G.pagPend = G.pagPend.filter(x => x !== p);
+    salvar();
+  } catch {}
+  AMG.entregandoMundos = false;
+}
+setInterval(() => { if (!document.hidden && ((G.mundoPend || []).length || (G.pagPend || []).length)) entregarMundos(); }, 20000);
 

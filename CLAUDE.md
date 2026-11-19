@@ -147,13 +147,16 @@ Botão "Esportes" na tela inicial (`TELAS.esportes`). Partida de verdade vista d
 - **Poderes** (ideia do Andre; só moedas do jogo): `ESP_PODERES` (🔥 `fogo`: próximo chute a 1050 e o outro time não segura a bola enquanto `b.fogo`; no basquete o arremesso tem 95%; ⚡ `turbo`: 1,75x de velocidade por 4 s; ❄️ `gelo`: adversários a até 170 ficam parados 2 s e soltam a bola). Guardados em `G.inv[nome].espPod` (lista) e `espPodUsar` (o que leva). Na 1ª vez em Esportes ganha 1 sorteado (`espPresentePoder`, `G.espPresente`); os outros saem na Caixa de poder (`acoes.espCaixa`, `ESP_POD_PRECO` = 300, sorteia um que ainda não tem). Na partida: botão de poder (no PC Q), recarga `ESP_POD_CD` = 20 s (`espUsarPoder`); robôs ganham um poder sorteado e usam quando faz sentido. Online: o poder vai no `eola` (`pod`), o amigo manda `ea` "poder", e o estado leva os efeitos (`fx` de cada jogador, `b[5]` bola de fogo e `fx` do gelo).
 - Teste: `ferramentas/teste/teste-esportes.js`, `ferramentas/teste/teste-esportes3d.js` e `ferramentas/teste/teste-esportes-poderes.js`.
 
-## Criar Mundo (ideia do Andre)
+## Criar Mundo (ideias do Andre)
 
-Botão "Mundo" na tela inicial (`TELAS.mundos`): mundo plano e vazio (40x40) para construir qualquer coisa e jogar nele. Bloco "Criar Mundo" no último `<script>` de `fonte/jogo.html` (`MB`, `mundoAbrir`, `mbQuadro`, `mundoFechar`), num `div#mundo` por cima de tudo (mesmo estilo da Praça).
-- **Construir**: voa (⤴ sobe, ⤵ desce; no PC espaço e Shift), toca na tela para pôr o bloco escolhido (raio da câmera; em cima ou do lado do bloco tocado, `mbOnde`), 🧽 apaga. Tipos `MB_TIPOS`: bloco (8 cores `MB_CORES`), 🏁 largada (só uma), 🏆 chegada, 🔥 lava, 🟢 mola, 🪙 moeda, 💡 luz e 🌳 árvore. Até `MUNDO_MAX` = 1500 blocos.
-- **Jogar**: gravidade, pulo, colisão com os blocos (`mbColide`), começa na largada; lava volta para a largada, mola joga para o alto, moedas contam pontos (**não dão moedas do jogo**, para ninguém construir moedas infinitas), chegada mostra o tempo e guarda o recorde do mundo (`m.rec`).
-- Guardado só no aparelho: `G.mundos[nome] = [{id, nome, b: [[x, y, z, tipo, cor]], rec}]`, até `MUNDOS_MAX` = 4 por perfil.
-- Teste: `ferramentas/teste/teste-mundo.js`.
+Botão "Mundo" na tela inicial (`TELAS.mundos`): mundo plano e vazio (40x40) para criar qualquer coisa e jogar nele. Bloco "Criar Mundo" no último `<script>` de `fonte/jogo.html` (`MB`, `mundoAbrir`, `mbQuadro`, `mundoFechar`), num `div#mundo` por cima de tudo.
+- **Construir**: voa (⤴/⤵; no PC espaço e Shift) e toca na tela para pôr (`mbTocar`). Blocos `MB_TIPOS`: bloco (8 cores `MB_CORES`), 🏁 largada (só uma), 🏆 chegada, 🔥 lava, 🟢 mola, 🪙 moeda, 💡 luz, 🌳 árvore e os **blocos de poder** grátis (`p_turbo`, `p_pulo`, `p_voo`, `p_escudo`). 🧽 apaga. Até 1500 blocos.
+- **Formas livres tipo Blender** (`MB_FORMAS`: esfera, cilindro, cone, rampa, placa; até 200): tocar numa forma seleciona e abre a barra (`mbSelBarra`): tamanho em 3 eixos, girar 45°, mover (segue a câmera), subir/descer, cor e apagar. Colisão pela caixa (`formaCaixa`); a rampa é andável (`alturaRampa`).
+- **⚙️ Ajustes** (`mbAjustesHTML`): tipo de jogo `MB_MODOS` (corrida: chegar no 🏆; moedas: pegar todas no tempo; sobreviver: lava sobe, `MB.lavaSobe`; livre), tempo (30–120 s) e a **loja do mundo** (preço de cada poder em `m.loja`, `MB_PRECOS`).
+- **Jogar** (`mbRegras`): gravidade e pulo, chão de blocos/formas (`mbChaoEm`, `mbBate`), lava volta à largada (o escudo segura), mola, poderes `MB_PODERES` (turbo 5 s, super pulo 8 s, voar 4 s, escudo 6 s). Moedas 🪙 do mundo são só pontos (não viram moedas do jogo).
+- **Mandar para um amigo** e **ganhar moedas**: fonte/online.js, bloco "Mundos dos amigos". "📤 Mandar para um amigo" põe o mundo em `G.mundoPend` e entrega pelo código de amigo (`t: "mundo"`; quem recebe confere com `limparMundo` e guarda em `G.mundosAmigos`, só para jogar). Na 🛒 Loja do mundo de um amigo, comprar tira as moedas de quem compra e manda `t: "pag"` para o criador (`pagarCriador`, `G.pagPend`); o criador soma no perfil dono do mundo, uma vez só por compra (`G.pagRecebidos`). Fica esperando até os dois estarem online (`entregarMundos`, a cada 20 s). No seu próprio mundo a loja é teste grátis.
+- Guardado só no aparelho: `G.mundos[nome] = [{id, nome, b, f, modo, tempo, loja, rec}]`, até 4 por perfil.
+- Teste: `ferramentas/teste/teste-mundo.js` e `ferramentas/teste/teste-mundo-mais.js`.
 
 ## Avisos do ADM para todo mundo
 
