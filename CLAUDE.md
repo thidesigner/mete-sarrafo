@@ -170,6 +170,10 @@ Botão "Mundo" na tela inicial (`TELAS.mundos`): mundo plano e vazio (40x40) par
 - Pelo chat também vale para eventos: "manda o evento: moedas em dobro até domingo", "promoção de 30% nas skins por 1 dia", "código de presente FESTA com 200 moedas" (no arquivo vai só o hash) ou "encerra a promoção". Faça igual ao aviso: edite `avisos.json`, commit e push direto na `main`.
 - O mesmo arquivo também guarda os **eventos** da aba "Eventos" do ADM: `eventos` (`{id, mult: 2|3, de, ate}`, moedas multiplicadas em `ganhar`/`aGanhar`), `promos` (`{id, alvo, desc: 10|20|30|50, de, ate}`, aplicada em `aplicarPromo`) e `presentes` (`{id, h, moedas | item: "tipo:k", de, ate}`). Também: `brindes` (`{id, moedas | item, de, ate}`, presente para todos, entregue uma vez por jogador na tela inicial em `entregarBrindes`, guardado em `G.brindesRecebidos`), `voltas` (`{id, col, de, ate}`, uma coleção de `COLECOES` volta para a loja com o pacote, aplicada em `aplicarLimitadas`) e `vidas` (`{id, extra: 1|2, de, ate}`, vidas a mais no começo de cada partida, `vidaExtraEvento`) e `historias` (`{id, tema, de, ate}`, liga a história e a missão de uma coleção na Praça; `tema` é uma chave de `HIST_TEMAS`). Ao mexer no arquivo (por exemplo, "manda o aviso"), **mantenha essas chaves**. Código de presente: no arquivo vai só o hash (`hashPresente`, SHA-256 com o sal `mete-sarrafo-presente:`); **nunca escreva o texto do código no repositório**. Gravação pelo celular do pai: `gravarSite`.
 
+## Aviso de versão nova
+
+O Chrome guarda a página por uns minutos e às vezes mostra a versão antiga. O `montar.py` grava uma impressão do conteúdo em `<meta name="versao-site">` e em `versao.json` (em `teste/` ao gerar, e na raiz ao promover). O jogo (bloco "Versão nova do site" em `fonte/online.js`) busca o `versao.json` ao abrir, a cada minuto e ao voltar para a aba; se for diferente, mostra a faixa "🆕 Tem versão nova do jogo!" com o botão Atualizar (recarrega com `?v=`). Sempre faça commit do `versao.json` junto com o `index.html`. Teste: `ferramentas/teste/teste-versao.js`.
+
 ## Testes
 
 - Sintaxe: extraia os `<script>` de `teste/index.html` e rode `node --check`.

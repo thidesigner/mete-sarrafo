@@ -357,6 +357,8 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .es-card span { font-size: 54px; line-height: 1; } .es-card b { font-family: var(--display); font-size: 20px; }
 .es-card.on { background: #ffd23f; color: #0b1b33; }
 @media (prefers-reduced-motion: reduce) { .es-msg { animation: none; } }
+.faixa-versao { position: fixed; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 90; display: flex; gap: 10px; align-items: center; background: #ffd23f; color: #0b1b33; border: 3px solid #0b1b33; border-radius: 16px; padding: 8px 10px 8px 14px; font: 800 16px Nunito, sans-serif; box-shadow: 0 5px 0 #0b1b33; white-space: nowrap; }
+.faixa-versao button { background: #37d99a; border: 2px solid #0b1b33; border-radius: 10px; padding: 6px 12px; font: 800 15px Nunito, sans-serif; color: #0b1b33; cursor: pointer; }
 .mb-paleta { position: absolute; left: 8px; right: 8px; top: 66px; z-index: 3; display: grid; gap: 6px; justify-items: center; pointer-events: none; }
 .mb-paleta > * { pointer-events: auto; }
 .mb-linha { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; background: rgba(11,27,51,.7); border-radius: 14px; padding: 5px; }

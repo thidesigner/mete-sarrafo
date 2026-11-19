@@ -6,6 +6,8 @@
 fonte/jogo.html é a mesma página publicada como artefato no Claude (sem o esqueleto <html>).
 Aqui ela ganha o esqueleto, a conexão online (PeerJS) e o modo online de fonte/online.js.
 """
+import hashlib
+import json
 import os
 import re
 import shutil
@@ -39,9 +41,13 @@ def montar_teste():
             "<meta name=\"theme-color\" content=\"#0f3057\">\n<style>" + reset + "</style>\n"
             + head + "</head>\n<body>\n<div class=\"faixa-teste\" id=\"faixa-teste\">VERSÃO DE TESTE</div>\n"
             + body + "</body>\n</html>\n")
+    # versão do site (impressão do conteúdo): o jogo compara com versao.json e avisa quando sai versão nova
+    versao = hashlib.sha1(html.encode("utf-8")).hexdigest()[:10]
+    html = html.replace("<meta charset=\"utf-8\">\n", "<meta charset=\"utf-8\">\n<meta name=\"versao-site\" content=\"" + versao + "\">\n", 1)
     os.makedirs(os.path.join(RAIZ, "teste"), exist_ok=True)
     destino = os.path.join(RAIZ, "teste", "index.html")
     open(destino, "w", encoding="utf-8").write(html)
+    json.dump({"v": versao}, open(os.path.join(RAIZ, "teste", "versao.json"), "w"))
     print("Versão de teste gerada:", os.path.relpath(destino, RAIZ))
 
 
@@ -50,6 +56,7 @@ def promover():
     html = open(origem, encoding="utf-8").read()
     html = html.replace('<div class="faixa-teste" id="faixa-teste">VERSÃO DE TESTE</div>\n', "")
     open(os.path.join(RAIZ, "index.html"), "w", encoding="utf-8").write(html)
+    shutil.copyfile(os.path.join(RAIZ, "teste", "versao.json"), os.path.join(RAIZ, "versao.json"))
     print("Versão de teste copiada para a oficial: index.html")
 
 

@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
+<meta name="versao-site" content="f3ef048ee2">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0f3057">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;-webkit-text-size-adjust:100%}img{max-width:100%}[hidden]{display:none!important}.faixa-teste{position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:50;background:#ff4d6d;color:#fff;font:800 12px/1 system-ui,sans-serif;letter-spacing:.08em;padding:4px 10px;border-radius:0 0 8px 8px;pointer-events:none}</style>
@@ -364,6 +365,8 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .es-card span { font-size: 54px; line-height: 1; } .es-card b { font-family: var(--display); font-size: 20px; }
 .es-card.on { background: #ffd23f; color: #0b1b33; }
 @media (prefers-reduced-motion: reduce) { .es-msg { animation: none; } }
+.faixa-versao { position: fixed; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 90; display: flex; gap: 10px; align-items: center; background: #ffd23f; color: #0b1b33; border: 3px solid #0b1b33; border-radius: 16px; padding: 8px 10px 8px 14px; font: 800 16px Nunito, sans-serif; box-shadow: 0 5px 0 #0b1b33; white-space: nowrap; }
+.faixa-versao button { background: #37d99a; border: 2px solid #0b1b33; border-radius: 10px; padding: 6px 12px; font: 800 15px Nunito, sans-serif; color: #0b1b33; cursor: pointer; }
 .mb-paleta { position: absolute; left: 8px; right: 8px; top: 66px; z-index: 3; display: grid; gap: 6px; justify-items: center; pointer-events: none; }
 .mb-paleta > * { pointer-events: auto; }
 .mb-linha { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; background: rgba(11,27,51,.7); border-radius: 14px; padding: 5px; }
@@ -10884,6 +10887,22 @@ async function entregarMundos() {
   AMG.entregandoMundos = false;
 }
 setInterval(() => { if (!document.hidden && ((G.mundoPend || []).length || (G.pagPend || []).length)) entregarMundos(); }, 20000);
+
+/* ===================== Versão nova do site =====================
+   O montar.py grava a impressão do conteúdo em <meta name="versao-site"> e em versao.json (ao lado do index.html).
+   Se o versao.json do site for diferente da página aberta (o Chrome guardou a cópia antiga), aparece a faixa "Versão nova" com o botão Atualizar. */
+function checarVersaoSite() {
+  const atual = (document.querySelector('meta[name="versao-site"]') || {}).content; if (!atual || $("faixa-versao")) return;
+  fetch("versao.json?t=" + Date.now(), { cache: "no-store" }).then(r => r.ok ? r.json() : null).then(j => {
+    if (!j || !j.v || j.v === atual || $("faixa-versao")) return;
+    const f = document.createElement("div"); f.id = "faixa-versao"; f.className = "faixa-versao";
+    f.innerHTML = `<span>🆕 Tem versão nova do jogo!</span><button type="button">Atualizar</button>`;
+    f.querySelector("button").addEventListener("click", () => { const u = new URL(location.href); u.searchParams.set("v", j.v); location.replace(u.toString()); });
+    document.body.appendChild(f);
+  }).catch(() => {});
+}
+setTimeout(checarVersaoSite, 4000); setInterval(checarVersaoSite, 60000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) checarVersaoSite(); });
 
 
 render();

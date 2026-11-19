@@ -1545,3 +1545,19 @@ async function entregarMundos() {
 }
 setInterval(() => { if (!document.hidden && ((G.mundoPend || []).length || (G.pagPend || []).length)) entregarMundos(); }, 20000);
 
+/* ===================== Versão nova do site =====================
+   O montar.py grava a impressão do conteúdo em <meta name="versao-site"> e em versao.json (ao lado do index.html).
+   Se o versao.json do site for diferente da página aberta (o Chrome guardou a cópia antiga), aparece a faixa "Versão nova" com o botão Atualizar. */
+function checarVersaoSite() {
+  const atual = (document.querySelector('meta[name="versao-site"]') || {}).content; if (!atual || $("faixa-versao")) return;
+  fetch("versao.json?t=" + Date.now(), { cache: "no-store" }).then(r => r.ok ? r.json() : null).then(j => {
+    if (!j || !j.v || j.v === atual || $("faixa-versao")) return;
+    const f = document.createElement("div"); f.id = "faixa-versao"; f.className = "faixa-versao";
+    f.innerHTML = `<span>🆕 Tem versão nova do jogo!</span><button type="button">Atualizar</button>`;
+    f.querySelector("button").addEventListener("click", () => { const u = new URL(location.href); u.searchParams.set("v", j.v); location.replace(u.toString()); });
+    document.body.appendChild(f);
+  }).catch(() => {});
+}
+setTimeout(checarVersaoSite, 4000); setInterval(checarVersaoSite, 60000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) checarVersaoSite(); });
+
