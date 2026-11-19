@@ -364,6 +364,22 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .es-card span { font-size: 54px; line-height: 1; } .es-card b { font-family: var(--display); font-size: 20px; }
 .es-card.on { background: #ffd23f; color: #0b1b33; }
 @media (prefers-reduced-motion: reduce) { .es-msg { animation: none; } }
+.mb-paleta { position: absolute; left: 8px; right: 8px; top: 66px; z-index: 3; display: grid; gap: 6px; justify-items: center; pointer-events: none; }
+.mb-paleta > * { pointer-events: auto; }
+.mb-linha { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; background: rgba(11,27,51,.7); border-radius: 14px; padding: 5px; }
+.mb-paleta .mb-linha { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; justify-content: flex-start; scrollbar-width: none; }
+.mb-paleta .mb-linha::-webkit-scrollbar { display: none; }
+.mb-paleta .mb-tipo, .mb-paleta .mb-cor { flex: none; }
+.mb-tipo { width: 42px; height: 42px; border-radius: 10px; border: 2px solid #0b1b33; background: #fff; font-size: 22px; padding: 0; cursor: pointer; }
+.mb-tipo[aria-pressed="true"] { background: #ffd23f; box-shadow: 0 0 10px #ffd23f; }
+.mb-cor { width: 30px; height: 30px; border-radius: 50%; border: 3px solid #0b1b33; cursor: pointer; padding: 0; }
+.mb-cor[aria-pressed="true"] { outline: 3px solid #ffd23f; }
+.mb-sel { position: absolute; left: 8px; right: 8px; bottom: 186px; z-index: 3; display: grid; gap: 5px; justify-items: center; background: rgba(11,27,51,.85); border: 2px solid #ffd23f; border-radius: 14px; padding: 6px; color: #fff; font: 700 14px Nunito, sans-serif; }
+.mb-sel button { min-width: 38px; height: 34px; border-radius: 9px; border: 2px solid #0b1b33; background: #fff; font: 800 14px Nunito, sans-serif; color: #0b1b33; padding: 0 8px; cursor: pointer; }
+.mb-sel span { align-self: center; }
+.mb-loja { position: absolute; right: 12px; bottom: 140px; z-index: 3; background: #37d99a !important; color: #0b1b33 !important; }
+.mb-podhud { position: absolute; left: 0; right: 0; top: 112px; text-align: center; color: #fff; font: 800 18px Nunito, sans-serif; text-shadow: 0 2px 0 #0b1b33; pointer-events: none; z-index: 2; }
+.mb-dica { color: #fff; font: 700 13px Nunito, sans-serif; background: rgba(11,27,51,.7); border-radius: 10px; padding: 3px 10px; }
 .praca { position: fixed; inset: 0; z-index: 50; background: #9fd3ff; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
 .praca .pr-cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .pr-top { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; gap: 8px; align-items: center; justify-content: space-between; z-index: 2; }
@@ -4612,6 +4628,7 @@ TELAS.lobby = () => {
         <button class="lb-btn" data-a="loja">${ICONES.loja}<span>Loja</span><i class="lb-tag">${SKINS.some(s => s.limitada && naVenda(s) && !temSkin(nome, s.k)) || FUNDOS_LIM.some(f => naVenda(f) && !temFundo(nome, f.k)) || EMOJIS.some(e => e.limitada && naVenda(e) && !temEmoji(nome, e.k)) || GESTOS.some(g => g.limitada && naVenda(g) && !temGesto(nome, g.k)) || AV_ESPECIAIS.some(x => x.limitada && naVenda(x) && !temAvatar(nome, x.k)) || ARREMESSOS.some(a => a.limitada && naVenda(a) && !temArremesso(nome, a.k)) ? "limitada!" : "novo!"}</i></button>
         <button class="lb-btn" data-a="personagens"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4" fill="#f1c27d" stroke="#0b1b33" stroke-width="1.5"/><path d="M5 21v-3a7 7 0 0 1 14 0v3z" fill="#2f80ed" stroke="#0b1b33" stroke-width="1.5" stroke-linejoin="round"/><path d="M18 3l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" fill="#ffd23f" stroke="#0b1b33" stroke-width="1"/></svg><span>Criar</span></button>
         <button class="lb-btn" data-a="fundos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.3 0 1.9-.8 1.9-1.7 0-1.2-1-1.5-1-2.6 0-1 .8-1.7 1.9-1.7h2.1a3.6 3.6 0 0 0 3.6-3.6C20.5 6.6 16.7 3.5 12 3.5z" fill="#f4f7fb" stroke="#0b1b33" stroke-width="1.6"/><circle cx="7.8" cy="11" r="1.5" fill="#ff4d6d"/><circle cx="10.2" cy="7.4" r="1.5" fill="#ffd23f"/><circle cx="14.6" cy="7.4" r="1.5" fill="#37d99a"/><circle cx="17" cy="11" r="1.5" fill="#2f80ed"/></svg><span>Fundo</span></button>
+        <button class="lb-btn" data-a="mundos" aria-label="Criar mundo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z" fill="#37d99a" stroke="#0b1b33" stroke-width="1.5" stroke-linejoin="round"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9" fill="none" stroke="#0b1b33" stroke-width="1.5"/><path d="M12 12l8-4.5v9L12 21z" fill="#2bb57a"/></svg><span>Mundo</span></button>
       </div>
       <div class="lb-side lb-side-d"><!--lado-direito-->
         <button class="lb-btn" data-a="mais">${ICONES.regras}<span>Regras</span>${sugestoes.length ? `<i class="lb-badge">${sugestoes.length}</i>` : ""}</button>
@@ -8954,6 +8971,370 @@ function espSair(semAvisar) {
   G.tela = "esportes"; salvar(); render();
 }
 </script>
+<script>
+/* ===================== Criar Mundo (ideias do Andre) =====================
+   Mundo plano e vazio. Construir: voa e toca na tela para pôr blocos e formas livres (tipo Blender: esfera, cilindro, cone, rampa e placa,
+   com tamanho, giro, posição e cor). Jogar: Corrida, Caça às moedas, Sobrevivência (lava subindo) ou Livre, com blocos de poder.
+   Loja do mundo: o criador põe poderes à venda; quando um amigo compra no mundo dele, as moedas vão para o criador (pelo código de amigo,
+   em fonte/online.js, bloco "Mundos dos amigos"). Moedas do mundo (🪙) são só pontos ali dentro.
+   G.mundos[nome] = [{id, nome, b: [[x, y, z, tipo, cor]], f: [{s, p, e, r, c}], modo, tempo, loja: {k: preço}, rec}]; G.mundosAmigos = [{..., autor: {nome, codigo}}]. */
+const MUNDO_TAM = 40, MUNDO_MAX = 1500, MUNDOS_MAX = 4, FORMAS_MAX = 200;
+const MB_CORES = ["#ff4d6d", "#ff8a1f", "#ffd23f", "#37d99a", "#2f80ed", "#9b5de5", "#ffffff", "#3a3a48"];
+const MB_TIPOS = [
+  { k: "bloco", ic: "🧱", nome: "Bloco" }, { k: "largada", ic: "🏁", nome: "Largada" }, { k: "chegada", ic: "🏆", nome: "Chegada" },
+  { k: "lava", ic: "🔥", nome: "Lava" }, { k: "mola", ic: "🟢", nome: "Mola" }, { k: "moeda", ic: "🪙", nome: "Moeda" },
+  { k: "luz", ic: "💡", nome: "Luz" }, { k: "arvore", ic: "🌳", nome: "Árvore" },
+  { k: "p_turbo", ic: "⚡", nome: "Poder Turbo", pega: true }, { k: "p_pulo", ic: "🦘", nome: "Poder Super pulo", pega: true },
+  { k: "p_voo", ic: "🕊️", nome: "Poder Voar", pega: true }, { k: "p_escudo", ic: "🛡️", nome: "Poder Escudo", pega: true } ];
+const MB_FORMAS = [{ k: "esfera", ic: "⚪", nome: "Esfera" }, { k: "cilindro", ic: "🛢️", nome: "Cilindro" }, { k: "cone", ic: "🔺", nome: "Cone" }, { k: "rampa", ic: "📐", nome: "Rampa" }, { k: "placa", ic: "▬", nome: "Placa" }];
+const MB_PODERES = { turbo: { ic: "⚡", nome: "Turbo", seg: 5 }, pulo: { ic: "🦘", nome: "Super pulo", seg: 8 }, voo: { ic: "🕊️", nome: "Voar", seg: 4 }, escudo: { ic: "🛡️", nome: "Escudo contra lava", seg: 6 } };
+const MB_MODOS = { corrida: { ic: "🏁", nome: "Corrida", dica: "Chegue no 🏆 o mais rápido que puder." }, moedas: { ic: "🪙", nome: "Caça às moedas", dica: "Pegue todas as 🪙 antes do tempo acabar." },
+  sobreviver: { ic: "🌋", nome: "Sobrevivência", dica: "A lava vai subindo: suba nos blocos e aguente até o tempo acabar." }, livre: { ic: "🌳", nome: "Livre", dica: "Só passear e explorar." } };
+const MB_PRECOS = [0, 10, 25, 50, 100];
+const MB = { on: false, modo: "construir", tipo: 0, forma: -1, cor: 0, apagar: false, mundo: null, blocos: new Map(), formas: [], sel: null, r: null, cena: null, cam: null, eu: null, yaw: Math.PI, alt: .45, mov: { x: 0, y: 0 }, keys: {}, sobe: false, desce: false };
+const mbChave = (x, y, z) => x + "," + y + "," + z;
+function mundosDe(nome) { G.mundos = G.mundos || {}; return G.mundos[nome] = Array.isArray(G.mundos[nome]) ? G.mundos[nome] : []; }
+function mundosAmigos() { return G.mundosAmigos = Array.isArray(G.mundosAmigos) ? G.mundosAmigos : []; }
+function mundoPorId(id) { return mundosDe(perfil()).find(x => x.id === id) || mundosAmigos().find(x => x.id === id); }
+function mbDoAmigo(m) { return !!(m && m.autor); }
+const podeMandarMundo = () => typeof mandarMundoAmigo === "function" && typeof amigos === "function";
+/* ---------- tela com a lista de mundos ---------- */
+TELAS.mundos = () => {
+  const l = mundosDe(perfil()), la = mundosAmigos(), info = m => `${m.b.length + (m.f || []).length} peças · ${(MB_MODOS[m.modo] || MB_MODOS.corrida).ic} ${(MB_MODOS[m.modo] || MB_MODOS.corrida).nome}${m.rec ? ` · recorde ${m.rec.toFixed(1)} s` : ""}${Object.values(m.loja || {}).some(v => v > 0) ? " · 🛒 loja" : ""}`;
+  return `<section data-fundo="${fundoAtual()}" class="bgf lobby" aria-label="Criar mundo">
+    <div class="lb-top"><button class="lb-pill" data-a="voltarLobby">← Voltar</button><span class="lb-pill">🧱 Criar</span></div>
+    <h1 class="lb-title" style="font-size:34px">Meus mundos</h1>
+    <div class="card" style="background:rgba(11,27,51,.6)">
+      <p>Um mundo plano e vazio para criar <b>o que quiser</b>: blocos, formas livres, poderes e até uma lojinha. Escolha o tipo de jogo nos ⚙️ Ajustes e mande para os amigos jogarem!</p>
+      ${l.length < MUNDOS_MAX ? `<form class="presente-form" data-a="mundoNovo" autocomplete="off"><input id="mb-nome" maxlength="20" placeholder="Nome do mundo" aria-label="Nome do mundo"><button class="btn small" type="submit">Criar</button></form>` : `<p class="dim">Você já tem ${MUNDOS_MAX} mundos. Apague um para criar outro.</p>`}
+    </div>
+    ${l.map(m => `<div class="card" style="background:rgba(11,27,51,.6)">
+      <h3>🌍 ${esc(m.nome)}</h3><p class="dim" style="font-size:14px">${info(m)}</p>
+      <div class="row"><button class="btn small" data-a="mundoAbrir" data-id="${m.id}" data-modo="construir">🧱 Construir</button><button class="btn ok small" data-a="mundoAbrir" data-id="${m.id}" data-modo="jogar">▶️ Jogar</button></div>
+      ${podeMandarMundo() ? (MB.mandarId === m.id ? `<p style="margin:0">Mandar para:</p><div class="chips">${amigos().length ? amigos().map(a => `<button type="button" class="chip pick" data-a="mundoMandar" data-id="${m.id}" data-c="${a.codigo}">${esc(a.nome)}</button>`).join("") : `<span class="dim">Adicione amigos no botão Amigos.</span>`}</div>` : `<button class="btn ghost small" data-a="mundoMandarAbrir" data-id="${m.id}">📤 Mandar para um amigo</button>`) : ""}
+      <button class="link" data-a="mundoApagar" data-id="${m.id}">${MB.apagarId === m.id ? "Toque de novo para apagar de vez" : "Apagar este mundo"}</button>
+    </div>`).join("")}
+    ${la.length ? `<h2 class="lb-secao" style="color:#fff;text-align:center">🎁 Mundos dos amigos</h2>` + la.map(m => `<div class="card" style="background:rgba(11,27,51,.6)">
+      <h3>🌍 ${esc(m.nome)}</h3><p class="dim" style="font-size:14px">Criado por ${esc(m.autor.nome)} · ${info(m)}</p>
+      <div class="row"><button class="btn ok small" data-a="mundoAbrir" data-id="${m.id}" data-modo="jogar">▶️ Jogar</button><button class="btn ghost small" data-a="mundoApagarAmigo" data-id="${m.id}">Tirar da lista</button></div>
+    </div>`).join("") : ""}
+  </section>`;
+};
+acoes.mundos = () => ir("mundos");
+acoes.mundoNovo = () => {
+  const nome = (($("mb-nome") || {}).value || "").replace(/[<>]/g, "").trim().slice(0, 20) || "Meu mundo", l = mundosDe(perfil());
+  if (l.length >= MUNDOS_MAX) return;
+  const m = { id: "m" + Date.now().toString(36), nome, b: [[0, 0, 0, 1, 3]], f: [], modo: "corrida", tempo: 60, loja: {} }; l.push(m); salvar(); mundoAbrir(m, "construir");
+};
+acoes.mundoAbrir = el => { const m = mundoPorId(el.dataset.id); if (m) mundoAbrir(m, mbDoAmigo(m) ? "jogar" : el.dataset.modo); };
+acoes.mundoApagar = el => { const id = el.dataset.id; if (MB.apagarId !== id) { MB.apagarId = id; render(); return; } G.mundos[perfil()] = mundosDe(perfil()).filter(x => x.id !== id); MB.apagarId = null; salvar(); render(); };
+acoes.mundoApagarAmigo = el => { G.mundosAmigos = mundosAmigos().filter(x => x.id !== el.dataset.id); salvar(); render(); };
+acoes.mundoMandarAbrir = el => { MB.mandarId = el.dataset.id; render(); };
+acoes.mundoMandar = el => { const m = mundoPorId(el.dataset.id); if (!m || !podeMandarMundo()) return; mandarMundoAmigo(el.dataset.c, m); MB.mandarId = null; render(); };
+/* ---------- montar o mundo em 3D ---------- */
+const MB_GEO = {}, MB_MAT = {};
+function mbMaterial(t, c) {
+  const k = t + ":" + c; if (MB_MAT[k]) return MB_MAT[k];
+  const T = MB_TIPOS[t].k, cor = { largada: "#37d99a", chegada: "#ffd23f", lava: "#ff5a1f", mola: "#2bd96b", luz: "#fff3b0" }[T] || MB_CORES[c] || "#ffffff";
+  const ex = { lava: "#a52a00", luz: "#d9c25a", chegada: "#5a4200" }[T];
+  let map = null;
+  if (T === "largada" || T === "chegada" || T === "mola") map = texturaCanvas(64, 64, (g) => { g.fillStyle = cor; g.fillRect(0, 0, 64, 64); g.font = "40px sans-serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(T === "largada" ? "🏁" : T === "chegada" ? "🏆" : "⬆", 32, 36); g.strokeStyle = "rgba(0,0,0,.25)"; g.lineWidth = 4; g.strokeRect(2, 2, 60, 60); });
+  else if (T === "bloco") map = texturaCanvas(32, 32, (g) => { g.fillStyle = cor; g.fillRect(0, 0, 32, 32); g.strokeStyle = "rgba(0,0,0,.18)"; g.lineWidth = 2; g.strokeRect(1, 1, 30, 30); });
+  return MB_MAT[k] = new THREE.MeshLambertMaterial({ color: map ? "#ffffff" : cor, map, emissive: ex || "#000000" });
+}
+function mbMesh(x, y, z, t, c) {
+  const T = MB_TIPOS[t].k; let m;
+  if (T === "moeda") { MB_GEO.moeda = MB_GEO.moeda || new THREE.CylinderGeometry(.32, .32, .08, 20); m = new THREE.Mesh(MB_GEO.moeda, MB_MAT.moeda = MB_MAT.moeda || new THREE.MeshLambertMaterial({ color: "#ffd23f", emissive: "#6b4e00" })); m.rotation.x = Math.PI / 2; }
+  else if (MB_TIPOS[t].pega) { m = new THREE.Group(); const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTexto(MB_TIPOS[t].ic, "#000", "rgba(0,0,0,0)", 128, 128, 96), transparent: true })); sp.scale.set(.8, .8, 1); m.add(sp);
+    const br = new THREE.Sprite(new THREE.SpriteMaterial({ map: brilhoTextura("rgba(150,220,255,1)"), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); br.scale.set(1.5, 1.5, 1); m.add(br); }
+  else if (T === "arvore") { m = new THREE.Group(); const tr = new THREE.Mesh(new THREE.CylinderGeometry(.12, .16, .7, 8), new THREE.MeshLambertMaterial({ color: "#8a5a2b" })); tr.position.y = -.15; m.add(tr); const co = new THREE.Mesh(new THREE.SphereGeometry(.42, 10, 8), new THREE.MeshLambertMaterial({ color: "#3f9d3a" })); co.position.y = .3; m.add(co); }
+  else { MB_GEO.cubo = MB_GEO.cubo || new THREE.BoxGeometry(1, 1, 1); m = new THREE.Mesh(MB_GEO.cubo, mbMaterial(t, c)); if (T === "mola") m.scale.y = .5; }
+  m.position.set(x, y + .5 - (T === "mola" ? .25 : 0), z); m.userData.bloco = [x, y, z]; MB.cena.add(m);
+  if (T === "luz") { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: brilhoTextura("rgba(255,240,170,1)"), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); sp.scale.set(2.4, 2.4, 1); m.add(sp); }
+  return m;
+}
+function mbPor(x, y, z, t, c, salvarJa = true) {
+  if (Math.abs(x) > MUNDO_TAM / 2 || Math.abs(z) > MUNDO_TAM / 2 || y < 0 || y > 30 || !MB_TIPOS[t]) return false;
+  const k = mbChave(x, y, z); if (MB.blocos.has(k)) return false;
+  if (MB.blocos.size >= MUNDO_MAX) { toast(`O mundo pode ter até ${MUNDO_MAX} blocos`); return false; }
+  if (MB_TIPOS[t].k === "largada") for (const b of [...MB.blocos.values()]) if (MB_TIPOS[b.t].k === "largada") mbTirar(...b.p, false);   // só uma largada
+  MB.blocos.set(k, { p: [x, y, z], t, c, m: mbMesh(x, y, z, t, c) }); if (salvarJa) mbGuardar(); return true;
+}
+function mbTirar(x, y, z, salvarJa = true) { const k = mbChave(x, y, z), b = MB.blocos.get(k); if (!b) return; MB.cena.remove(b.m); MB.blocos.delete(k); if (salvarJa) mbGuardar(); }
+/* formas livres (tipo Blender) */
+function formaGeo(s) {
+  if (MB_GEO["f" + s]) return MB_GEO["f" + s];
+  let g;
+  if (s === "esfera") g = new THREE.SphereGeometry(.5, 20, 14); else if (s === "cilindro") g = new THREE.CylinderGeometry(.5, .5, 1, 20); else if (s === "cone") g = new THREE.ConeGeometry(.5, 1, 20);
+  else if (s === "placa") g = new THREE.BoxGeometry(1, .2, 1);
+  else { g = new THREE.BufferGeometry(); const v = [-.5, -.5, -.5, .5, -.5, -.5, .5, .5, -.5, -.5, -.5, .5, .5, -.5, .5, .5, .5, .5];   // cunha: sobe no sentido +x
+    const i = [0, 1, 2, 3, 5, 4, 0, 3, 4, 0, 4, 1, 1, 4, 5, 1, 5, 2, 0, 2, 5, 0, 5, 3]; g.setAttribute("position", new THREE.Float32BufferAttribute(v, 3)); g.setIndex(i); g.computeVertexNormals(); }
+  return MB_GEO["f" + s] = g;
+}
+function formaMesh(f) {
+  const m = new THREE.Mesh(formaGeo(f.s), new THREE.MeshLambertMaterial({ color: MB_CORES[f.c] || "#ffffff" }));
+  m.position.set(f.p[0], f.p[1] + (f.s === "placa" ? f.e[1] * .1 : f.e[1] / 2), f.p[2]); m.scale.set(f.e[0], f.e[1], f.e[2]); m.rotation.y = f.r * Math.PI / 4; m.userData.forma = f; MB.cena.add(m); return m;
+}
+function formaRefazer(f) { if (f.m) MB.cena.remove(f.m); f.m = formaMesh(f); }
+function formaPor(s, p, c) { if (MB.formas.length >= FORMAS_MAX) { toast(`Até ${FORMAS_MAX} formas por mundo`); return null; } const f = { s, p, e: [1, 1, 1], r: 0, c }; f.m = formaMesh(f); MB.formas.push(f); mbGuardar(); return f; }
+function formaCaixa(f) {   // caixa (alinhada) que a forma ocupa; com giro de 45° fica um pouco maior
+  const diag = f.r % 2 ? Math.SQRT1_2 * (f.e[0] + f.e[2]) / 2 : 0, hx = diag || (f.r % 4 === 2 || f.r % 4 === 0 ? f.e[0] : f.e[2]) / 2, hz = diag || (f.r % 4 === 2 || f.r % 4 === 0 ? f.e[2] : f.e[0]) / 2;
+  const h = f.s === "placa" ? f.e[1] * .2 : f.e[1]; return { x0: f.p[0] - hx, x1: f.p[0] + hx, z0: f.p[2] - hz, z1: f.p[2] + hz, y0: f.p[1], y1: f.p[1] + h };
+}
+function alturaRampa(f, x, z) {   // altura do topo da rampa no ponto (ou null se fora)
+  const a = -f.r * Math.PI / 4, dx = x - f.p[0], dz = z - f.p[2], lx = dx * Math.cos(a) - dz * Math.sin(a), lz = dx * Math.sin(a) + dz * Math.cos(a);
+  if (Math.abs(lx) > f.e[0] / 2 || Math.abs(lz) > f.e[2] / 2) return null; return f.p[1] + f.e[1] * (lx / f.e[0] + .5);
+}
+function mbGuardar() { if (!MB.mundo || mbDoAmigo(MB.mundo)) return; MB.mundo.b = [...MB.blocos.values()].map(b => [...b.p, b.t, b.c]); MB.mundo.f = MB.formas.map(f => ({ s: f.s, p: f.p.slice(), e: f.e.slice(), r: f.r, c: f.c })); salvar(); }
+function mbSolido(x, y, z) { const b = MB.blocos.get(mbChave(Math.round(x), Math.floor(y), Math.round(z))); if (!b) return null; const T = MB_TIPOS[b.t]; return T.k === "moeda" || T.k === "luz" || T.pega ? null : b; }
+/* ---------- abrir ---------- */
+function mundoAbrir(m, modo) {
+  if (typeof THREE === "undefined") { toast("O 3D não carregou. Confira a internet."); return; }
+  mundoFechar(true); MB.mundo = m; MB.blocos = new Map(); MB.formas = []; MB.sel = null; MB.forma = -1;
+  m.f = m.f || []; m.modo = MB_MODOS[m.modo] ? m.modo : "corrida"; m.tempo = m.tempo || 60; m.loja = m.loja || {};
+  let box = $("mundo"); if (!box) { box = document.createElement("div"); box.id = "mundo"; box.className = "praca mundo"; document.body.appendChild(box); }
+  box.innerHTML = `
+    <div class="pr-top"><button type="button" class="lb-pill" id="mb-sair">← Sair</button><span class="lb-pill" id="mb-info"></span><button type="button" class="lb-pill" id="mb-ajustes" aria-label="Ajustes do mundo">⚙️</button><button type="button" class="lb-pill" id="mb-modo"></button></div>
+    <div class="pr-missao" id="mb-hud" hidden></div>
+    <div class="mb-paleta" id="mb-paleta"></div>
+    <div class="mb-sel" id="mb-sel" hidden></div>
+    <div class="pr-joy" id="mb-joy" aria-label="Andar"><i></i></div>
+    <button type="button" class="pr-pular" id="mb-pular" aria-label="Pular ou subir">⤴</button>
+    <button type="button" class="pr-descer" id="mb-descer" aria-label="Descer">⤵</button>
+    <button type="button" class="lb-pill mb-loja" id="mb-loja" hidden>🛒 Loja</button>
+    <div class="mb-podhud" id="mb-podhud"></div>
+    <div class="pr-painel" id="mb-painel" hidden role="dialog" aria-modal="true"><div class="pr-painel-top"><b id="mb-painel-t"></b><button type="button" class="lb-pill" id="mb-fechar" aria-label="Fechar">✕</button></div><div class="pr-painel-c lobby lb-loja" id="mb-painel-c"></div></div>
+    <div class="es-fim" id="mb-fim" hidden></div>`;
+  box.hidden = false;
+  const r = new THREE.WebGLRenderer({ antialias: true }); r.setPixelRatio(Math.min(1.75, devicePixelRatio || 1)); r.domElement.className = "pr-cv"; box.prepend(r.domElement); MB.r = r;
+  const s = new THREE.Scene(); MB.cena = s; s.background = new THREE.Color("#9fd3ff"); s.fog = new THREE.Fog("#cfe9ff", 40, 80);
+  s.add(new THREE.HemisphereLight("#ffffff", "#5f8f4a", .85)); const sol = new THREE.DirectionalLight("#fff4dd", .65); sol.position.set(8, 14, 6); s.add(sol);
+  const grade = texturaCanvas(64, 64, (g) => { g.fillStyle = "#6fcd5c"; g.fillRect(0, 0, 64, 64); g.strokeStyle = "rgba(0,0,0,.12)"; g.lineWidth = 2; g.strokeRect(0, 0, 64, 64); });
+  grade.wrapS = grade.wrapT = THREE.RepeatWrapping; grade.repeat.set(MUNDO_TAM + 1, MUNDO_TAM + 1);
+  const chao = new THREE.Mesh(new THREE.PlaneGeometry(MUNDO_TAM + 1, MUNDO_TAM + 1), new THREE.MeshLambertMaterial({ map: grade })); chao.rotation.x = -Math.PI / 2; chao.userData.chao = true; s.add(chao); MB.chao = chao;
+  const borda = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshLambertMaterial({ color: "#4e9a43" })); borda.rotation.x = -Math.PI / 2; borda.position.y = -.02; s.add(borda);
+  MB.lavaSobe = new THREE.Mesh(new THREE.PlaneGeometry(MUNDO_TAM + 1, MUNDO_TAM + 1), new THREE.MeshBasicMaterial({ color: "#ff4a10", transparent: true, opacity: .72 })); MB.lavaSobe.rotation.x = -Math.PI / 2; MB.lavaSobe.visible = false; s.add(MB.lavaSobe);
+  MB.cam = new THREE.PerspectiveCamera(60, 1, .1, 200);
+  for (const b of m.b) if (Array.isArray(b) && MB_TIPOS[b[3]]) mbPor(b[0], b[1], b[2], b[3], b[4] || 0, false);
+  for (const f of m.f) if (f && MB_FORMAS.some(x => x.k === f.s)) { const ff = { s: f.s, p: f.p.slice(0, 3).map(Number), e: f.e.slice(0, 3).map(v => Math.max(.25, Math.min(10, +v || 1))), r: (+f.r || 0) % 8, c: (+f.c || 0) % MB_CORES.length }; ff.m = formaMesh(ff); MB.formas.push(ff); }
+  const info = meuInfoPraca(), mod = pracaModelo(info); s.add(mod.g);
+  MB.eu = { m: mod, x: 0, y: 1, z: 3, vy: 0, r: 0 };
+  MB.mira = new THREE.Mesh(new THREE.BoxGeometry(1.02, 1.02, 1.02), new THREE.MeshBasicMaterial({ color: "#ffffff", wireframe: true, transparent: true, opacity: .7 })); MB.mira.visible = false; s.add(MB.mira);
+  MB.selCaixa = new THREE.BoxHelper(undefined, 0xffd23f); MB.selCaixa.visible = false; s.add(MB.selCaixa);
+  mbMudarModo(modo); mbControles(box); MB.on = true; MB.ult = performance.now(); MB.raf = requestAnimationFrame(mbQuadro);
+}
+/* ---------- paleta (construir) e barra da forma selecionada ---------- */
+function mbPaleta() {
+  const p = $("mb-paleta"); if (!p) return; p.hidden = MB.modo !== "construir";
+  const sel = (i, f) => !MB.apagar && (f ? MB.forma === i : MB.forma < 0 && MB.tipo === i);
+  p.innerHTML = `<div class="mb-linha">${MB_TIPOS.map((t, i) => `<button type="button" class="mb-tipo" data-t="${i}" aria-pressed="${sel(i)}" title="${t.nome}">${t.ic}</button>`).join("")}</div>
+    <div class="mb-linha">${MB_FORMAS.map((f, i) => `<button type="button" class="mb-tipo" data-f="${i}" aria-pressed="${sel(i, true)}" title="${f.nome}">${f.ic}</button>`).join("")}<button type="button" class="mb-tipo" data-apagar="1" aria-pressed="${MB.apagar}" title="Apagar">🧽</button></div>
+    ${!MB.apagar && (MB.forma >= 0 || MB_TIPOS[MB.tipo].k === "bloco") ? `<div class="mb-linha">${MB_CORES.map((c, i) => `<button type="button" class="mb-cor" data-c="${i}" aria-pressed="${MB.cor === i}" style="background:${c}" aria-label="Cor ${i + 1}"></button>`).join("")}</div>` : ""}
+    <div class="mb-dica">${MB.apagar ? "Toque num bloco ou forma para apagar" : MB.forma >= 0 ? `Toque para pôr ${MB_FORMAS[MB.forma].nome}. Toque numa forma para mudar tamanho e girar.` : "Toque no chão ou num bloco para pôr " + MB_TIPOS[MB.tipo].nome}</div>`;
+  p.querySelectorAll("[data-t]").forEach(b => b.addEventListener("click", () => { MB.tipo = +b.dataset.t; MB.forma = -1; MB.apagar = false; mbPaleta(); }));
+  p.querySelectorAll("[data-f]").forEach(b => b.addEventListener("click", () => { MB.forma = +b.dataset.f; MB.apagar = false; mbPaleta(); }));
+  p.querySelectorAll("[data-c]").forEach(b => b.addEventListener("click", () => { MB.cor = +b.dataset.c; if (MB.sel) { MB.sel.c = MB.cor; formaRefazer(MB.sel); mbGuardar(); } mbPaleta(); }));
+  p.querySelectorAll("[data-apagar]").forEach(b => b.addEventListener("click", () => { MB.apagar = !MB.apagar; mbPaleta(); }));
+}
+function mbSelBarra() {
+  const el = $("mb-sel"), f = MB.sel; if (!el) return; el.hidden = !f || MB.modo !== "construir"; MB.selCaixa.visible = !el.hidden; if (el.hidden) return;
+  MB.selCaixa.setFromObject(f.m);
+  const nome = MB_FORMAS.find(x => x.k === f.s).nome;
+  el.innerHTML = `<b>${nome}</b>
+    <div class="mb-linha"><span>↔️</span><button data-e="0,-1">−</button><button data-e="0,1">+</button><span>↕️</span><button data-e="1,-1">−</button><button data-e="1,1">+</button><span>⤢</span><button data-e="2,-1">−</button><button data-e="2,1">+</button></div>
+    <div class="mb-linha"><button data-g="1">↻ Girar</button><button data-m="0,-1">⬅</button><button data-m="0,1">➡</button><button data-m="2,-1">⬆</button><button data-m="2,1">⬇</button><button data-m="1,1">Sobe</button><button data-m="1,-1">Desce</button></div>
+    <div class="mb-linha"><button data-x="1">🗑️ Apagar</button><button data-ok="1">✔ Pronto</button></div>`;
+  const muda = fn => { fn(); formaRefazer(f); mbGuardar(); mbSelBarra(); bip(700, .03); };
+  el.querySelectorAll("[data-e]").forEach(b => b.addEventListener("click", () => muda(() => { const [i, d] = b.dataset.e.split(",").map(Number); f.e[i] = Math.max(.25, Math.min(10, Math.round((f.e[i] + d * .5) * 4) / 4)); })));
+  el.querySelectorAll("[data-m]").forEach(b => b.addEventListener("click", () => muda(() => { const [i, d] = b.dataset.m.split(",").map(Number);
+    if (i === 1) { f.p[1] = Math.max(0, Math.min(30, f.p[1] + d * .5)); return; }
+    const sy = Math.sin(MB.yaw), cy = Math.cos(MB.yaw), dx = i === 0 ? d * cy : d * sy, dz = i === 0 ? -d * sy : d * cy;   // segue a câmera
+    if (Math.abs(dx) > Math.abs(dz)) f.p[0] = Math.max(-20, Math.min(20, f.p[0] + Math.sign(dx) * .5)); else f.p[2] = Math.max(-20, Math.min(20, f.p[2] + Math.sign(dz) * .5)); })));
+  el.querySelector("[data-g]").addEventListener("click", () => muda(() => { f.r = (f.r + 1) % 8; }));
+  el.querySelector("[data-x]").addEventListener("click", () => { MB.cena.remove(f.m); MB.formas = MB.formas.filter(x => x !== f); MB.sel = null; mbGuardar(); mbSelBarra(); });
+  el.querySelector("[data-ok]").addEventListener("click", () => { MB.sel = null; mbSelBarra(); });
+}
+/* ---------- ajustes do mundo e loja ---------- */
+function mbPainel(titulo, html) { $("mb-painel-t").textContent = titulo; $("mb-painel-c").innerHTML = html; $("mb-painel").hidden = false; MB.painel = titulo; mbLigarPainel(); }
+function mbFecharPainel() { $("mb-painel").hidden = true; MB.painel = null; }
+function mbAjustesHTML() {
+  const m = MB.mundo, dono = !mbDoAmigo(m);
+  if (!dono) return `<p class="pr-sub">${(MB_MODOS[m.modo]).ic} <b>${MB_MODOS[m.modo].nome}</b>: ${MB_MODOS[m.modo].dica}</p><p class="pr-sub" style="font-size:15px">Mundo criado por ${esc(m.autor.nome)}.</p>`;
+  return `<h3 style="color:#fff">🎮 Tipo de jogo</h3><div class="chips">${Object.entries(MB_MODOS).map(([k, x]) => `<button type="button" class="chip pick" data-mb="modo" data-v="${k}" aria-pressed="${m.modo === k}">${x.ic} ${x.nome}</button>`).join("")}</div>
+    <p class="pr-sub" style="font-size:15px">${MB_MODOS[m.modo].dica}</p>
+    ${["moedas", "sobreviver"].includes(m.modo) ? `<h3 style="color:#fff">⏱️ Tempo</h3><div class="chips">${[30, 60, 90, 120].map(t => `<button type="button" class="chip pick" data-mb="tempo" data-v="${t}" aria-pressed="${m.tempo === t}">${t} s</button>`).join("")}</div>` : ""}
+    <h3 style="color:#fff">🛒 Loja do seu mundo</h3><p class="pr-sub" style="font-size:14px">Escolha o preço de cada poder. Quando um amigo comprar no seu mundo, as moedas vão para você! (0 = não vende)</p>
+    ${Object.entries(MB_PODERES).map(([k, p]) => `<p style="color:#fff;margin:6px 0 2px">${p.ic} ${p.nome} (${p.seg} s)</p><div class="chips">${MB_PRECOS.map(v => `<button type="button" class="chip pick" data-mb="loja" data-k="${k}" data-v="${v}" aria-pressed="${(m.loja[k] || 0) === v}">${v ? v + " 🪙" : "Não vende"}</button>`).join("")}</div>`).join("")}`;
+}
+function mbLojaHTML() {
+  const m = MB.mundo, dono = !mbDoAmigo(m), itens = Object.entries(m.loja || {}).filter(([k, v]) => v > 0 && MB_PODERES[k]), moedas = G.banco[perfil()] || 0;
+  return `<p class="pr-sub">${dono ? "Esta é a loja do seu mundo. Aqui você testa de graça; os amigos pagam e as moedas vão para você." : `Loja de ${esc(m.autor.nome)}: as moedas vão para quem criou o mundo.`}</p>
+    ${itens.map(([k, v]) => `<button type="button" class="lb-comprar" data-mb="comprar" data-k="${k}" ${!dono && moedas < v ? "disabled" : ""} style="margin-top:6px">${MB_PODERES[k].ic} ${MB_PODERES[k].nome} ${dono ? "(teste grátis)" : `<span class="lb-coin" aria-hidden="true">$</span>${v}`}</button>`).join("")}`;
+}
+function mbLigarPainel() {
+  $("mb-painel-c").querySelectorAll("[data-mb]").forEach(b => b.addEventListener("click", () => {
+    const m = MB.mundo, a = b.dataset.mb;
+    if (a === "modo") { m.modo = b.dataset.v; } if (a === "tempo") m.tempo = +b.dataset.v; if (a === "loja") m.loja[b.dataset.k] = +b.dataset.v;
+    if (a === "comprar") { mbComprar(b.dataset.k); return; }
+    salvar(); mbPainel(MB.painel, mbAjustesHTML()); $("mb-loja").hidden = !mbTemLoja() || MB.modo !== "jogar";
+  }));
+}
+function mbTemLoja() { return Object.values((MB.mundo || {}).loja || {}).some(v => v > 0); }
+function mbComprar(k) {
+  const m = MB.mundo, v = (m.loja || {})[k], nome = perfil(); if (!v || !MB_PODERES[k]) return;
+  if (mbDoAmigo(m)) {
+    if ((G.banco[nome] || 0) < v) { toast("Faltam moedas"); return; }
+    G.banco[nome] = Math.round((G.banco[nome] - v) * 10) / 10; salvar();
+    if (typeof pagarCriador === "function") pagarCriador(m, k, v);
+    toast(`${MB_PODERES[k].ic} Comprou ${MB_PODERES[k].nome}! ${esc(m.autor.nome)} ganhou ${v} moedas.`);
+  } else toast(`${MB_PODERES[k].ic} ${MB_PODERES[k].nome} (teste grátis no seu mundo)`);
+  mbDarPoder(k); mbFecharPainel();
+}
+function mbDarPoder(k) { const J = MB.jogo; if (!J) return; J.pod = J.pod || {}; J.pod[k] = MB_PODERES[k].seg; bip(900, .08); }
+/* ---------- modos ---------- */
+function mbMudarModo(modo) {
+  MB.modo = modo; const jogar = modo === "jogar", m = MB.mundo, amigo = mbDoAmigo(m);
+  $("mb-modo").textContent = jogar ? "🧱 Construir" : "▶️ Jogar"; $("mb-modo").hidden = amigo; $("mb-descer").hidden = jogar; $("mb-hud").hidden = !jogar; $("mb-fim").hidden = true;
+  $("mb-info").textContent = "🌍 " + m.nome; $("mb-loja").hidden = !jogar || !mbTemLoja(); MB.mira.visible = false; MB.sel = null; mbSelBarra(); mbPaleta(); mbFecharPainel();
+  for (const b of MB.blocos.values()) b.m.visible = true;
+  const larg = [...MB.blocos.values()].find(b => MB_TIPOS[b.t].k === "largada"), eu = MB.eu;
+  MB.lavaSobe.visible = jogar && m.modo === "sobreviver"; MB.lavaSobe.position.y = -.5;
+  if (jogar) { if (larg) { eu.x = larg.p[0]; eu.z = larg.p[2]; eu.y = larg.p[1] + 1; }
+    MB.jogo = { t: 0, moedas: 0, total: [...MB.blocos.values()].filter(b => MB_TIPOS[b.t].k === "moeda").length, fim: false, ini: { x: eu.x, y: eu.y, z: eu.z }, pod: {} }; eu.vy = 0;
+    toast(`${MB_MODOS[m.modo].ic} ${MB_MODOS[m.modo].nome}: ${MB_MODOS[m.modo].dica}`); }
+}
+function mbControles(box) {
+  const joy = $("mb-joy"), bola = joy.querySelector("i"); let joyId = null, olhar = null, ox = 0, oy = 0, t0 = 0, mov = 0;
+  const mexe = e => { const b = joy.getBoundingClientRect(), R = b.width / 2; let dx = (e.clientX - b.left - R) / R, dy = (e.clientY - b.top - R) / R; const m = Math.hypot(dx, dy); if (m > 1) { dx /= m; dy /= m; } MB.mov = { x: dx, y: dy }; bola.style.transform = `translate(${dx * R * .6}px, ${dy * R * .6}px)`; };
+  joy.addEventListener("pointerdown", e => { joyId = e.pointerId; joy.setPointerCapture(joyId); mexe(e); e.preventDefault(); });
+  joy.addEventListener("pointermove", e => { if (e.pointerId === joyId) mexe(e); });
+  const solta = e => { if (e.pointerId !== joyId) return; joyId = null; MB.mov = { x: 0, y: 0 }; bola.style.transform = ""; }; joy.addEventListener("pointerup", solta); joy.addEventListener("pointercancel", solta);
+  const cv = MB.r.domElement;
+  cv.addEventListener("pointerdown", e => { olhar = e.pointerId; ox = e.clientX; oy = e.clientY; t0 = performance.now(); mov = 0; cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener("pointermove", e => { if (e.pointerId !== olhar) { if (MB.modo === "construir" && e.pointerType === "mouse") mbMirar(e); return; } const dx = e.clientX - ox, dy = e.clientY - oy; mov += Math.abs(dx) + Math.abs(dy); MB.yaw -= dx * .008; MB.alt = Math.max(.08, Math.min(.9, MB.alt + dy * .003)); ox = e.clientX; oy = e.clientY; });
+  cv.addEventListener("pointerup", e => { if (e.pointerId !== olhar) return; olhar = null; if (mov < 10 && performance.now() - t0 < 400 && MB.modo === "construir") mbTocar(e); });
+  const segura = (id, k) => { const b = $(id); b.addEventListener("pointerdown", e => { MB[k] = true; b.setPointerCapture(e.pointerId); if (k === "sobe") mbPular(); }); ["pointerup", "pointercancel", "lostpointercapture"].forEach(t => b.addEventListener(t, () => { MB[k] = false; })); };
+  segura("mb-pular", "sobe"); segura("mb-descer", "desce");
+  $("mb-sair").addEventListener("click", () => mundoFechar());
+  $("mb-modo").addEventListener("click", () => mbMudarModo(MB.modo === "jogar" ? "construir" : "jogar"));
+  $("mb-ajustes").addEventListener("click", () => mbPainel("⚙️ Ajustes do mundo", mbAjustesHTML()));
+  $("mb-loja").addEventListener("click", () => mbPainel("🛒 Loja do mundo", mbLojaHTML()));
+  $("mb-fechar").addEventListener("click", mbFecharPainel);
+  MB.kd = e => { if (!MB.on || /INPUT|TEXTAREA/.test((e.target || {}).tagName || "")) return; const k = e.key.toLowerCase(); MB.keys[k] = true; if (k === " ") { MB.sobe = true; mbPular(); e.preventDefault(); } if (k === "shift") MB.desce = true; };
+  MB.ku = e => { const k = e.key.toLowerCase(); MB.keys[k] = false; if (k === " ") MB.sobe = false; if (k === "shift") MB.desce = false; };
+  addEventListener("keydown", MB.kd); addEventListener("keyup", MB.ku);
+}
+function mbRaio(e) {
+  const cv = MB.r.domElement, b = cv.getBoundingClientRect(), v = new THREE.Vector2((e.clientX - b.left) / b.width * 2 - 1, -((e.clientY - b.top) / b.height) * 2 + 1);
+  const rc = new THREE.Raycaster(); rc.setFromCamera(v, MB.cam);
+  const alvos = [MB.chao, ...[...MB.blocos.values()].map(x => x.m), ...MB.formas.map(f => f.m)], hit = rc.intersectObjects(alvos, true)[0]; if (!hit) return null;
+  let o = hit.object; while (o && !o.userData.bloco && !o.userData.chao && !o.userData.forma) o = o.parent;
+  return { hit, bloco: o && o.userData.bloco, chao: o && o.userData.chao, forma: o && o.userData.forma };
+}
+function mbOnde(rr) {
+  if (!rr) return null;
+  if (rr.chao || rr.forma) return [Math.round(rr.hit.point.x), rr.forma ? Math.max(0, Math.round(rr.hit.point.y)) : 0, Math.round(rr.hit.point.z)];
+  const [x, y, z] = rr.bloco, n = rr.hit.face ? rr.hit.face.normal.clone().transformDirection(rr.hit.object.matrixWorld) : new THREE.Vector3(0, 1, 0);
+  return [x + Math.round(n.x), y + Math.round(n.y), z + Math.round(n.z)];
+}
+function mbMirar(e) { const rr = mbRaio(e), p = MB.apagar ? rr && rr.bloco : mbOnde(rr); MB.mira.visible = !!p; if (p) MB.mira.position.set(p[0], p[1] + .5, p[2]); }
+function mbTocar(e) {
+  const rr = mbRaio(e); if (!rr) return;
+  if (MB.apagar) { if (rr.bloco) { mbTirar(...rr.bloco); bip(300, .04); } else if (rr.forma) { MB.cena.remove(rr.forma.m); MB.formas = MB.formas.filter(x => x !== rr.forma); mbGuardar(); bip(300, .04); } return; }
+  if (rr.forma) { MB.sel = rr.forma; MB.cor = rr.forma.c; mbSelBarra(); mbPaleta(); return; }   // tocou numa forma: seleciona (para mudar tamanho, girar, mover)
+  const p = mbOnde(rr); if (!p) return; const eu = MB.eu;
+  if (Math.abs(p[0] - eu.x) < .8 && Math.abs(p[2] - eu.z) < .8 && p[1] + 1 > eu.y && p[1] < eu.y + 1.8) { toast("Esse lugar é onde você está!"); return; }
+  if (MB.forma >= 0) { const f = formaPor(MB_FORMAS[MB.forma].k, p, MB.cor); if (f) { MB.sel = f; mbSelBarra(); bip(700, .04); } return; }
+  if (mbPor(p[0], p[1], p[2], MB.tipo, MB.cor)) { bip(600 + p[1] * 20, .04); MB.mira.visible = true; MB.mira.position.set(p[0], p[1] + .5, p[2]); }
+}
+/* ---------- física ---------- */
+function mbPular() { const eu = MB.eu, J = MB.jogo; if (MB.modo === "jogar" && eu && eu.noChao && !(J && J.fim)) { eu.vy = J && J.pod && J.pod.pulo > 0 ? 11 : 7.6; eu.noChao = false; bip(660, .05); } }
+function mbBate(x, y, z) {   // corpo (do joelho até a cabeça) bate em bloco ou forma?
+  for (const dx of [-.3, .3]) for (const dz of [-.3, .3]) for (const dy of [.6, 1.1, 1.65]) if (mbSolido(x + dx, y + dy, z + dz)) return true;
+  for (const f of MB.formas) { if (f.s === "rampa") continue; const c = formaCaixa(f); if (x + .3 > c.x0 && x - .3 < c.x1 && z + .3 > c.z0 && z - .3 < c.z1 && y + 1.65 > c.y0 && y + .6 < c.y1) return true; }
+  return false;
+}
+function mbChaoEm(x, z, y) {   // topo mais alto embaixo dos pés (até 0,55 acima, para subir degrauzinho)
+  let h = 0; const by = Math.floor(y + .55) - 1;
+  for (const dx of [-.28, .28]) for (const dz of [-.28, .28]) for (let k = by; k >= Math.max(0, by - 3); k--) if (mbSolido(x + dx, k + .5, z + dz)) { h = Math.max(h, k + 1); break; }
+  for (const f of MB.formas) { if (f.s === "rampa") { const hr = alturaRampa(f, x, z); if (hr !== null && hr <= y + .55) h = Math.max(h, hr); continue; }
+    const c = formaCaixa(f); if (x + .28 > c.x0 && x - .28 < c.x1 && z + .28 > c.z0 && z - .28 < c.z1 && c.y1 <= y + .55) h = Math.max(h, c.y1); }
+  return h;
+}
+function mbQuadro(ts) {
+  if (!MB.on) return; MB.raf = requestAnimationFrame(mbQuadro);
+  const dt = Math.min(.05, (ts - MB.ult) / 1000); MB.ult = ts;
+  const r = MB.r, cv = r.domElement, w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return;
+  if (cv.width !== Math.round(w * r.getPixelRatio()) || cv.height !== Math.round(h * r.getPixelRatio())) { r.setSize(w, h, false); MB.cam.aspect = w / h; MB.cam.updateProjectionMatrix(); }
+  const eu = MB.eu, k = MB.keys, jogar = MB.modo === "jogar", J = MB.jogo, parado = (jogar && J && J.fim) || MB.painel, pod = (J && J.pod) || {};
+  let mx = MB.mov.x, my = MB.mov.y; const kx = (k.d || k.arrowright ? 1 : 0) - (k.a || k.arrowleft ? 1 : 0), ky = (k.s || k.arrowdown ? 1 : 0) - (k.w || k.arrowup ? 1 : 0);
+  if (kx || ky) { const m = Math.hypot(kx, ky); mx = kx / m; my = ky / m; } if (parado) mx = my = 0;
+  const sy = Math.sin(MB.yaw), cy = Math.cos(MB.yaw), vel = jogar ? 5.5 * (pod.turbo > 0 ? 1.8 : 1) : 7, vx = (mx * cy + my * sy) * vel, vz = (-mx * sy + my * cy) * vel, anda = Math.hypot(vx, vz) > .1;
+  const lim = MUNDO_TAM / 2 + .4, cl = v => Math.max(-lim, Math.min(lim, v));
+  if (anda) { const nx = cl(eu.x + vx * dt), nz = cl(eu.z + vz * dt);
+    if (!jogar || !mbBate(nx, eu.y, eu.z)) eu.x = nx; if (!jogar || !mbBate(eu.x, eu.y, nz)) eu.z = nz; eu.r = Math.atan2(-vx, -vz); eu.m.passo += Math.hypot(vx, vz) * dt * 3; }
+  if (!jogar) { eu.y = Math.max(0, Math.min(32, eu.y + ((MB.sobe ? 1 : 0) - (MB.desce ? 1 : 0)) * 6 * dt)); eu.vy = 0; eu.noChao = true; }
+  else if (pod.voo > 0 && !parado) { eu.y = Math.max(mbChaoEm(eu.x, eu.z, eu.y), Math.min(32, eu.y + (MB.sobe ? 6 : -2) * dt)); eu.vy = 0; eu.noChao = eu.y <= mbChaoEm(eu.x, eu.z, eu.y) + .01; }
+  else if (!parado) {
+    const chao = mbChaoEm(eu.x, eu.z, eu.y); eu.vy -= 20 * dt; let ny = eu.y + eu.vy * dt; eu.noChao = false;
+    if (eu.vy > 0 && mbBate(eu.x, ny + .1, eu.z)) { ny = eu.y; eu.vy = 0; }   // bateu a cabeça
+    if (ny <= chao) { ny = chao; eu.vy = 0; eu.noChao = true; }
+    eu.y = ny;
+  }
+  if (jogar && J && !J.fim && !parado) mbRegras(dt);
+  for (const b of MB.blocos.values()) { const T = MB_TIPOS[b.t]; if (T.k === "moeda") b.m.rotation.z += dt * 3; else if (T.k === "lava") b.m.material.emissive.setHSL(.03, 1, .25 + .1 * Math.sin(ts / 200)); else if (T.pega) b.m.position.y = b.p[1] + .5 + Math.sin(ts / 300 + b.p[0]) * .15; }
+  animarBonecoPraca(eu.m, eu.x, eu.y, eu.z, eu.r, anda, dt);
+  if (MB.sel) MB.selCaixa.setFromObject(MB.sel.m);
+  const ph = $("mb-podhud"); if (ph) { const t = Object.entries(pod).filter(([, v]) => v > 0).map(([kk, v]) => `${MB_PODERES[kk].ic} ${Math.ceil(v)}s`).join("  "); if (ph.textContent !== t) ph.textContent = t; }
+  const dist = 7, alt = 1.2 + MB.alt * 8; MB.cam.position.set(eu.x + sy * dist, eu.y + alt, eu.z + cy * dist); MB.cam.lookAt(eu.x, eu.y + 1.2, eu.z);
+  r.render(MB.cena, MB.cam);
+}
+function mbRegras(dt) {
+  const J = MB.jogo, eu = MB.eu, m = MB.mundo, modo = m.modo;
+  for (const k in J.pod) J.pod[k] = Math.max(0, J.pod[k] - dt);
+  const pe = eu.noChao ? MB.blocos.get(mbChave(Math.round(eu.x), Math.round(eu.y) - 1, Math.round(eu.z))) : null;
+  if (pe) { const T = MB_TIPOS[pe.t].k;
+    if (T === "mola") { eu.vy = 13; eu.noChao = false; bip(500, .06); }
+    if (T === "chegada" && (modo === "corrida" || modo === "livre")) return mbFim(true); }
+  for (const b of MB.blocos.values()) { const T = MB_TIPOS[b.t], perto = Math.abs(eu.x - b.p[0]) < .75 && Math.abs(eu.z - b.p[2]) < .75;
+    if (T.k === "lava" && perto && eu.y < b.p[1] + 1.05 && eu.y + 1.7 > b.p[1] && !(J.pod.escudo > 0)) mbVoltar("🔥 Lava! Voltou para a largada.");
+    if ((T.k === "moeda" || T.pega) && b.m.visible && perto && Math.abs(eu.y - b.p[1]) < 1.1) { b.m.visible = false;
+      if (T.k === "moeda") { J.moedas++; bip(1200, .05); if (modo === "moedas" && J.moedas >= J.total && J.total) return mbFim(true); }
+      else { const k = T.k.slice(2); mbDarPoder(k); toast(`${MB_PODERES[k].ic} ${MB_PODERES[k].nome}!${k === "voo" ? " Segure ⤴ para subir." : ""}`); } } }
+  J.t += dt; const resta = Math.max(0, m.tempo - J.t);
+  if (modo === "sobreviver") { MB.lavaSobe.position.y = J.t / m.tempo * 8 - .3; if (eu.y < MB.lavaSobe.position.y && !(J.pod.escudo > 0)) return mbFim(false, "🌋 A lava te pegou!"); if (resta <= 0) return mbFim(true); }
+  if (modo === "moedas" && resta <= 0) return mbFim(false, "⏰ O tempo acabou!");
+  $("mb-hud").textContent = modo === "corrida" ? `⏱️ ${J.t.toFixed(1)} s · 🪙 ${J.moedas}/${J.total}` : modo === "moedas" ? `⏱️ ${Math.ceil(resta)} s · 🪙 ${J.moedas}/${J.total}` : modo === "sobreviver" ? `🌋 Aguente: ${Math.ceil(resta)} s` : `🌳 Livre · 🪙 ${J.moedas}`;
+}
+function mbVoltar(msg) { const J = MB.jogo, eu = MB.eu; if (!J || J.voltou > performance.now() - 600) return; J.voltou = performance.now(); eu.x = J.ini.x; eu.y = J.ini.y; eu.z = J.ini.z; eu.vy = 0; toast(msg); bip(200, .12); }
+function mbFim(ganhou, motivo) {
+  const J = MB.jogo, m = MB.mundo, modo = m.modo; J.fim = true; const s = Math.round(J.t * 10) / 10;
+  const rec = ganhou && modo === "corrida" && (!m.rec || s < m.rec); if (rec) { m.rec = s; salvar(); }
+  if (ganhou && typeof tocarNotas === "function") tocarNotas([[72, 72, 0, .1, "square"], [76, 76, .1, .1, "square"], [79, 79, .2, .1, "square"], [84, 84, .3, .3, "square"]]); else bip(200, .3);
+  const f = $("mb-fim"); f.hidden = false;
+  f.innerHTML = `<div class="aviso-caixa"><span class="aviso-tag">🌍 ${esc(m.nome)}</span><h2>${ganhou ? (modo === "corrida" || modo === "livre" ? "🏆 Chegou!" : "🏆 Conseguiu!") : motivo || "Não foi dessa vez!"}</h2>
+    ${modo === "corrida" ? `<p>Tempo: <b>${s} s</b>${rec ? " — recorde! 🎉" : m.rec ? ` (recorde ${m.rec} s)` : ""}</p>` : modo === "sobreviver" ? `<p>Aguentou ${s} s</p>` : ""}<p>🪙 Moedas: ${J.moedas}/${J.total}</p>
+    <button class="lb-jogar" id="mb-denovo">Jogar de novo</button>${mbDoAmigo(m) ? "" : `<button class="btn ghost" id="mb-editar">🧱 Voltar a construir</button>`}</div>`;
+  $("mb-denovo").addEventListener("click", () => mbMudarModo("jogar")); if ($("mb-editar")) $("mb-editar").addEventListener("click", () => mbMudarModo("construir"));
+}
+function mundoFechar(semTela) {
+  const estavaAberto = MB.on; cancelAnimationFrame(MB.raf); MB.on = false;
+  if (MB.kd) { removeEventListener("keydown", MB.kd); removeEventListener("keyup", MB.ku); }
+  if (MB.r) { try { MB.r.dispose(); } catch {} } MB.r = null;
+  const box = $("mundo"); if (box) { box.hidden = true; box.innerHTML = ""; }
+  if (MB.mundo && estavaAberto) mbGuardar(); MB.mundo = null; MB.cena = null; MB.blocos = new Map(); MB.formas = []; MB.sel = null; MB.painel = null; for (const k in MB_MAT) delete MB_MAT[k]; for (const k in MB_GEO) delete MB_GEO[k];
+  if (!semTela) { G.tela = "mundos"; salvar(); render(); }
+}
+/* mundo vindo de um amigo: só dados conferidos */
+function limparMundo(d, autor) {
+  if (!d || typeof d !== "object" || !Array.isArray(d.b)) return null;
+  const num = (v, a, b) => Math.max(a, Math.min(b, Math.round(+v * 4) / 4 || 0));
+  const b = d.b.slice(0, MUNDO_MAX).filter(x => Array.isArray(x) && MB_TIPOS[x[3]]).map(x => [num(x[0], -20, 20) | 0, num(x[1], 0, 30) | 0, num(x[2], -20, 20) | 0, x[3] | 0, (x[4] | 0) % MB_CORES.length]);
+  const f = (Array.isArray(d.f) ? d.f : []).slice(0, FORMAS_MAX).filter(x => x && MB_FORMAS.some(s => s.k === x.s) && Array.isArray(x.p) && Array.isArray(x.e)).map(x => ({ s: x.s, p: [num(x.p[0], -20, 20), num(x.p[1], 0, 30), num(x.p[2], -20, 20)], e: x.e.slice(0, 3).map(v => num(v, .25, 10) || 1), r: (x.r | 0) % 8, c: (x.c | 0) % MB_CORES.length }));
+  const loja = {}; for (const k of Object.keys(MB_PODERES)) { const v = +((d.loja || {})[k]) || 0; if (MB_PRECOS.includes(v)) loja[k] = v; }
+  return { id: String(d.id || "").replace(/[^a-z0-9]/gi, "").slice(0, 20) || "m" + Date.now().toString(36), nome: String(d.nome || "Mundo").replace(/[<>]/g, "").slice(0, 20), b, f, modo: MB_MODOS[d.modo] ? d.modo : "corrida", tempo: [30, 60, 90, 120].includes(+d.tempo) ? +d.tempo : 60, loja, autor };
+}
+</script>
 
 <script>
 /* ================= Online: cada um no seu celular =================
@@ -9763,7 +10144,19 @@ function amigoRecebe(conn, d) {
   const av = d.av && typeof d.av === "object" && avValido(d.av.i) && AV_CORES.includes(d.av.cor) ? { i: d.av.i, cor: d.av.cor } : null;
   if (amigo && av && JSON.stringify(amigo.av) !== JSON.stringify(av)) { amigo.av = av; salvar(); }
   if (d.t === "oi") { if (amigo) { if (d.rk) mesclarRank(d.rk, d.mo); enviar(conn, { t: "rkAmg", de: meuCodigoAmigo(), nome: perfil(), av: avatarDe(perfil()), rk: rankAtual(), mo: moedasPraca() }); reRender(); } return; }
-  if (d.t === "rkAmg") { if (amigo && d.rk) mesclarRank(d.rk, d.mo); return; }   // a classificação passa de amigo para amigo
+  if (d.t === "rkAmg") { if (amigo && d.rk) mesclarRank(d.rk, d.mo); return; }
+  if (d.t === "mundo" && amigo && typeof limparMundo === "function") {   // um amigo mandou um mundo para jogar
+    const m = limparMundo(d.m, { nome: amigo.nome, codigo: de }); if (!m) return;
+    G.mundosAmigos = [m, ...mundosAmigos().filter(x => !(x.id === m.id && x.autor.codigo === de))].slice(0, 8); salvar();
+    toast(`🌍 ${amigo.nome} te mandou o mundo "${m.nome}"!`, "Jogar", () => ir("mundos")); bip(880, .08); return;
+  }
+  if (d.t === "pag" && amigo) {   // alguém comprou na loja do meu mundo
+    const id = String(d.id || "").slice(0, 30), v = Math.max(0, Math.min(100, +d.v || 0)); G.pagRecebidos = G.pagRecebidos || [];
+    if (!id || !v || G.pagRecebidos.includes(id)) return; G.pagRecebidos = [id, ...G.pagRecebidos].slice(0, 300);
+    const meu = mundosDe(perfil()).find(x => x.id === d.mundo), dono = jogadoresDoAparelho().find(n => mundosDe(n).some(x => x.id === d.mundo)) || perfil();
+    G.banco[dono] = Math.round(((G.banco[dono] || 0) + v) * 10) / 10; salvar();
+    toast(`🛒 ${amigo.nome} comprou ${(MB_PODERES[d.k] || {}).ic || ""} no seu mundo "${(meu || {}).nome || "mundo"}": +${v} moedas!`); return;
+  }   // a classificação passa de amigo para amigo
   if (d.t === "pedido") {
     if (amigo) { enviar(conn, { t: "aceito", de: meuCodigoAmigo(), nome: perfil(), av: avatarDe(perfil()) }); return; }   // já somos amigos
     if (!pedidos().some(p => p.codigo === de)) { pedidos().unshift({ codigo: de, nome: nome || "Alguém", em: Date.now(), av }); G.amigoPedidos = pedidos().slice(0, 10); salvar(); }
@@ -10466,6 +10859,30 @@ async function rankOnlineSincronizar() {
   RK.rodando = false;
 }
 if (rankOnlineLigado()) { setTimeout(rankOnlineSincronizar, 3000); setInterval(rankOnlineSincronizar, 60000); }
+
+/* ===================== Mundos dos amigos (Criar Mundo) =====================
+   Mandar um mundo para um amigo (pelo código de amigo) e pagar o criador quando alguém compra na loja do mundo dele.
+   Fica esperando no aparelho (G.mundoPend, G.pagPend) até os dois estarem online; quem recebe confere tudo (limparMundo) e não conta duas vezes (G.pagRecebidos). */
+function mandarMundoAmigo(codigo, m) {
+  G.mundoPend = (G.mundoPend || []).filter(x => !(x.para === codigo && x.id === m.id));
+  G.mundoPend.push({ para: codigo, id: m.id }); salvar(); toast("📤 Mandando… chega quando o amigo estiver online."); entregarMundos();
+}
+function pagarCriador(m, k, v) {
+  if (!m.autor || !m.autor.codigo) return;
+  G.pagPend = G.pagPend || []; G.pagPend.push({ para: m.autor.codigo, id: meuCodigoAmigo() + "-" + Date.now().toString(36), v, k, mundo: m.id }); salvar(); entregarMundos();
+}
+async function entregarMundos() {
+  if (AMG.entregandoMundos || !AMG.peer || !AMG.peer.open) return; AMG.entregandoMundos = true;
+  try {
+    for (const p of [...(G.mundoPend || [])]) { const m = mundosDe(perfil()).find(x => x.id === p.id); if (!m) { G.mundoPend = G.mundoPend.filter(x => x !== p); continue; }
+      const env = { id: m.id, nome: m.nome, b: m.b, f: m.f || [], modo: m.modo, tempo: m.tempo, loja: m.loja || {} };
+      if (await falarComAmigo(p.para, { t: "mundo", m: env })) { G.mundoPend = G.mundoPend.filter(x => x !== p); const a = amigos().find(x => x.codigo === p.para); toast(`📤 Mundo "${m.nome}" entregue para ${a ? a.nome : "o amigo"}!`); } }
+    for (const p of [...(G.pagPend || [])]) if (await falarComAmigo(p.para, { t: "pag", id: p.id, v: p.v, k: p.k, mundo: p.mundo })) G.pagPend = G.pagPend.filter(x => x !== p);
+    salvar();
+  } catch {}
+  AMG.entregandoMundos = false;
+}
+setInterval(() => { if (!document.hidden && ((G.mundoPend || []).length || (G.pagPend || []).length)) entregarMundos(); }, 20000);
 
 
 render();
