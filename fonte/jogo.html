@@ -5183,7 +5183,7 @@ function montarPraca2(s) {
   PRACA.clima = climaDaColecao();
   if (PRACA.clima) { const N = PRACA.clima === "chuva" ? 500 : 300, pos = new Float32Array(N * 3); for (let i = 0; i < N; i++) { pos[i * 3] = (Math.random() - .5) * 40; pos[i * 3 + 1] = Math.random() * 20; pos[i * 3 + 2] = (Math.random() - .5) * 40; }
     const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-    const cor = { chuva: "#9fd3ff", neve: "#ffffff", sol: "#ffe58a", fogo: "#ff8a1f" }[PRACA.clima];
+    const cor = { chuva: "#9fd3ff", neve: "#ffffff", sol: "#ffe58a", fogo: "#ff8a1f", bolhas: "#8fe6ff" }[PRACA.clima];
     PRACA.climaPts = new THREE.Points(geo, new THREE.PointsMaterial({ color: cor, size: PRACA.clima === "chuva" ? .09 : .2, transparent: true, opacity: .85, depthWrite: false })); s.add(PRACA.climaPts); }
   PRACA.objMissao = null;
 }
@@ -5355,7 +5355,7 @@ async function pracaFoto() {
 function passoClimaPraca(dt, t) {
   const p = PRACA.climaPts; if (!p) return; const a = p.geometry.attributes.position, eu = PRACA.eu, cl = PRACA.clima;
   const vy = cl === "chuva" ? 14 : cl === "neve" ? 1.4 : cl === "fogo" ? -1.2 : -.6;
-  for (let i = 0; i < a.count; i++) { let y = a.getY(i) - vy * dt; let x = a.getX(i) + (cl === "neve" ? Math.sin(t + i) * .3 * dt : 0);
+  for (let i = 0; i < a.count; i++) { let y = a.getY(i) - vy * dt; let x = a.getX(i) + (cl === "neve" || cl === "bolhas" ? Math.sin(t + i) * .3 * dt : 0);
     if (y < 0) y += 20; if (y > 20) y -= 20; a.setY(i, y); a.setX(i, x); }
   a.needsUpdate = true; p.position.set(eu.x, 0, eu.z);
   if (cl === "chuva") { PRACA.tRaio = (PRACA.tRaio ?? 8) - dt; if (PRACA.tRaio <= 0) { PRACA.tRaio = 9 + Math.random() * 10; const fl = document.createElement("div"); fl.className = "pr-flash"; fl.style.opacity = ".5"; $("praca").appendChild(fl); setTimeout(() => fl.remove(), 300); if (typeof ruido === "function" && musCtx()) ruido(MUS.ctx.currentTime + .4, 1.2, .25, "lowpass", 200); } }
@@ -7292,6 +7292,112 @@ acoes.comprarLoja = () => {
   toast(`${nome} comprou uma vida extra!`);
   render();
 };
+if (G.tela === "lobby") render();
+</script>
+
+<script>
+/* ===================== Gerador de coleções semanais (troca todo domingo) =====================
+   Cada conjunto vira skin, pet, fundo, emoji, gesto, foto, arremesso e pacote, a partir de poucos dados (cores, ícone, bicho).
+   Coleção nova: acrescente em COLS_SEMANA (de = domingo 00:00, ate = sábado 23:59, horário de Brasília) e um boss em BOSSES_SEMANA.
+   Os desenhos são genéricos: o ícone do conjunto vira o enfeite da cabeça, o selo do pet e o efeito do gesto, nas cores do conjunto. */
+const COLS_SEMANA = [
+  { de: "2026-11-22T00:00:00-03:00", ate: "2026-11-28T23:59:59-03:00", clima: "bolhas", sets: [
+    { k: "tubarao", nome: "Tubarão", ic: "🦈", camisa: "#3f6f9a", cores: ["#5b8db8", "#1f3f5e"], pet: { k: "caotubarao", base: "cachorro", nome: "Cãozinho Tubarão", poder: "Mordidinha: +0,5 moeda a cada letra certa", acerto: .5 },
+      fundo: "Fundo do Mar", fic: "🐠", emoji: "Mordida", gesto: "Barbatana", pose: "requebrado", arr: { nome: "Bola de Água", ic: "💧" } },
+    { k: "polvo", nome: "Polvo", ic: "🐙", camisa: "#b04a9b", cores: ["#d26ab8", "#5e1f52"], pet: { k: "hamsterpolvo", base: "hamster", nome: "Hamster Polvo", poder: "Oito bracinhos: +1 moeda cada vez que escapa da bola", sobreviver: 1 },
+      fundo: "Recife de Coral", fic: "🪸", emoji: "Jato de Tinta", gesto: "Oito Braços", pose: "gelatina", arr: { nome: "Lula Voadora", ic: "🦑" } },
+    { k: "reidomar", nome: "Rei do Mar", ic: "🔱", camisa: "#0f8f8a", cores: ["#3fd0c8", "#0b4d4a"], pet: { k: "tartarugareal", base: "tartaruga", nome: "Tartaruga Real", poder: "Coroa do mar: corre um pouco mais rápido (+7%)", vel: 1.07 },
+      fundo: "Palácio do Mar", fic: "🏰", emoji: "Tridente", gesto: "Onda Gigante", pose: "giro", arr: { nome: "Concha Mágica", ic: "🐚" } } ] },
+  { de: "2026-11-29T00:00:00-03:00", ate: "2026-12-05T23:59:59-03:00", clima: "fogo", sets: [
+    { k: "trex", nome: "T-Rex", ic: "🦖", camisa: "#4f8a3a", cores: ["#6dbb4f", "#1f4a15"], pet: { k: "minirex", base: "cachorro", nome: "Mini Rex", poder: "Rugidinho: +0,5 moeda a cada letra certa", acerto: .5 },
+      fundo: "Floresta Jurássica", fic: "🌴", emoji: "Rugido", gesto: "Rugidão", pose: "tremedeira", arr: { nome: "Ovo de Dino", ic: "🥚" } },
+    { k: "ptero", nome: "Pterodáctilo", ic: "🦅", camisa: "#8a6a4a", cores: ["#c39a6b", "#4a3420"], pet: { k: "pterinho", base: "passarinho", nome: "Pterinho", poder: "Asas grandes: corre um pouco mais rápido (+8%)", vel: 1.08 },
+      fundo: "Penhasco dos Dinos", fic: "⛰️", emoji: "Voo Rasante", gesto: "Bater de Asas", pose: "pulinho", arr: { nome: "Pena Gigante", ic: "🪶" } },
+    { k: "vulcaojur", nome: "Vulcão Jurássico", ic: "🌋", camisa: "#8a3a1f", cores: ["#e2632b", "#4a120a"], pet: { k: "gatolava", base: "gato", nome: "Gato Lava", poder: "Pelo quente: +1 moeda cada vez que escapa da bola", sobreviver: 1 },
+      fundo: "Vulcão Jurássico", fic: "🌋", emoji: "Erupção", gesto: "Erupção", pose: "pulinho", arr: { nome: "Meteoro", ic: "☄️" } } ] },
+  { de: "2026-12-06T00:00:00-03:00", ate: "2026-12-12T23:59:59-03:00", clima: "neve", sets: [
+    { k: "papainoel", nome: "Papai Noel", ic: "🎅", camisa: "#d62828", cores: ["#ff4d4d", "#6b0f0f"], pet: { k: "caonoel", base: "cachorro", nome: "Cãozinho Noel", poder: "Presentinho: +0,5 moeda a cada letra certa", acerto: .5 },
+      fundo: "Noite de Natal", fic: "🌟", emoji: "Ho Ho Ho", gesto: "Ho Ho Ho", pose: "requebrado", arr: { nome: "Presente", ic: "🎁" } },
+    { k: "rena", nome: "Rena", ic: "🦌", camisa: "#8a5a2b", cores: ["#b5793f", "#4a2c12"], pet: { k: "coelhorena", base: "coelho", nome: "Coelho Rena", poder: "Galope: corre um pouco mais rápido (+8%)", vel: 1.08 },
+      fundo: "Trenó no Céu", fic: "🛷", emoji: "Galopada", gesto: "Voo da Rena", pose: "pulinho", arr: { nome: "Sininho", ic: "🔔" } },
+    { k: "boneconeve", nome: "Boneco de Neve", ic: "⛄", camisa: "#dfe8f2", cores: ["#ffffff", "#6f93b8"], pet: { k: "pinguimnatal", base: "pinguim", nome: "Pinguim de Natal", poder: "Escorrega: +1 moeda cada vez que escapa da bola", sobreviver: 1 },
+      fundo: "Vila de Neve", fic: "❄️", emoji: "Brrr", gesto: "Derretendo", pose: "gelatina", arr: { nome: "Floco de Neve", ic: "❄️" } } ] } ];
+const BOSSES_SEMANA = {
+  kraken: { nome: "Kraken", ic: "🐙", cols: ["tubarao", "polvo", "reidomar"], bolas: ["tubarao", "polvo"], moedas: 200, item: "arremesso:tridenterei", corpo: ["#6b2a7a", "#3d1450"], coroa: "#3fd0c8", olhos: "#ffd23f",
+    tema: "Mar e Oceano", palavras: ["TUBARAO", "POLVO", "BALEIA", "GOLFINHO", "CORAL", "ONDA", "AREIA", "CONCHA", "PEIXE", "ALGA", "CARANGUEJO", "MERGULHO", "SUBMARINO", "TESOURO", "ILHA", "AGUAVIVA", "PRAIA", "BARCO"] },
+  reirex: { nome: "Rei Rex", ic: "🦖", cols: ["trex", "ptero", "vulcaojur"], bolas: ["trex", "vulcaojur"], moedas: 200, item: "arremesso:ossodino", corpo: ["#2e6b22", "#16380f"], coroa: "#ffd23f", olhos: "#ff4d6d",
+    tema: "Dinossauros", palavras: ["DINOSSAURO", "FOSSIL", "VULCAO", "OVO", "METEORO", "JURASSICO", "ESQUELETO", "GARRA", "PEGADA", "DENTE", "CAUDA", "ESCAMA", "ARQUEOLOGO", "SELVA", "RUGIDO", "CHIFRE", "OSSO", "LAVA"] },
+  duende: { nome: "Duende Ranzinza", ic: "🧝", cols: ["papainoel", "rena", "boneconeve"], bolas: ["boneconeve", "papainoel"], moedas: 200, item: "arremesso:estrelanatal", corpo: ["#2f8a3a", "#174d1d"], coroa: "#ff4d4d", olhos: "#ffd23f",
+    tema: "Natal", palavras: ["PRESENTE", "RENA", "TRENO", "ESTRELA", "PINHEIRO", "NEVE", "SINO", "PANETONE", "GORRO", "ENFEITE", "MEIA", "CEIA", "LUZES", "BISCOITO", "CHAMINE", "DUENDE", "BOLA", "LACO"] } };
+const SETS_SEMANA = {};   // k -> {set, col}
+(function montarColecoesSemana() {
+  const css = [], svgEmoji = ic => `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='90' height='90'><text x='10' y='40' font-size='28' opacity='.22'>${ic}</text><text x='55' y='85' font-size='22' opacity='.16'>${ic}</text></svg>`)}")`;
+  for (const col of COLS_SEMANA) for (const s of col.sets) {
+    SETS_SEMANA[s.k] = { s, col }; const L = { limitada: true, de: col.de, ate: col.ate }, [c1, c2] = s.cores;
+    SKINS.push({ k: s.k, nome: s.nome, preco: 700, camisa: s.camisa, ...L });
+    PETS.push({ k: s.pet.k, base: s.pet.base, nome: s.pet.nome, icone: s.ic, preco: 300, tipo: "pet", ...L, poder: s.pet.poder, ...(s.pet.acerto ? { acerto: s.pet.acerto } : {}), ...(s.pet.sobreviver ? { sobreviver: s.pet.sobreviver } : {}), ...(s.pet.vel ? { vel: s.pet.vel } : {}) });
+    PET_TEMA[s.pet.k] = s.k; SKIN_TEMA[s.k] = s.k; CORES_TEMA[s.k] = [c1, c2];
+    FUNDOS.push([s.k, s.fundo]); PRECO_FUNDO[s.k] = 300; FUNDOS_LIM.push({ k: s.k, nome: s.fundo, tipo: "fundo", preco: 300, ...L });
+    EMOJIS.push({ k: s.k, e: s.ic, nome: s.emoji, preco: 150, tipo: "emoji", ...L });
+    GESTOS.push({ k: s.k, icone: s.ic, nome: s.gesto, preco: 250, dura: 2, tipo: "gesto", ...L, pose: s.pose, som: [[60, 72, 0, .2, "square"], [72, 79, .2, .2, "square"], [79, 84, .4, .3, "square"]] });
+    AV_ESPECIAIS.push({ k: s.k, icone: s.ic, nome: s.nome, tipo: "avatar", preco: 200, ...L });
+    ARREMESSOS.push({ k: s.k, nome: s.arr.nome, icone: s.arr.ic, preco: 200, cor: c1, tipo: "arremesso", ...L });
+    COLECOES[s.k] = { nome: s.nome, chaves: ["skin-" + s.k, "fundo-" + s.k, "emoji-" + s.k, "gesto-" + s.k, "avatar-" + s.k, "arremesso-" + s.k, "pet-" + s.pet.k], pacote: s.k };
+    PACOTES.push({ id: s.k, nome: "Pacote " + s.nome, emoji: s.ic, desconto: .25, de: col.de, ate: col.ate,
+      itens: () => [ITEM_PACOTE.skin(s.k), ITEM_PACOTE.fundo(s.k, s.fic), ITEM_PACOTE.emoji(s.k, s.ic), ITEM_PACOTE.gesto(s.k, s.ic), ITEM_PACOTE.foto(s.k, s.ic), ITEM_PACOTE.arremesso(s.k, s.arr.ic), ...ITEM_PACOTE.pet(s.pet.k, s.ic)] });
+    css.push(`.bgf[data-fundo="${s.k}"] { background: radial-gradient(ellipse 120% 60% at 50% 110%, ${c1}aa, transparent 60%), linear-gradient(180deg, ${c2} 0%, ${c1} 100%); }`,
+      `.bgf[data-fundo="${s.k}"]::before { background-image: ${svgEmoji(s.fic)}; background-size: 90px 90px; }`,
+      `.av-${s.k} { border-color: ${c1} !important; box-shadow: 0 0 12px ${c1}; background: radial-gradient(circle at 30% 30%, ${c1} 0%, ${c2} 100%) !important; }`,
+      `.pacote.sk-limitada.pacote-${s.k} { background: radial-gradient(circle at 85% 15%, ${c1}88, transparent 35%), linear-gradient(180deg, ${c1} 0%, ${c2} 100%) !important; border-color: ${c1} !important; box-shadow: 0 0 0 2px ${c1}66, 0 0 24px ${c1}88; }`);
+  }
+  // itens só do boss (fora da loja)
+  ARREMESSOS.push({ k: "tridenterei", nome: "Tridente do Kraken", icone: "🔱", preco: 0, cor: "#3fd0c8", tipo: "arremesso", boss: true },
+    { k: "ossodino", nome: "Osso do Rei Rex", icone: "🦴", preco: 0, cor: "#f4f1ec", tipo: "arremesso", boss: true },
+    { k: "estrelanatal", nome: "Estrela de Natal", icone: "🌟", preco: 0, cor: "#ffd23f", tipo: "arremesso", boss: true });
+  Object.assign(BOSSES, BOSSES_SEMANA);
+  const st = document.createElement("style"); st.textContent = css.join("\n"); document.head.appendChild(st);
+})();
+/* desenhos genéricos: o ícone do conjunto como enfeite (2D e 3D), selo no pet e efeito do gesto */
+const _acessorio2DAntes = desenharAcessorio2D;
+desenharAcessorio2D = function (c, skin, x, y) {
+  const S = SETS_SEMANA[skin]; if (!S) return _acessorio2DAntes(c, skin, x, y);
+  const t = performance.now() / 1000, [c1] = S.s.cores;
+  c.save(); c.globalCompositeOperation = "lighter"; const g = c.createRadialGradient(x, y - 18, 6, x, y - 18, 48); g.addColorStop(0, c1 + "66"); g.addColorStop(1, c1 + "00"); c.fillStyle = g; c.beginPath(); c.arc(x, y - 18, 48, 0, Math.PI * 2); c.fill(); c.restore();
+  c.save(); c.font = "24px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.translate(x, y - 53 + Math.sin(t * 3) * 1.5); c.rotate(Math.sin(t * 2) * .12); c.fillText(S.s.ic, 0, 0); c.restore();
+};
+const _acessorio3DAntes = acessorio3D;
+acessorio3D = function (cabeca, skin) {
+  const S = SETS_SEMANA[skin]; if (!S) return _acessorio3DAntes(cabeca, skin);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTextoSemana(S.s.ic), transparent: true })); sp.scale.set(.45, .45, 1); sp.position.y = .42; cabeca.add(sp);
+  const br = new THREE.Sprite(new THREE.SpriteMaterial({ map: brilhoTextura(S.s.cores[0]), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: .5 })); br.scale.set(1.1, 1.1, 1); br.position.y = -.1; cabeca.add(br);
+};
+const TEX_SEMANA = {};
+function texTextoSemana(ic) { return TEX_SEMANA[ic] = TEX_SEMANA[ic] || texturaCanvas(128, 128, c => { c.font = "100px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(ic, 64, 70); }); }
+const _pet2DAntes = desenharPet2D;
+desenharPet2D = function (c, k, x, y, t, skin) {
+  _pet2DAntes(c, k, x, y, t, skin);
+  const v = visualPet(k, skin), S = v && SETS_SEMANA[v.tema]; if (!S) return;
+  c.save(); c.font = "14px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(S.s.ic, x, y - 28 + Math.sin(t * 3) * 2); c.restore();
+};
+const _pet3DAntes = pet3D;
+pet3D = function (k, skin) {
+  const g = _pet3DAntes(k, skin), v = visualPet(k, skin), S = v && SETS_SEMANA[v.tema]; if (!g || !S) return g;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTextoSemana(S.s.ic), transparent: true })); sp.scale.set(.22, .22, 1); sp.position.y = .5; g.add(sp); return g;
+};
+const _poseGestoAntes = poseGesto;
+poseGesto = function (k, f) { const S = SETS_SEMANA[k]; return _poseGestoAntes(S ? S.s.pose : k, f); };
+const _efeitoGestoAntes = efeitoGesto2D;
+efeitoGesto2D = function (c, x, y, k, f) {
+  const S = SETS_SEMANA[k]; if (!S) return _efeitoGestoAntes(c, x, y, k, f);
+  c.save(); c.textAlign = "center"; c.textBaseline = "middle";
+  for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2 + f * 4, d = 30 + f * 70; c.globalAlpha = Math.max(0, 1 - f); c.font = (18 + 10 * Math.sin(f * Math.PI)) + "px sans-serif"; c.fillText(i % 2 ? S.s.ic : S.s.fic, x + Math.cos(a) * d, y - 30 + Math.sin(a) * d * .6); }
+  c.restore();
+};
+// clima da Praça para as coleções novas (bolhas no Oceano, brasas nos Dinos, neve no Natal)
+if (typeof climaDaColecao === "function") {
+  const _climaAntes = climaDaColecao;
+  climaDaColecao = function () { const ids = colecoesNaLoja(perfil()).map(c => c.id); for (const col of COLS_SEMANA) if (col.sets.some(s => ids.includes(s.k))) return col.clima; return _climaAntes(); };
+}
 if (G.tela === "lobby") render();
 </script>
 

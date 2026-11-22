@@ -32,7 +32,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const T = 
   const b2 = await host.evaluate(() => A.boss.hp);
   // golpe final
   await host.evaluate(() => { A.boss.hp = 5; bossDano(8, A.P[ON.myIdx]); }); await host.waitForTimeout(1200);
-  const fimH = await host.evaluate(() => ({ morto: A.boss.morto, rank: G.evRank.j, item: temArremesso("Andre", "coroaeclipse"), banco: G.banco.Andre, bossG: G.bossG }));
-  const fimA = await amigo.evaluate(() => ({ morto: A.boss && A.boss.morto, item: temArremesso("Maria", "coroaeclipse"), banco: G.banco.Maria, bossG: G.bossG }));
+  const fimH = await host.evaluate(() => ({ morto: A.boss.morto, rank: G.evRank.j, item: temArremesso("Andre", BOSSES[G.bossG.k].item.split(":")[1]), banco: G.banco.Andre, bossG: G.bossG }));
+  const fimA = await amigo.evaluate(() => ({ morto: A.boss && A.boss.morto, item: temArremesso("Maria", BOSSES[G.bossG.k].item.split(":")[1]), banco: G.banco.Maria, bossG: G.bossG }));
   await (await amigo.$('#a-game .stage-wrap')).screenshot({ path: S + '/boss-morto.png' });
   console.log(JSON.stringify({ b0, b1, ataques, b2, fimH, fimA, errs })); await b.close(); })();

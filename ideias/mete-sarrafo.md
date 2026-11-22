@@ -287,3 +287,12 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
 - As moedas do mundo são só pontos (não viram moedas do jogo).
 - Ideia para depois: mandar o seu mundo para um amigo jogar.
 - (19/11) Criar Mundo, parte 2 (ideias do Andre): formas livres tipo Blender (esfera, cilindro, cone, rampa e placa, com tamanho, giro e cor), blocos de poder (turbo, super pulo, voar, escudo), tipos de jogo (Corrida, Caça às moedas, Sobrevivência com lava subindo, Livre), mandar o mundo para um amigo e a loja do mundo: o criador escolhe o preço dos poderes e, quando um amigo compra no mundo dele, as moedas vão para o criador.
+
+## Coleções da semana (troca todo domingo), pedido do Andre em 22/11
+
+- 🌊 **Oceano** (22/11 a 28/11): Tubarão, Polvo e Rei do Mar. Boss: Kraken (palavras do mar), prêmio Tridente do Kraken.
+- 🦖 **Dinossauros** (29/11 a 05/12): T-Rex, Pterodáctilo e Vulcão Jurássico. Boss: Rei Rex, prêmio Osso do Rei Rex.
+- 🎄 **Natal** (06/12 a 12/12): Papai Noel, Rena e Boneco de Neve. Boss: Duende Ranzinza, prêmio Estrela de Natal.
+- Cada conjunto tem skin (700), pet (300), fundo (300), emoji (150), gesto (250), foto (200), arremesso (200) e pacote com 25% de desconto (1.575).
+- Na Praça: bolhas no Oceano, brasas nos Dinossauros e neve no Natal.
+- Elas trocam sozinhas no domingo, sem precisar mexer em nada.
