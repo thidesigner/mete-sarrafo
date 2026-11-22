@@ -9131,7 +9131,7 @@ const ESP_PODERES = {
   muralha: { ic: "🧱", nome: "Muralha", dica: "Um muro na frente do seu gol (ou cesta) por 5 segundos." },
   furacao: { ic: "🌪️", nome: "Furacão", dica: "Empurra para longe os adversários perto de você, e quem estava com a bola solta ela." },
   clone: { ic: "👯", nome: "Clone", dica: "Aparece uma cópia sua por 6 segundos que corre atrás da bola e passa para você." } };
-const ESP_MURO_W = 260;
+const ESP_MURO_W = 150;
 function espMuroY(E, time) { const topo = 1 - time === 0; return topo ? (E.tipo === "futebol" ? 64 : 150) : ESP_H - (E.tipo === "futebol" ? 64 : 150); }   // muro na frente do gol que o time defende
 function espPasseDono(E, dono) {   // o clone ou o ímã mandam a bola para quem chamou
   const b = E.b, d = espDist(b.x, b.y, dono.x, dono.y) || 1, v = Math.min(560, d * 2 + 200); b.dono = -1; b.voo = null; b.vx = (dono.x - b.x) / d * v; b.vy = (dono.y - b.y) / d * v; b.z = 4; b.ultimo = dono.i;
@@ -9533,8 +9533,8 @@ function esp3PoderesJogador(m, p, nx, nz, dt) {
   m.imaAnel.visible = p.ima > 0; if (p.ima > 0) m.imaAnel.scale.setScalar(1 + ((tt * 2) % 1) * .8);
 }
 function esp3PoderesCampo(E, dt) {
-  E3.muros = E3.muros || [0, 1].map(t => { const g = new THREE.Mesh(new THREE.BoxGeometry(e3x(ESP_W / 2 + ESP_MURO_W / 2) - e3x(ESP_W / 2 - ESP_MURO_W / 2), 1.3, .35), new THREE.MeshLambertMaterial({ color: 0xa0522d, emissive: 0x2a1206 })); g.visible = false; E3.cena.add(g); return g; });
-  E3.muros.forEach((g, t) => { const m = (E.muros || []).find(x => x.time === t); g.visible = !!m; if (m) { g.position.set(e3x(ESP_W / 2), .65, e3z(espMuroY(E, t))); } });
+  E3.muros = E3.muros || [0, 1].map(t => { const g = new THREE.Mesh(new THREE.BoxGeometry(e3x(ESP_W / 2 + ESP_MURO_W / 2) - e3x(ESP_W / 2 - ESP_MURO_W / 2), .8, .3), new THREE.MeshLambertMaterial({ color: 0xa0522d, emissive: 0x2a1206 })); g.visible = false; E3.cena.add(g); return g; });
+  E3.muros.forEach((g, t) => { const m = (E.muros || []).find(x => x.time === t); g.visible = !!m; if (m) { g.position.set(e3x(ESP_W / 2), .4, e3z(espMuroY(E, t))); } });
   E3.clones = E3.clones || {};
   const vivos = new Set((E.clones || []).map(c => c.dono));
   for (const k of Object.keys(E3.clones)) if (!vivos.has(+k)) { E3.cena.remove(E3.clones[k].g); delete E3.clones[k]; }
