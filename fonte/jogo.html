@@ -7336,12 +7336,14 @@ const BOSSES_SEMANA = {
     tema: "Dinossauros", palavras: ["DINOSSAURO", "FOSSIL", "VULCAO", "OVO", "METEORO", "JURASSICO", "ESQUELETO", "GARRA", "PEGADA", "DENTE", "CAUDA", "ESCAMA", "ARQUEOLOGO", "SELVA", "RUGIDO", "CHIFRE", "OSSO", "LAVA"] },
   duende: { nome: "Duende Ranzinza", forma: "emoji", ic: "🧝", cols: ["papainoel", "rena", "boneconeve"], bolas: ["boneconeve", "papainoel"], moedas: 200, item: "arremesso:estrelanatal", corpo: ["#2f8a3a", "#174d1d"], coroa: "#ff4d4d", olhos: "#ffd23f",
     tema: "Natal", palavras: ["PRESENTE", "RENA", "TRENO", "ESTRELA", "PINHEIRO", "NEVE", "SINO", "PANETONE", "GORRO", "ENFEITE", "MEIA", "CEIA", "LUZES", "BISCOITO", "CHAMINE", "DUENDE", "BOLA", "LACO"] } };
+const NEON_SEMANA = { tubarao: ["#7fd3ff"], polvo: ["#ff7ad9"], reidomar: ["#3fffe8", "#ffd23f"], trex: ["#7dff5a"], ptero: ["#ffb35a"], vulcaojur: ["#ff6a2a", "#ffd23f"], papainoel: ["#ff4d4d", "#ffffff"], rena: ["#ff3b3b", "#ffb35a"], boneconeve: ["#bfefff"] };
 const SETS_SEMANA = {};   // k -> {set, col}
 (function montarColecoesSemana() {
   const css = [], svgEmoji = ic => `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='90' height='90'><text x='10' y='40' font-size='28' opacity='.22'>${ic}</text><text x='55' y='85' font-size='22' opacity='.16'>${ic}</text></svg>`)}")`;
   for (const col of COLS_SEMANA) for (const s of col.sets) {
     SETS_SEMANA[s.k] = { s, col }; const L = { limitada: true, de: col.de, ate: col.ate }, [c1, c2] = s.cores;
     SKINS.push({ k: s.k, nome: s.nome, preco: 700, camisa: s.camisa, ...L });
+    { const ne = NEON_SEMANA[s.k] || [c1]; SKINS.push({ k: s.k + "neon", base: s.k, neon: ne[0], ...(ne[1] ? { neon2: ne[1] } : {}), nome: s.nome + " Neon", camisa: "#0a0a12", preco: 200, variante: true }); }   // Neon: compra extra no quadro da skin, só para quem tem a original e enquanto ela está à venda
     PETS.push({ k: s.pet.k, base: s.pet.base, nome: s.pet.nome, icone: s.ic, preco: 300, tipo: "pet", ...L, poder: s.pet.poder, ...(s.pet.acerto ? { acerto: s.pet.acerto } : {}), ...(s.pet.sobreviver ? { sobreviver: s.pet.sobreviver } : {}), ...(s.pet.vel ? { vel: s.pet.vel } : {}) });
     PET_TEMA[s.pet.k] = s.k; SKIN_TEMA[s.k] = s.k; CORES_TEMA[s.k] = [c1, c2];
     FUNDOS.push([s.k, s.fundo]); PRECO_FUNDO[s.k] = 300; FUNDOS_LIM.push({ k: s.k, nome: s.fundo, tipo: "fundo", preco: 300, ...L });

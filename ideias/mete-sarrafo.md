@@ -306,3 +306,4 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
   - **Labirinto:** tem um baú no meio que dá 40 moedas uma vez por dia, e guarda o seu recorde de tempo.
   - **Carrinho:** dá para dirigir por todo lugar. Tem uma corrida de 6 arcos em volta da Praça: a primeira volta do dia dá 20 moedas, e o jogo guarda o seu recorde. Os amigos veem você no carrinho.
 - O pet agora anda atrás do bonequinho na Praça.
+- As 9 skins da semana têm versão Neon (200 moedas): só para quem tem a skin e enquanto a coleção está na loja.
