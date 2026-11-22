@@ -296,3 +296,5 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
 - Cada conjunto tem skin (700), pet (300), fundo (300), emoji (150), gesto (250), foto (200), arremesso (200) e pacote com 25% de desconto (1.575).
 - Na Praça: bolhas no Oceano, brasas nos Dinossauros e neve no Natal.
 - Elas trocam sozinhas no domingo, sem precisar mexer em nada.
+- Histórias com batalha na Praça (pedido do Andre): o boss de cada coleção (Kraken, Rei Rex, Duende Ranzinza) aparece, o Bip e o Bop batalham com ele, ele foge e espalha fragmentos. Missão em 2 partes e batalha final: o boss perde e vira amigo. Prêmio só da missão: gesto Herói do Mar, Domador de Dinos ou Salvador do Natal.
+- As skins da semana ganharam fantasia de verdade (barbatana, tentáculos, coroa, asas, gorro do Papai Noel, chifres da rena, cartola do boneco de neve...) com bolhas, brasas ou neve em volta.
