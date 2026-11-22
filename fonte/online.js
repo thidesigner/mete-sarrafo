@@ -1404,8 +1404,8 @@ acoes.espComecarOnline = () => {
   for (const [id, c] of o.conns) enviar(c.conn, { t: "einicio", tipo: E.tipo, tam, P, eu: E.P.findIndex(p => p.id === id) });
   espComecar(E, E.P.findIndex(p => p.id === "h"), {
     enviar(dt) { o.tEnvio -= dt; if (o.tEnvio > 0 && !(E.fim && !o.fimMandado)) return; o.tEnvio = .066; if (E.fim) o.fimMandado = true;
-      const b = E.b; espMandarTodos({ t: "es", p: E.P.map(p => [espR(p.x), espR(p.y), Math.round(p.dir * 100) / 100, Math.round(p.passo), p.flash > 0 ? 1 : 0, p.gols, (p.turbo > 0 ? 1 : 0) | (p.gelo > 0 ? 2 : 0) | (p.fogo > 0 ? 4 : 0), Math.ceil(p.podCd || 0)]),
-        b: [espR(b.x), espR(b.y), espR(b.z), b.dono, espR(b.h3 || 0), b.fogo > 0 ? 1 : 0], fx: (E.fxPod || []).filter(f => !f.env && (f.env = true)).map(f => [f.k, espR(f.x), espR(f.y)]), pl: E.placar, tm: espR(E.t), msg: E.msg || "", fim: E.fim || null }); },
+      const b = E.b; espMandarTodos({ t: "es", p: E.P.map(p => [espR(p.x), espR(p.y), Math.round(p.dir * 100) / 100, Math.round(p.passo), p.flash > 0 ? 1 : 0, p.gols, espEfeitos(p), Math.ceil(p.podCd || 0)]),
+        b: [espR(b.x), espR(b.y), espR(b.z), b.dono, espR(b.h3 || 0), b.fogo > 0 ? 1 : 0], fx: (E.fxPod || []).filter(f => !f.env && (f.env = true)).map(f => [f.k, espR(f.x), espR(f.y)]), mu: (E.muros || []).map(m => m.time), cl: (E.clones || []).map(c => [c.dono, espR(c.x), espR(c.y), Math.round((c.dir || 0) * 100) / 100]), pl: E.placar, tm: espR(E.t), msg: E.msg || "", fim: E.fim || null }); },
     denovo() { o.fimMandado = false; acoes.espComecarOnline(); },
     sair() { espMandarTodos({ t: "efechou" }); setTimeout(espLimparRede, 200); }
   });
@@ -1447,7 +1447,8 @@ function espCliRecebe(d) {
         if (o.tInp <= 0 || (k !== o.ultInp && o.tInp < .04)) { o.tInp = k !== o.ultInp ? .066 : .25; o.ultInp = k; enviar(o.hostConn, { t: "ei", x: Math.round(inp.x * 100) / 100, y: Math.round(inp.y * 100) / 100 }); }
         if (E.fxPod) E.fxPod = E.fxPod.filter(f => (f.t -= dt) > 0);
         const a = o.alvo; if (!a) return; const kk = 1 - Math.exp(-dt * 14);
-        E.P.forEach((p, i) => { const q = a.p[i]; if (!q) return; p.x += (q[0] - p.x) * kk; p.y += (q[1] - p.y) * kk; p.dir = q[2]; p.passo = q[3]; p.flash = q[4] ? 1 : 0; p.gols = q[5] || 0; p.turbo = q[6] & 1 ? 1 : 0; p.gelo = q[6] & 2 ? 1 : 0; p.fogo = q[6] & 4 ? 1 : 0; p.podCd = q[7] || 0; });
+        E.P.forEach((p, i) => { const q = a.p[i]; if (!q) return; p.x += (q[0] - p.x) * kk; p.y += (q[1] - p.y) * kk; p.dir = q[2]; p.passo = q[3]; p.flash = q[4] ? 1 : 0; p.gols = q[5] || 0; p.turbo = q[6] & 1 ? 1 : 0; p.gelo = q[6] & 2 ? 1 : 0; p.fogo = q[6] & 4 ? 1 : 0; p.ima = q[6] & 8 ? 1 : 0; p.fant = q[6] & 16 ? 1 : 0; p.pulo = q[6] & 32 ? 1 : 0; p.defesa = q[6] & 64 ? 1 : 0; p.podCd = q[7] || 0; });
+        E.muros = (a.mu || []).map(time => ({ time, t: 1 })); E.clones = (a.cl || []).map(c => { const v = (E.clones || []).find(x => x.dono === c[0]); return { dono: c[0], x: v ? v.x + (c[1] - v.x) * kk : c[1], y: v ? v.y + (c[2] - v.y) * kk : c[2], dir: c[3], passo: v ? (v.passo || 0) + Math.hypot(c[1] - v.x, c[2] - v.y) * 1.6 : 0, t: 1 }; });
         E.b.x += (a.b[0] - E.b.x) * kk; E.b.y += (a.b[1] - E.b.y) * kk; E.b.z += (a.b[2] - E.b.z) * kk; E.b.h3 = (E.b.h3 || 0) + (a.b[4] - (E.b.h3 || 0)) * kk; E.b.dono = a.b[3]; E.b.fogo = a.b[5] ? 1 : 0;
       },
       acao(x) { enviar(o.hostConn, { t: "ea", a: x }); },
@@ -1457,7 +1458,7 @@ function espCliRecebe(d) {
   }
   if (d.t === "es" && ESP.E && Array.isArray(d.p) && Array.isArray(d.b)) {
     const E = ESP.E, num = v => espClamp(+v || 0, -50, ESP_H + 50);
-    o.alvo = { p: d.p.slice(0, 6).map(q => [num(q[0]), num(q[1]), +q[2] || 0, +q[3] || 0, q[4] ? 1 : 0, Math.max(0, Math.min(99, +q[5] || 0)), (+q[6] || 0) & 7, Math.max(0, Math.min(99, +q[7] || 0))]), b: [num(d.b[0]), num(d.b[1]), espClamp(+d.b[2] || 0, 0, 400), Number.isInteger(d.b[3]) ? d.b[3] : -1, espClamp(+d.b[4] || 0, 0, 400), d.b[5] ? 1 : 0] };
+    o.alvo = { p: d.p.slice(0, 6).map(q => [num(q[0]), num(q[1]), +q[2] || 0, +q[3] || 0, q[4] ? 1 : 0, Math.max(0, Math.min(99, +q[5] || 0)), (+q[6] || 0) & 127, Math.max(0, Math.min(99, +q[7] || 0))]), b: [num(d.b[0]), num(d.b[1]), espClamp(+d.b[2] || 0, 0, 400), Number.isInteger(d.b[3]) ? d.b[3] : -1, espClamp(+d.b[4] || 0, 0, 400), d.b[5] ? 1 : 0], mu: Array.isArray(d.mu) ? d.mu.slice(0, 2).filter(x => x === 0 || x === 1) : [], cl: Array.isArray(d.cl) ? d.cl.slice(0, 6).filter(c => Array.isArray(c) && Number.isInteger(c[0]) && c[0] >= 0 && c[0] < 6).map(c => [c[0], num(c[1]), num(c[2]), +c[3] || 0]) : [] };
     if (Array.isArray(d.fx)) E.fxPod = (E.fxPod || []).filter(f => (f.t || 0) > 0).concat(d.fx.slice(0, 6).filter(f => Array.isArray(f) && ESP_PODERES[f[0]]).map(f => ({ k: f[0], x: num(f[1]), y: num(f[2]), t: .8 })));
     if (Array.isArray(d.pl)) E.placar = [Math.max(0, +d.pl[0] || 0), Math.max(0, +d.pl[1] || 0)];
     E.t = espClamp(+d.tm || 0, 0, ESP_TEMPO); E.msg = String(d.msg || "").slice(0, 40);

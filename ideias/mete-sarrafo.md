@@ -307,3 +307,8 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
   - **Carrinho:** dá para dirigir por todo lugar. Tem uma corrida de 6 arcos em volta da Praça: a primeira volta do dia dá 20 moedas, e o jogo guarda o seu recorde. Os amigos veem você no carrinho.
 - O pet agora anda atrás do bonequinho na Praça.
 - As 9 skins da semana têm versão Neon (200 moedas): só para quem tem a skin e enquanto a coleção está na loja.
+
+## Mais 8 poderes nos Esportes (pedido do Andre, 22/11)
+
+- Os novos são 🧲 Ímã, 👻 Fantasma, 🌀 Teleporte, 🦘 Super pulo (no basquete vira enterrada), 🛡️ Super defesa (ideia do Andre), 🧱 Muralha, 🌪️ Furacão e 👯 Clone.
+- Agora são 11 poderes no total. Eles saem na Caixa de poder (300 moedas), que sorteia um que você ainda não tem, e os robôs também usam.
