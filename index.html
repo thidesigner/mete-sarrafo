@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="versao-site" content="1880e88d89">
+<meta name="versao-site" content="d9d34f1d7c">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0f3057">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;-webkit-text-size-adjust:100%}img{max-width:100%}[hidden]{display:none!important}.faixa-teste{position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:50;background:#ff4d6d;color:#fff;font:800 12px/1 system-ui,sans-serif;letter-spacing:.08em;padding:4px 10px;border-radius:0 0 8px 8px;pointer-events:none}</style>
@@ -9131,7 +9131,46 @@ function espAlvo(time) { return ESP_CESTA[time]; }   // gol/cesta que o time ata
 const ESP_PODERES = {
   fogo: { ic: "🔥", nome: "Chute de fogo", dica: "O próximo chute vai muito forte e o outro time não segura. No basquete o arremesso quase sempre entra." },
   turbo: { ic: "⚡", nome: "Turbo", dica: "Corre muito rápido por 4 segundos." },
-  gelo: { ic: "❄️", nome: "Congelar", dica: "Congela os adversários perto de você por 2 segundos." } };
+  gelo: { ic: "❄️", nome: "Congelar", dica: "Congela os adversários perto de você por 2 segundos." },
+  // 8 poderes novos (escolhidos pelo Andre)
+  ima: { ic: "🧲", nome: "Ímã", dica: "Por 3 segundos a bola é puxada para você (e escapa de quem está perto com ela)." },
+  fantasma: { ic: "👻", nome: "Fantasma", dica: "Fica transparente por 4 segundos: ninguém consegue roubar a sua bola." },
+  tele: { ic: "🌀", nome: "Teleporte", dica: "Aparece na hora perto do gol (ou da cesta) do outro time." },
+  pulo: { ic: "🦘", nome: "Super pulo", dica: "Um pulo gigante para a frente, por cima de todo mundo. No basquete, perto da cesta, vira ENTERRADA!" },
+  defesa: { ic: "🛡️", nome: "Super defesa", dica: "Por 5 segundos você rouba a bola sempre que encosta e pega toda bola que passa perto." },
+  muralha: { ic: "🧱", nome: "Muralha", dica: "Um muro na frente do seu gol (ou cesta) por 5 segundos." },
+  furacao: { ic: "🌪️", nome: "Furacão", dica: "Empurra para longe os adversários perto de você, e quem estava com a bola solta ela." },
+  clone: { ic: "👯", nome: "Clone", dica: "Aparece uma cópia sua por 6 segundos que corre atrás da bola e passa para você." } };
+const ESP_MURO_W = 150;
+function espMuroY(E, time) { const topo = 1 - time === 0; return topo ? (E.tipo === "futebol" ? 64 : 150) : ESP_H - (E.tipo === "futebol" ? 64 : 150); }   // muro na frente do gol que o time defende
+function espPasseDono(E, dono) {   // o clone ou o ímã mandam a bola para quem chamou
+  const b = E.b, d = espDist(b.x, b.y, dono.x, dono.y) || 1, v = Math.min(560, d * 2 + 200); b.dono = -1; b.voo = null; b.vx = (dono.x - b.x) / d * v; b.vy = (dono.y - b.y) / d * v; b.z = 4; b.ultimo = dono.i;
+}
+function espPoderesPasso(E, dt) {   // ímã, muralha, clone e o fim do super pulo
+  const b = E.b;
+  for (const p of E.P) {
+    if (p.ima > 0) {
+      const d = espDist(b.x, b.y, p.x, p.y);
+      if (b.dono < 0 && !b.voo && d < 340 && d > 18) { b.vx += (p.x - b.x) / d * 1100 * dt; b.vy += (p.y - b.y) / d * 1100 * dt; const vv = Math.hypot(b.vx, b.vy); if (vv > 520) { b.vx *= 520 / vv; b.vy *= 520 / vv; } }
+      else if (b.dono >= 0 && E.P[b.dono].time !== p.time && d < 130 && !(E.P[b.dono].fant > 0) && Math.random() < dt * 3) { E.P[b.dono].cdPegar = .8; espPasseDono(E, p); bipEsp(1200); }
+    }
+    if (p.puloFim) { p.puloFim = false; if (p.enterra && b.dono === p.i) { const c = espAlvo(p.time); if (espDist(p.x, p.y, c.x, c.y) < 140) { p.gols += 2; espPonto(E, p.time, 2); E.msg = "ENTERRADA! +2 " + ESP_TIMES[p.time].nome; } } p.enterra = false; }
+  }
+  // muralha: a bola bate e volta; o outro time não passa
+  for (const m of E.muros || []) {
+    const wy = espMuroY(E, m.time), dentroX = x => Math.abs(x - ESP_W / 2) < ESP_MURO_W / 2;
+    if (b.dono < 0 && !b.voo && dentroX(b.x) && Math.abs(b.y - wy) < 14) { const lado = wy < ESP_H / 2 ? 1 : -1; b.y = wy + lado * 15; b.vy = Math.abs(b.vy) * .7 * lado; bipEsp(160); }
+    for (const q of E.P) if (q.time !== m.time && Math.abs(q.x - ESP_W / 2) < ESP_MURO_W / 2 + 16 && Math.abs(q.y - wy) < 30) q.y = wy + (wy < ESP_H / 2 ? 30 : -30);
+  }
+  // clones: correm atrás da bola, roubam e passam para quem chamou
+  for (const c of E.clones || []) {
+    const dono = E.P[c.dono]; if (!dono) continue; c.cd = Math.max(0, (c.cd || 0) - dt);
+    const tx = b.x, ty = b.y, d = espDist(c.x, c.y, tx, ty) || 1, nossa = b.dono >= 0 && E.P[b.dono].time === dono.time;
+    if (!nossa) { const v = Math.min(d, 250 * dt); c.x += (tx - c.x) / d * v; c.y += (ty - c.y) / d * v; c.dir = Math.atan2(ty - c.y, tx - c.x); c.passo = (c.passo || 0) + v * 1.6; }
+    if (c.cd <= 0 && !nossa && !b.voo && d < 30 && !(b.dono >= 0 && (E.P[b.dono].fant > 0 || E.P[b.dono].pulo > 0))) { if (b.dono >= 0) E.P[b.dono].cdPegar = .8; c.cd = 1; espPasseDono(E, dono); bipEsp(900); }
+  }
+}
+function espEfeitos(p) { return (p.turbo > 0 ? 1 : 0) | (p.gelo > 0 ? 2 : 0) | (p.fogo > 0 ? 4 : 0) | (p.ima > 0 ? 8 : 0) | (p.fant > 0 ? 16 : 0) | (p.pulo > 0 ? 32 : 0) | (p.defesa > 0 ? 64 : 0); }
 const ESP_POD_CD = 20, ESP_POD_PRECO = 300;
 function espPoderesDe(nome) { const l = ((G.inv || {})[nome] || {}).espPod; return Array.isArray(l) ? l.filter(k => ESP_PODERES[k]) : []; }
 function espPoderUsado(nome) { const inv = (G.inv || {})[nome] || {}, l = espPoderesDe(nome); return l.includes(inv.espPodUsar) ? inv.espPodUsar : l[0] || null; }
@@ -9173,7 +9212,9 @@ function espSaida(E, time) {
 /* ---------- um passo da simulação (quem roda: o celular sozinho ou quem abriu a sala online) ---------- */
 function espPasso(E, dt) {
   if (E.fim) return;
-  for (const p of E.P) { p.flash = Math.max(0, p.flash - dt * 2); p.cdPegar -= dt; p.cdRoubo -= dt; p.podCd = Math.max(0, (p.podCd || 0) - dt); p.turbo = Math.max(0, (p.turbo || 0) - dt); p.gelo = Math.max(0, (p.gelo || 0) - dt); p.fogo = Math.max(0, (p.fogo || 0) - dt); }
+  for (const p of E.P) { p.flash = Math.max(0, p.flash - dt * 2); p.cdPegar -= dt; p.cdRoubo -= dt; p.podCd = Math.max(0, (p.podCd || 0) - dt); p.turbo = Math.max(0, (p.turbo || 0) - dt); p.gelo = Math.max(0, (p.gelo || 0) - dt); p.fogo = Math.max(0, (p.fogo || 0) - dt);
+    p.ima = Math.max(0, (p.ima || 0) - dt); p.fant = Math.max(0, (p.fant || 0) - dt); p.defesa = Math.max(0, (p.defesa || 0) - dt); if (p.pulo > 0) { p.pulo -= dt; if (p.pulo <= 0) { p.pulo = 0; p.puloFim = true; } } }
+  if (E.muros) E.muros = E.muros.filter(m => (m.t -= dt) > 0); if (E.clones) E.clones = E.clones.filter(c => (c.t -= dt) > 0);
   E.b.fogo = Math.max(0, (E.b.fogo || 0) - dt); if (E.fxPod) E.fxPod = E.fxPod.filter(f => (f.t -= dt) > 0);
   if (E.pausa > 0) { E.pausa -= dt; if (E.pausa <= 0) { E.msg = ""; if (E.depois) { const f = E.depois; E.depois = null; f(); } } return; }
   E.t -= dt;
@@ -9181,9 +9222,10 @@ function espPasso(E, dt) {
   const b = E.b;
   for (const p of E.P) {
     if (!p.humano || p.virouRobo) espIA(E, p, dt);
+    if (p.pulo > 0) { if (p.enterra) { const c = espAlvo(p.time), dd = espDist(p.x, p.y, c.x, c.y) || 1; p.inp = { x: (c.x - p.x) / dd, y: (c.y - p.y) / dd }; } else p.inp = { x: Math.cos(p.dir), y: Math.sin(p.dir) }; }
     const m = Math.hypot(p.inp.x, p.inp.y), ix = m > 1 ? p.inp.x / m : p.inp.x, iy = m > 1 ? p.inp.y / m : p.inp.y;
     if (p.gelo > 0) { p.inp = { x: 0, y: 0 }; p.acao = null; p.vx = p.vy = 0; continue; }   // congelado: não anda nem chuta
-    const vel = p.vel * (b.dono === p.i ? .9 : 1) * (p.turbo > 0 ? 1.75 : 1), k = 1 - Math.exp(-dt * 12);
+    const vel = p.vel * (b.dono === p.i ? .9 : 1) * (p.turbo > 0 ? 1.75 : 1) * (p.pulo > 0 ? (p.enterra ? 2.3 : 1.8) : 1), k = 1 - Math.exp(-dt * 12);
     p.vx += (ix * vel - p.vx) * k; p.vy += (iy * vel - p.vy) * k;
     p.x = espClamp(p.x + p.vx * dt, 22, ESP_W - 22); p.y = espClamp(p.y + p.vy * dt, 22, ESP_H - 22);
     const v = Math.hypot(p.vx, p.vy); if (m > .15) p.dir = Math.atan2(iy, ix); p.passo += v * dt * 1.6;
@@ -9198,8 +9240,8 @@ function espPasso(E, dt) {
     const d = E.P[b.dono]; b.x = d.x + Math.cos(d.dir) * 20; b.y = d.y + Math.sin(d.dir) * 20;
     b.z = E.tipo === "basquete" ? Math.abs(Math.sin(d.passo / 9)) * 16 : 0; b.h3 = b.z;
     // roubada: adversário encosta em quem está com a bola
-    for (const q of E.P) if (q.time !== d.time && q.cdRoubo <= 0 && espDist(q.x, q.y, d.x, d.y) < 30) {
-      q.cdRoubo = 1.1; if (Math.random() < ESP_ROUBO) { b.dono = q.i; d.cdPegar = .7; d.flash = 1; bipEsp(330); }
+    if (!(d.fant > 0) && !(d.pulo > 0)) for (const q of E.P) if (q.time !== d.time && q.cdRoubo <= 0 && !(q.pulo > 0) && espDist(q.x, q.y, d.x, d.y) < (q.defesa > 0 ? 40 : 30)) {
+      q.cdRoubo = q.defesa > 0 ? .3 : 1.1; if (q.defesa > 0 || Math.random() < ESP_ROUBO) { b.dono = q.i; d.cdPegar = .7; d.flash = 1; bipEsp(330); break; }
     }
   } else {
     b.x += b.vx * dt; b.y += b.vy * dt; const fr = Math.exp(-dt * (E.tipo === "futebol" ? 1.1 : 1.6)); b.vx *= fr; b.vy *= fr;
@@ -9211,9 +9253,10 @@ function espPasso(E, dt) {
     let perto = null, pd = 28;
     for (const p of E.P) { const d = espDist(p.x, p.y, b.x, b.y); if (p.gelo > 0) continue;
       if (b.fogo > 0 && p.time !== b.fogoTime) { if (d < 26 && p.flash <= 0) { p.flash = 1; bipEsp(180); } continue; }   // bola de fogo: o outro time não segura
-      if (p.cdPegar <= 0 && d < pd) { pd = d; perto = p; } }
+      if (p.cdPegar <= 0 && !(p.pulo > 0) && d < (p.defesa > 0 ? Math.max(pd, 62) : pd)) { pd = d; perto = p; } }
     if (perto) { b.dono = perto.i; b.vx = b.vy = 0; }
   }
+  espPoderesPasso(E, dt);
 }
 function espChutar(E, p) {
   const b = E.b;
@@ -9234,6 +9277,7 @@ function espArremessar(E, p) {
   const b = E.b, c = espAlvo(p.time), d = espDist(p.x, p.y, c.x, c.y);
   let chance = espClamp(.92 - d / 850, .12, .88);
   if (E.P.some(q => q.time !== p.time && espDist(q.x, q.y, p.x, p.y) < 60)) chance -= .25;   // marcado: mais difícil
+  if ((E.muros || []).some(m => m.time !== p.time)) chance *= .3;   // muralha na frente da cesta
   if (p.fogo > 0) { chance = .95; p.fogo = 0; b.fogo = 1.6; b.fogoTime = p.time; }   // arremesso de fogo
   b.dono = -1; b.ultimo = p.i; p.cdPegar = .5;
   b.voo = { x0: b.x, y0: b.y, hx: c.x, hy: c.y, f: 0, dur: .55 + d / 1300, h: 70 + d / 6, ok: Math.random() < chance, pts: d > 300 ? 3 : 2, time: p.time, quem: p.i };
@@ -9246,6 +9290,17 @@ function espUsarPoder(E, p) {
   if (p.pod === "fogo") { p.fogo = 8; bipEsp(300); }
   if (p.pod === "gelo") { bipEsp(1400);
     for (const q of E.P) if (q.time !== p.time && espDist(q.x, q.y, p.x, p.y) < 170) { q.gelo = 2; q.turbo = 0; if (E.b.dono === q.i) { E.b.dono = -1; E.b.vx = (Math.random() - .5) * 120; E.b.vy = (Math.random() - .5) * 120; q.cdPegar = 2; } } }
+  if (p.pod === "ima") { p.ima = 3; bipEsp(1100); }
+  if (p.pod === "fantasma") { p.fant = 4; bipEsp(500); }
+  if (p.pod === "defesa") { p.defesa = 5; bipEsp(800); }
+  if (p.pod === "pulo") { const c = espAlvo(p.time); p.pulo = .9; p.enterra = E.tipo === "basquete" && E.b.dono === p.i && espDist(p.x, p.y, c.x, c.y) < 470; bipEsp(700); }
+  if (p.pod === "tele") { const c = espAlvo(p.time); E.fxPod = (E.fxPod || []).concat([{ k: "tele", x: p.x, y: p.y, t: .8 }]);
+    p.x = espClamp(ESP_W / 2 + (Math.random() - .5) * 200, 40, ESP_W - 40); p.y = c.y + (c.y < ESP_H / 2 ? 230 : -230); p.vx = p.vy = 0; bipEsp(1500); }
+  if (p.pod === "muralha") { E.muros = (E.muros || []).filter(m => m.time !== p.time).concat([{ time: p.time, t: 5 }]); bipEsp(200); }
+  if (p.pod === "furacao") { bipEsp(250);
+    for (const q of E.P) { const d = espDist(q.x, q.y, p.x, p.y); if (q.time === p.time || d > 210) continue; const a = Math.atan2(q.y - p.y, q.x - p.x); q.x = espClamp(q.x + Math.cos(a) * 170, 22, ESP_W - 22); q.y = espClamp(q.y + Math.sin(a) * 170, 22, ESP_H - 22); q.flash = 1;
+      if (E.b.dono === q.i) { E.b.dono = -1; E.b.vx = Math.cos(a) * 380; E.b.vy = Math.sin(a) * 380; q.cdPegar = 1.2; } } }
+  if (p.pod === "clone") { E.clones = (E.clones || []).filter(c => c.dono !== p.i).concat([{ dono: p.i, x: p.x + 30, y: p.y, dir: p.dir, t: 6 }]); bipEsp(1000); }
   E.fxPod = (E.fxPod || []).concat([{ k: p.pod, x: p.x, y: p.y, t: .8 }]).slice(-6);
   return true;
 }
@@ -9276,7 +9331,11 @@ function espIA(E, p, dt) {
   const temBola = b.dono === p.i, nossa = b.dono >= 0 && E.P[b.dono].time === p.time;
   if (p.pod && p.podCd <= 0 && Math.random() < dt * 1.5) {   // robô usa o poder quando faz sentido
     const perto = E.P.some(q => q.time !== p.time && espDist(q.x, q.y, p.x, p.y) < 120), dGol = espDist(p.x, p.y, alvo.x, alvo.y);
-    if ((p.pod === "turbo" && temBola && dGol > 300) || (p.pod === "gelo" && perto && (temBola || (b.dono >= 0 && !nossa))) || (p.pod === "fogo" && temBola && dGol < 460)) p.acao = "poder";
+    const dono = b.dono >= 0 ? E.P[b.dono] : null, dBola = espDist(p.x, p.y, b.x, b.y), pertos = E.P.filter(q => q.time !== p.time && espDist(q.x, q.y, p.x, p.y) < 200).length;
+    if ((p.pod === "turbo" && temBola && dGol > 300) || (p.pod === "gelo" && perto && (temBola || (b.dono >= 0 && !nossa))) || (p.pod === "fogo" && temBola && dGol < 460)
+      || (p.pod === "ima" && !nossa && dBola < 300 && dBola > 60) || (p.pod === "fantasma" && temBola && perto) || (p.pod === "tele" && temBola && dGol > 520)
+      || (p.pod === "pulo" && temBola && (E.tipo === "basquete" ? dGol < 430 : perto)) || (p.pod === "defesa" && dono && !nossa && dBola < 200)
+      || (p.pod === "muralha" && dono && !nossa && espDist(dono.x, dono.y, meuGol.x, meuGol.y) < 420) || (p.pod === "furacao" && (pertos >= 2 || (temBola && perto))) || (p.pod === "clone" && !nossa)) p.acao = "poder";
   }
   let tx = p.x, ty = p.y;
   if (temBola) {
@@ -9360,6 +9419,7 @@ function espDesenhar(c, E, eu, cw, ch, topo = 0) {
   espDesenharCampo(c, E.tipo);
   const ph = { k: "esporte" }, ord = E.P.slice().sort((a, b) => a.y - b.y), b = E.b, tt = performance.now() / 1000;
   for (const f of E.fxPod || []) if (f.k === "gelo") { c.strokeStyle = "rgba(160,225,255,.7)"; c.lineWidth = 6; c.beginPath(); c.arc(f.x, f.y, 170 * (1 - Math.max(0, f.t) / .8 * .6), 0, Math.PI * 2); c.stroke(); }
+  espDesenharPoderes(c, E, tt);
   if (b.fogo > 0) for (let k = 1; k <= 6; k++) { c.fillStyle = `rgba(255,${120 + k * 15},40,${.5 - k * .07})`; c.beginPath(); c.arc(b.x - (b.vx || 0) * k * .012, b.y + 10 - (b.vy || 0) * k * .012, 14 - k, 0, Math.PI * 2); c.fill(); }
   const bolaAtras = b.y - b.z < (E.P[b.dono] || {}).y;
   if (bolaAtras && b.dono >= 0) espDesenharBola(c, E, b.x, b.y + 10, b.z);
@@ -9368,7 +9428,10 @@ function espDesenhar(c, E, eu, cw, ch, topo = 0) {
     c.beginPath(); c.ellipse(p.x, p.y + 16, 24, 10, 0, 0, Math.PI * 2); c.fill(); c.stroke();
     if (p.turbo > 0) { c.strokeStyle = "rgba(255,225,80,.8)"; c.lineWidth = 3; for (let k = 0; k < 4; k++) { const a = p.dir + Math.PI + (k - 1.5) * .3; c.beginPath(); c.moveTo(p.x + Math.cos(a) * 26, p.y + Math.sin(a) * 26); c.lineTo(p.x + Math.cos(a) * (46 + Math.sin(tt * 20 + k) * 8), p.y + Math.sin(a) * (46 + Math.sin(tt * 20 + k) * 8)); c.stroke(); } }
     if (p.fogo > 0) { c.strokeStyle = `rgba(255,120,30,${.6 + .3 * Math.sin(tt * 10)})`; c.lineWidth = 5; c.beginPath(); c.arc(p.x, p.y - 10, 34, 0, Math.PI * 2); c.stroke(); }
-    c.save(); c.translate(p.x, p.y); c.scale(ESP_ESC, ESP_ESC);
+    const pz = p.pulo > 0 ? Math.abs(Math.sin(tt * 3.5)) * 60 + 20 : 0;
+    if (p.defesa > 0) { c.strokeStyle = `rgba(90,170,255,${.6 + .3 * Math.sin(tt * 8)})`; c.fillStyle = "rgba(90,170,255,.15)"; c.lineWidth = 4; c.beginPath(); c.arc(p.x, p.y - 12, 40, 0, Math.PI * 2); c.fill(); c.stroke(); }
+    if (p.ima > 0) { c.strokeStyle = "rgba(255,70,140,.8)"; c.lineWidth = 3; for (let k = 0; k < 3; k++) { c.beginPath(); c.arc(p.x, p.y - 10, 30 + ((tt * 60 + k * 20) % 60), 0, Math.PI * 2); c.stroke(); } }
+    c.save(); c.translate(p.x, p.y - pz); c.scale(ESP_ESC, ESP_ESC); if (p.fant > 0) c.globalAlpha = .35;
     const t = espTemp; Object.assign(t, p); t.x = 0; t.y = 0; t.vidas = 0; t.i = p.i + 1000; t.pet = null;
     try { desenharBoneco2(c, t, ph); } catch {}
     c.restore();
@@ -9378,6 +9441,23 @@ function espDesenhar(c, E, eu, cw, ch, topo = 0) {
   c.setTransform(1, 0, 0, 1, 0, 0);
 }
 const espTemp = {};
+function espDesenharPoderes(c, E, tt) {
+  for (const m of E.muros || []) { const wy = espMuroY(E, m.time), x0 = ESP_W / 2 - ESP_MURO_W / 2;
+    c.fillStyle = "#a0522d"; c.fillRect(x0, wy - 12, ESP_MURO_W, 24); c.strokeStyle = "#5a2d12"; c.lineWidth = 2;
+    for (let i = 0; i <= ESP_MURO_W; i += 26) { c.beginPath(); c.moveTo(x0 + i, wy - 12); c.lineTo(x0 + i, wy); c.moveTo(x0 + i + 13, wy); c.lineTo(x0 + i + 13, wy + 12); c.stroke(); }
+    c.strokeRect(x0, wy - 12, ESP_MURO_W, 24); c.beginPath(); c.moveTo(x0, wy); c.lineTo(x0 + ESP_MURO_W, wy); c.stroke();
+    c.fillStyle = ESP_TIMES[m.time].cor; c.fillRect(x0, wy - 15, ESP_MURO_W, 4); }
+  for (const cl of E.clones || []) { const dono = E.P[cl.dono]; if (!dono) continue;
+    c.save(); c.translate(cl.x, cl.y); c.scale(ESP_ESC, ESP_ESC); c.globalAlpha = .55; const t = espTemp; Object.assign(t, dono); t.x = 0; t.y = 0; t.vidas = 0; t.i = dono.i + 2000; t.pet = null; t.dir = cl.dir || 0; t.passo = cl.passo || 0; t.gelo = 0;
+    try { desenharBoneco2(c, t, { k: "esporte" }); } catch {} c.restore();
+    c.fillStyle = "#fff"; c.font = "bold 18px sans-serif"; c.textAlign = "center"; c.fillText("👯", cl.x, cl.y - 50); }
+  for (const f of E.fxPod || []) {
+    const q = 1 - Math.max(0, f.t) / .8;
+    if (f.k === "tele") { c.strokeStyle = `rgba(170,90,255,${1 - q})`; c.lineWidth = 6; for (let k = 0; k < 3; k++) { c.beginPath(); c.arc(f.x, f.y, 10 + q * 60 + k * 12, k + q * 6, k + q * 6 + 4); c.stroke(); } }
+    if (f.k === "furacao") { c.strokeStyle = `rgba(200,220,235,${1 - q})`; c.lineWidth = 5; for (let k = 0; k < 4; k++) { c.beginPath(); c.arc(f.x, f.y, 40 + q * 170 - k * 18, k * 1.6 + q * 9, k * 1.6 + q * 9 + 3.6); c.stroke(); } }
+    if (f.k === "muralha" || f.k === "clone" || f.k === "pulo" || f.k === "ima" || f.k === "fantasma" || f.k === "defesa") { c.globalAlpha = 1 - q; c.font = `${30 + q * 30}px sans-serif`; c.textAlign = "center"; c.fillText(ESP_PODERES[f.k].ic, f.x, f.y - 60 - q * 30); c.globalAlpha = 1; }
+  }
+}
 /* ---------- Mini jogos em 3D (pedido do Andre): a mesma partida, desenhada com three.js ----------
    Campo/quadra com a pintura do 2D, gols ou cestas de verdade, arquibancada com torcida, placas e refletores.
    Câmera atrás de quem joga, olhando para o lado que o seu time ataca (no time Vermelho o controle gira junto). */
@@ -9451,7 +9531,30 @@ function esp3Montar(E, eu) {
 function esp3Limpar() {
   if (E3.r) { try { E3.r.dispose(); E3.r.domElement.remove(); } catch {} }
   if (E3.cena) E3.cena.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) [].concat(o.material).forEach(m => { if (m.map) m.map.dispose(); m.dispose(); }); });
-  E3.r = null; E3.cena = null; E3.mods = []; E3.confete = []; E3.faiscas = []; E3.torcida = null; E3.geoF = null;
+  E3.r = null; E3.cena = null; E3.mods = []; E3.confete = []; E3.faiscas = []; E3.torcida = null; E3.geoF = null; E3.muros = null; E3.clones = null;
+}
+function esp3PoderesJogador(m, p, nx, nz, dt) {
+  const tt = performance.now() / 1000;
+  if (p.pulo > 0) m.g.position.y = Math.abs(Math.sin(tt * 3.5)) * 1.5 + .4;
+  const fant = p.fant > 0; if (m.fantA !== fant) { m.fantA = fant; m.g.traverse(o => { if (o.material && !o.isSprite) [].concat(o.material).forEach(mt => { if (mt.userData.op0 == null) mt.userData.op0 = mt.opacity, mt.userData.tr0 = mt.transparent; mt.transparent = fant || mt.userData.tr0; mt.opacity = fant ? .3 : mt.userData.op0; }); }); }
+  if (!m.escudo) { m.escudo = new THREE.Mesh(new THREE.SphereGeometry(.9, 18, 12), new THREE.MeshBasicMaterial({ color: 0x5aaaff, transparent: true, opacity: .25, depthWrite: false })); m.escudo.position.y = .9; m.g.add(m.escudo); }
+  m.escudo.visible = p.defesa > 0; if (p.defesa > 0) m.escudo.material.opacity = .2 + .1 * Math.sin(tt * 8);
+  if (!m.imaAnel) { m.imaAnel = new THREE.Mesh(new THREE.TorusGeometry(.7, .05, 8, 28), new THREE.MeshBasicMaterial({ color: 0xff468c })); m.imaAnel.rotation.x = Math.PI / 2; m.imaAnel.position.y = .15; m.g.add(m.imaAnel); }
+  m.imaAnel.visible = p.ima > 0; if (p.ima > 0) m.imaAnel.scale.setScalar(1 + ((tt * 2) % 1) * .8);
+}
+function esp3PoderesCampo(E, dt) {
+  E3.muros = E3.muros || [0, 1].map(t => { const g = new THREE.Mesh(new THREE.BoxGeometry(e3x(ESP_W / 2 + ESP_MURO_W / 2) - e3x(ESP_W / 2 - ESP_MURO_W / 2), .8, .3), new THREE.MeshLambertMaterial({ color: 0xa0522d, emissive: 0x2a1206 })); g.visible = false; E3.cena.add(g); return g; });
+  E3.muros.forEach((g, t) => { const m = (E.muros || []).find(x => x.time === t); g.visible = !!m; if (m) { g.position.set(e3x(ESP_W / 2), .4, e3z(espMuroY(E, t))); } });
+  E3.clones = E3.clones || {};
+  const vivos = new Set((E.clones || []).map(c => c.dono));
+  for (const k of Object.keys(E3.clones)) if (!vivos.has(+k)) { E3.cena.remove(E3.clones[k].g); delete E3.clones[k]; }
+  for (const c of E.clones || []) { const dono = E.P[c.dono]; if (!dono) continue;
+    let m = E3.clones[c.dono];
+    if (!m) { m = E3.clones[c.dono] = pracaModelo({ nome: "👯", skin: dono.skin, cor: dono.cor, pele: dono.pele }); m.g.traverse(o => { if (o.material && !o.isSprite) [].concat(o.material).forEach(mt => { mt.transparent = true; mt.opacity = .5; }); }); m.g.scale.setScalar(.9); E3.cena.add(m.g); m.ux = e3x(c.x); m.uz = e3z(c.y); m.passo = 0; }
+    const nx = e3x(c.x), nz = e3z(c.y), v = Math.hypot(nx - m.ux, nz - m.uz) / Math.max(dt, .001); m.ux = nx; m.uz = nz; m.passo += v * dt * 3;
+    animarBonecoPraca(m, nx, 0, nz, Math.atan2(-Math.cos(c.dir || 0), -Math.sin(c.dir || 0)), v > .6, dt); }
+  for (const f of E.fxPod || []) if (!f.v3 && (f.k === "tele" || f.k === "furacao")) { f.v3 = true; const cor = f.k === "tele" ? 0xaa5aff : 0xd8e6f0;
+    for (let k = 0; k < 36; k++) { const a = k / 36 * Math.PI * 2; esp3Faisca(e3x(f.x) + Math.cos(a) * .4, .4 + (k % 3) * .4, e3z(f.y) + Math.sin(a) * .4, cor, Math.cos(a) * (f.k === "furacao" ? 9 : 3), Math.sin(a) * (f.k === "furacao" ? 9 : 3)); } }
 }
 function esp3Faisca(x, y, z, cor, vx = 0, vz = 0) {
   if (E3.faiscas.length > 160) return;
@@ -9477,7 +9580,9 @@ function esp3Quadro(E, eu, dt, w, h) {
     if (m.gelo) m.gelo.visible = p.gelo > 0;
     if (!m.fogoAnel) { m.fogoAnel = new THREE.Mesh(new THREE.TorusGeometry(.62, .06, 8, 28), new THREE.MeshBasicMaterial({ color: 0xff7a1a })); m.fogoAnel.rotation.x = Math.PI / 2; m.fogoAnel.position.y = 1; m.g.add(m.fogoAnel); }
     m.fogoAnel.visible = p.fogo > 0; if (p.fogo > 0) m.fogoAnel.rotation.z += dt * 6;
-    if (p.turbo > 0 && Math.random() < .6) esp3Faisca(nx, .4 + Math.random(), nz, 0xffe14d); });
+    if (p.turbo > 0 && Math.random() < .6) esp3Faisca(nx, .4 + Math.random(), nz, 0xffe14d);
+    esp3PoderesJogador(m, p, nx, nz, dt); });
+  esp3PoderesCampo(E, dt);
   // bola (no basquete, o arremesso termina na altura do aro)
   const b = E.b, alt = (b.h3 != null ? b.h3 : b.z) / 40, bx = e3x(b.x), bz = e3z(b.y);
   E3.bola.position.set(bx, (E.tipo === "futebol" ? .24 : .26) + alt, bz);
@@ -11442,8 +11547,8 @@ acoes.espComecarOnline = () => {
   for (const [id, c] of o.conns) enviar(c.conn, { t: "einicio", tipo: E.tipo, tam, P, eu: E.P.findIndex(p => p.id === id) });
   espComecar(E, E.P.findIndex(p => p.id === "h"), {
     enviar(dt) { o.tEnvio -= dt; if (o.tEnvio > 0 && !(E.fim && !o.fimMandado)) return; o.tEnvio = .066; if (E.fim) o.fimMandado = true;
-      const b = E.b; espMandarTodos({ t: "es", p: E.P.map(p => [espR(p.x), espR(p.y), Math.round(p.dir * 100) / 100, Math.round(p.passo), p.flash > 0 ? 1 : 0, p.gols, (p.turbo > 0 ? 1 : 0) | (p.gelo > 0 ? 2 : 0) | (p.fogo > 0 ? 4 : 0), Math.ceil(p.podCd || 0)]),
-        b: [espR(b.x), espR(b.y), espR(b.z), b.dono, espR(b.h3 || 0), b.fogo > 0 ? 1 : 0], fx: (E.fxPod || []).filter(f => !f.env && (f.env = true)).map(f => [f.k, espR(f.x), espR(f.y)]), pl: E.placar, tm: espR(E.t), msg: E.msg || "", fim: E.fim || null }); },
+      const b = E.b; espMandarTodos({ t: "es", p: E.P.map(p => [espR(p.x), espR(p.y), Math.round(p.dir * 100) / 100, Math.round(p.passo), p.flash > 0 ? 1 : 0, p.gols, espEfeitos(p), Math.ceil(p.podCd || 0)]),
+        b: [espR(b.x), espR(b.y), espR(b.z), b.dono, espR(b.h3 || 0), b.fogo > 0 ? 1 : 0], fx: (E.fxPod || []).filter(f => !f.env && (f.env = true)).map(f => [f.k, espR(f.x), espR(f.y)]), mu: (E.muros || []).map(m => m.time), cl: (E.clones || []).map(c => [c.dono, espR(c.x), espR(c.y), Math.round((c.dir || 0) * 100) / 100]), pl: E.placar, tm: espR(E.t), msg: E.msg || "", fim: E.fim || null }); },
     denovo() { o.fimMandado = false; acoes.espComecarOnline(); },
     sair() { espMandarTodos({ t: "efechou" }); setTimeout(espLimparRede, 200); }
   });
@@ -11485,7 +11590,8 @@ function espCliRecebe(d) {
         if (o.tInp <= 0 || (k !== o.ultInp && o.tInp < .04)) { o.tInp = k !== o.ultInp ? .066 : .25; o.ultInp = k; enviar(o.hostConn, { t: "ei", x: Math.round(inp.x * 100) / 100, y: Math.round(inp.y * 100) / 100 }); }
         if (E.fxPod) E.fxPod = E.fxPod.filter(f => (f.t -= dt) > 0);
         const a = o.alvo; if (!a) return; const kk = 1 - Math.exp(-dt * 14);
-        E.P.forEach((p, i) => { const q = a.p[i]; if (!q) return; p.x += (q[0] - p.x) * kk; p.y += (q[1] - p.y) * kk; p.dir = q[2]; p.passo = q[3]; p.flash = q[4] ? 1 : 0; p.gols = q[5] || 0; p.turbo = q[6] & 1 ? 1 : 0; p.gelo = q[6] & 2 ? 1 : 0; p.fogo = q[6] & 4 ? 1 : 0; p.podCd = q[7] || 0; });
+        E.P.forEach((p, i) => { const q = a.p[i]; if (!q) return; p.x += (q[0] - p.x) * kk; p.y += (q[1] - p.y) * kk; p.dir = q[2]; p.passo = q[3]; p.flash = q[4] ? 1 : 0; p.gols = q[5] || 0; p.turbo = q[6] & 1 ? 1 : 0; p.gelo = q[6] & 2 ? 1 : 0; p.fogo = q[6] & 4 ? 1 : 0; p.ima = q[6] & 8 ? 1 : 0; p.fant = q[6] & 16 ? 1 : 0; p.pulo = q[6] & 32 ? 1 : 0; p.defesa = q[6] & 64 ? 1 : 0; p.podCd = q[7] || 0; });
+        E.muros = (a.mu || []).map(time => ({ time, t: 1 })); E.clones = (a.cl || []).map(c => { const v = (E.clones || []).find(x => x.dono === c[0]); return { dono: c[0], x: v ? v.x + (c[1] - v.x) * kk : c[1], y: v ? v.y + (c[2] - v.y) * kk : c[2], dir: c[3], passo: v ? (v.passo || 0) + Math.hypot(c[1] - v.x, c[2] - v.y) * 1.6 : 0, t: 1 }; });
         E.b.x += (a.b[0] - E.b.x) * kk; E.b.y += (a.b[1] - E.b.y) * kk; E.b.z += (a.b[2] - E.b.z) * kk; E.b.h3 = (E.b.h3 || 0) + (a.b[4] - (E.b.h3 || 0)) * kk; E.b.dono = a.b[3]; E.b.fogo = a.b[5] ? 1 : 0;
       },
       acao(x) { enviar(o.hostConn, { t: "ea", a: x }); },
@@ -11495,7 +11601,7 @@ function espCliRecebe(d) {
   }
   if (d.t === "es" && ESP.E && Array.isArray(d.p) && Array.isArray(d.b)) {
     const E = ESP.E, num = v => espClamp(+v || 0, -50, ESP_H + 50);
-    o.alvo = { p: d.p.slice(0, 6).map(q => [num(q[0]), num(q[1]), +q[2] || 0, +q[3] || 0, q[4] ? 1 : 0, Math.max(0, Math.min(99, +q[5] || 0)), (+q[6] || 0) & 7, Math.max(0, Math.min(99, +q[7] || 0))]), b: [num(d.b[0]), num(d.b[1]), espClamp(+d.b[2] || 0, 0, 400), Number.isInteger(d.b[3]) ? d.b[3] : -1, espClamp(+d.b[4] || 0, 0, 400), d.b[5] ? 1 : 0] };
+    o.alvo = { p: d.p.slice(0, 6).map(q => [num(q[0]), num(q[1]), +q[2] || 0, +q[3] || 0, q[4] ? 1 : 0, Math.max(0, Math.min(99, +q[5] || 0)), (+q[6] || 0) & 127, Math.max(0, Math.min(99, +q[7] || 0))]), b: [num(d.b[0]), num(d.b[1]), espClamp(+d.b[2] || 0, 0, 400), Number.isInteger(d.b[3]) ? d.b[3] : -1, espClamp(+d.b[4] || 0, 0, 400), d.b[5] ? 1 : 0], mu: Array.isArray(d.mu) ? d.mu.slice(0, 2).filter(x => x === 0 || x === 1) : [], cl: Array.isArray(d.cl) ? d.cl.slice(0, 6).filter(c => Array.isArray(c) && Number.isInteger(c[0]) && c[0] >= 0 && c[0] < 6).map(c => [c[0], num(c[1]), num(c[2]), +c[3] || 0]) : [] };
     if (Array.isArray(d.fx)) E.fxPod = (E.fxPod || []).filter(f => (f.t || 0) > 0).concat(d.fx.slice(0, 6).filter(f => Array.isArray(f) && ESP_PODERES[f[0]]).map(f => ({ k: f[0], x: num(f[1]), y: num(f[2]), t: .8 })));
     if (Array.isArray(d.pl)) E.placar = [Math.max(0, +d.pl[0] || 0), Math.max(0, +d.pl[1] || 0)];
     E.t = espClamp(+d.tm || 0, 0, ESP_TEMPO); E.msg = String(d.msg || "").slice(0, 40);
