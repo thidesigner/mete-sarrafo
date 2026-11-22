@@ -135,6 +135,12 @@ Botão "Praça" na tela inicial: lugar 3D para andar com o bonequinho (`abrirPra
   - **Pega-pega**: pelo Bip. Com amigos na Praça, quem começa é o pegador (anel vermelho; vai na rede no bit 4 de `e`); encostou, manda `pg` ao dono, que avisa todos (`pracaPegaRecebe`). Sozinho: pega-pega com o Bip (pegar em 30 s e depois fugir 15 s = 15 moedas).
   - **Clima da coleção** (`climaDaColecao`): chuva com relâmpago na Tempestade, neve no Gelo, brasas no Fogo, brilho no Sol/Lua/Eclipse.
   - **Máquina de foto** (📷 no alto): salva um PNG só da tela do jogo, com o nome e a data (`pracaFoto`); não usa a câmera do celular.
+- **Bosque** (ideias do Andre), bloco "Bosque da Praça" em `fonte/jogo.html` (`BOSQUE`, `montarBosque3D`, `passoBosque`): fica a oeste, saindo da Praça por uma passagem (o poste da passagem foi tirado). `pracaLivre` foi embrulhada para a área nova (lago e paredes do labirinto não deixam andar; voando por cima do labirinto pode). Tem:
+  - **Lago de pescaria** (`LAGO`, `PIER`, `PESCA_LUGAR`): "🎣 Pescar" joga a linha; quando a boia mexe aparece "❗ PUXA AGORA!" (1,2 s). Peixes em `PEIXES` (chance `p`, moedas `m`; 🌟 Peixe Dourado é raro). Moedas só nas `PESCA_LIMITE` (15) primeiras do dia (`G.pesca`); coleção em `G.peixes[nome]` e placa "🐠 Aquário" (`aquarioHTML`), com +100 ao pegar todos os tipos. Barquinho, vitórias-régias e peixe pulando são só enfeite.
+  - **Labirinto** de cerca viva (`LAB`, `LAB_PAREDES` sorteado com semente fixa, igual para todos): cronômetro em `#pr-lab`, baú no meio (`abrirBau`): `LAB_PREMIO` (40) uma vez por dia (`G.labPremio`), recorde em `G.labRec`.
+  - **Carrinho** (`KART_LUGAR`, `modeloKart`, `passoKartFisica`): dirige por toda a Praça, Parque e Bosque (círculo: frente/ré e virar; no PC WASD). Corrida de 6 arcos em volta da Praça (`KART_ARCOS`, o próximo pisca): volta completa guarda o recorde em `G.kartRec` e dá `KART_PREMIO` (20) na 1ª do dia. Os amigos veem o carrinho (bit 8 de `e` na rede; as máscaras em `fonte/online.js` viraram `& 15`).
+  - **Pet andando junto**: em `pracaModelo` o pet fica solto (`m.pet`) e `animarBonecoPraca` faz ele seguir atrás pulando (o seu e o dos amigos).
+  - Teste: `ferramentas/teste/teste-bosque.js`.
 - Teste: `ferramentas/teste/teste-praca.js`, `ferramentas/teste/teste-historia.js`, `ferramentas/teste/teste-missao.js`, `ferramentas/teste/teste-saga.js`, `ferramentas/teste/teste-parque.js` e `ferramentas/teste/teste-praca-mais.js`.
 
 ## Mini jogos: Futebol e Basquete (ideia do Andre)

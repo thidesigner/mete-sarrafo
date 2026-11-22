@@ -298,3 +298,11 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
 - Elas trocam sozinhas no domingo, sem precisar mexer em nada.
 - Histórias com batalha na Praça (pedido do Andre): o boss de cada coleção (Kraken, Rei Rex, Duende Ranzinza) aparece, o Bip e o Bop batalham com ele, ele foge e espalha fragmentos. Missão em 2 partes e batalha final: o boss perde e vira amigo. Prêmio só da missão: gesto Herói do Mar, Domador de Dinos ou Salvador do Natal.
 - As skins da semana ganharam fantasia de verdade (barbatana, tentáculos, coroa, asas, gorro do Papai Noel, chifres da rena, cartola do boneco de neve...) com bolhas, brasas ou neve em volta.
+
+## Bosque na Praça Central (pedido do Andre, 22/11)
+
+- A oeste da Praça tem o Bosque, com:
+  - **Lago de pescaria:** espera a boia mexer e aperta "PUXA AGORA!". São 9 tipos de peixe (um deles é a bota velha). Só as 15 primeiras pescas do dia dão moedas. No aquário dá para ver a coleção, e quem pega todos os tipos ganha +100.
+  - **Labirinto:** tem um baú no meio que dá 40 moedas uma vez por dia, e guarda o seu recorde de tempo.
+  - **Carrinho:** dá para dirigir por todo lugar. Tem uma corrida de 6 arcos em volta da Praça: a primeira volta do dia dá 20 moedas, e o jogo guarda o seu recorde. Os amigos veem você no carrinho.
+- O pet agora anda atrás do bonequinho na Praça.

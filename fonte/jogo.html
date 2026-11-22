@@ -5387,12 +5387,12 @@ function pracaModelo(info) {
   const p = { i: -1, nome: info.nome, humano: true, cor: info.cor || A_CORES[0], pele: info.pele || A_PELE[0], vidas: 0, x: 0, y: 0, passo: 0, flash: 0 };
   vestir(p, info.skin || "classico"); if (info.ficha) p.ficha = info.ficha; p.pet = info.pet || null; p.selo = info.selo || 0;
   const m = modeloBoneco3D(p), g = new THREE.Group(); g.add(m.g);
-  const pg = p.pet && pet3D(p.pet, p.skin); if (pg) { pg.position.set(-.5, 0, .15); m.g.add(pg); }
+  const pg = p.pet && pet3D(p.pet, p.skin); if (pg) { pg.position.set(-.5, 0, .15); g.add(pg); }   // o pet anda atrás (animarBonecoPraca, bloco do Bosque)
   deixarDesenho(m.g, m.corpoMat);
   const tag = etiqueta({ nome: nomeComSelo(p), vidas: "" }); tag.position.y = 1.95; g.add(tag);
   const sombra = new THREE.Mesh(new THREE.PlaneGeometry(.9, .9), new THREE.MeshBasicMaterial({ map: PRACA.sombraTex, transparent: true, depthWrite: false })); sombra.rotation.x = -Math.PI / 2; sombra.position.y = .02; g.add(sombra);
   const giram = []; g.traverse(o => { if (o.userData && o.userData.gira) giram.push(o); });
-  return { g, corpo: m.g, pernaE: m.pernaE, pernaD: m.pernaD, bracoE: m.bracoE, bracoD: m.bracoD, giram, tag, passo: 0 };
+  return { g, corpo: m.g, pernaE: m.pernaE, pernaD: m.pernaD, bracoE: m.bracoE, bracoD: m.bracoD, giram, tag, passo: 0, pet: pg || null };
 }
 function meuInfoPraca() {
   const nome = perfil();
@@ -5416,7 +5416,7 @@ function pracaOutro(id, info) {
   if (info) { o.info = info; anotarMoedas(info.nome, info.moedas); }
   return o;
 }
-function pracaPos(id, x, z, r, y, e) { const o = PRACA.outros.get(id); if (!o) return; if (!o.alvo) { o.x = x; o.z = z; o.m.g.visible = true; } o.alvo = { x, z, r, y, e: (+e || 0) & 7 }; }
+function pracaPos(id, x, z, r, y, e) { const o = PRACA.outros.get(id); if (!o) return; if (!o.alvo) { o.x = x; o.z = z; o.m.g.visible = true; } o.alvo = { x, z, r, y, e: (+e || 0) & 15 }; }
 function pracaTirar(id) { const o = PRACA.outros.get(id); if (!o) return; PRACA.cena.remove(o.m.g); PRACA.outros.delete(id); }
 function pracaTirarTodos() { for (const id of [...PRACA.outros.keys()]) pracaTirar(id); }
 /* ---------- abrir e fechar ---------- */
@@ -7687,6 +7687,306 @@ passoHistoria = function (dt) {
 };
 const _acabarHistoriaAntes = acabarHistoria;
 acabarHistoria = function () { const o = PRACA.hist; _acabarHistoriaAntes(); if (o && PRACA.ceu) PRACA.ceu.material.color.setScalar(1); };
+</script>
+
+<script>
+/* ===================== Bosque da Praça (ideias do Andre): lago de pescaria, labirinto, carrinho de dirigir e pet andando junto =====================
+   Fica a oeste da Praça, saindo por uma passagem (BOSQUE). Tudo guardado só no aparelho.
+   Pescaria: G.pesca = {dia, por: {nome: n}} (moedas nas PESCA_LIMITE primeiras do dia) e G.peixes[nome] = {k: quantos, bonus}.
+   Labirinto: baú no meio, LAB_PREMIO moedas uma vez por dia (G.labPremio[nome] = dia), recorde em G.labRec[nome].
+   Carrinho: corrida de 6 arcos em volta da Praça (KART_ARCOS); recorde em G.kartRec[nome], KART_PREMIO moedas na 1ª volta do dia (G.kartPremio). Na rede vai o bit 8 de "e". */
+const BOSQUE = { x0: -47, x1: -21, z0: -17, z1: 17, passagem: 2.4 };
+const LAGO = { x: -36, z: -8, rx: 7, rz: 5.5 }, PIER = { x: -36, z0: -7.2, z1: -2.2, w: 1.4 }, PESCA_LUGAR = { x: -36, z: -6.3 }, AQUARIO = { x: -30.5, z: -1.6 };
+const LAB = { x0: -42, z0: 2, n: 7, cel: 2, alto: 2.2 }, LAB_PREMIO = 40, KART_PREMIO = 20, PESCA_LIMITE = 15;
+const KART_LUGAR = { x: -25, z: -6 };
+const KART_ARCOS = [Math.PI, Math.PI * 4 / 3, Math.PI * 5 / 3, 0, Math.PI / 3, Math.PI * 2 / 3].map(a => ({ x: Math.cos(a) * 16, z: Math.sin(a) * 16, a }));
+const PEIXES = [
+  { k: "peixinho", ic: "🐟", nome: "Peixinho", p: 35, m: 3 }, { k: "palhaco", ic: "🐠", nome: "Peixe-palhaço", p: 25, m: 5 }, { k: "baiacu", ic: "🐡", nome: "Baiacu", p: 14, m: 8 },
+  { k: "camarao", ic: "🦐", nome: "Camarão", p: 10, m: 4 }, { k: "lula", ic: "🦑", nome: "Lula", p: 6, m: 12 }, { k: "polvo", ic: "🐙", nome: "Polvo", p: 4, m: 15 },
+  { k: "tubarao", ic: "🦈", nome: "Tubarão", p: 2.5, m: 30 }, { k: "bota", ic: "👢", nome: "Bota velha", p: 3, m: 0 }, { k: "dourado", ic: "🌟", nome: "Peixe Dourado", p: .5, m: 100 } ];
+const PESCA_BONUS = 100;   // pegou todos os tipos
+// labirinto: sempre o mesmo para todo mundo (sorteio com semente fixa)
+const LAB_PAREDES = (() => {
+  const n = LAB.n, H = [], V = []; for (let r = 0; r <= n; r++) { H.push(Array(n).fill(true)); V.push(Array(n + 1).fill(true)); }
+  let s = 7; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  const vis = new Set(), pilha = [[3, 3]]; vis.add("3,3");
+  while (pilha.length) { const [r, c] = pilha[pilha.length - 1], viz = [[r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]].filter(([a, b]) => a >= 0 && b >= 0 && a < n && b < n && !vis.has(a + "," + b));
+    if (!viz.length) { pilha.pop(); continue; } const [a, b] = viz[Math.floor(rnd() * viz.length)];
+    if (a !== r) H[Math.max(a, r)][c] = false; else V[r][Math.max(b, c)] = false; vis.add(a + "," + b); pilha.push([a, b]); }
+  V[3][n] = false;   // entrada do lado da passagem (leste)
+  const l = [], C = LAB.cel; for (let r = 0; r <= n; r++) for (let c = 0; c < n; c++) if (H[r][c]) l.push({ x: LAB.x0 + c * C + C / 2, z: LAB.z0 + r * C, w: C + .3, d: .3 });
+  for (let r = 0; r < n; r++) for (let c = 0; c <= n; c++) if (V[r][c]) l.push({ x: LAB.x0 + c * C, z: LAB.z0 + r * C + C / 2, w: .3, d: C + .3 });
+  return l;
+})();
+const LAB_BAU = { x: LAB.x0 + 3 * LAB.cel + LAB.cel / 2, z: LAB.z0 + 3 * LAB.cel + LAB.cel / 2 };
+const naLagoa = (x, z) => ((x - LAGO.x) / LAGO.rx) ** 2 + ((z - LAGO.z) / LAGO.rz) ** 2 < 1 && !(Math.abs(x - PIER.x) <= PIER.w / 2 && z >= PIER.z0 && z <= PIER.z1);
+const naParede = (x, z, m = .3) => LAB_PAREDES.some(p => Math.abs(x - p.x) < p.w / 2 + m && Math.abs(z - p.z) < p.d / 2 + m);
+const noLabirinto = (x, z) => x > LAB.x0 && x < LAB.x0 + LAB.n * LAB.cel && z > LAB.z0 && z < LAB.z0 + LAB.n * LAB.cel;
+const _pracaLivreAntes = pracaLivre;
+pracaLivre = function (x, z) {
+  if (x < 0 && Math.hypot(x, z) > PRACA_R) {
+    if (Math.abs(z) <= BOSQUE.passagem && x >= BOSQUE.x1 - .5) return true;
+    if (x < BOSQUE.x0 || x > BOSQUE.x1 || z < BOSQUE.z0 || z > BOSQUE.z1) return false;
+    if (naLagoa(x, z)) return false;
+    if (naParede(x, z) && !(PRACA.voando && PRACA.eu && PRACA.eu.y > LAB.alto + .2)) return false;
+    return true;
+  }
+  return _pracaLivreAntes(x, z);
+};
+/* ---------- montar o Bosque em 3D ---------- */
+const _montarPraca3DAntes = montarPraca3D;
+montarPraca3D = function () { const s = _montarPraca3DAntes(); try { montarBosque3D(s); } catch (e) { console.error(e); } return s; };
+function montarBosque3D(s) {
+  const mat = cor => new THREE.MeshLambertMaterial({ color: cor }), add = (geo, cor, x, y, z, pai = s) => { const m = new THREE.Mesh(geo, typeof cor === "string" ? mat(cor) : cor); m.position.set(x, y, z); pai.add(m); return m; };
+  const B = PRACA.bosque = { arcos: [] };
+  // chão de terra e caminho
+  const terra = texturaCanvas(256, 256, (c, w) => { c.fillStyle = "#b9a37a"; c.fillRect(0, 0, w, w); for (let i = 0; i < 500; i++) { c.fillStyle = Math.random() < .5 ? "#a8936a" : "#c8b48b"; c.fillRect(Math.random() * w, Math.random() * w, 3, 3); } });
+  terra.wrapS = terra.wrapT = THREE.RepeatWrapping; terra.repeat.set(3, 1);
+  const cam = add(new THREE.PlaneGeometry(BOSQUE.x1 - BOSQUE.x0 + 5, BOSQUE.passagem * 2), new THREE.MeshLambertMaterial({ map: terra }), (BOSQUE.x0 + BOSQUE.x1) / 2 + 2.5, .012, 0); cam.rotation.x = -Math.PI / 2;
+  // cerca com a entrada aberta e arco "Bosque"
+  const cerca = mat("#8a5a2b");
+  const lado = (x1, z1, x2, z2) => { const n = Math.ceil(Math.hypot(x2 - x1, z2 - z1) / 1.2); for (let i = 0; i <= n; i++) { const f = i / n; add(new THREE.BoxGeometry(.14, .8, .14), cerca, x1 + (x2 - x1) * f, .4, z1 + (z2 - z1) * f); }
+    const tr = add(new THREE.BoxGeometry(Math.hypot(x2 - x1, z2 - z1), .1, .08), cerca, (x1 + x2) / 2, .62, (z1 + z2) / 2); tr.rotation.y = -Math.atan2(z2 - z1, x2 - x1); };
+  lado(BOSQUE.x0, BOSQUE.z0, BOSQUE.x1, BOSQUE.z0); lado(BOSQUE.x0, BOSQUE.z1, BOSQUE.x1, BOSQUE.z1); lado(BOSQUE.x0, BOSQUE.z0, BOSQUE.x0, BOSQUE.z1);
+  lado(BOSQUE.x1, BOSQUE.z0, BOSQUE.x1, -BOSQUE.passagem - .4); lado(BOSQUE.x1, BOSQUE.passagem + .4, BOSQUE.x1, BOSQUE.z1);
+  { const g = new THREE.Group(); g.position.set(BOSQUE.x1 + .3, 0, 0); g.rotation.y = Math.PI / 2; s.add(g);
+    [-2.8, 2.8].forEach(dx => add(new THREE.BoxGeometry(.45, 4, .45), "#6b4423", dx, 2, 0, g)); add(new THREE.BoxGeometry(6.2, .9, .4), "#2f8a3a", 0, 4.2, 0, g);
+    add(new THREE.PlaneGeometry(5.6, .75), new THREE.MeshBasicMaterial({ map: texTexto("🌳 BOSQUE", "#ffffff", "#2f8a3a", 512, 80, 48) }), 0, 4.2, .21, g);
+    const pl = add(new THREE.PlaneGeometry(5.6, .75), new THREE.MeshBasicMaterial({ map: texTexto("🌳 BOSQUE", "#ffffff", "#2f8a3a", 512, 80, 48) }), 0, 4.2, -.21, g); pl.rotation.y = Math.PI; }
+  // árvores em volta
+  const arvore = (x, z, k = 1) => { add(new THREE.CylinderGeometry(.18 * k, .25 * k, 1.6 * k, 8), "#7a4a22", x, .8 * k, z); add(new THREE.ConeGeometry(1.1 * k, 2.2 * k, 9), "#2f8a3a", x, 2.4 * k, z); add(new THREE.ConeGeometry(.85 * k, 1.7 * k, 9), "#3fa34d", x, 3.3 * k, z); };
+  [[-45.5, -15.5], [-45.5, -4], [-45.5, 0.5], [-45.5, 15.5], [-23, -15.5], [-27, -15.5], [-31, -15.8], [-41, -15.8], [-23, 15.5], [-27, 15.8], [-44.5, 8], [-23, 12], [-24, -11], [-29, -12.8]].forEach(([x, z], i) => arvore(x, z, .8 + (i % 3) * .15));
+  // lago com areia, píer, barquinho, vitórias-régias e juncos
+  const areia = add(new THREE.CircleGeometry(1, 40), "#e8d8a8", LAGO.x, .011, LAGO.z); areia.rotation.x = -Math.PI / 2; areia.scale.set(LAGO.rx + .9, LAGO.rz + .9, 1);
+  const agua = add(new THREE.CircleGeometry(1, 40), new THREE.MeshLambertMaterial({ color: "#3aa0d8", emissive: "#0d3a5a" }), LAGO.x, .03, LAGO.z); agua.rotation.x = -Math.PI / 2; agua.scale.set(LAGO.rx, LAGO.rz, 1); B.agua = agua;
+  for (let i = 0; i < 7; i++) { const a = i * 2.1, r = .35 + (i % 3) * .2, v = add(new THREE.CircleGeometry(.4, 12, .3, Math.PI * 1.8), "#3fa34d", LAGO.x + Math.cos(a) * LAGO.rx * r * 1.3, .045, LAGO.z + Math.sin(a) * LAGO.rz * r * 1.3); v.rotation.x = -Math.PI / 2; }
+  for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2; if (Math.abs(a - Math.PI / 2) < .5) continue; const x = LAGO.x + Math.cos(a) * (LAGO.rx + .4), z = LAGO.z + Math.sin(a) * (LAGO.rz + .4); for (let j = 0; j < 3; j++) add(new THREE.CylinderGeometry(.03, .03, .9, 5), "#4f8a3a", x + j * .12, .45, z + j * .07); }
+  const pier = add(new THREE.BoxGeometry(PIER.w, .15, PIER.z1 - PIER.z0), "#a0703f", PIER.x, .12, (PIER.z0 + PIER.z1) / 2);
+  for (const dz of [0, 1.6, 3.2]) for (const dx of [-.6, .6]) add(new THREE.CylinderGeometry(.08, .08, .6, 6), "#6b4423", PIER.x + dx, 0, PIER.z0 + .3 + dz);
+  const barco = new THREE.Group(); barco.position.set(LAGO.x - 3.5, .1, LAGO.z - 2); s.add(barco); B.barco = barco;
+  add(new THREE.BoxGeometry(1, .35, 2.2), "#d9643a", 0, .1, 0, barco); add(new THREE.BoxGeometry(.8, .1, 1.9), "#f4e3c1", 0, .26, 0, barco); add(new THREE.ConeGeometry(.5, .6, 4), "#d9643a", 0, .1, -1.35, barco).rotation.x = -Math.PI / 2;
+  add(new THREE.CylinderGeometry(.04, .04, 1.8, 6), "#6b4423", 0, 1.1, 0, barco); const vela = add(new THREE.PlaneGeometry(.9, 1.2), new THREE.MeshLambertMaterial({ color: "#ffffff", side: THREE.DoubleSide }), .02, 1.3, .3, barco); vela.rotation.y = Math.PI / 2;
+  // boia da pescaria (aparece quando joga a linha)
+  B.boia = new THREE.Group(); add(new THREE.SphereGeometry(.22, 12, 10), "#ff4d4d", 0, 0, 0, B.boia); add(new THREE.SphereGeometry(.225, 12, 10, 0, Math.PI * 2, 0, Math.PI / 2), "#ffffff", 0, .01, 0, B.boia); add(new THREE.CylinderGeometry(.03, .03, .35, 6), "#ffd23f", 0, .3, 0, B.boia); B.boia.visible = false; s.add(B.boia);
+  B.linha = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineBasicMaterial({ color: "#ffffff" })); B.linha.visible = false; s.add(B.linha);
+  const placa = (x, z, txt, cor, ry = 0) => { const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry; s.add(g); add(new THREE.BoxGeometry(.12, 1.4, .12), "#6b4423", 0, .7, 0, g);
+    add(new THREE.PlaneGeometry(1.9, .55), new THREE.MeshBasicMaterial({ map: texTexto(txt, "#ffffff", cor, 512, 140, 50), side: THREE.DoubleSide }), 0, 1.5, 0, g); };
+  placa(AQUARIO.x, AQUARIO.z, "🐠 Aquário", "#2f80ed", Math.PI / 2); placa(PIER.x + 1.6, PIER.z1 + .3, "🎣 Pescaria", "#2f80ed", Math.PI / 2);
+  // labirinto de cerca viva com o baú no meio
+  const folha = texturaCanvas(64, 64, (c, w) => { c.fillStyle = "#2f7a32"; c.fillRect(0, 0, w, w); for (let i = 0; i < 90; i++) { c.fillStyle = Math.random() < .5 ? "#3a8f3c" : "#25662a"; c.beginPath(); c.arc(Math.random() * w, Math.random() * w, 3, 0, 7); c.fill(); } });
+  const matSebe = new THREE.MeshLambertMaterial({ map: folha });
+  for (const p of LAB_PAREDES) add(new THREE.BoxGeometry(p.w, LAB.alto, p.d), matSebe, p.x, LAB.alto / 2, p.z);
+  placa(LAB.x0 + LAB.n * LAB.cel + 1.2, LAB.z0 + 3 * LAB.cel + LAB.cel / 2 + 1.6, "🌀 Labirinto", "#2f8a3a", Math.PI / 2);
+  const bau = new THREE.Group(); bau.position.set(LAB_BAU.x, 0, LAB_BAU.z); s.add(bau); B.bau = bau;
+  add(new THREE.BoxGeometry(.9, .55, .6), "#8a5a2b", 0, .28, 0, bau); add(new THREE.BoxGeometry(.95, .08, .65), "#ffd23f", 0, .3, 0, bau);
+  B.tampa = new THREE.Group(); B.tampa.position.set(0, .56, .3); bau.add(B.tampa); add(new THREE.BoxGeometry(.92, .2, .62), "#a0703f", 0, .1, -.3, B.tampa); add(new THREE.BoxGeometry(.14, .14, .05), "#ffd23f", 0, .02, -.62, B.tampa);
+  B.bauLuz = new THREE.Sprite(new THREE.SpriteMaterial({ map: brilhoTextura("rgba(255,215,80,1)"), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); B.bauLuz.scale.setScalar(2.2); B.bauLuz.position.y = .8; bau.add(B.bauLuz);
+  // garagem do carrinho e os arcos da corrida em volta da Praça
+  B.kartParado = modeloKart("#ff4d6d"); B.kartParado.position.set(KART_LUGAR.x, 0, KART_LUGAR.z); B.kartParado.rotation.y = -Math.PI / 2; s.add(B.kartParado);
+  placa(KART_LUGAR.x + 1.8, KART_LUGAR.z - 1.4, "🏎️ Carrinho", "#ff4d6d", Math.PI / 2);
+  KART_ARCOS.forEach((p, i) => { const g = new THREE.Group(); g.position.set(p.x, 0, p.z); g.rotation.y = -p.a; s.add(g);
+    const cor = i ? ["#3dd9ff", "#ffd23f", "#37d99a", "#9b5de5", "#ff8a1f"][i - 1] : "#ffffff", m = new THREE.MeshLambertMaterial({ color: cor, emissive: "#000000" });
+    [-2.2, 2.2].forEach(dx => add(new THREE.CylinderGeometry(.12, .12, 2.8, 8), m, dx, 1.4, 0, g));
+    add(new THREE.BoxGeometry(4.6, .5, .15), m, 0, 2.8, 0, g);
+    const t = add(new THREE.PlaneGeometry(1.6, .45), new THREE.MeshBasicMaterial({ map: texTexto(i ? String(i + 1) : "🏁 1", "#0b1b33", cor, 256, 72, 52), side: THREE.DoubleSide }), 0, 2.8, .09, g); t.rotation.y = 0;
+    g.visible = false; B.arcos.push({ g, m }); });
+  // tira o poste que ficava bem na passagem para o Bosque (e o brilho dele à noite)
+  const px = Math.cos(Math.PI) * (PRACA_R - .6);
+  s.children.filter(o => Math.abs(o.position.x - px) < .05 && Math.abs(o.position.z) < .05).forEach(o => s.remove(o));
+}
+function modeloKart(cor) {
+  const g = new THREE.Group(), add = (geo, c, x, y, z) => { const m = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color: c })); m.position.set(x, y, z); g.add(m); return m; };
+  add(new THREE.BoxGeometry(1.1, .28, 1.7), cor, 0, .3, 0); add(new THREE.BoxGeometry(.9, .2, .55), cor, 0, .3, -1.05);
+  add(new THREE.BoxGeometry(.85, .5, .14), "#1b1f2a", 0, .62, .55); add(new THREE.BoxGeometry(1.25, .06, .32), cor, 0, .92, .85);
+  [-.45, .45].forEach(x => add(new THREE.BoxGeometry(.06, .3, .06), "#1b1f2a", x, .76, .85));
+  for (const [x, z] of [[-.62, -.62], [.62, -.62], [-.62, .6], [.62, .6]]) { const w = add(new THREE.CylinderGeometry(.24, .24, .22, 14), "#16161c", x, .24, z); w.rotation.z = Math.PI / 2; g.userData.rodas = (g.userData.rodas || []).concat(w); }
+  const vol = add(new THREE.TorusGeometry(.15, .03, 6, 16), "#1b1f2a", 0, .66, -.32); vol.rotation.x = -1;
+  add(new THREE.SphereGeometry(.07, 8, 6), "#fff3b0", -.32, .38, -1.33); add(new THREE.SphereGeometry(.07, 8, 6), "#fff3b0", .32, .38, -1.33);
+  return g;
+}
+/* ---------- lugares com botão ---------- */
+const _lugaresPracaAntes = lugaresPraca;
+lugaresPraca = function () {
+  if (PRACA.kart) return [{ x: PRACA.eu.x, z: PRACA.eu.z, r: 99, txt: "🚶 Sair do carrinho", abrir: sairKart }];
+  if (PRACA.pesca) return [{ x: PRACA.eu.x, z: PRACA.eu.z, r: 99, txt: PRACA.pesca.fase === "morde" ? "❗ PUXA AGORA!" : PRACA.pesca.fase === "fim" ? "🎣 Pescar de novo" : "🎣 Esperando o peixe...", abrir: puxarPesca }];
+  const l = _lugaresPracaAntes();
+  if (PRACA.naRoda) return l;
+  l.push({ x: PESCA_LUGAR.x, z: PESCA_LUGAR.z, r: 1.5, txt: "🎣 Pescar", abrir: comecarPesca });
+  l.push({ x: AQUARIO.x, z: AQUARIO.z, r: 1.8, txt: "🐠 Ver meu aquário", abrir: () => abrirPainelPraca("🐠 Meu aquário", aquarioHTML) });
+  l.push({ x: LAB_BAU.x, z: LAB_BAU.z, r: 1.4, txt: "🎁 Abrir o baú", abrir: abrirBau });
+  l.push({ x: KART_LUGAR.x, z: KART_LUGAR.z, r: 2.2, txt: "🏎️ Dirigir o carrinho", abrir: entrarKart });
+  return l;
+};
+/* ---------- pescaria ---------- */
+function pescaHoje(nome) { G.pesca = G.pesca && G.pesca.dia === diaBR() ? G.pesca : { dia: diaBR(), por: {} }; return G.pesca.por[nome] || 0; }
+function comecarPesca() {
+  const B = PRACA.bosque; if (!B) return;
+  PRACA.pesca = { fase: "espera", t: 1.6 + Math.random() * 3 }; PRACA.eu.r = 0;
+  B.boia.position.set(PESCA_LUGAR.x + (Math.random() - .5) * 1.2, .06, PESCA_LUGAR.z - 2.6 - Math.random()); B.boia.visible = B.linha.visible = true;
+  if (typeof tocarNotas === "function") tocarNotas([[79, 67, 0, .25, "sine"]]);
+}
+function sortearPeixe() { let r = Math.random() * PEIXES.reduce((a, p) => a + p.p, 0); for (const p of PEIXES) { r -= p.p; if (r <= 0) return p; } return PEIXES[0]; }
+function puxarPesca() {
+  const P = PRACA.pesca; if (!P) return;
+  if (P.fase === "fim") { comecarPesca(); return; }
+  if (P.fase === "espera") { acabarPesca("Puxou cedo! O peixe fugiu 🙈"); return; }
+  const nome = perfil(), px = sortearPeixe(), n = pescaHoje(nome);
+  G.peixes = G.peixes || {}; const aq = G.peixes[nome] = G.peixes[nome] || {}; aq[px.k] = (aq[px.k] || 0) + 1;
+  let ganho = 0; if (px.m && n < PESCA_LIMITE) { ganho = px.m; G.banco[nome] = Math.round(((G.banco[nome] || 0) + ganho) * 10) / 10; }
+  G.pesca.por[nome] = n + 1;
+  let extra = ""; if (!aq.bonus && PEIXES.every(p => aq[p.k])) { aq.bonus = 1; G.banco[nome] = Math.round(((G.banco[nome] || 0) + PESCA_BONUS) * 10) / 10; extra = ` Aquário completo! +${PESCA_BONUS} 🎉`; }
+  salvarPlacar();
+  pulaPeixe(px.ic);
+  if (px.k === "dourado" && typeof fogosPraca === "function") fogosPraca(PRACA.bosque.boia.position.x, 1, PRACA.bosque.boia.position.z, 40);
+  if (typeof tocarNotas === "function") tocarNotas(px.m >= 15 ? [[72, 72, 0, .1, "square"], [76, 76, .1, .1, "square"], [79, 79, .2, .1, "square"], [84, 84, .3, .3, "square"]] : [[72, 84, 0, .2, "triangle"]]);
+  acabarPesca(`${px.ic} Pegou: ${px.nome}!${ganho ? ` +${ganho} moedas` : px.m && n >= PESCA_LIMITE ? " (moedas de pesca de hoje acabaram)" : ""}${extra}`);
+}
+function acabarPesca(msg) { const B = PRACA.bosque; if (PRACA.pesca) PRACA.pesca = { fase: "fim", t: 0 }; if (B) { B.boia.visible = B.linha.visible = false; B.boia.scale.setScalar(1); } if (msg) toast(msg); }
+function pulaPeixe(ic) {
+  const B = PRACA.bosque, sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTextoSemana(ic), transparent: true, depthWrite: false })); sp.scale.setScalar(.9);
+  const de = B.boia.position.clone(), para = new THREE.Vector3(PRACA.eu.x, 1.6, PRACA.eu.z); sp.position.copy(de); PRACA.cena.add(sp); B.pulos = B.pulos || []; B.pulos.push({ sp, de, para, t: 0 });
+}
+function aquarioHTML() {
+  const nome = perfil(), aq = (G.peixes || {})[nome] || {}, tipos = PEIXES.filter(p => aq[p.k]).length, hoje = pescaHoje(nome);
+  return `<div class="mi-caixa"><h2 class="lb-secao">🐠 Aquário de ${esc(nome)}</h2><p class="lb-sub">${tipos}/${PEIXES.length} tipos pescados${aq.bonus ? " · completo! 🎉" : ` · pegue todos e ganhe ${PESCA_BONUS} moedas`}</p>
+    <ul class="pr-premios">${PEIXES.map(p => `<li>${aq[p.k] ? `${p.ic} ${esc(p.nome)} × ${aq[p.k]}` : "❔ ???"}${p.m ? ` · ${p.m} moedas` : ""}</li>`).join("")}</ul>
+    <p class="lb-sub">Hoje: ${Math.min(hoje, PESCA_LIMITE)}/${PESCA_LIMITE} pescas valendo moedas.</p></div>`;
+}
+/* ---------- labirinto ---------- */
+function abrirBau() {
+  const nome = perfil(), B = PRACA.bosque; G.labPremio = G.labPremio || {};
+  const t = PRACA.lab && PRACA.lab.t != null ? Math.round(PRACA.lab.t * 10) / 10 : null; let rec = false;
+  if (t != null) { G.labRec = G.labRec || {}; const nl = nomeLimpo(nome); rec = !G.labRec[nl] || t < G.labRec[nl]; if (rec) G.labRec[nl] = t; PRACA.lab.fim = t; }
+  const tempo = t != null ? ` Você chegou em ${t} s${rec ? " — recorde seu!" : "."}` : "";
+  if (G.labPremio[nome] === diaBR()) { salvar(); toast(`🎁 O baú já foi aberto hoje. Volte amanhã!${tempo}`); return; }
+  G.labPremio[nome] = diaBR(); G.banco[nome] = Math.round(((G.banco[nome] || 0) + LAB_PREMIO) * 10) / 10; salvarPlacar();
+  if (B && typeof fogosPraca === "function") fogosPraca(LAB_BAU.x, 1, LAB_BAU.z, 36);
+  if (typeof sfxVitoria === "function") sfxVitoria();
+  toast(`🎁 Achou o baú! +${LAB_PREMIO} moedas.${tempo}`);
+}
+function passoLabirinto(dt) {
+  const eu = PRACA.eu, dentro = noLabirinto(eu.x, eu.z), el = $("pr-lab"); if (!el) return;
+  if (dentro && !PRACA.lab) PRACA.lab = { t: 0 };
+  if (!dentro) PRACA.lab = null;
+  if (PRACA.lab && PRACA.lab.fim == null) PRACA.lab.t += dt;
+  el.hidden = !PRACA.lab; if (PRACA.lab) { const rec = (G.labRec || {})[nomeLimpo(perfil())]; el.innerHTML = `<b>🌀 ${PRACA.lab.fim != null ? PRACA.lab.fim : (Math.floor(PRACA.lab.t * 10) / 10).toFixed(1)} s</b>${rec ? `<span>recorde ${rec} s</span>` : "<span>ache o baú 🎁</span>"}`; }
+  const B = PRACA.bosque; if (B) { const aberto = (G.labPremio || {})[perfil()] === diaBR(); B.tampa.rotation.x += ((aberto ? -1.9 : 0) - B.tampa.rotation.x) * Math.min(1, dt * 4); B.bauLuz.visible = !aberto; B.bauLuz.material.opacity = .6 + .3 * Math.sin(performance.now() / 300); }
+}
+/* ---------- carrinho ---------- */
+function entrarKart() {
+  if (PRACA.voando) { toast("Desligue o voo para dirigir 🕊️"); return; }
+  PRACA.kart = { v: 0, prox: 0, corrida: null }; PRACA.eu.r = -Math.PI / 2; PRACA.yaw = PRACA.eu.r;
+  if (PRACA.bosque) PRACA.bosque.kartParado.visible = false; PRACA.bosque.arcos.forEach(a => (a.g.visible = true));
+  if (typeof tocarNotas === "function") tocarNotas([[40, 52, 0, .4, "sawtooth"]]);
+  toast("🏎️ Vrum! Passe pelo arco 🏁 para começar a corrida.");
+}
+function sairKart() {
+  const K = PRACA.kart; PRACA.kart = null; const eu = PRACA.eu;
+  if (eu && eu.kartM) { eu.kartM.parent && eu.kartM.parent.remove(eu.kartM); eu.kartM = null; eu.m.corpo.position.y = 0; }
+  if (PRACA.bosque) { PRACA.bosque.kartParado.visible = true; PRACA.bosque.arcos.forEach(a => (a.g.visible = false)); }
+  const el = $("pr-kart"); if (el) el.hidden = true;
+}
+function corDoKart(skin) { const s = skinInfo(skin || "classico"); return s && s.camisa ? s.camisa : "#ff4d6d"; }
+function passoKartFisica(dt) {
+  const K = PRACA.kart, eu = PRACA.eu, k = PRACA.keys;
+  let acel = -PRACA.mov.y, vira = PRACA.mov.x;
+  const ky = (k.w || k.arrowup ? 1 : 0) - (k.s || k.arrowdown ? 1 : 0), kx = (k.d || k.arrowright ? 1 : 0) - (k.a || k.arrowleft ? 1 : 0);
+  if (ky || kx) { acel = ky; vira = kx; }
+  if (PRACA.painel || PRACA.hist) { acel = 0; vira = 0; }
+  K.v += acel * 16 * dt; K.v *= Math.pow(.4, dt); K.v = Math.max(-5, Math.min(14, K.v));
+  eu.r -= vira * dt * 2.6 * Math.min(1, Math.abs(K.v) / 3) * (K.v < 0 ? -1 : 1);
+  const nx = eu.x - Math.sin(eu.r) * K.v * dt, nz = eu.z - Math.cos(eu.r) * K.v * dt;
+  if (pracaLivre(nx, nz) && Math.hypot(nx, nz) > 3.7) { eu.x = nx; eu.z = nz; } else if (Math.abs(K.v) > .5) { K.v *= -.35; if (typeof bip === "function") bip(110, .06); }
+  let d = eu.r - PRACA.yaw; d = (d + Math.PI * 3) % (Math.PI * 2) - Math.PI; PRACA.yaw += d * Math.min(1, dt * 3.5);
+}
+function vestirKart(m, cor, v) {   // põe o carrinho no bonequinho (o seu ou o de um amigo); a pose sentada é feita em animarBonecoPraca
+  if (!m.kartM || m.kartM.parent !== m.g) { if (m.kartM && m.kartM.parent) m.kartM.parent.remove(m.kartM); m.kartM = modeloKart(cor); m.g.add(m.kartM); }
+  m.kartV = v;
+}
+function tirarKart(m) { if (m.kartM) { if (m.kartM.parent) m.kartM.parent.remove(m.kartM); m.kartM = null; m.corpo.position.y = 0; } }
+function passoKartCorrida(dt) {
+  const K = PRACA.kart, eu = PRACA.eu, el = $("pr-kart"), B = PRACA.bosque; if (!el || !B) return;
+  el.hidden = false; const N = KART_ARCOS.length, a = KART_ARCOS[K.prox];
+  if (Math.hypot(eu.x - a.x, eu.z - a.z) < 2.8) {
+    if (K.prox === 0) {
+      if (K.corrida && K.passou >= N - 1) { const s = Math.round(K.corrida.t * 10) / 10, nome = perfil(), nl = nomeLimpo(nome); G.kartRec = G.kartRec || {}; const rec = !G.kartRec[nl] || s < G.kartRec[nl]; if (rec) G.kartRec[nl] = s;
+        let txt = `🏁 Volta em ${s} s${rec ? " — recorde seu!" : "!"}`;
+        if (!G.kartPremio || G.kartPremio[nome] !== diaBR()) { G.kartPremio = { ...(G.kartPremio || {}), [nome]: diaBR() }; G.banco[nome] = Math.round(((G.banco[nome] || 0) + KART_PREMIO) * 10) / 10; txt += ` +${KART_PREMIO} moedas`; }
+        salvarPlacar(); toast(txt); if (typeof fogosPraca === "function") fogosPraca(a.x, 2.5, a.z, 40); if (typeof tocarNotas === "function") tocarNotas([[72, 72, 0, .1, "square"], [76, 76, .1, .1, "square"], [79, 79, .2, .1, "square"], [84, 84, .3, .3, "square"]]);
+        K.ultima = s; }
+      K.corrida = { t: 0 }; K.passou = 0; K.prox = 1; if (typeof bip === "function") bip(880, .08);
+    } else { K.prox = (K.prox + 1) % N; K.passou = (K.passou || 0) + 1; if (typeof bip === "function") bip(700, .06); }
+  }
+  if (K.corrida) K.corrida.t += dt;
+  const pis = .5 + .5 * Math.sin(performance.now() / 160);
+  B.arcos.forEach((ar, i) => ar.m.emissive.setRGB(i === K.prox ? .5 * pis : 0, i === K.prox ? .5 * pis : 0, i === K.prox ? .2 * pis : 0));
+  const rec = (G.kartRec || {})[nomeLimpo(perfil())];
+  el.innerHTML = K.corrida ? `<b>🏎️ ${K.corrida.t.toFixed(1)} s</b><span>arco ${K.prox === 0 ? N : K.prox}/${N}</span>${rec ? `<span>recorde ${rec} s</span>` : ""}` : `<b>🏎️ Passe pelo arco 🏁</b>${rec ? `<span>recorde ${rec} s</span>` : ""}`;
+}
+const _pularPracaAntes = pularPraca;
+pularPraca = function () { if (PRACA.kart) { if (typeof tocarNotas === "function") tocarNotas([[67, 67, 0, .12, "square"], [67, 67, .16, .2, "square"]]); return; } return _pularPracaAntes(); };
+const _efeitosPracaAntes = efeitosPraca;
+efeitosPraca = function () { return _efeitosPracaAntes() | (PRACA.kart ? 8 : 0); };
+/* ---------- pet andando junto ---------- */
+const _animarBonecoAntes = animarBonecoPraca;
+animarBonecoPraca = function (m, x, y, z, r, anda, dt) {
+  _animarBonecoAntes(m, x, y, z, r, anda, dt);
+  if (m.kartM) { m.kartM.rotation.y = r; m.corpo.position.y = .18; m.pernaE.rotation.x = m.pernaD.rotation.x = -1.4; m.bracoE.rotation.x = m.bracoD.rotation.x = -1; for (const w of m.kartM.userData.rodas) w.rotation.x -= (m.kartV || 0) * dt * 3; }
+  const p = m.pet; if (!p) return;
+  const W = m.petW || (m.petW = { x: x + .8, z: z + .8, y, r, hop: 0, t: Math.random() * 9 });
+  const tx = x + Math.sin(r) * 1.1 + Math.cos(r) * .55, tz = z + Math.cos(r) * 1.1 - Math.sin(r) * .55, dx = tx - W.x, dz = tz - W.z, d = Math.hypot(dx, dz);
+  W.t += dt; let anda2 = false;
+  if (d > 9) { W.x = tx; W.z = tz; } else if (d > .3) { const sp = Math.min(d * 4, 16); W.x += dx / d * sp * dt; W.z += dz / d * sp * dt; W.r = Math.atan2(-dx, -dz); W.hop += dt * 13; anda2 = true; }
+  else { const vira = Math.sin(W.t * .6); W.r += vira * dt * .6; }
+  W.y += (y - W.y) * Math.min(1, dt * 8);
+  const pulo = anda2 ? Math.abs(Math.sin(W.hop)) * .16 : (W.t % 4 < .35 ? Math.sin((W.t % 4) / .35 * Math.PI) * .22 : 0);
+  const sc = m.g.scale.x || 1; p.position.set((W.x - x) / sc, (W.y + pulo - y) / sc, (W.z - z) / sc); p.rotation.y = W.r;
+};
+/* ---------- tudo a cada quadro ---------- */
+const _quadroPracaAntes = quadroPraca;
+quadroPraca = function (ts) {
+  if (!PRACA.on) return _quadroPracaAntes(ts);
+  const dt = Math.min(.05, (ts - (PRACA.ultB || ts)) / 1000); PRACA.ultB = ts;
+  let guardaMov = null, guardaKeys = null;
+  if (PRACA.kart && PRACA.eu) { passoKartFisica(dt); guardaMov = PRACA.mov; guardaKeys = PRACA.keys; PRACA.mov = { x: 0, y: 0 }; PRACA.keys = {}; }
+  try { _quadroPracaAntes(ts); } finally { if (guardaMov) { PRACA.mov = guardaMov; PRACA.keys = guardaKeys; } }
+  if (!PRACA.on || !PRACA.bosque || !PRACA.eu) return;
+  try { passoBosque(dt, ts / 1000); } catch (e) { console.error(e); }
+};
+function passoBosque(dt, t) {
+  const B = PRACA.bosque, eu = PRACA.eu;
+  // o barquinho balança e a água brilha
+  B.barco.rotation.z = Math.sin(t * 1.3) * .06; B.barco.position.y = .1 + Math.sin(t * 1.7) * .04; B.barco.rotation.y = Math.sin(t * .2) * .4;
+  B.agua.material.emissive.setRGB(.05, .22 + .03 * Math.sin(t * 2), .35 + .04 * Math.sin(t * 2));
+  // pescaria
+  const P = PRACA.pesca;
+  if (P) {
+    if (Math.hypot(eu.x - PESCA_LUGAR.x, eu.z - PESCA_LUGAR.z) > 2.2) { PRACA.pesca = null; B.boia.visible = B.linha.visible = false; }
+    else if (P.fase === "espera" || P.fase === "morde") {
+      P.t -= dt; const bo = B.boia.position;
+      if (P.fase === "espera") { bo.y = .06 + Math.sin(t * 3) * .03; if (P.t <= 0) { P.fase = "morde"; P.t = 1.2; if (typeof bip === "function") bip(300, .1); if (typeof vibrar === "function") vibrar(60); } }
+      else { bo.y = .03 + Math.sin(t * 30) * .06; B.boia.scale.setScalar(1 + .25 * Math.abs(Math.sin(t * 15))); if (P.t <= 0) acabarPesca("O peixe escapou! Tente de novo 🐟"); }
+      const g = B.linha.geometry, ps = g.attributes.position; ps.setXYZ(0, eu.x, eu.y + 1.5, eu.z - .3); ps.setXYZ(1, bo.x, bo.y, bo.z); ps.needsUpdate = true;
+    }
+  } else { B.boia.visible = B.linha.visible = false; }
+  if (B.pulos) B.pulos = B.pulos.filter(j => { j.t += dt; const q = Math.min(1, j.t / .8); j.sp.position.lerpVectors(j.de, j.para, q); j.sp.position.y += Math.sin(Math.PI * q) * 2.2; j.sp.material.rotation += dt * 6; if (q < 1) return true; PRACA.cena.remove(j.sp); j.sp.material.dispose(); return false; });
+  // peixinho pulando de vez em quando no lago
+  B.tPeixe = (B.tPeixe ?? 3) - dt; if (B.tPeixe <= 0) { B.tPeixe = 4 + Math.random() * 5; const a = Math.random() * Math.PI * 2, x = LAGO.x + Math.cos(a) * LAGO.rx * .5, z = LAGO.z + Math.sin(a) * LAGO.rz * .5, sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTextoSemana("🐟"), transparent: true, depthWrite: false })); sp.scale.setScalar(.6); PRACA.cena.add(sp); B.pulos = B.pulos || []; B.pulos.push({ sp, de: new THREE.Vector3(x, 0, z), para: new THREE.Vector3(x + 1.4, 0, z), t: 0 }); }
+  passoLabirinto(dt);
+  // carrinho: o seu e o dos amigos
+  if (PRACA.kart) { vestirKart(eu.m, corDoKart(eu.info && eu.info.skin), PRACA.kart.v); passoKartCorrida(dt); }
+  else if (eu.m.kartM) tirarKart(eu.m);
+  for (const o of PRACA.outros.values()) { if (o.alvo && o.alvo.e & 8) vestirKart(o.m, corDoKart(o.info && o.info.skin), 8); else if (o.m.kartM) tirarKart(o.m); }
+}
+// HUD do labirinto e da corrida de carrinho
+const _abrirPracaAntes = abrirPraca;
+abrirPraca = function () {
+  _abrirPracaAntes(); const box = $("praca"); if (!box || !PRACA.on) return;
+  box.insertAdjacentHTML("beforeend", `<div class="pr-missao pr-corrida" id="pr-lab" hidden></div><div class="pr-missao pr-corrida" id="pr-kart" hidden></div>`);
+  PRACA.kart = null; PRACA.pesca = null; PRACA.lab = null; PRACA.ultB = 0;
+};
+const _fecharPracaAntes = fecharPraca;
+fecharPraca = function (irLobby) { PRACA.kart = null; PRACA.pesca = null; PRACA.lab = null; return _fecharPracaAntes(irLobby); };
 </script>
 
 <script>
