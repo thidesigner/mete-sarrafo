@@ -312,3 +312,4 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
 
 - Os novos são 🧲 Ímã, 👻 Fantasma, 🌀 Teleporte, 🦘 Super pulo (no basquete vira enterrada), 🛡️ Super defesa (ideia do Andre), 🧱 Muralha, 🌪️ Furacão e 👯 Clone.
 - Agora são 11 poderes no total. Eles saem na Caixa de poder (300 moedas), que sorteia um que você ainda não tem, e os robôs também usam.
+- Super chute (🔥 Chute de fogo) no futebol: dá para escolher ⬆️ por cima (a bola voa alto, ninguém alcança e passa até por cima da muralha) ou ⬇️ rasteiro (como era antes).

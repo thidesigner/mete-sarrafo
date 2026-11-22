@@ -1386,7 +1386,7 @@ function espHostRecebe(conn, d) {
   if (!id || !ESP.E) return;
   const p = ESP.E.P.find(x => x.id === id); if (!p) return;
   if (d.t === "ei") p.inp = { x: espClamp(+d.x || 0, -1, 1), y: espClamp(+d.y || 0, -1, 1) };
-  if (d.t === "ea" && (d.a === "chute" || d.a === "passe" || d.a === "poder")) p.acao = d.a;
+  if (d.t === "ea" && (d.a === "chute" || d.a === "chuteAlto" || d.a === "passe" || d.a === "poder")) p.acao = d.a;
 }
 function espHostSaiu(conn) {
   const o = espOnline; let id = null; for (const [k, c] of o.conns) if (c.conn === conn) id = k; if (!id) return;

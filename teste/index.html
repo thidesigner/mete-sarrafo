@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="versao-site" content="d9d34f1d7c">
+<meta name="versao-site" content="f6b521bcb7">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0f3057">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;-webkit-text-size-adjust:100%}img{max-width:100%}[hidden]{display:none!important}.faixa-teste{position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:50;background:#ff4d6d;color:#fff;font:800 12px/1 system-ui,sans-serif;letter-spacing:.08em;padding:4px 10px;border-radius:0 0 8px 8px;pointer-events:none}</style>
@@ -354,6 +354,10 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .es-chute { right: 20px; bottom: 30px; width: 104px; height: 104px; background: #ffd23f; }
 .es-passe { right: 132px; bottom: 26px; width: 72px; height: 72px; background: #7fd3ff; font-size: 26px; }
 .es-btn:disabled { opacity: .45; }
+.es-alto { right: 132px; bottom: 110px; width: 80px; height: 80px; background: #ff8a3c; font-size: 28px; animation: esAlto 1s ease-in-out infinite; }
+@keyframes esAlto { 50% { transform: scale(1.08); } }
+@media (prefers-reduced-motion: reduce) { .es-alto { animation: none; } }
+.es-alto[hidden] { display: none; }
 .es-poder { right: 30px; bottom: 150px; width: 72px; height: 72px; background: #ff9ad5; font-size: 28px; }
 .es-poder.ativo { box-shadow: 0 0 18px #ffd23f, 0 5px 0 #0b1b33; background: #ffd23f; }
 .es-pods { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
@@ -9160,7 +9164,7 @@ function espPoderesPasso(E, dt) {   // ímã, muralha, clone e o fim do super pu
   // muralha: a bola bate e volta; o outro time não passa
   for (const m of E.muros || []) {
     const wy = espMuroY(E, m.time), dentroX = x => Math.abs(x - ESP_W / 2) < ESP_MURO_W / 2;
-    if (b.dono < 0 && !b.voo && dentroX(b.x) && Math.abs(b.y - wy) < 14) { const lado = wy < ESP_H / 2 ? 1 : -1; b.y = wy + lado * 15; b.vy = Math.abs(b.vy) * .7 * lado; bipEsp(160); }
+    if (b.dono < 0 && !b.voo && !(b.z > 30) && dentroX(b.x) && Math.abs(b.y - wy) < 14) { const lado = wy < ESP_H / 2 ? 1 : -1; b.y = wy + lado * 15; b.vy = Math.abs(b.vy) * .7 * lado; bipEsp(160); }
     for (const q of E.P) if (q.time !== m.time && Math.abs(q.x - ESP_W / 2) < ESP_MURO_W / 2 + 16 && Math.abs(q.y - wy) < 30) q.y = wy + (wy < ESP_H / 2 ? 30 : -30);
   }
   // clones: correm atrás da bola, roubam e passam para quem chamou
@@ -9230,7 +9234,7 @@ function espPasso(E, dt) {
     p.vx += (ix * vel - p.vx) * k; p.vy += (iy * vel - p.vy) * k;
     p.x = espClamp(p.x + p.vx * dt, 22, ESP_W - 22); p.y = espClamp(p.y + p.vy * dt, 22, ESP_H - 22);
     const v = Math.hypot(p.vx, p.vy); if (m > .15) p.dir = Math.atan2(iy, ix); p.passo += v * dt * 1.6;
-    if (p.acao) { const a = p.acao; p.acao = null; if (a === "poder") espUsarPoder(E, p); else if (b.dono === p.i) a === "passe" ? espPassar(E, p) : espChutar(E, p); }
+    if (p.acao) { const a = p.acao; p.acao = null; if (a === "poder") espUsarPoder(E, p); else if (b.dono === p.i) a === "passe" ? espPassar(E, p) : espChutar(E, p, a === "chuteAlto" ? true : a === "chute" && p.humano ? false : undefined); }
   }
   // bola
   if (b.voo) {
@@ -9247,22 +9251,29 @@ function espPasso(E, dt) {
   } else {
     b.x += b.vx * dt; b.y += b.vy * dt; const fr = Math.exp(-dt * (E.tipo === "futebol" ? 1.1 : 1.6)); b.vx *= fr; b.vy *= fr;
     b.z = Math.max(0, b.z - dt * 60); b.h3 = Math.max(b.z, (b.h3 || 0) - dt * 160);
+    if (b.alto) { b.alto.t += dt; const u = Math.min(1, b.alto.t / b.alto.dur); b.z = 4 * 110 * u * (1 - u); b.h3 = b.z; if (u >= 1) b.alto = null; }
     if (b.x < 12) { b.x = 12; b.vx = Math.abs(b.vx) * .7; } if (b.x > ESP_W - 12) { b.x = ESP_W - 12; b.vx = -Math.abs(b.vx) * .7; }
     const noGol = Math.abs(b.x - ESP_W / 2) < ESP_GOL / 2;
     if (E.tipo === "futebol" && noGol && (b.y < 12 || b.y > ESP_H - 12)) return espPonto(E, b.y < 12 ? 0 : 1, 1);
     if (b.y < 12) { b.y = 12; b.vy = Math.abs(b.vy) * .7; } if (b.y > ESP_H - 12) { b.y = ESP_H - 12; b.vy = -Math.abs(b.vy) * .7; }
     let perto = null, pd = 28;
-    for (const p of E.P) { const d = espDist(p.x, p.y, b.x, b.y); if (p.gelo > 0) continue;
+    for (const p of E.P) { const d = espDist(p.x, p.y, b.x, b.y); if (p.gelo > 0 || b.z > 28) continue;   // bola alta: ninguém alcança
       if (b.fogo > 0 && p.time !== b.fogoTime) { if (d < 26 && p.flash <= 0) { p.flash = 1; bipEsp(180); } continue; }   // bola de fogo: o outro time não segura
       if (p.cdPegar <= 0 && !(p.pulo > 0) && d < (p.defesa > 0 ? Math.max(pd, 62) : pd)) { pd = d; perto = p; } }
-    if (perto) { b.dono = perto.i; b.vx = b.vy = 0; }
+    if (perto) { b.dono = perto.i; b.vx = b.vy = 0; b.alto = null; }
   }
   espPoderesPasso(E, dt);
 }
-function espChutar(E, p) {
+function espChutar(E, p, alto) {
   const b = E.b;
   if (E.tipo === "basquete") return espArremessar(E, p);
-  const fogo = p.fogo > 0, v = fogo ? 1050 : 640; b.dono = -1; b.vx = Math.cos(p.dir) * v + p.vx * .3; b.vy = Math.sin(p.dir) * v + p.vy * .3; b.z = 6; p.cdPegar = .35; bipEsp(fogo ? 260 : 520);
+  const fogo = p.fogo > 0;
+  if (fogo && !p.humano && alto === undefined) alto = Math.random() < .45;   // robô também escolhe por cima ou rasteiro
+  if (fogo && alto) {   // super chute por cima: a bola voa alto e passa por cima de todo mundo (e da muralha)
+    b.dono = -1; b.vx = Math.cos(p.dir) * 820 + p.vx * .3; b.vy = Math.sin(p.dir) * 820 + p.vy * .3; b.alto = { t: 0, dur: 1 }; b.z = 6; p.cdPegar = .35; bipEsp(200);
+    p.fogo = 0; b.fogo = 1.1; b.fogoTime = p.time; b.ultimo = p.i; E.fxPod = (E.fxPod || []).concat([{ k: "fogo", x: p.x, y: p.y, t: .8 }]).slice(-6); return;
+  }
+  const v = fogo ? 1050 : 640; b.dono = -1; b.vx = Math.cos(p.dir) * v + p.vx * .3; b.vy = Math.sin(p.dir) * v + p.vy * .3; b.z = 6; p.cdPegar = .35; bipEsp(fogo ? 260 : 520);
   if (fogo) { p.fogo = 0; b.fogo = 1.1; b.fogoTime = p.time; }
   b.ultimo = p.i;
 }
@@ -9686,7 +9697,8 @@ function espComecar(E, eu, rede) {
     <div class="pr-joy es-joy" id="es-joy" aria-label="Andar"><i></i></div>
     <button type="button" class="es-btn es-passe" id="es-passe">↪️<small>Passar</small></button>
     ${E.P[eu] && E.P[eu].pod ? `<button type="button" class="es-btn es-poder" id="es-poder">${ESP_PODERES[E.P[eu].pod].ic}<small id="es-podtxt">Poder</small></button>` : ""}
-    <button type="button" class="es-btn es-chute" id="es-chute">${t.ic}<small>${t.acao}</small></button>
+    <button type="button" class="es-btn es-chute" id="es-chute">${t.ic}<small id="es-chutetxt">${t.acao}</small></button>
+    ${E.tipo === "futebol" ? `<button type="button" class="es-btn es-alto" id="es-alto" hidden>🔥<small>⬆️ Por cima</small></button>` : ""}
     <div class="es-fim" id="es-fim" hidden></div>`;
   box.hidden = false; document.body.classList.add("es-aberto");
   ESP.v3 = esp3Usar() && esp3Montar(E, eu);
@@ -9704,12 +9716,13 @@ function espControles() {
   const solta = e => { if (e.pointerId !== id) return; id = null; ESP.joy = { x: 0, y: 0 }; bola.style.transform = ""; };
   joy.addEventListener("pointerup", solta); joy.addEventListener("pointercancel", solta);
   $("es-chute").addEventListener("pointerdown", e => { e.preventDefault(); espAcao("chute"); });
+  if ($("es-alto")) $("es-alto").addEventListener("pointerdown", e => { e.preventDefault(); espAcao("chuteAlto"); });
   $("es-passe").addEventListener("pointerdown", e => { e.preventDefault(); espAcao("passe"); });
   if ($("es-poder")) $("es-poder").addEventListener("pointerdown", e => { e.preventDefault(); espAcao("poder"); });
   $("es-sair").addEventListener("click", () => espSair());
   if ($("es-visao")) $("es-visao").addEventListener("click", () => { G.esp3d = !ESP.v3; salvar(); if (ESP.v3) { esp3Limpar(); ESP.v3 = false; } else ESP.v3 = esp3Montar(ESP.E, ESP.eu); $("es-visao").textContent = ESP.v3 ? "2D" : "3D"; });
   ESP.kd = e => { if (/INPUT|TEXTAREA/.test((e.target || {}).tagName || "")) return; const k = e.key.toLowerCase(); ESP.keys[k] = true;
-    if (k === " ") { espAcao("chute"); e.preventDefault(); } if (k === "e") espAcao("passe"); if (k === "q" || k === "shift") espAcao("poder"); if (k.startsWith("arrow")) e.preventDefault(); };
+    if (k === " ") { espAcao("chute"); e.preventDefault(); } if (k === "e") espAcao("passe"); if (k === "r") espAcao("chuteAlto"); if (k === "q" || k === "shift") espAcao("poder"); if (k.startsWith("arrow")) e.preventDefault(); };
   ESP.ku = e => { ESP.keys[e.key.toLowerCase()] = false; };
   window.addEventListener("keydown", ESP.kd); window.addEventListener("keyup", ESP.ku);
 }
@@ -9740,6 +9753,7 @@ function espHUD() {
   if (E.tMsg > 0) { E.tMsg -= 1 / 60; if (E.tMsg <= 0 && !E.pausa) E.msg = ""; }
   const comBola = E.b.dono === ESP.eu; $("es-chute").disabled = !comBola; $("es-passe").disabled = !comBola || E.tam < 2;
   const bp = $("es-poder"), me = E.P[ESP.eu]; if (bp && me) { const cd = Math.ceil(me.podCd || 0); bp.disabled = cd > 0 || me.gelo > 0; $("es-podtxt").textContent = me.fogo > 0 ? "Pronto!" : cd > 0 ? cd + "s" : ESP_PODERES[me.pod].nome.split(" ")[0]; bp.classList.toggle("ativo", me.fogo > 0 || me.turbo > 0); }
+  { const ba = $("es-alto"), me2 = E.P[ESP.eu], f = !!(ba && me2 && me2.fogo > 0); if (ba && ba.hidden === f) { ba.hidden = !f; const ct = $("es-chutetxt"); if (ct) ct.textContent = f ? "⬇️ Rasteiro" : ESP_TIPOS[E.tipo].acao; } }
   if (E.fim && !ESP.ganhou) espFim();
 }
 function espFim() {
@@ -11530,7 +11544,7 @@ function espHostRecebe(conn, d) {
   if (!id || !ESP.E) return;
   const p = ESP.E.P.find(x => x.id === id); if (!p) return;
   if (d.t === "ei") p.inp = { x: espClamp(+d.x || 0, -1, 1), y: espClamp(+d.y || 0, -1, 1) };
-  if (d.t === "ea" && (d.a === "chute" || d.a === "passe" || d.a === "poder")) p.acao = d.a;
+  if (d.t === "ea" && (d.a === "chute" || d.a === "chuteAlto" || d.a === "passe" || d.a === "poder")) p.acao = d.a;
 }
 function espHostSaiu(conn) {
   const o = espOnline; let id = null; for (const [k, c] of o.conns) if (c.conn === conn) id = k; if (!id) return;
