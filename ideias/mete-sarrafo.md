@@ -313,3 +313,17 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
 - Os novos são 🧲 Ímã, 👻 Fantasma, 🌀 Teleporte, 🦘 Super pulo (no basquete vira enterrada), 🛡️ Super defesa (ideia do Andre), 🧱 Muralha, 🌪️ Furacão e 👯 Clone.
 - Agora são 11 poderes no total. Eles saem na Caixa de poder (300 moedas), que sorteia um que você ainda não tem, e os robôs também usam.
 - Super chute (🔥 Chute de fogo) no futebol: dá para escolher ⬆️ por cima (a bola voa alto, ninguém alcança e passa até por cima da muralha) ou ⬇️ rasteiro (como era antes).
+
+## Posições nos Esportes (pedido do Andre, 22/11)
+
+- Antes de jogar você escolhe a sua posição, e cada uma tem uma vantagem:
+  - **Futebol:**
+    - 🧤 Goleiro: perto do gol pega a bola de mais longe e segura até o chute de fogo.
+    - 🛡️ Zagueiro: rouba bem mais.
+    - 🎯 Meio-campo: passa mais rápido e corre um pouco mais.
+    - ⚽ Atacante: chuta mais forte.
+  - **Basquete:**
+    - 🏃 Armador: corre e passa melhor.
+    - 🎯 Ala: acerta mais as de 3 pontos.
+    - 💪 Pivô: pega mais rebote, acerta mais perto da cesta e é difícil roubar a bola dele.
+- Os robôs ficam nas posições que sobram e jogam do jeito da posição. O goleiro robô fica no gol.

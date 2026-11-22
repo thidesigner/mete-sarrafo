@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="versao-site" content="f6b521bcb7">
+<meta name="versao-site" content="a6f2fbe55e">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0f3057">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;-webkit-text-size-adjust:100%}img{max-width:100%}[hidden]{display:none!important}.faixa-teste{position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:50;background:#ff4d6d;color:#fff;font:800 12px/1 system-ui,sans-serif;letter-spacing:.08em;padding:4px 10px;border-radius:0 0 8px 8px;pointer-events:none}</style>
@@ -9147,6 +9147,45 @@ const ESP_PODERES = {
   furacao: { ic: "🌪️", nome: "Furacão", dica: "Empurra para longe os adversários perto de você, e quem estava com a bola solta ela." },
   clone: { ic: "👯", nome: "Clone", dica: "Aparece uma cópia sua por 6 segundos que corre atrás da bola e passa para você." } };
 const ESP_MURO_W = 150;
+/* Posições (pedido do Andre): cada um escolhe antes de jogar e cada posição tem uma vantagem. Robôs ficam nas posições que faltam. */
+const ESP_POS = {
+  futebol: { gol: { ic: "🧤", nome: "Goleiro", dica: "Perto do seu gol pega a bola de mais longe, segura até o chute de fogo e rouba mais." },
+    zag: { ic: "🛡️", nome: "Zagueiro", dica: "Rouba a bola com muito mais facilidade." },
+    meio: { ic: "🎯", nome: "Meio-campo", dica: "Passes mais rápidos e corre um pouco mais." },
+    ata: { ic: "⚽", nome: "Atacante", dica: "Chute mais forte e corre um pouco mais." } },
+  basquete: { arm: { ic: "🏃", nome: "Armador", dica: "Corre mais rápido e passa melhor." },
+    ala: { ic: "🎯", nome: "Ala", dica: "Acerta mais as bolas de 3 pontos." },
+    piv: { ic: "💪", nome: "Pivô", dica: "Pega mais rebotes, acerta mais perto da cesta e é difícil roubar a bola dele." } } };
+const ESP_POS_ORDEM = { futebol: [["ata"], ["gol", "ata"], ["gol", "zag", "ata"]], basquete: [["arm"], ["arm", "piv"], ["arm", "ala", "piv"]] };
+function espPosDe(nome, tipo) { const p = (((G.inv || {})[nome] || {}).espPos || {})[tipo]; return ESP_POS[tipo][p] ? p : ESP_POS_ORDEM[tipo][0][0]; }
+function espPosVel(p) { return p.pos === "ata" || p.pos === "meio" ? 1.06 : p.pos === "arm" ? 1.1 : 1; }
+function espDaPos(E, tam) {   // humanos com a posição escolhida; robôs nas que faltam
+  for (let t = 0; t < 2; t++) { const meus = E.P.filter(p => p.time === t), ordem = ESP_POS_ORDEM[E.tipo][Math.min(tam, 3) - 1];
+    for (const p of meus) if (!p.humano || !ESP_POS[E.tipo][p.pos]) p.pos = null;
+    for (const p of meus) if (!p.pos) { const usadas = meus.map(q => q.pos); p.pos = ordem.find(k => !usadas.includes(k)) || (E.tipo === "futebol" ? "meio" : "ala"); } }
+}
+function espChanceRoubo(E, q, d) {
+  let c = ESP_ROUBO; if (q.pos === "zag") c = .6; if (q.pos === "gol") { const g = espAlvo(1 - q.time); if (espDist(q.x, q.y, g.x, g.y) < 260) c = .5; }
+  if (d.pos === "piv") c *= .5; return c;
+}
+function espRaioPegar(E, p) { if (p.pos === "piv") return 45; if (p.pos === "gol") { const g = espAlvo(1 - p.time); if (espDist(p.x, p.y, g.x, g.y) < 260) return 55; } return 28; }
+function espPosAjuste(E, p, tx, ty, temBola, nossa) {   // robôs ficam no lugar da posição quando não estão com a bola
+  if (!p.pos) return [tx, ty];
+  const b = E.b, alvo = espAlvo(p.time), meuGol = espAlvo(1 - p.time), meioY = ESP_H / 2, paraFrente = alvo.y < meioY ? -1 : 1;
+  if (temBola) { if (p.pos === "gol" && E.P.some(q => q.time === p.time && q !== p) && Math.random() < .08) p.acao = "passe"; return [tx, ty]; }   // goleiro robô: pegou, passa
+  if (E.tipo === "futebol" && p.pos === "gol") {   // goleiro fica no gol; só sai se a bola estiver bem perto
+    const perto = b.dono < 0 && espDist(b.x, b.y, p.x, p.y) < 130 && espDist(b.x, b.y, meuGol.x, meuGol.y) < 260;
+    return perto ? [b.x, b.y] : [espClamp(b.x, ESP_W / 2 - ESP_GOL / 2 + 10, ESP_W / 2 + ESP_GOL / 2 - 10), meuGol.y + (meuGol.y < meioY ? -30 : 30)];
+  }
+  if (E.tipo === "futebol") {
+    if (p.pos === "zag" && espDist(b.x, b.y, meuGol.x, meuGol.y) > ESP_H * .5) { ty = meioY - paraFrente * 120; tx = espClamp(b.x, 120, ESP_W - 120); }
+    if (p.pos === "ata" && !nossa && espDist(b.x, b.y, meuGol.x, meuGol.y) < ESP_H * .45) { ty = meioY + paraFrente * 60; tx = ESP_W / 2 + (p.i % 2 ? 120 : -120); }
+  } else if (nossa) {
+    if (p.pos === "piv") { tx = alvo.x + (p.i % 2 ? 50 : -50); ty = alvo.y - paraFrente * 130; }
+    if (p.pos === "ala") { tx = ESP_W / 2 + (p.i % 2 ? 210 : -210); ty = alvo.y - paraFrente * 320; }
+  }
+  return [tx, ty];
+}
 function espMuroY(E, time) { const topo = 1 - time === 0; return topo ? (E.tipo === "futebol" ? 64 : 150) : ESP_H - (E.tipo === "futebol" ? 64 : 150); }   // muro na frente do gol que o time defende
 function espPasseDono(E, dono) {   // o clone ou o ímã mandam a bola para quem chamou
   const b = E.b, d = espDist(b.x, b.y, dono.x, dono.y) || 1, v = Math.min(560, d * 2 + 200); b.dono = -1; b.voo = null; b.vx = (dono.x - b.x) / d * v; b.vy = (dono.y - b.y) / d * v; b.z = 4; b.ultimo = dono.i;
@@ -9181,7 +9220,7 @@ function espPoderesDe(nome) { const l = ((G.inv || {})[nome] || {}).espPod; retu
 function espPoderUsado(nome) { const inv = (G.inv || {})[nome] || {}, l = espPoderesDe(nome); return l.includes(inv.espPodUsar) ? inv.espPodUsar : l[0] || null; }
 function espDarPoder(nome, k) { G.inv = G.inv || {}; const inv = G.inv[nome] = G.inv[nome] || { vidas: 0 }; inv.espPod = espPoderesDe(nome); if (!inv.espPod.includes(k)) inv.espPod.push(k); if (!inv.espPodUsar) inv.espPodUsar = k; }
 function espInfoJogador(nome) {   // o que vai pela rede de cada humano (aparência e o poder escolhido)
-  return { nome, skin: skinDe(nome), pet: petDe(nome), ficha: typeof personagemDe === "function" ? personagemDe(nome) : null, selo: nivelSelo(nome), pod: espPoderUsado(nome) };
+  return { nome, skin: skinDe(nome), pet: petDe(nome), ficha: typeof personagemDe === "function" ? personagemDe(nome) : null, selo: nivelSelo(nome), pod: espPoderUsado(nome), posF: espPosDe(nome, "futebol"), posB: espPosDe(nome, "basquete") };
 }
 /* ---------- montar a partida ---------- */
 function espNovaPartida(tipo, humanos, tam) {
@@ -9193,11 +9232,12 @@ function espNovaPartida(tipo, humanos, tam) {
       vidas: 0, x: 0, y: 0, vx: 0, vy: 0, dir: o.time === 0 ? -Math.PI / 2 : Math.PI / 2, passo: 0, flash: 0, inp: { x: 0, y: 0 }, acao: null,
       cdPegar: 0, cdRoubo: 0, cdIA: 0, gols: 0, vel: ESP_VEL * (o.humano ? 1 : .8 + Math.random() * .08),
       pod: o.humano ? null : aPick(Object.keys(ESP_PODERES)), podCd: 8 + Math.random() * 4, turbo: 0, gelo: 0, fogo: 0 };
-    if (o.humano) { const f = o.info || espInfoJogador(o.nome); vestir(p, SKINS.some(s => s.k === f.skin) ? f.skin : "classico"); if (f.ficha) p.ficha = f.ficha; p.pet = f.pet || null; p.selo = f.selo || 0; p.pod = ESP_PODERES[f.pod] ? f.pod : null; p.podCd = 6; }
+    if (o.humano) { const f = o.info || espInfoJogador(o.nome); p.pos = tipo === "futebol" ? f.posF : f.posB; vestir(p, SKINS.some(s => s.k === f.skin) ? f.skin : "classico"); if (f.ficha) p.ficha = f.ficha; p.pet = f.pet || null; p.selo = f.selo || 0; p.pod = ESP_PODERES[f.pod] ? f.pod : null; p.podCd = 6; }
     return p;
   });
   vestirRobos(P);
   const E = { tipo, tam, t: ESP_TEMPO, placar: [0, 0], P, b: { x: ESP_W / 2, y: ESP_H / 2, z: 0, vx: 0, vy: 0, dono: -1, voo: null }, pausa: 0, msg: "", fim: null, saque: 0 };
+  espDaPos(E, tam);
   espSaida(E, Math.random() < .5 ? 0 : 1);
   return E;
 }
@@ -9209,6 +9249,7 @@ function espSaida(E, time) {
     meus.forEach((p, k) => { const f = forma[k % forma.length], dy = (f[1] + Math.floor(k / 3) * .08) * ESP_H;
       p.x = ESP_W / 2 + f[0] * ESP_W; p.y = t === 0 ? ESP_H / 2 + dy : ESP_H / 2 - dy; p.vx = p.vy = 0; p.dir = t === 0 ? -Math.PI / 2 : Math.PI / 2; p.cdPegar = 0; p.acao = null; });
   }
+  if (E.tipo === "futebol") for (const p of E.P) if (p.pos === "gol" && E.P.filter(q => q.time === p.time).length > 1) { p.x = ESP_W / 2; p.y = p.time === 0 ? ESP_H - 90 : 90; }   // goleiro começa no gol
   const quem = E.P.filter(p => p.time === time).sort((a, b) => Math.abs(a.y - ESP_H / 2) - Math.abs(b.y - ESP_H / 2))[0];
   quem.x = ESP_W / 2; quem.y = ESP_H / 2 + (time === 0 ? 30 : -30);
   Object.assign(E.b, { x: quem.x, y: quem.y, z: 0, vx: 0, vy: 0, dono: quem.i, voo: null });
@@ -9230,7 +9271,7 @@ function espPasso(E, dt) {
     if (p.pulo > 0) { if (p.enterra) { const c = espAlvo(p.time), dd = espDist(p.x, p.y, c.x, c.y) || 1; p.inp = { x: (c.x - p.x) / dd, y: (c.y - p.y) / dd }; } else p.inp = { x: Math.cos(p.dir), y: Math.sin(p.dir) }; }
     const m = Math.hypot(p.inp.x, p.inp.y), ix = m > 1 ? p.inp.x / m : p.inp.x, iy = m > 1 ? p.inp.y / m : p.inp.y;
     if (p.gelo > 0) { p.inp = { x: 0, y: 0 }; p.acao = null; p.vx = p.vy = 0; continue; }   // congelado: não anda nem chuta
-    const vel = p.vel * (b.dono === p.i ? .9 : 1) * (p.turbo > 0 ? 1.75 : 1) * (p.pulo > 0 ? (p.enterra ? 2.3 : 1.8) : 1), k = 1 - Math.exp(-dt * 12);
+    const vel = p.vel * (b.dono === p.i ? .9 : 1) * (p.turbo > 0 ? 1.75 : 1) * (p.pulo > 0 ? (p.enterra ? 2.3 : 1.8) : 1) * espPosVel(p), k = 1 - Math.exp(-dt * 12);
     p.vx += (ix * vel - p.vx) * k; p.vy += (iy * vel - p.vy) * k;
     p.x = espClamp(p.x + p.vx * dt, 22, ESP_W - 22); p.y = espClamp(p.y + p.vy * dt, 22, ESP_H - 22);
     const v = Math.hypot(p.vx, p.vy); if (m > .15) p.dir = Math.atan2(iy, ix); p.passo += v * dt * 1.6;
@@ -9246,7 +9287,7 @@ function espPasso(E, dt) {
     b.z = E.tipo === "basquete" ? Math.abs(Math.sin(d.passo / 9)) * 16 : 0; b.h3 = b.z;
     // roubada: adversário encosta em quem está com a bola
     if (!(d.fant > 0) && !(d.pulo > 0)) for (const q of E.P) if (q.time !== d.time && q.cdRoubo <= 0 && !(q.pulo > 0) && espDist(q.x, q.y, d.x, d.y) < (q.defesa > 0 ? 40 : 30)) {
-      q.cdRoubo = q.defesa > 0 ? .3 : 1.1; if (q.defesa > 0 || Math.random() < ESP_ROUBO) { b.dono = q.i; d.cdPegar = .7; d.flash = 1; bipEsp(330); break; }
+      q.cdRoubo = q.defesa > 0 ? .3 : 1.1; if (q.defesa > 0 || Math.random() < espChanceRoubo(E, q, d)) { b.dono = q.i; d.cdPegar = .7; d.flash = 1; bipEsp(330); break; }
     }
   } else {
     b.x += b.vx * dt; b.y += b.vy * dt; const fr = Math.exp(-dt * (E.tipo === "futebol" ? 1.1 : 1.6)); b.vx *= fr; b.vy *= fr;
@@ -9256,10 +9297,11 @@ function espPasso(E, dt) {
     const noGol = Math.abs(b.x - ESP_W / 2) < ESP_GOL / 2;
     if (E.tipo === "futebol" && noGol && (b.y < 12 || b.y > ESP_H - 12)) return espPonto(E, b.y < 12 ? 0 : 1, 1);
     if (b.y < 12) { b.y = 12; b.vy = Math.abs(b.vy) * .7; } if (b.y > ESP_H - 12) { b.y = ESP_H - 12; b.vy = -Math.abs(b.vy) * .7; }
-    let perto = null, pd = 28;
+    let perto = null, pd = 999;
     for (const p of E.P) { const d = espDist(p.x, p.y, b.x, b.y); if (p.gelo > 0 || b.z > 28) continue;   // bola alta: ninguém alcança
-      if (b.fogo > 0 && p.time !== b.fogoTime) { if (d < 26 && p.flash <= 0) { p.flash = 1; bipEsp(180); } continue; }   // bola de fogo: o outro time não segura
-      if (p.cdPegar <= 0 && !(p.pulo > 0) && d < (p.defesa > 0 ? Math.max(pd, 62) : pd)) { pd = d; perto = p; } }
+      const goleiroSegura = p.pos === "gol" && espRaioPegar(E, p) > 28;
+      if (b.fogo > 0 && p.time !== b.fogoTime && !goleiroSegura) { if (d < 26 && p.flash <= 0) { p.flash = 1; bipEsp(180); } continue; }   // bola de fogo: o outro time não segura
+      if (p.cdPegar <= 0 && !(p.pulo > 0) && d < (p.defesa > 0 ? Math.max(62, espRaioPegar(E, p)) : espRaioPegar(E, p)) && d < pd) { pd = d; perto = p; } }
     if (perto) { b.dono = perto.i; b.vx = b.vy = 0; b.alto = null; }
   }
   espPoderesPasso(E, dt);
@@ -9273,7 +9315,7 @@ function espChutar(E, p, alto) {
     b.dono = -1; b.vx = Math.cos(p.dir) * 820 + p.vx * .3; b.vy = Math.sin(p.dir) * 820 + p.vy * .3; b.alto = { t: 0, dur: 1 }; b.z = 6; p.cdPegar = .35; bipEsp(200);
     p.fogo = 0; b.fogo = 1.1; b.fogoTime = p.time; b.ultimo = p.i; E.fxPod = (E.fxPod || []).concat([{ k: "fogo", x: p.x, y: p.y, t: .8 }]).slice(-6); return;
   }
-  const v = fogo ? 1050 : 640; b.dono = -1; b.vx = Math.cos(p.dir) * v + p.vx * .3; b.vy = Math.sin(p.dir) * v + p.vy * .3; b.z = 6; p.cdPegar = .35; bipEsp(fogo ? 260 : 520);
+  const v = fogo ? 1050 : p.pos === "ata" ? 800 : 640; b.dono = -1; b.vx = Math.cos(p.dir) * v + p.vx * .3; b.vy = Math.sin(p.dir) * v + p.vy * .3; b.z = 6; p.cdPegar = .35; bipEsp(fogo ? 260 : 520);
   if (fogo) { p.fogo = 0; b.fogo = 1.1; b.fogoTime = p.time; }
   b.ultimo = p.i;
 }
@@ -9282,13 +9324,14 @@ function espPassar(E, p) {
   if (!cand.length) return espChutar(E, p);
   // o companheiro mais à frente na direção que olha (ou o mais perto)
   const alvo = cand.map(q => { const a = Math.atan2(q.y - p.y, q.x - p.x), d = espDist(p.x, p.y, q.x, q.y), da = Math.abs(((a - p.dir) + Math.PI * 3) % (Math.PI * 2) - Math.PI); return { q, n: d / 300 + da }; }).sort((a, c) => a.n - c.n)[0].q;
-  const dx = alvo.x + alvo.vx * .25 - p.x, dy = alvo.y + alvo.vy * .25 - p.y, d = Math.hypot(dx, dy) || 1, v = Math.min(620, d * 2 + 220);
+  const dx = alvo.x + alvo.vx * .25 - p.x, dy = alvo.y + alvo.vy * .25 - p.y, d = Math.hypot(dx, dy) || 1, v = Math.min(p.pos === "meio" || p.pos === "arm" ? 780 : 620, d * 2 + (p.pos === "meio" || p.pos === "arm" ? 320 : 220));
   b.dono = -1; b.vx = dx / d * v; b.vy = dy / d * v; b.z = 4; p.cdPegar = .35; b.ultimo = p.i; bipEsp(700);
 }
 function espArremessar(E, p) {
   const b = E.b, c = espAlvo(p.time), d = espDist(p.x, p.y, c.x, c.y);
   let chance = espClamp(.92 - d / 850, .12, .88);
   if (E.P.some(q => q.time !== p.time && espDist(q.x, q.y, p.x, p.y) < 60)) chance -= .25;   // marcado: mais difícil
+  if (p.pos === "ala" && d > 300) chance += .15; if (p.pos === "piv" && d < 260) chance += .12;
   if ((E.muros || []).some(m => m.time !== p.time)) chance *= .3;   // muralha na frente da cesta
   if (p.fogo > 0) { chance = .95; p.fogo = 0; b.fogo = 1.6; b.fogoTime = p.time; }   // arremesso de fogo
   b.dono = -1; b.ultimo = p.i; p.cdPegar = .5;
@@ -9334,6 +9377,7 @@ function espPonto(E, time, pts) {
 function bipEsp(f) { try { bip(f, .05); } catch {} }
 /* ---------- robôs ---------- */
 function espGoleiro(E, p) {   // o robô do time mais perto do próprio gol (com 2 ou mais por time)
+  if (p.pos) return p.pos === "gol";
   const meuGol = espAlvo(1 - p.time), robos = E.P.filter(q => q.time === p.time && (!q.humano || q.virouRobo));
   if (robos.length < (E.P.some(q => q.time === p.time && q.humano && !q.virouRobo) ? 1 : 2)) return false;
   return robos.sort((a, c) => Math.abs(a.y - meuGol.y) - Math.abs(c.y - meuGol.y))[0] === p;
@@ -9375,6 +9419,7 @@ function espIA(E, p, dt) {
       else { tx = (b.x + meuGol.x) / 2 + (p.i % 2 ? 90 : -90); ty = (b.y + meuGol.y) / 2; }
     } else { tx = (b.x + meuGol.x) / 2 + (p.i % 2 ? 90 : -90); ty = (b.y + meuGol.y) / 2; }
   }
+  [tx, ty] = espPosAjuste(E, p, tx, ty, temBola, nossa);
   const dx = tx - p.x, dy = ty - p.y, d = Math.hypot(dx, dy);
   p.inp = d < 10 ? { x: 0, y: 0 } : { x: dx / d, y: dy / d };
 }
@@ -9447,6 +9492,7 @@ function espDesenhar(c, E, eu, cw, ch, topo = 0) {
     const t = espTemp; Object.assign(t, p); t.x = 0; t.y = 0; t.vidas = 0; t.i = p.i + 1000; t.pet = null;
     try { desenharBoneco2(c, t, ph); } catch {}
     c.restore();
+    const pi = p.pos && ESP_POS[E.tipo][p.pos]; if (pi) { c.font = "18px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillStyle = "rgba(11,27,51,.75)"; c.beginPath(); c.arc(p.x + 22, p.y - 40 - pz, 13, 0, Math.PI * 2); c.fill(); c.fillText(pi.ic, p.x + 22, p.y - 39 - pz); }
     if (p.gelo > 0) { c.fillStyle = "rgba(170,225,255,.45)"; c.strokeStyle = "rgba(255,255,255,.9)"; c.lineWidth = 3; c.beginPath(); c.roundRect ? c.roundRect(p.x - 22, p.y - 52, 44, 74, 8) : c.rect(p.x - 22, p.y - 52, 44, 74); c.fill(); c.stroke(); }
   }
   if (!bolaAtras || b.dono < 0) espDesenharBola(c, E, b.x, b.y + 10, b.z);
@@ -9529,7 +9575,7 @@ function esp3Montar(E, eu) {
       const rede = new THREE.Mesh(new THREE.CylinderGeometry(.32, .2, .5, 12, 2, true), new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true, opacity: .8 })); rede.position.set(hx, E3_ARO - .25, hz); cena.add(rede); }
   }
   // jogadores (o mesmo bonequinho da Praça) com anel do time embaixo
-  E3.mods = E.P.map(p => { const m = pracaModelo({ nome: p.nome, skin: p.skin, ficha: p.ficha, selo: p.selo, pet: null, cor: p.cor, pele: p.pele });
+  E3.mods = E.P.map(p => { const m = pracaModelo({ nome: p.nome + (p.pos && ESP_POS[E.tipo][p.pos] ? " " + ESP_POS[E.tipo][p.pos].ic : ""), skin: p.skin, ficha: p.ficha, selo: p.selo, pet: null, cor: p.cor, pele: p.pele });
     const anel = new THREE.Mesh(new THREE.RingGeometry(.42, p.i === eu ? .6 : .52, 28), new THREE.MeshBasicMaterial({ color: p.i === eu ? 0xffd23f : new THREE.Color(ESP_TIMES[p.time].cor), transparent: true, opacity: .9, side: THREE.DoubleSide }));
     anel.rotation.x = -Math.PI / 2; anel.position.y = .03; m.g.add(anel); cena.add(m.g); m.ux = e3x(p.x); m.uz = e3z(p.y); return m; });
   // bola
@@ -9628,6 +9674,9 @@ TELAS.esportes = () => {
       <h3>Tamanho dos times</h3>
       <div class="chips" style="justify-content:center">${[1, 2, 3].map(n => `<button type="button" class="chip pick" data-a="espTam" data-n="${n}" aria-pressed="${ESP.tam === n}">${n} x ${n}</button>`).join("")}</div>
       ${esp3Pode() ? `<h3>Visão</h3><div class="chips" style="justify-content:center"><button type="button" class="chip pick" data-a="esp3d" data-v="1" aria-pressed="${esp3Usar()}">🏟️ 3D</button><button type="button" class="chip pick" data-a="esp3d" data-v="0" aria-pressed="${!esp3Usar()}">🗺️ 2D (de cima)</button></div>` : ""}
+      <h3>Sua posição</h3>
+      <div class="chips" style="justify-content:center">${Object.entries(ESP_POS[ESP.tipo]).map(([k, x]) => `<button type="button" class="chip pick" data-a="espPos" data-k="${k}" aria-pressed="${espPosDe(perfil(), ESP.tipo) === k}">${x.ic} ${x.nome}</button>`).join("")}</div>
+      <p style="font-size:14px;text-align:center">${ESP_POS[ESP.tipo][espPosDe(perfil(), ESP.tipo)].ic} ${ESP_POS[ESP.tipo][espPosDe(perfil(), ESP.tipo)].dica}</p>
       <p class="dim" style="font-size:14px;text-align:center">Partida de 2 minutos. Ganha o time que fizer mais ${ESP.tipo === "futebol" ? "gols" : "pontos"}. Robôs completam os times.</p>
       <button class="lb-jogar" data-a="espJogar">Jogar contra robôs</button>
       ${on ? `<button class="btn ok" data-a="espCriarSala">🌐 Criar sala online</button>
@@ -9662,6 +9711,7 @@ function espSorteioVer(k, titulo, depois) {   // janela com os ícones girando e
     if (typeof tocarNotas === "function") tocarNotas([[72, 72, 0, .1, "square"], [76, 76, .1, .1, "square"], [79, 79, .2, .1, "square"], [84, 84, .3, .3, "square"]]); }, 1600);
   $("es-sort-ok").addEventListener("click", () => { box.remove(); if (depois) depois(); });
 }
+acoes.espPos = el => { const nome = perfil(), k = el.dataset.k; if (!ESP_POS[ESP.tipo][k]) return; G.inv = G.inv || {}; const inv = G.inv[nome] = G.inv[nome] || { vidas: 0 }; inv.espPos = { ...(inv.espPos || {}), [ESP.tipo]: k }; salvar(); const y = window.scrollY; render(); window.scrollTo(0, y); };
 acoes.espPodUsar = el => { const nome = perfil(); if (!espPoderesDe(nome).includes(el.dataset.k)) return; G.inv[nome].espPodUsar = el.dataset.k; salvar(); render(); };
 acoes.espCaixa = () => {
   const nome = perfil(), faltam = Object.keys(ESP_PODERES).filter(k => !espPoderesDe(nome).includes(k));
@@ -11537,7 +11587,7 @@ function espHostRecebe(conn, d) {
     if (o.lista.length >= 6) { enviar(conn, { t: "enao", motivo: "A sala está cheia (máximo 6 pessoas)." }); return; }
     const inf = d.info || {}, nome = String(inf.nome || "Amigo").replace(/[<>]/g, "").slice(0, 20).trim() || "Amigo";
     id = "c" + o.prox++; o.conns.set(id, { conn });
-    const info = { nome, pod: ESP_PODERES[inf.pod] ? inf.pod : null, skin: String(inf.skin || "classico").slice(0, 30), pet: null, ficha: typeof limparFicha === "function" && inf.ficha ? limparFicha(inf.ficha) : null, selo: [1, 2, 3].includes(inf.selo) ? inf.selo : 0 };
+    const info = { nome, pod: ESP_PODERES[inf.pod] ? inf.pod : null, skin: String(inf.skin || "classico").slice(0, 30), pet: null, ficha: typeof limparFicha === "function" && inf.ficha ? limparFicha(inf.ficha) : null, selo: [1, 2, 3].includes(inf.selo) ? inf.selo : 0, posF: ESP_POS.futebol[inf.posF] ? inf.posF : null, posB: ESP_POS.basquete[inf.posB] ? inf.posB : null };
     o.lista.push({ id, nome, info }); espMandarLista(); bip(880, .08);
     return;
   }
@@ -11558,7 +11608,7 @@ acoes.espComecarOnline = () => {
   const o = espOnline; if (!o.host) return;
   const tam = Math.max(ESP.tam, Math.ceil(o.lista.length / 2));
   const E = espNovaPartida(ESP.tipo, o.lista.map(x => ({ nome: x.nome, id: x.id, info: x.info })), tam);
-  const P = E.P.map(p => ({ nome: p.nome, time: p.time, skin: p.skin, cor: p.cor, pele: p.pele, ficha: p.ficha || null, humano: p.humano, selo: p.selo || 0, pod: p.pod || null }));
+  const P = E.P.map(p => ({ nome: p.nome, time: p.time, skin: p.skin, cor: p.cor, pele: p.pele, ficha: p.ficha || null, humano: p.humano, selo: p.selo || 0, pod: p.pod || null, pos: p.pos || null }));
   for (const [id, c] of o.conns) enviar(c.conn, { t: "einicio", tipo: E.tipo, tam, P, eu: E.P.findIndex(p => p.id === id) });
   espComecar(E, E.P.findIndex(p => p.id === "h"), {
     enviar(dt) { o.tEnvio -= dt; if (o.tEnvio > 0 && !(E.fim && !o.fimMandado)) return; o.tEnvio = .066; if (E.fim) o.fimMandado = true;
@@ -11594,7 +11644,7 @@ function espCliRecebe(d) {
   if (d.t === "efechou") { toast("Quem abriu a sala saiu."); const jogando = ESP.E; espLimparRede(); if (jogando) espSair(true); else ir("esportes"); return; }
   if (d.t === "einicio" && ESP_TIPOS[d.tipo] && Array.isArray(d.P)) {
     const P = d.P.slice(0, 6).map((x, i) => { const p = { i, nome: String(x.nome || "").slice(0, 20), humano: !!x.humano, time: x.time ? 1 : 0, cor: String(x.cor || "#2f80ed").slice(0, 9), pele: String(x.pele || A_PELE[0]).slice(0, 9),
-      pod: ESP_PODERES[x.pod] ? x.pod : null, skin: SKINS.some(s => s.k === x.skin) ? x.skin : "classico", selo: [1, 2, 3].includes(x.selo) ? x.selo : 0, vidas: 0, x: ESP_W / 2, y: ESP_H / 2, dir: 0, passo: 0, flash: 0, gols: 0, vx: 0, vy: 0 };
+      pod: ESP_PODERES[x.pod] ? x.pod : null, skin: SKINS.some(s => s.k === x.skin) ? x.skin : "classico", selo: [1, 2, 3].includes(x.selo) ? x.selo : 0, pos: ESP_POS[d.tipo][x.pos] ? x.pos : null, vidas: 0, x: ESP_W / 2, y: ESP_H / 2, dir: 0, passo: 0, flash: 0, gols: 0, vx: 0, vy: 0 };
       if (x.ficha && typeof limparFicha === "function") p.ficha = limparFicha(x.ficha); return p; });
     const E = { tipo: d.tipo, tam: d.tam, t: ESP_TEMPO, placar: [0, 0], P, b: { x: ESP_W / 2, y: ESP_H / 2, z: 0, dono: -1 }, msg: "", fim: null };
     o.alvo = null;

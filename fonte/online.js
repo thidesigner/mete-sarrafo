@@ -1379,7 +1379,7 @@ function espHostRecebe(conn, d) {
     if (o.lista.length >= 6) { enviar(conn, { t: "enao", motivo: "A sala está cheia (máximo 6 pessoas)." }); return; }
     const inf = d.info || {}, nome = String(inf.nome || "Amigo").replace(/[<>]/g, "").slice(0, 20).trim() || "Amigo";
     id = "c" + o.prox++; o.conns.set(id, { conn });
-    const info = { nome, pod: ESP_PODERES[inf.pod] ? inf.pod : null, skin: String(inf.skin || "classico").slice(0, 30), pet: null, ficha: typeof limparFicha === "function" && inf.ficha ? limparFicha(inf.ficha) : null, selo: [1, 2, 3].includes(inf.selo) ? inf.selo : 0 };
+    const info = { nome, pod: ESP_PODERES[inf.pod] ? inf.pod : null, skin: String(inf.skin || "classico").slice(0, 30), pet: null, ficha: typeof limparFicha === "function" && inf.ficha ? limparFicha(inf.ficha) : null, selo: [1, 2, 3].includes(inf.selo) ? inf.selo : 0, posF: ESP_POS.futebol[inf.posF] ? inf.posF : null, posB: ESP_POS.basquete[inf.posB] ? inf.posB : null };
     o.lista.push({ id, nome, info }); espMandarLista(); bip(880, .08);
     return;
   }
@@ -1400,7 +1400,7 @@ acoes.espComecarOnline = () => {
   const o = espOnline; if (!o.host) return;
   const tam = Math.max(ESP.tam, Math.ceil(o.lista.length / 2));
   const E = espNovaPartida(ESP.tipo, o.lista.map(x => ({ nome: x.nome, id: x.id, info: x.info })), tam);
-  const P = E.P.map(p => ({ nome: p.nome, time: p.time, skin: p.skin, cor: p.cor, pele: p.pele, ficha: p.ficha || null, humano: p.humano, selo: p.selo || 0, pod: p.pod || null }));
+  const P = E.P.map(p => ({ nome: p.nome, time: p.time, skin: p.skin, cor: p.cor, pele: p.pele, ficha: p.ficha || null, humano: p.humano, selo: p.selo || 0, pod: p.pod || null, pos: p.pos || null }));
   for (const [id, c] of o.conns) enviar(c.conn, { t: "einicio", tipo: E.tipo, tam, P, eu: E.P.findIndex(p => p.id === id) });
   espComecar(E, E.P.findIndex(p => p.id === "h"), {
     enviar(dt) { o.tEnvio -= dt; if (o.tEnvio > 0 && !(E.fim && !o.fimMandado)) return; o.tEnvio = .066; if (E.fim) o.fimMandado = true;
@@ -1436,7 +1436,7 @@ function espCliRecebe(d) {
   if (d.t === "efechou") { toast("Quem abriu a sala saiu."); const jogando = ESP.E; espLimparRede(); if (jogando) espSair(true); else ir("esportes"); return; }
   if (d.t === "einicio" && ESP_TIPOS[d.tipo] && Array.isArray(d.P)) {
     const P = d.P.slice(0, 6).map((x, i) => { const p = { i, nome: String(x.nome || "").slice(0, 20), humano: !!x.humano, time: x.time ? 1 : 0, cor: String(x.cor || "#2f80ed").slice(0, 9), pele: String(x.pele || A_PELE[0]).slice(0, 9),
-      pod: ESP_PODERES[x.pod] ? x.pod : null, skin: SKINS.some(s => s.k === x.skin) ? x.skin : "classico", selo: [1, 2, 3].includes(x.selo) ? x.selo : 0, vidas: 0, x: ESP_W / 2, y: ESP_H / 2, dir: 0, passo: 0, flash: 0, gols: 0, vx: 0, vy: 0 };
+      pod: ESP_PODERES[x.pod] ? x.pod : null, skin: SKINS.some(s => s.k === x.skin) ? x.skin : "classico", selo: [1, 2, 3].includes(x.selo) ? x.selo : 0, pos: ESP_POS[d.tipo][x.pos] ? x.pos : null, vidas: 0, x: ESP_W / 2, y: ESP_H / 2, dir: 0, passo: 0, flash: 0, gols: 0, vx: 0, vy: 0 };
       if (x.ficha && typeof limparFicha === "function") p.ficha = limparFicha(x.ficha); return p; });
     const E = { tipo: d.tipo, tam: d.tam, t: ESP_TEMPO, placar: [0, 0], P, b: { x: ESP_W / 2, y: ESP_H / 2, z: 0, dono: -1 }, msg: "", fim: null };
     o.alvo = null;
