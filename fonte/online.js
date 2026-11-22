@@ -1435,6 +1435,7 @@ function espCliRecebe(d) {
   if (d.t === "elista") { if (d.rk) mesclarRank(d.rk, d.mo); o.lista = (d.lista || []).slice(0, 6).map(n => ({ nome: String(n).slice(0, 20) })); if (ESP_TIPOS[d.tipo]) ESP.tipo = d.tipo; if ([1, 2, 3].includes(d.tam)) ESP.tam = d.tam; if (!ESP.E) { if (G.tela !== "espSala") ir("espSala"); else render(); } return; }
   if (d.t === "efechou") { toast("Quem abriu a sala saiu."); const jogando = ESP.E; espLimparRede(); if (jogando) espSair(true); else ir("esportes"); return; }
   if (d.t === "einicio" && ESP_TIPOS[d.tipo] && Array.isArray(d.P)) {
+    espTamanhoCampo(d.tipo);
     const P = d.P.slice(0, 6).map((x, i) => { const p = { i, nome: String(x.nome || "").slice(0, 20), humano: !!x.humano, time: x.time ? 1 : 0, cor: String(x.cor || "#2f80ed").slice(0, 9), pele: String(x.pele || A_PELE[0]).slice(0, 9),
       pod: ESP_PODERES[x.pod] ? x.pod : null, skin: SKINS.some(s => s.k === x.skin) ? x.skin : "classico", selo: [1, 2, 3].includes(x.selo) ? x.selo : 0, pos: ESP_POS[d.tipo][x.pos] ? x.pos : null, vidas: 0, x: ESP_W / 2, y: ESP_H / 2, dir: 0, passo: 0, flash: 0, gols: 0, vx: 0, vy: 0 };
       if (x.ficha && typeof limparFicha === "function") p.ficha = limparFicha(x.ficha); return p; });

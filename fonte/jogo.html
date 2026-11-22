@@ -9109,13 +9109,16 @@ acoes.admLimparAvisos = () => { ADM.avisoJSON = JSON.stringify({ avisos: [] }, n
    Times Azul (ataca para cima) e Vermelho (ataca para baixo); robôs completam os times. 2 minutos; ganha quem fizer mais.
    Contra robôs funciona em qualquer lugar (inclusive no Claude). Online (só no site) fica em fonte/online.js, bloco "Mini jogos online":
    lá quem abre a sala roda esta mesma simulação (espPasso) e manda o estado para os amigos. */
-const ESP_W = 640, ESP_H = 1000, ESP_TEMPO = 120, ESP_VEL = 240, ESP_GOL = 180, ESP_ESC = .75;
+let ESP_W = 640, ESP_H = 1000, ESP_GOL = 180;   // o tamanho muda com o esporte (espTamanhoCampo)
+const ESP_TEMPO = 120, ESP_VEL = 240, ESP_ESC = .75;
+const ESP_CAMPOS = { futebol: { w: 860, h: 1350, gol: 230 }, basquete: { w: 640, h: 1000, gol: 180 } };   // campo de futebol maior (pedido do Andre)
 let ESP_ROUBO = .3;
 const ESP_TIPOS = {
   futebol: { nome: "Futebol", ic: "⚽", acao: "Chutar", ponto: "GOOOL!" },
   basquete: { nome: "Basquete", ic: "🏀", acao: "Arremessar", ponto: "CESTA!" } };
 const ESP_TIMES = [{ nome: "Azul", cor: "#2f80ed" }, { nome: "Vermelho", cor: "#e4572e" }];
 const ESP_CESTA = [{ x: ESP_W / 2, y: 78 }, { x: ESP_W / 2, y: ESP_H - 78 }];   // cesta que cada time ataca
+function espTamanhoCampo(tipo) { const c = ESP_CAMPOS[tipo] || ESP_CAMPOS.basquete; ESP_W = c.w; ESP_H = c.h; ESP_GOL = c.gol; ESP_CESTA[0].x = ESP_CESTA[1].x = ESP_W / 2; ESP_CESTA[1].y = ESP_H - 78; }
 const ESP = { tipo: G.espTipo || "futebol", tam: G.espTam || 2, E: null, eu: 0, joy: { x: 0, y: 0 }, keys: {}, raf: 0, rede: null };
 const espDist = (a, b, c, d) => Math.hypot(a - c, b - d);
 const espClamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -9130,7 +9133,6 @@ const ESP_PODERES = {
   ima: { ic: "🧲", nome: "Ímã", dica: "Por 3 segundos a bola é puxada para você (e escapa de quem está perto com ela)." },
   fantasma: { ic: "👻", nome: "Fantasma", dica: "Fica transparente por 4 segundos: ninguém consegue roubar a sua bola." },
   tele: { ic: "🌀", nome: "Teleporte", dica: "Aparece na hora perto do gol (ou da cesta) do outro time." },
-  pulo: { ic: "🦘", nome: "Super pulo", dica: "Um pulo gigante para a frente, por cima de todo mundo. No basquete, perto da cesta, vira ENTERRADA!" },
   defesa: { ic: "🛡️", nome: "Super defesa", dica: "Por 5 segundos você rouba a bola sempre que encosta e pega toda bola que passa perto." },
   muralha: { ic: "🧱", nome: "Muralha", dica: "Um muro na frente do seu gol (ou cesta) por 5 segundos." },
   furacao: { ic: "🌪️", nome: "Furacão", dica: "Empurra para longe os adversários perto de você, e quem estava com a bola solta ela." },
@@ -9205,6 +9207,11 @@ function espPoderesPasso(E, dt) {   // ímã, muralha, clone e o fim do super pu
 }
 function espEfeitos(p) { return (p.turbo > 0 ? 1 : 0) | (p.gelo > 0 ? 2 : 0) | (p.fogo > 0 ? 4 : 0) | (p.ima > 0 ? 8 : 0) | (p.fant > 0 ? 16 : 0) | (p.pulo > 0 ? 32 : 0) | (p.defesa > 0 ? 64 : 0); }
 const ESP_POD_CD = 20, ESP_POD_PRECO = 300;
+function espDevolverPulo(nome) {   // o Super pulo saiu do jogo (pedido do Andre): quem tinha ganha as moedas da caixa de volta, uma vez
+  const inv = (G.inv || {})[nome]; if (!inv || !Array.isArray(inv.espPod) || !inv.espPod.includes("pulo")) return;
+  inv.espPod = inv.espPod.filter(k => k !== "pulo"); if (inv.espPodUsar === "pulo") inv.espPodUsar = inv.espPod[0] || null;
+  G.banco[nome] = Math.round(((G.banco[nome] || 0) + ESP_POD_PRECO) * 10) / 10; salvar(); setTimeout(() => toast(`🦘 O Super pulo saiu do jogo. ${nome} ganhou ${ESP_POD_PRECO} moedas de volta!`), 600);
+}
 function espPoderesDe(nome) { const l = ((G.inv || {})[nome] || {}).espPod; return Array.isArray(l) ? l.filter(k => ESP_PODERES[k]) : []; }
 function espPoderUsado(nome) { const inv = (G.inv || {})[nome] || {}, l = espPoderesDe(nome); return l.includes(inv.espPodUsar) ? inv.espPodUsar : l[0] || null; }
 function espDarPoder(nome, k) { G.inv = G.inv || {}; const inv = G.inv[nome] = G.inv[nome] || { vidas: 0 }; inv.espPod = espPoderesDe(nome); if (!inv.espPod.includes(k)) inv.espPod.push(k); if (!inv.espPodUsar) inv.espPodUsar = k; }
@@ -9213,6 +9220,7 @@ function espInfoJogador(nome) {   // o que vai pela rede de cada humano (aparên
 }
 /* ---------- montar a partida ---------- */
 function espNovaPartida(tipo, humanos, tam) {
+  espTamanhoCampo(tipo);
   // humanos: [{nome, id, info}] (o primeiro é quem abriu); completa com robôs até tam x tam
   const lista = humanos.slice(0, tam * 2).map((h, k) => ({ ...h, humano: true, time: k % 2 }));
   let r = 1; for (let t = 0; t < 2; t++) while (lista.filter(x => x.time === t).length < tam) lista.push({ nome: "Robô " + r++, humano: false, time: t });
@@ -9337,7 +9345,6 @@ function espUsarPoder(E, p) {
   if (p.pod === "ima") { p.ima = 3; bipEsp(1100); }
   if (p.pod === "fantasma") { p.fant = 4; bipEsp(500); }
   if (p.pod === "defesa") { p.defesa = 5; bipEsp(800); }
-  if (p.pod === "pulo") { const c = espAlvo(p.time); p.pulo = .9; p.enterra = E.tipo === "basquete" && E.b.dono === p.i && espDist(p.x, p.y, c.x, c.y) < 470; bipEsp(700); }
   if (p.pod === "tele") { const c = espAlvo(p.time); E.fxPod = (E.fxPod || []).concat([{ k: "tele", x: p.x, y: p.y, t: .8 }]);
     p.x = espClamp(ESP_W / 2 + (Math.random() - .5) * 200, 40, ESP_W - 40); p.y = c.y + (c.y < ESP_H / 2 ? 230 : -230); p.vx = p.vy = 0; bipEsp(1500); }
   if (p.pod === "muralha") { E.muros = (E.muros || []).filter(m => m.time !== p.time).concat([{ time: p.time, t: 5 }]); bipEsp(200); }
@@ -9379,7 +9386,7 @@ function espIA(E, p, dt) {
     const dono = b.dono >= 0 ? E.P[b.dono] : null, dBola = espDist(p.x, p.y, b.x, b.y), pertos = E.P.filter(q => q.time !== p.time && espDist(q.x, q.y, p.x, p.y) < 200).length;
     if ((p.pod === "turbo" && temBola && dGol > 300) || (p.pod === "gelo" && perto && (temBola || (b.dono >= 0 && !nossa))) || (p.pod === "fogo" && temBola && dGol < 460)
       || (p.pod === "ima" && !nossa && dBola < 300 && dBola > 60) || (p.pod === "fantasma" && temBola && perto) || (p.pod === "tele" && temBola && dGol > 520)
-      || (p.pod === "pulo" && temBola && (E.tipo === "basquete" ? dGol < 430 : perto)) || (p.pod === "defesa" && dono && !nossa && dBola < 200)
+      || (p.pod === "defesa" && dono && !nossa && dBola < 200)
       || (p.pod === "muralha" && dono && !nossa && espDist(dono.x, dono.y, meuGol.x, meuGol.y) < 420) || (p.pod === "furacao" && (pertos >= 2 || (temBola && perto))) || (p.pod === "clone" && !nossa)) p.acao = "poder";
   }
   let tx = p.x, ty = p.y;
@@ -9509,7 +9516,7 @@ function espDesenharPoderes(c, E, tt) {
    Campo/quadra com a pintura do 2D, gols ou cestas de verdade, arquibancada com torcida, placas e refletores.
    Câmera atrás de quem joga, olhando para o lado que o seu time ataca (no time Vermelho o controle gira junto). */
 const E3 = { r: null, cena: null, cam: null, mods: [], bola: null, sombra: null, torcida: null, confete: [], tipo: "", placar: "0x0", pulo: 0, camPos: null };
-const e3x = x => (x - ESP_W / 2) / 40, e3z = y => (y - ESP_H / 2) / 40;
+const e3x = x => (x - ESP_W / 2) / 40, e3z = y => (y - ESP_H / 2) / 40;   // usa o tamanho do campo da partida
 const E3_ARO = 3.0;   // altura do aro (o bonequinho tem ~1,8)
 function esp3Pode() { return typeof THREE !== "undefined"; }
 function esp3Usar() { return esp3Pode() && G.esp3d !== false; }
@@ -9525,7 +9532,7 @@ function esp3Montar(E, eu) {
   const W = ESP_W / 40, H = ESP_H / 40, mat = (cor, o = {}) => new THREE.MeshLambertMaterial({ color: cor, ...o });
   // chão em volta e o campo com a pintura do 2D
   const chao = new THREE.Mesh(new THREE.PlaneGeometry(90, 90), mat(futebol ? 0x2a7d43 : 0x3a2a20)); chao.rotation.x = -Math.PI / 2; chao.position.y = -.02; cena.add(chao);
-  const tex = texturaCanvas(640, 1000, c => espDesenharCampo(c, E.tipo, true));
+  const tex = texturaCanvas(ESP_W, ESP_H, c => espDesenharCampo(c, E.tipo, true));
   const campo = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.MeshLambertMaterial({ map: tex })); campo.rotation.x = -Math.PI / 2; cena.add(campo);
   // placas de propaganda em volta
   const placaTex = texturaCanvas(512, 64, c => { const gr = c.createLinearGradient(0, 0, 512, 0); gr.addColorStop(0, "#2f80ed"); gr.addColorStop(.5, "#9b51e0"); gr.addColorStop(1, "#e4572e"); c.fillStyle = gr; c.fillRect(0, 0, 512, 64);
@@ -9652,6 +9659,7 @@ function esp3Quadro(E, eu, dt, w, h) {
 }
 /* ---------- tela de escolha ---------- */
 TELAS.esportes = () => {
+  espDevolverPulo(perfil());
   const on = typeof espOnline === "object";
   const card = (k) => { const t = ESP_TIPOS[k]; return `<button type="button" class="es-card${ESP.tipo === k ? " on" : ""}" data-a="espTipo" data-k="${k}" aria-pressed="${ESP.tipo === k}"><span>${t.ic}</span><b>${t.nome}</b></button>`; };
   return `

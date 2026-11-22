@@ -1,4 +1,4 @@
-// Os 8 poderes novos dos Esportes (ímã, fantasma, teleporte, super pulo, super defesa, muralha, furacão, clone): simulação, robôs, desenho 2D/3D e online.
+// Os poderes novos dos Esportes (ímã, fantasma, teleporte, super defesa, muralha, furacão, clone; o super pulo saiu): simulação, robôs, desenho 2D/3D e online.
 // Uso: na raiz do repositório, rode `python3 -m http.server 8767` e depois `node ferramentas/teste/teste-esportes-poderes2.js <pasta-para-fotos>`.
 const { chromium } = require('playwright'); const fs = require('fs'); const T = '/home/user/mete-sarrafo/ferramentas/teste/';
 (async () => { const S = process.argv[2]; const b = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist'] });
@@ -23,9 +23,6 @@ const { chromium } = require('playwright'); const fs = require('fs'); const T = 
     for (let i = 0; i < 120; i++) { ini.x = p.x + 10; ini.y = p.y; ini.cdRoubo = 0; espPasso(E, 1 / 60); if (E.b.dono !== p.i) roubou = true; } out.fantasma = { roubou };
     // teleporte: perto do gol do outro time
     E = mk("futebol", "tele"); p = E.P[0]; E.b.dono = p.i; const y0 = p.y; p.acao = "poder"; espPasso(E, 1 / 60); out.tele = { de: Math.round(y0), para: Math.round(p.y), comBola: E.b.dono === p.i };
-    // super pulo (basquete): enterrada
-    E = mk("basquete", "pulo"); p = E.P[0]; E.b.dono = p.i; const c = espAlvo(p.time); p.x = c.x + 60; p.y = c.y + 300; for (const q of E.P) if (q !== p) { q.x = 50; q.y = 950; } const pl0 = E.placar[p.time];
-    p.acao = "poder"; for (let i = 0; i < 70; i++) espPasso(E, 1 / 60); out.pulo = { pontos: E.placar[p.time] - pl0, msg: E.msg };
     // super defesa: rouba sempre
     E = mk("futebol", "defesa"); p = E.P[0]; ini = E.P.find(q => q.time !== p.time); E.b.dono = ini.i; p.acao = "poder"; espPasso(E, 1 / 60); ini.x = p.x + 20; ini.y = p.y; espPasso(E, 1 / 60); out.defesa = { roubou: E.b.dono === p.i };
     // muralha: bola chutada no gol volta
@@ -39,7 +36,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const T = 
     let veio = false; for (let i = 0; i < 360; i++) { espPasso(E, 1 / 60); if (E.b.dono === p.i || (E.b.dono < 0 && E.b.ultimo === p.i)) veio = true; } out.clone = { veio, clones: (E.clones || []).length };
     volta();
     // robôs usam os poderes novos
-    const novos = ["ima", "fantasma", "tele", "pulo", "defesa", "muralha", "furacao", "clone"], usos = {};
+    const novos = ["ima", "fantasma", "tele", "defesa", "muralha", "furacao", "clone"], usos = {};
     for (const tipo of ["futebol", "basquete"]) { E = espNovaPartida(tipo, [], 3); E.P.forEach((q, i) => (q.pod = novos[(i + (tipo === "basquete" ? 4 : 0)) % novos.length])); const orig = espUsarPoder; window.espUsarPoder = (E2, q) => { const r = orig(E2, q); if (r) usos[q.pod] = (usos[q.pod] || 0) + 1; return r; };
       for (let i = 0; i < 60 * 90; i++) espPasso(E, 1 / 60); window.espUsarPoder = orig; }
     out.robos = usos; return out; });

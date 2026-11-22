@@ -327,3 +327,4 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
     - 🎯 Ala: acerta mais as de 3 pontos.
     - 💪 Pivô: pega mais rebote, acerta mais perto da cesta e é difícil roubar a bola dele.
 - Os robôs ficam nas posições que sobram e jogam do jeito da posição. O goleiro robô fica no gol.
+- O campo de futebol ficou maior (mais largo e mais comprido, com gol maior), e o 🦘 Super pulo saiu dos poderes. Quem tinha ganha as 300 moedas de volta.
