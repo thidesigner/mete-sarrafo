@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
+<meta name="versao-site" content="bae42d8322">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0f3057">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;-webkit-text-size-adjust:100%}img{max-width:100%}[hidden]{display:none!important}.faixa-teste{position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:50;background:#ff4d6d;color:#fff;font:800 12px/1 system-ui,sans-serif;letter-spacing:.08em;padding:4px 10px;border-radius:0 0 8px 8px;pointer-events:none}</style>
@@ -364,6 +365,8 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .es-card span { font-size: 54px; line-height: 1; } .es-card b { font-family: var(--display); font-size: 20px; }
 .es-card.on { background: #ffd23f; color: #0b1b33; }
 @media (prefers-reduced-motion: reduce) { .es-msg { animation: none; } }
+.faixa-versao { position: fixed; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 90; display: flex; gap: 10px; align-items: center; background: #ffd23f; color: #0b1b33; border: 3px solid #0b1b33; border-radius: 16px; padding: 8px 10px 8px 14px; font: 800 16px Nunito, sans-serif; box-shadow: 0 5px 0 #0b1b33; white-space: nowrap; }
+.faixa-versao button { background: #37d99a; border: 2px solid #0b1b33; border-radius: 10px; padding: 6px 12px; font: 800 15px Nunito, sans-serif; color: #0b1b33; cursor: pointer; }
 .mb-paleta { position: absolute; left: 8px; right: 8px; top: 66px; z-index: 3; display: grid; gap: 6px; justify-items: center; pointer-events: none; }
 .mb-paleta > * { pointer-events: auto; }
 .mb-linha { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; background: rgba(11,27,51,.7); border-radius: 14px; padding: 5px; }
@@ -2270,9 +2273,11 @@ function desenharBoss2D(c) {
     c.restore(); c.save();
     // sol e lua girando em volta (o que ficar atrás aparece primeiro)
     const orb = (frente) => [0, Math.PI].forEach((d, i) => { const a = t * 1.3 + d, ox = x + Math.cos(a) * (R + 46), oy = y + Math.sin(a) * 18; if ((Math.sin(a) > 0) !== frente) return; c.fillStyle = i ? "#e6ecf8" : "#ffd23f"; c.shadowColor = i ? "#bcd2ff" : "#ffb347"; c.shadowBlur = 12; c.beginPath(); c.arc(ox, oy, 12, 0, Math.PI * 2); c.fill(); c.shadowBlur = 0; });
-    orb(false);
+    if (forma !== "emoji") orb(false);
+    if (forma === "emoji") { c.font = "150px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; if (hit) c.filter = "brightness(1.5) sepia(1) saturate(5) hue-rotate(-40deg)"; c.fillText(cfg.ic, x, y + 8); c.filter = "none"; } else {
     c.fillStyle = hit ? "#ff4d6d" : cfg.corpo[0]; c.beginPath(); c.arc(x, y, R, Math.PI / 2, Math.PI * 1.5); c.fill();
     c.fillStyle = hit ? "#ff4d6d" : cfg.corpo[1]; c.beginPath(); c.arc(x, y, R, -Math.PI / 2, Math.PI / 2); c.fill();
+    }
     // coroa de ouro
     c.fillStyle = "#ffd23f"; c.strokeStyle = "#0b1b33"; c.lineWidth = 3; c.beginPath(); c.moveTo(x - 34, y - R + 8);
     [[-34, -30], [-17, -12], [0, -36], [17, -12], [34, -30]].forEach(([dx, dy], i) => { c.lineTo(x + dx, y - R + dy); if (i < 4) c.lineTo(x + dx + 8.5, y - R + 2); });
@@ -2281,17 +2286,19 @@ function desenharBoss2D(c) {
     // mãos de ouro flutuando (sobem quando ele vai atacar)
     [-1, 1].forEach(l => { const hy = y + 14 + Math.sin(t * 3 + l) * 6 - (al ? 34 : 0), hx = x + l * (R + 26); c.fillStyle = "#ffd23f"; c.strokeStyle = "#0b1b33"; c.lineWidth = 3; c.beginPath(); c.arc(hx, hy, 15, 0, Math.PI * 2); c.fill(); c.stroke();
       if (al) { c.save(); c.globalCompositeOperation = "lighter"; const g = c.createRadialGradient(hx, hy, 2, hx, hy, 30); g.addColorStop(0, "rgba(255,220,120,.9)"); g.addColorStop(1, "rgba(255,220,120,0)"); c.fillStyle = g; c.beginPath(); c.arc(hx, hy, 30, 0, Math.PI * 2); c.fill(); c.restore(); } });
-    orb(true);
+    if (forma !== "emoji") orb(true);
   }
   // rachaduras brilhando quando está com menos da metade da vida
   if (ferido) { c.save(); c.strokeStyle = cfg.coroa; c.shadowColor = cfg.coroa; c.shadowBlur = 10; c.lineWidth = 3; c.beginPath(); c.moveTo(x - 20, y - 50); c.lineTo(x - 30, y - 30); c.lineTo(x - 18, y - 20); c.lineTo(x - 34, y + 4); c.moveTo(x + 30, y + 10); c.lineTo(x + 40, y + 30); c.lineTo(x + 26, y + 40); c.stroke(); c.restore(); }
   // olhos (piscam; vermelhos quando está ferido) e boca (abre quando vai atacar)
+  if (forma !== "emoji") {
   const corOlho = ferido ? "#ff4d6d" : cfg.olhos; c.fillStyle = corOlho; c.strokeStyle = corOlho; c.shadowColor = corOlho; c.shadowBlur = 14;
   if (pisca) { c.lineWidth = 4; [-1, 1].forEach(l => { c.beginPath(); c.moveTo(x + l * 12, y - 12); c.lineTo(x + l * 30, y - 16); c.stroke(); }); }
   else [-1, 1].forEach(l => { c.beginPath(); c.moveTo(x + l * 10, y - 14); c.lineTo(x + l * 30, y - 22); c.lineTo(x + l * 28, y - 6); c.closePath(); c.fill(); });
   c.shadowBlur = 0;
   if (al) { c.fillStyle = "#0b0716"; c.beginPath(); c.ellipse(x, y + 26, 16, 11 + Math.sin(t * 20) * 2, 0, 0, Math.PI * 2); c.fill(); c.save(); c.globalCompositeOperation = "lighter"; c.fillStyle = `rgba(${forma === "tempestade" ? "255,225,80" : "255,190,90"},.8)`; c.beginPath(); c.ellipse(x, y + 26, 9, 6, 0, 0, Math.PI * 2); c.fill(); c.restore(); }
   else { c.strokeStyle = corOlho; c.lineWidth = 4; c.beginPath(); c.arc(x, y + 30, 16, Math.PI * 1.15, Math.PI * 1.85); c.stroke(); }
+  }
   if (hit) { c.save(); c.globalCompositeOperation = "lighter"; c.fillStyle = "rgba(255,255,255,.35)"; c.beginPath(); c.arc(x, y, R + 10, 0, Math.PI * 2); c.fill(); c.restore(); }
   if ((A.ph || {}).k === "pergunta" && (!A.ph.perg || A.ph.perg.boss)) { c.fillStyle = "#f4f7fb"; c.beginPath(); c.arc(x + R + 10, y - R + 4, 22, 0, Math.PI * 2); c.fill(); c.fillStyle = "#0f3057"; c.font = "30px Bungee, sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("?", x + R + 10, y - R + 6); }
   // nome e barra de vida em cima
@@ -2321,6 +2328,7 @@ function boss3D() {
       u.bracos = [-1, 1].map(l => { const b = new THREE.Group(); for (let i = 0; i < 4; i++) { const m = new THREE.Mesh(new THREE.BoxGeometry(.45, .07, .07), new THREE.MeshBasicMaterial({ color: "#ffe14d" })); m.position.set(l * (1.2 + i * .38), -.1 - (i % 2) * .18, 0); m.rotation.z = (i % 2 ? .5 : -.5) * l; b.add(m); } corpo.add(b); return b; });
     } else {
       const m1 = new THREE.MeshLambertMaterial({ color: cfg.corpo[0] }), m2 = new THREE.MeshLambertMaterial({ color: cfg.corpo[1] }); mats.push([m1, cfg.corpo[0]], [m2, cfg.corpo[1]]);
+      if (forma === "emoji") { const sm = new THREE.SpriteMaterial({ map: texturaCanvas(256, 256, c => { c.font = "210px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(cfg.ic, 128, 140); }), transparent: true, depthWrite: false, depthTest: false }); mats.push([sm, "#ffffff"]); const sp = new THREE.Sprite(sm); sp.scale.setScalar(3.4); sp.renderOrder = 20; corpo.add(sp); u.emoji = sp; } else
       corpo.add(new THREE.Mesh(new THREE.SphereGeometry(1.3, 28, 20, 0, Math.PI), m1), new THREE.Mesh(new THREE.SphereGeometry(1.3, 28, 20, Math.PI, Math.PI), m2));
       corpo.add(new THREE.Mesh(new THREE.TorusGeometry(1.55, .12, 10, 48), luz(cfg.coroa, .95)));
       const raios = new THREE.Group(); raios.userData.gira = .6; corpo.add(raios); u.raios = raios;
@@ -2330,7 +2338,7 @@ function boss3D() {
       const aro = new THREE.Mesh(new THREE.CylinderGeometry(.8, .85, .22, 20, 1, true), ouro); aro.material.side = THREE.DoubleSide; aro.position.y = 1.2; corpo.add(aro);
       const joia = new THREE.Mesh(new THREE.OctahedronGeometry(.13), new THREE.MeshBasicMaterial({ color: "#ff4d6d" })); joia.position.set(0, 1.25, .8); corpo.add(joia);
       u.maos = [-1, 1].map(l => { const m = new THREE.Mesh(new THREE.SphereGeometry(.32, 16, 12), ouro); m.position.set(l * 1.95, -.2, .3); corpo.add(m); return m; });
-      const orb = new THREE.Group(); orb.userData.gira = 1.3; g.add(orb);
+      const orb = new THREE.Group(); orb.userData.gira = 1.3; g.add(orb); orb.visible = forma !== "emoji";
       const sol = new THREE.Mesh(new THREE.SphereGeometry(.28, 14, 10), new THREE.MeshBasicMaterial({ color: "#ffd23f" })); sol.position.set(2.5, 0, 0); orb.add(sol);
       const lua = new THREE.Mesh(new THREE.SphereGeometry(.24, 14, 10), new THREE.MeshBasicMaterial({ color: "#e6ecf8" })); lua.position.set(-2.5, 0, 0); orb.add(lua);
     }
@@ -2339,6 +2347,7 @@ function boss3D() {
     u.boca = new THREE.Mesh(new THREE.SphereGeometry(.24, 14, 10), new THREE.MeshBasicMaterial({ color: "#0b0716" })); u.boca.scale.set(1, .15, .3); u.boca.position.set(0, -.38, forma === "tempestade" ? .92 : 1.2); corpo.add(u.boca);
     u.rachas = new THREE.Group(); corpo.add(u.rachas); [[-.4, .55, .5], [-.55, .2, -.6], [.5, -.2, .4], [.62, -.55, -.5]].forEach(([x0, y0, r]) => { const m = new THREE.Mesh(new THREE.BoxGeometry(.05, .4, .05), new THREE.MeshBasicMaterial({ color: cfg.coroa })); m.position.set(x0, y0, forma === "tempestade" ? .88 : 1.18); m.rotation.z = r; u.rachas.add(m); }); u.rachas.visible = false;
     u.brilho = new THREE.Sprite(new THREE.SpriteMaterial({ map: brilhoTextura(forma === "tempestade" ? "rgba(159,240,255,1)" : "rgba(255,200,90,1)"), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); u.brilho.scale.setScalar(4.8); g.add(u.brilho);
+    if (forma === "emoji") { u.olhos.forEach(o => (o.visible = false)); u.boca.visible = false; u.brilho.material.opacity = .45; }
     g.userData = u; g.position.set(0, 2.3, 0); F.scene.add(g); F.bossG = g;
   }
   const g = F.bossG, u = g.userData, t = A.t, hit = B.hit > 0, al = !!B.alerta, ferido = B.hp / B.max < .5;
@@ -2480,10 +2489,11 @@ function texBossPraca() {
     const resta = bossGRestante(), x = w / 2, y = 230;
     const g = c.createRadialGradient(x, y, 100, x, y, 250); g.addColorStop(0, "rgba(255,200,90,.95)"); g.addColorStop(1, "rgba(255,150,40,0)"); c.fillStyle = g; c.fillRect(0, 0, w, 480);
     if (cfg.forma === "tempestade") { nuvem2D(c, x, y + 10, 95, cfg.corpo[0]); nuvem2D(c, x - 10, y - 5, 70, cfg.corpo[1]); [-1, 0, 1].forEach(l => raio2D(c, x + l * 50, y - 120, x + l * 60, y - 60, "#ffe14d", 8, 4)); }
+    else if (cfg.forma === "emoji") { c.font = "250px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(cfg.ic, x, y + 15); }
     else { c.fillStyle = cfg.corpo[0]; c.beginPath(); c.arc(x, y, 120, Math.PI / 2, Math.PI * 1.5); c.fill(); c.fillStyle = cfg.corpo[1]; c.beginPath(); c.arc(x, y, 120, -Math.PI / 2, Math.PI / 2); c.fill(); }
     c.fillStyle = "#ffd23f"; c.beginPath(); c.moveTo(x - 70, y - 104); [[-70, -170], [-35, -130], [0, -185], [35, -130], [70, -170]].forEach(([dx, dy], i) => { c.lineTo(x + dx, y + dy); if (i < 4) c.lineTo(x + dx + 17, y - 112); }); c.lineTo(x + 70, y - 104); c.closePath(); c.fill();
-    c.fillStyle = cfg.olhos; if (st.fim) { c.strokeStyle = cfg.olhos; c.lineWidth = 10; [-1, 1].forEach(l => { c.beginPath(); c.moveTo(x + l * 30, y - 40); c.lineTo(x + l * 70, y - 10); c.moveTo(x + l * 70, y - 40); c.lineTo(x + l * 30, y - 10); c.stroke(); }); }
-    else [-1, 1].forEach(l => { c.beginPath(); c.moveTo(x + l * 20, y - 25); c.lineTo(x + l * 75, y - 45); c.lineTo(x + l * 70, y - 8); c.closePath(); c.fill(); });
+    if (cfg.forma !== "emoji") {c.fillStyle = cfg.olhos; if (st.fim) { c.strokeStyle = cfg.olhos; c.lineWidth = 10; [-1, 1].forEach(l => { c.beginPath(); c.moveTo(x + l * 30, y - 40); c.lineTo(x + l * 70, y - 10); c.moveTo(x + l * 70, y - 40); c.lineTo(x + l * 30, y - 10); c.stroke(); }); }
+    else [-1, 1].forEach(l => { c.beginPath(); c.moveTo(x + l * 20, y - 25); c.lineTo(x + l * 75, y - 45); c.lineTo(x + l * 70, y - 8); c.closePath(); c.fill(); }); }
     c.fillStyle = "rgba(11,27,51,.9)"; c.fillRect(16, 470, w - 32, 112);
     c.fillStyle = "#fff"; c.font = "800 34px Nunito, sans-serif"; c.textAlign = "center"; c.fillText(st.fim ? `${cfg.nome} derrotado! 🎉` : `${cfg.ic} ${cfg.nome}`, x, 510);
     c.fillStyle = "rgba(255,255,255,.2)"; c.fillRect(36, 528, w - 72, 26); c.fillStyle = "#ff4d6d"; c.fillRect(36, 528, (w - 72) * resta / BOSS_VIDA_GLOBAL, 26);
@@ -5190,7 +5200,7 @@ function montarPraca2(s) {
   PRACA.clima = climaDaColecao();
   if (PRACA.clima) { const N = PRACA.clima === "chuva" ? 500 : 300, pos = new Float32Array(N * 3); for (let i = 0; i < N; i++) { pos[i * 3] = (Math.random() - .5) * 40; pos[i * 3 + 1] = Math.random() * 20; pos[i * 3 + 2] = (Math.random() - .5) * 40; }
     const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-    const cor = { chuva: "#9fd3ff", neve: "#ffffff", sol: "#ffe58a", fogo: "#ff8a1f" }[PRACA.clima];
+    const cor = { chuva: "#9fd3ff", neve: "#ffffff", sol: "#ffe58a", fogo: "#ff8a1f", bolhas: "#8fe6ff" }[PRACA.clima];
     PRACA.climaPts = new THREE.Points(geo, new THREE.PointsMaterial({ color: cor, size: PRACA.clima === "chuva" ? .09 : .2, transparent: true, opacity: .85, depthWrite: false })); s.add(PRACA.climaPts); }
   PRACA.objMissao = null;
 }
@@ -5362,7 +5372,7 @@ async function pracaFoto() {
 function passoClimaPraca(dt, t) {
   const p = PRACA.climaPts; if (!p) return; const a = p.geometry.attributes.position, eu = PRACA.eu, cl = PRACA.clima;
   const vy = cl === "chuva" ? 14 : cl === "neve" ? 1.4 : cl === "fogo" ? -1.2 : -.6;
-  for (let i = 0; i < a.count; i++) { let y = a.getY(i) - vy * dt; let x = a.getX(i) + (cl === "neve" ? Math.sin(t + i) * .3 * dt : 0);
+  for (let i = 0; i < a.count; i++) { let y = a.getY(i) - vy * dt; let x = a.getX(i) + (cl === "neve" || cl === "bolhas" ? Math.sin(t + i) * .3 * dt : 0);
     if (y < 0) y += 20; if (y > 20) y -= 20; a.setY(i, y); a.setX(i, x); }
   a.needsUpdate = true; p.position.set(eu.x, 0, eu.z);
   if (cl === "chuva") { PRACA.tRaio = (PRACA.tRaio ?? 8) - dt; if (PRACA.tRaio <= 0) { PRACA.tRaio = 9 + Math.random() * 10; const fl = document.createElement("div"); fl.className = "pr-flash"; fl.style.opacity = ".5"; $("praca").appendChild(fl); setTimeout(() => fl.remove(), 300); if (typeof ruido === "function" && musCtx()) ruido(MUS.ctx.currentTime + .4, 1.2, .25, "lowpass", 200); } }
@@ -7300,6 +7310,393 @@ acoes.comprarLoja = () => {
   render();
 };
 if (G.tela === "lobby") render();
+</script>
+
+<script>
+/* ===================== Gerador de coleções semanais (troca todo domingo) =====================
+   Cada conjunto vira skin, pet, fundo, emoji, gesto, foto, arremesso e pacote, a partir de poucos dados (cores, ícone, bicho).
+   Coleção nova: acrescente em COLS_SEMANA (de = domingo 00:00, ate = sábado 23:59, horário de Brasília) e um boss em BOSSES_SEMANA.
+   Os desenhos são genéricos: o ícone do conjunto vira o enfeite da cabeça, o selo do pet e o efeito do gesto, nas cores do conjunto. */
+const COLS_SEMANA = [
+  { de: "2026-11-22T00:00:00-03:00", ate: "2026-11-28T23:59:59-03:00", clima: "bolhas", sets: [
+    { k: "tubarao", nome: "Tubarão", ic: "🦈", camisa: "#3f6f9a", cores: ["#5b8db8", "#1f3f5e"], pet: { k: "caotubarao", base: "cachorro", nome: "Cãozinho Tubarão", poder: "Mordidinha: +0,5 moeda a cada letra certa", acerto: .5 },
+      fundo: "Fundo do Mar", fic: "🐠", emoji: "Mordida", gesto: "Barbatana", pose: "requebrado", arr: { nome: "Bola de Água", ic: "💧" } },
+    { k: "polvo", nome: "Polvo", ic: "🐙", camisa: "#b04a9b", cores: ["#d26ab8", "#5e1f52"], pet: { k: "hamsterpolvo", base: "hamster", nome: "Hamster Polvo", poder: "Oito bracinhos: +1 moeda cada vez que escapa da bola", sobreviver: 1 },
+      fundo: "Recife de Coral", fic: "🪸", emoji: "Jato de Tinta", gesto: "Oito Braços", pose: "gelatina", arr: { nome: "Lula Voadora", ic: "🦑" } },
+    { k: "reidomar", nome: "Rei do Mar", ic: "🔱", camisa: "#0f8f8a", cores: ["#3fd0c8", "#0b4d4a"], pet: { k: "tartarugareal", base: "tartaruga", nome: "Tartaruga Real", poder: "Coroa do mar: corre um pouco mais rápido (+7%)", vel: 1.07 },
+      fundo: "Palácio do Mar", fic: "🏰", emoji: "Tridente", gesto: "Onda Gigante", pose: "giro", arr: { nome: "Concha Mágica", ic: "🐚" } } ] },
+  { de: "2026-11-29T00:00:00-03:00", ate: "2026-12-05T23:59:59-03:00", clima: "fogo", sets: [
+    { k: "trex", nome: "T-Rex", ic: "🦖", camisa: "#4f8a3a", cores: ["#6dbb4f", "#1f4a15"], pet: { k: "minirex", base: "cachorro", nome: "Mini Rex", poder: "Rugidinho: +0,5 moeda a cada letra certa", acerto: .5 },
+      fundo: "Floresta Jurássica", fic: "🌴", emoji: "Rugido", gesto: "Rugidão", pose: "tremedeira", arr: { nome: "Ovo de Dino", ic: "🥚" } },
+    { k: "ptero", nome: "Pterodáctilo", ic: "🦅", camisa: "#8a6a4a", cores: ["#c39a6b", "#4a3420"], pet: { k: "pterinho", base: "passarinho", nome: "Pterinho", poder: "Asas grandes: corre um pouco mais rápido (+8%)", vel: 1.08 },
+      fundo: "Penhasco dos Dinos", fic: "⛰️", emoji: "Voo Rasante", gesto: "Bater de Asas", pose: "pulinho", arr: { nome: "Pena Gigante", ic: "🪶" } },
+    { k: "vulcaojur", nome: "Vulcão Jurássico", ic: "🌋", camisa: "#8a3a1f", cores: ["#e2632b", "#4a120a"], pet: { k: "gatolava", base: "gato", nome: "Gato Lava", poder: "Pelo quente: +1 moeda cada vez que escapa da bola", sobreviver: 1 },
+      fundo: "Vulcão Jurássico", fic: "🌋", emoji: "Erupção", gesto: "Erupção", pose: "pulinho", arr: { nome: "Meteoro", ic: "☄️" } } ] },
+  { de: "2026-12-06T00:00:00-03:00", ate: "2026-12-12T23:59:59-03:00", clima: "neve", sets: [
+    { k: "papainoel", nome: "Papai Noel", ic: "🎅", camisa: "#d62828", cores: ["#ff4d4d", "#6b0f0f"], pet: { k: "caonoel", base: "cachorro", nome: "Cãozinho Noel", poder: "Presentinho: +0,5 moeda a cada letra certa", acerto: .5 },
+      fundo: "Noite de Natal", fic: "🌟", emoji: "Ho Ho Ho", gesto: "Ho Ho Ho", pose: "requebrado", arr: { nome: "Presente", ic: "🎁" } },
+    { k: "rena", nome: "Rena", ic: "🦌", camisa: "#8a5a2b", cores: ["#b5793f", "#4a2c12"], pet: { k: "coelhorena", base: "coelho", nome: "Coelho Rena", poder: "Galope: corre um pouco mais rápido (+8%)", vel: 1.08 },
+      fundo: "Trenó no Céu", fic: "🛷", emoji: "Galopada", gesto: "Voo da Rena", pose: "pulinho", arr: { nome: "Sininho", ic: "🔔" } },
+    { k: "boneconeve", nome: "Boneco de Neve", ic: "⛄", camisa: "#dfe8f2", cores: ["#ffffff", "#6f93b8"], pet: { k: "pinguimnatal", base: "pinguim", nome: "Pinguim de Natal", poder: "Escorrega: +1 moeda cada vez que escapa da bola", sobreviver: 1 },
+      fundo: "Vila de Neve", fic: "❄️", emoji: "Brrr", gesto: "Derretendo", pose: "gelatina", arr: { nome: "Floco de Neve", ic: "❄️" } } ] } ];
+const BOSSES_SEMANA = {
+  kraken: { nome: "Kraken", forma: "emoji", ic: "🐙", cols: ["tubarao", "polvo", "reidomar"], bolas: ["tubarao", "polvo"], moedas: 200, item: "arremesso:tridenterei", corpo: ["#6b2a7a", "#3d1450"], coroa: "#3fd0c8", olhos: "#ffd23f",
+    tema: "Mar e Oceano", palavras: ["TUBARAO", "POLVO", "BALEIA", "GOLFINHO", "CORAL", "ONDA", "AREIA", "CONCHA", "PEIXE", "ALGA", "CARANGUEJO", "MERGULHO", "SUBMARINO", "TESOURO", "ILHA", "AGUAVIVA", "PRAIA", "BARCO"] },
+  reirex: { nome: "Rei Rex", forma: "emoji", ic: "🦖", cols: ["trex", "ptero", "vulcaojur"], bolas: ["trex", "vulcaojur"], moedas: 200, item: "arremesso:ossodino", corpo: ["#2e6b22", "#16380f"], coroa: "#ffd23f", olhos: "#ff4d6d",
+    tema: "Dinossauros", palavras: ["DINOSSAURO", "FOSSIL", "VULCAO", "OVO", "METEORO", "JURASSICO", "ESQUELETO", "GARRA", "PEGADA", "DENTE", "CAUDA", "ESCAMA", "ARQUEOLOGO", "SELVA", "RUGIDO", "CHIFRE", "OSSO", "LAVA"] },
+  duende: { nome: "Duende Ranzinza", forma: "emoji", ic: "🧝", cols: ["papainoel", "rena", "boneconeve"], bolas: ["boneconeve", "papainoel"], moedas: 200, item: "arremesso:estrelanatal", corpo: ["#2f8a3a", "#174d1d"], coroa: "#ff4d4d", olhos: "#ffd23f",
+    tema: "Natal", palavras: ["PRESENTE", "RENA", "TRENO", "ESTRELA", "PINHEIRO", "NEVE", "SINO", "PANETONE", "GORRO", "ENFEITE", "MEIA", "CEIA", "LUZES", "BISCOITO", "CHAMINE", "DUENDE", "BOLA", "LACO"] } };
+const SETS_SEMANA = {};   // k -> {set, col}
+(function montarColecoesSemana() {
+  const css = [], svgEmoji = ic => `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='90' height='90'><text x='10' y='40' font-size='28' opacity='.22'>${ic}</text><text x='55' y='85' font-size='22' opacity='.16'>${ic}</text></svg>`)}")`;
+  for (const col of COLS_SEMANA) for (const s of col.sets) {
+    SETS_SEMANA[s.k] = { s, col }; const L = { limitada: true, de: col.de, ate: col.ate }, [c1, c2] = s.cores;
+    SKINS.push({ k: s.k, nome: s.nome, preco: 700, camisa: s.camisa, ...L });
+    PETS.push({ k: s.pet.k, base: s.pet.base, nome: s.pet.nome, icone: s.ic, preco: 300, tipo: "pet", ...L, poder: s.pet.poder, ...(s.pet.acerto ? { acerto: s.pet.acerto } : {}), ...(s.pet.sobreviver ? { sobreviver: s.pet.sobreviver } : {}), ...(s.pet.vel ? { vel: s.pet.vel } : {}) });
+    PET_TEMA[s.pet.k] = s.k; SKIN_TEMA[s.k] = s.k; CORES_TEMA[s.k] = [c1, c2];
+    FUNDOS.push([s.k, s.fundo]); PRECO_FUNDO[s.k] = 300; FUNDOS_LIM.push({ k: s.k, nome: s.fundo, tipo: "fundo", preco: 300, ...L });
+    EMOJIS.push({ k: s.k, e: s.ic, nome: s.emoji, preco: 150, tipo: "emoji", ...L });
+    GESTOS.push({ k: s.k, icone: s.ic, nome: s.gesto, preco: 250, dura: 2, tipo: "gesto", ...L, pose: s.pose, som: [[60, 72, 0, .2, "square"], [72, 79, .2, .2, "square"], [79, 84, .4, .3, "square"]] });
+    AV_ESPECIAIS.push({ k: s.k, icone: s.ic, nome: s.nome, tipo: "avatar", preco: 200, ...L });
+    ARREMESSOS.push({ k: s.k, nome: s.arr.nome, icone: s.arr.ic, preco: 200, cor: c1, tipo: "arremesso", ...L });
+    COLECOES[s.k] = { nome: s.nome, chaves: ["skin-" + s.k, "fundo-" + s.k, "emoji-" + s.k, "gesto-" + s.k, "avatar-" + s.k, "arremesso-" + s.k, "pet-" + s.pet.k], pacote: s.k };
+    PACOTES.push({ id: s.k, nome: "Pacote " + s.nome, emoji: s.ic, desconto: .25, de: col.de, ate: col.ate,
+      itens: () => [ITEM_PACOTE.skin(s.k), ITEM_PACOTE.fundo(s.k, s.fic), ITEM_PACOTE.emoji(s.k, s.ic), ITEM_PACOTE.gesto(s.k, s.ic), ITEM_PACOTE.foto(s.k, s.ic), ITEM_PACOTE.arremesso(s.k, s.arr.ic), ...ITEM_PACOTE.pet(s.pet.k, s.ic)] });
+    css.push(`.bgf[data-fundo="${s.k}"] { background: radial-gradient(ellipse 120% 60% at 50% 110%, ${c1}aa, transparent 60%), linear-gradient(180deg, ${c2} 0%, ${c1} 100%); }`,
+      `.bgf[data-fundo="${s.k}"]::before { background-image: ${svgEmoji(s.fic)}; background-size: 90px 90px; }`,
+      `.av-${s.k} { border-color: ${c1} !important; box-shadow: 0 0 12px ${c1}; background: radial-gradient(circle at 30% 30%, ${c1} 0%, ${c2} 100%) !important; }`,
+      `.pacote.sk-limitada.pacote-${s.k} { background: radial-gradient(circle at 85% 15%, ${c1}88, transparent 35%), linear-gradient(180deg, ${c1} 0%, ${c2} 100%) !important; border-color: ${c1} !important; box-shadow: 0 0 0 2px ${c1}66, 0 0 24px ${c1}88; }`);
+  }
+  // itens só do boss (fora da loja)
+  ARREMESSOS.push({ k: "tridenterei", nome: "Tridente do Kraken", icone: "🔱", preco: 0, cor: "#3fd0c8", tipo: "arremesso", boss: true },
+    { k: "ossodino", nome: "Osso do Rei Rex", icone: "🦴", preco: 0, cor: "#f4f1ec", tipo: "arremesso", boss: true },
+    { k: "estrelanatal", nome: "Estrela de Natal", icone: "🌟", preco: 0, cor: "#ffd23f", tipo: "arremesso", boss: true });
+  Object.assign(BOSSES, BOSSES_SEMANA);
+  const st = document.createElement("style"); st.textContent = css.join("\n"); document.head.appendChild(st);
+})();
+/* desenhos genéricos: o ícone do conjunto como enfeite (2D e 3D), selo no pet e efeito do gesto */
+/* fantasias de verdade de cada conjunto (2D e 3D) e partículas em volta (bolhas, brasas ou neve, pelo clima da coleção) */
+function fantasia2DSemana(c, k, x, y, t) {
+  const hx = x, hy = y - 34, S = Math.sin, PI = Math.PI;
+  const P = (cor, f) => { c.fillStyle = cor; c.beginPath(); f(); c.fill(); };
+  const tri = (a, b, d, e, g, h) => { c.moveTo(a, b); c.lineTo(d, e); c.lineTo(g, h); c.closePath(); };
+  const capuz = cor => P(cor, () => { c.arc(hx, hy - 2, 17, PI * 1.02, PI * 1.98); c.lineTo(hx + 16, hy - 6); c.lineTo(hx - 16, hy - 6); c.closePath(); });
+  const dentes = (cor, yy) => { c.fillStyle = cor; for (let i = 0; i < 7; i++) { const tx = hx - 13 + i * 4.3; c.beginPath(); tri(tx, yy, tx + 2.1, yy + 3.5, tx + 4.2, yy); c.fill(); } };
+  const linha = (cor, w, f) => { c.strokeStyle = cor; c.lineWidth = w; c.lineCap = "round"; c.beginPath(); f(); c.stroke(); };
+  switch (k) {
+    case "tubarao":
+      P("#5f7389", () => tri(x + 8, y - 2, x + 8, y + 12, x + 26 + S(t * 6) * 3, y - 8 + S(t * 6) * 2));   // rabo
+      capuz("#7d8fa3"); P("#5f7389", () => tri(hx - 5, hy - 17, hx + 9, hy - 17, hx + 4 + S(t * 3) * 1.5, hy - 34));   // barbatana
+      P("#e9eef3", () => c.ellipse(x, y - 4, 8, 10, 0, 0, PI * 2)); dentes("#ffffff", hy - 6);
+      P("#1b2733", () => { c.arc(hx - 10, hy - 11, 1.8, 0, PI * 2); c.arc(hx + 10, hy - 11, 1.8, 0, PI * 2); }); break;
+    case "polvo":
+      for (let i = 0; i < 6; i++) { const d = (i - 2.5); linha("#d26ab8", 4, () => { c.moveTo(x + d * 3, y + 4); c.quadraticCurveTo(x + d * 8 + S(t * 4 + i) * 6, y + 12, x + d * 10 + S(t * 4 + i + 1) * 5, y + 22); }); }
+      capuz("#d26ab8"); P("#f2a6dc", () => { c.arc(hx - 7, hy - 12, 2.6, 0, PI * 2); c.arc(hx + 5, hy - 15, 2, 0, PI * 2); c.arc(hx + 11, hy - 9, 1.8, 0, PI * 2); }); break;
+    case "reidomar": {
+      linha("#f2c14e", 2.5, () => { c.moveTo(x + 22, y + 20); c.lineTo(x + 22, y - 30); c.moveTo(x + 15, y - 22); c.lineTo(x + 15, y - 31); c.moveTo(x + 29, y - 22); c.lineTo(x + 29, y - 31); c.moveTo(x + 15, y - 22); c.lineTo(x + 29, y - 22); });
+      P("#f2c14e", () => { c.rect(hx - 12, hy - 22, 24, 6); for (let i = 0; i < 5; i++) tri(hx - 12 + i * 6, hy - 22, hx - 9 + i * 6, hy - 30 - (i === 2 ? 3 : 0), hx - 6 + i * 6, hy - 22); });
+      P("#3fd0c8", () => c.arc(hx, hy - 19, 2.6, 0, PI * 2)); c.save(); c.globalAlpha = .5 + .5 * S(t * 5); P("#ffffff", () => c.arc(hx + 22 - 7 * 0, y - 32, 1.6, 0, PI * 2)); c.restore(); break; }
+    case "trex":
+      P("#2e6b22", () => { c.moveTo(x + 10, y + 2); c.quadraticCurveTo(x + 32, y + 6, x + 36 + S(t * 5) * 2, y + 20); c.quadraticCurveTo(x + 22, y + 12, x + 8, y + 12); c.closePath(); });
+      capuz("#4f8a3a"); dentes("#ffffff", hy - 6);
+      [-12, -4, 4, 12].forEach((dx, i) => { const by = hy - Math.sqrt(Math.max(0, 272 - dx * dx)) - 1; P("#ffb03b", () => tri(hx + dx - 4, by + 3, hx + dx, by - 7 - (i === 1 || i === 2 ? 2 : 0), hx + dx + 4, by + 3)); });
+      P("#ff4d6d", () => { c.arc(hx - 9, hy - 11, 1.8, 0, PI * 2); c.arc(hx + 9, hy - 11, 1.8, 0, PI * 2); }); break;
+    case "ptero": {
+      const bat = S(t * 7) * 7;
+      for (const s of [-1, 1]) P("#8a6a4a", () => { c.moveTo(x + s * 8, y - 12); c.lineTo(x + s * 38, y - 22 + bat); c.lineTo(x + s * 28, y - 6 + bat * .5); c.lineTo(x + s * 18, y - 2); c.lineTo(x + s * 8, y + 4); c.closePath(); });
+      P("#c39a6b", () => tri(hx + 4, hy - 14, hx + 28, hy - 28, hx + 10, hy - 8)); capuz("#a67c52");
+      P("#ffb03b", () => tri(hx - 4, hy - 7, hx + 4, hy - 7, hx, hy - 1)); break; }
+    case "vulcaojur":
+      for (let i = 0; i < 3; i++) { const fx = hx - 8 + i * 8, h = 12 + S(t * 9 + i * 2) * 4; P(i === 1 ? "#ffd23f" : "#ff6a2a", () => { c.moveTo(fx - 5, hy - 16); c.quadraticCurveTo(fx - 3, hy - 16 - h * .6, fx + S(t * 7 + i) * 2, hy - 16 - h); c.quadraticCurveTo(fx + 3, hy - 16 - h * .6, fx + 5, hy - 16); }); }
+      P("#3a2a22", () => { for (let i = 0; i < 6; i++) c.arc(hx - 14 + i * 5.6, hy - 15 + Math.abs(i - 2.5) * 1.2, 4, 0, PI * 2); });
+      P("#ff6a2a", () => { c.arc(hx - 8, hy - 15, 1.5, 0, PI * 2); c.arc(hx + 6, hy - 14, 1.5, 0, PI * 2); }); break;
+    case "papainoel":
+      P("#ffffff", () => { for (const [a, b, r] of [[-10, 10, 6], [-4, 15, 7], [4, 15, 7], [10, 10, 6], [0, 19, 6]]) { c.moveTo(hx + a + r, hy + b); c.arc(hx + a, hy + b, r, 0, PI * 2); } });
+      P("#d62828", () => { c.moveTo(hx - 15, hy - 12); c.quadraticCurveTo(hx - 4, hy - 40, hx + 20, hy - 30 + S(t * 3) * 2); c.lineTo(hx + 15, hy - 12); c.closePath(); });
+      P("#ffffff", () => { c.roundRect ? c.roundRect(hx - 17, hy - 16, 34, 7, 3) : c.rect(hx - 17, hy - 16, 34, 7); c.moveTo(hx + 25, hy - 30); c.arc(hx + 21, hy - 30 + S(t * 3) * 2, 4.5, 0, PI * 2); }); break;
+    case "rena":
+      for (const s of [-1, 1]) linha("#7a4a22", 3, () => { c.moveTo(hx + s * 7, hy - 14); c.lineTo(hx + s * 14, hy - 34); c.moveTo(hx + s * 10, hy - 23); c.lineTo(hx + s * 19, hy - 27); c.moveTo(hx + s * 12, hy - 29); c.lineTo(hx + s * 7, hy - 35); });
+      P("#b5793f", () => { c.ellipse(hx - 16, hy - 8, 3, 6, -.6, 0, PI * 2); c.ellipse(hx + 16, hy - 8, 3, 6, .6, 0, PI * 2); });
+      c.save(); c.shadowColor = "#ff2a2a"; c.shadowBlur = 8 + 4 * S(t * 4); P("#ff2a2a", () => c.arc(hx, hy + 2, 4, 0, PI * 2)); c.restore(); break;
+    case "boneconeve":
+      P("#d62828", () => { c.rect(x - 13, y - 19, 26, 6); c.rect(x + 4, y - 15, 6, 14 + S(t * 4)); });
+      P("#ff8c1a", () => tri(hx - 1, hy - 1, hx + 13, hy + 2, hx - 1, hy + 4));
+      P("#16161c", () => { c.rect(hx - 16, hy - 17, 32, 4); c.rect(hx - 10, hy - 36, 20, 20); }); P("#d62828", () => c.rect(hx - 10, hy - 21, 20, 4)); break;
+  }
+}
+function particulas2DSemana(c, clima, x, y, t) {
+  c.save();
+  for (let i = 0; i < 6; i++) {
+    const f = ((t * .45 + i / 6) % 1), dx = S2(i * 1.7) * 26;
+    if (clima === "bolhas") { c.globalAlpha = .7 * (1 - f); c.strokeStyle = "#bff3ff"; c.lineWidth = 1.5; c.beginPath(); c.arc(x + dx + Math.sin(t * 3 + i) * 3, y + 10 - f * 70, 2 + (i % 3), 0, Math.PI * 2); c.stroke(); }
+    else if (clima === "fogo") { c.globalAlpha = 1 - f; c.fillStyle = i % 2 ? "#ffd23f" : "#ff6a2a"; c.beginPath(); c.arc(x + dx + Math.sin(t * 5 + i) * 4, y + 10 - f * 64, 1.8, 0, Math.PI * 2); c.fill(); }
+    else if (clima === "neve") { c.globalAlpha = .9 * (1 - Math.abs(f - .5) * 2); c.fillStyle = "#ffffff"; c.beginPath(); c.arc(x + dx + Math.sin(t * 2 + i) * 5, y - 60 + f * 76, 1.8, 0, Math.PI * 2); c.fill(); }
+  }
+  c.restore();
+}
+function S2(v) { return Math.sin(v * 12.9898) * .9; }
+const _acessorio2DAntes = desenharAcessorio2D;
+desenharAcessorio2D = function (c, skin, x, y) {
+  const S = SETS_SEMANA[skin]; if (!S) return _acessorio2DAntes(c, skin, x, y);
+  const t = performance.now() / 1000, [c1] = S.s.cores;
+  c.save(); c.globalCompositeOperation = "lighter"; const g = c.createRadialGradient(x, y - 18, 6, x, y - 18, 46); g.addColorStop(0, c1 + "55"); g.addColorStop(1, c1 + "00"); c.fillStyle = g; c.beginPath(); c.arc(x, y - 18, 46, 0, Math.PI * 2); c.fill(); c.restore();
+  c.save(); fantasia2DSemana(c, skin, x, y, t); c.restore();
+  particulas2DSemana(c, S.col.clima, x, y, t);
+};
+function fantasia3DSemana(cabeca, k) {
+  const PI = Math.PI;
+  const add = (geo, cor, x, y, z, extra) => { const m = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color: cor, ...(extra || {}) })); m.position.set(x, y, z); cabeca.add(m); return m; };
+  const capuz = cor => add(new THREE.SphereGeometry(.218, 18, 12, 0, PI * 2, 0, PI / 2), cor, 0, .02, 0);
+  const dentes = () => { for (let i = 0; i < 6; i++) add(new THREE.ConeGeometry(.02, .055, 4), "#ffffff", -.1 + i * .04, -.01, -.19).rotation.x = PI; };
+  const brilha = cor => ({ emissive: cor, emissiveIntensity: .6 });
+  switch (k) {
+    case "tubarao": { capuz("#7d8fa3"); dentes();
+      const f = add(new THREE.ConeGeometry(.1, .3, 4), "#5f7389", 0, .32, .06); f.scale.z = .3; f.rotation.x = .25;
+      const r = add(new THREE.ConeGeometry(.12, .36, 4), "#5f7389", 0, -.72, .26); r.rotation.x = -1.2; r.scale.x = .3; r.userData.abana = 1;
+      for (const s of [-1, 1]) add(new THREE.SphereGeometry(.025, 8, 6), "#111", s * .12, .1, -.15); break; }
+    case "polvo": { capuz("#d26ab8");
+      for (const [a, b, z] of [[-.1, .14, -.1], [.06, .17, -.12], [.13, .09, -.12]]) add(new THREE.SphereGeometry(.03, 8, 6), "#f2a6dc", a, b, z);
+      for (let i = 0; i < 8; i++) { const a = i / 8 * PI * 2, t = add(new THREE.CylinderGeometry(.035, .012, .4, 6), "#d26ab8", Math.cos(a) * .2, -.82, Math.sin(a) * .2); t.rotation.z = -Math.cos(a) * .7; t.rotation.x = Math.sin(a) * .7; t.userData.abana = 1; } break; }
+    case "reidomar": {
+      add(new THREE.CylinderGeometry(.17, .17, .08, 18, 1, true), "#f2c14e", 0, .2, 0, { side: THREE.DoubleSide, ...brilha("#7a5a10") });
+      for (let i = 0; i < 6; i++) { const a = i / 6 * PI * 2; add(new THREE.ConeGeometry(.035, .12, 5), "#f2c14e", Math.cos(a) * .17, .29, Math.sin(a) * .17, brilha("#7a5a10")); }
+      add(new THREE.SphereGeometry(.04, 10, 8), "#3fd0c8", 0, .2, -.17, brilha("#3fd0c8"));
+      add(new THREE.CylinderGeometry(.016, .016, 1, 8), "#f2c14e", .34, -.45, -.05);
+      for (const dx of [-.06, 0, .06]) add(new THREE.ConeGeometry(.022, .13, 6), "#3fd0c8", .34 + dx, .1 + (dx ? 0 : .03), -.05, brilha("#1f8f8a"));
+      add(new THREE.BoxGeometry(.14, .02, .02), "#f2c14e", .34, .03, -.05); break; }
+    case "trex": { capuz("#4f8a3a"); dentes();
+      for (let i = 0; i < 6; i++) add(new THREE.ConeGeometry(.045, .13, 4), "#ffb03b", 0, .2 - i * .12, .08 + Math.min(i, 2) * .07).rotation.x = .5 + i * .15;
+      const r = add(new THREE.ConeGeometry(.1, .55, 8), "#2e6b22", 0, -.78, .26); r.rotation.x = -1.25; r.userData.abana = 1;
+      for (const s of [-1, 1]) add(new THREE.SphereGeometry(.025, 8, 6), "#ff4d6d", s * .11, .1, -.16, brilha("#ff4d6d")); break; }
+    case "ptero": { capuz("#a67c52");
+      const cr = add(new THREE.ConeGeometry(.06, .38, 4), "#c39a6b", 0, .22, .2); cr.rotation.x = 1.9;
+      const bico = add(new THREE.ConeGeometry(.05, .22, 4), "#ffb03b", 0, .02, -.27); bico.rotation.x = -PI / 2;
+      for (const s of [-1, 1]) { const w = add(new THREE.BoxGeometry(.55, .02, .28), "#8a6a4a", s * .4, -.42, .05); w.rotation.z = s * .35; w.userData.asa = s; } break; }
+    case "vulcaojur": {
+      for (let i = 0; i < 8; i++) { const a = i / 8 * PI * 2; add(new THREE.DodecahedronGeometry(.06), "#3a2a22", Math.cos(a) * .16, .17, Math.sin(a) * .16); }
+      for (let i = 0; i < 4; i++) { const a = i / 4 * PI * 2 + .4, f = add(new THREE.ConeGeometry(.05, .2, 6), i % 2 ? "#ffd23f" : "#ff6a2a", Math.cos(a) * .08, .32, Math.sin(a) * .08, { emissive: "#ff5a1a", emissiveIntensity: .9 }); f.userData.chama = i; }
+      const l = new THREE.PointLight("#ff6a2a", .8, 2); l.position.y = .35; cabeca.add(l); break; }
+    case "papainoel": {
+      const h = add(new THREE.ConeGeometry(.19, .4, 16), "#d62828", 0, .32, .02); h.rotation.z = .35;
+      add(new THREE.TorusGeometry(.19, .05, 8, 20), "#ffffff", 0, .14, 0).rotation.x = PI / 2;
+      add(new THREE.SphereGeometry(.06, 10, 8), "#ffffff", -.07, .51, .02);
+      const b = add(new THREE.SphereGeometry(.17, 14, 10), "#ffffff", 0, -.15, -.1); b.scale.set(1, .8, .6); break; }
+    case "rena": {
+      for (const s of [-1, 1]) {
+        add(new THREE.CylinderGeometry(.018, .024, .28, 6), "#7a4a22", s * .12, .3, 0).rotation.z = -s * .4;
+        add(new THREE.CylinderGeometry(.015, .015, .13, 6), "#7a4a22", s * .21, .36, 0).rotation.z = -s * 1.2;
+        add(new THREE.CylinderGeometry(.015, .015, .11, 6), "#7a4a22", s * .14, .45, 0).rotation.z = s * .4;
+        const o = add(new THREE.SphereGeometry(.05, 8, 6), "#b5793f", s * .21, .08, 0); o.scale.set(.5, 1, .4); }
+      add(new THREE.SphereGeometry(.045, 12, 10), "#ff2a2a", 0, -.02, -.21, { emissive: "#ff2a2a", emissiveIntensity: .9 }); break; }
+    case "boneconeve": {
+      add(new THREE.CylinderGeometry(.27, .27, .03, 20), "#16161c", 0, .17, 0);
+      add(new THREE.CylinderGeometry(.16, .16, .28, 18), "#16161c", 0, .32, 0);
+      add(new THREE.CylinderGeometry(.165, .165, .05, 18), "#d62828", 0, .21, 0);
+      const n = add(new THREE.ConeGeometry(.035, .2, 8), "#ff8c1a", 0, -.02, -.29); n.rotation.x = -PI / 2;
+      add(new THREE.TorusGeometry(.17, .05, 8, 20), "#d62828", 0, -.25, 0).rotation.x = PI / 2;
+      add(new THREE.BoxGeometry(.08, .22, .03), "#d62828", .1, -.38, -.18); break; }
+  }
+}
+const _acessorio3DAntes = acessorio3D;
+acessorio3D = function (cabeca, skin) {
+  const S = SETS_SEMANA[skin]; if (!S) return _acessorio3DAntes(cabeca, skin);
+  fantasia3DSemana(cabeca, skin);
+  const br = new THREE.Sprite(new THREE.SpriteMaterial({ map: brilhoTextura(S.s.cores[0]), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: .45 })); br.scale.set(1.1, 1.1, 1); br.position.y = -.1; cabeca.add(br);
+  // partes que mexem (rabo, tentáculos, asas, chamas): animadas pelo relógio quando a cabeça é desenhada
+  const mexe = []; cabeca.traverse(o => { if (o.userData.abana || o.userData.asa || o.userData.chama !== undefined) mexe.push([o, o.rotation.clone(), o.scale.clone()]); });
+  if (mexe.length) br.onBeforeRender = () => { const t = performance.now() / 1000;
+    for (const [o, r0, s0] of mexe) { if (o.userData.asa) o.rotation.z = r0.z + o.userData.asa * Math.sin(t * 7) * .45; else if (o.userData.abana) o.rotation.y = r0.y + Math.sin(t * 5 + o.position.x * 9) * .35; else o.scale.y = s0.y * (1 + .3 * Math.sin(t * 9 + o.userData.chama * 2)); } };
+};
+const TEX_SEMANA = {};
+function texTextoSemana(ic) { return TEX_SEMANA[ic] = TEX_SEMANA[ic] || texturaCanvas(128, 128, c => { c.font = "100px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(ic, 64, 70); }); }
+const _pet2DAntes = desenharPet2D;
+desenharPet2D = function (c, k, x, y, t, skin) {
+  _pet2DAntes(c, k, x, y, t, skin);
+  const v = visualPet(k, skin), S = v && SETS_SEMANA[v.tema]; if (!S) return;
+  c.save(); c.font = "14px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(S.s.ic, x, y - 28 + Math.sin(t * 3) * 2); c.restore();
+};
+const _pet3DAntes = pet3D;
+pet3D = function (k, skin) {
+  const g = _pet3DAntes(k, skin), v = visualPet(k, skin), S = v && SETS_SEMANA[v.tema]; if (!g || !S) return g;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTextoSemana(S.s.ic), transparent: true })); sp.scale.set(.22, .22, 1); sp.position.y = .5; g.add(sp); return g;
+};
+const _poseGestoAntes = poseGesto;
+poseGesto = function (k, f) { const S = SETS_SEMANA[k]; return _poseGestoAntes(S ? S.s.pose : k, f); };
+const _efeitoGestoAntes = efeitoGesto2D;
+efeitoGesto2D = function (c, x, y, k, f) {
+  const S = SETS_SEMANA[k]; if (!S) return _efeitoGestoAntes(c, x, y, k, f);
+  c.save(); c.textAlign = "center"; c.textBaseline = "middle";
+  for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2 + f * 4, d = 30 + f * 70; c.globalAlpha = Math.max(0, 1 - f); c.font = (18 + 10 * Math.sin(f * Math.PI)) + "px sans-serif"; c.fillText(i % 2 ? S.s.ic : S.s.fic, x + Math.cos(a) * d, y - 30 + Math.sin(a) * d * .6); }
+  c.restore();
+};
+// clima da Praça para as coleções novas (bolhas no Oceano, brasas nos Dinos, neve no Natal)
+if (typeof climaDaColecao === "function") {
+  const _climaAntes = climaDaColecao;
+  climaDaColecao = function () { const ids = colecoesNaLoja(perfil()).map(c => c.id); for (const col of COLS_SEMANA) if (col.sets.some(s => ids.includes(s.k))) return col.clima; return _climaAntes(); };
+}
+if (G.tela === "lobby") render();
+</script>
+
+<script>
+/* ===================== Histórias com batalha das coleções da semana (ideia do Andre) =====================
+   O boss da coleção aparece na Praça, o Bip e o Bop batalham com ele (bolas do tema voando), ele foge e deixa fragmentos.
+   Missão em 2 capítulos; no final todo mundo batalha junto, o boss perde e vira amigo. Prêmio só da missão: um gesto (missao: true).
+   Ligar: aba Eventos do ADM, "🎬 História e missão" (temas oceano, dinos, natal), ou lista "historias" do avisos.json. */
+const HIST_BATALHA = {
+  oceano: { nome: "Batalha contra o Kraken", cols: ["tubarao", "polvo", "reidomar"], skins: ["tubarao", "polvo"],
+    boss: { nome: "Kraken", ic: "🐙", tiros: ["🦈", "💧"], volta: "🫧", ceu: "#2a6f9e", derrotaEm: 2 },
+    falas: fim => [["Bip", "Bip! Que dia lindo para nadar no fundo do mar!"], ["Bop", "Bop! Ei... o chão está tremendo! O que é isso?!"], ["Kraken", "BLUB BLUB! Eu sou o KRAKEN! O oceano e a praça agora são MEUS!"],
+      ["Bip", "Não vai não! Ataque de tubarão!"], ["Bop", "Jato de tinta! Toma essa, Kraken!"], ["Kraken", "Aaai! Vocês me acertaram! Mas eu volto... BLUB!"],
+      ["Bip", "Ele fugiu e deixou cair conchas e bolhas pela praça!"], ["Bop", fim ? `Pegue 5 🐚 e 5 🫧 antes que ele volte! E a coleção Oceano está na loja${fim}!` : "Pegue 5 🐚 e 5 🫧 antes que ele volte!"]],
+    missao: { titulo: "Vença o Kraken", feitoTitulo: "Você venceu o Kraken!", qtd: 5, moedas: 300, exclusivo: "gesto:heroimar", fimEfeito: "batalha",
+      etapas: [
+        { titulo: "Pegue as conchas e as bolhas", frag: [{ ic: "🐚", nome: "de Concha", cor: "#ffd1dc", brilho: "rgba(255,200,220,1)" }, { ic: "🫧", nome: "de Bolha", cor: "#8fe6ff", brilho: "rgba(140,230,255,1)" }],
+          depois: [["Kraken", "BLUB! Quem pegou as minhas conchas?!"], ["Bip", "Ele voltou! Precisamos do poder do Rei do Mar!"], ["Bop", "Pegue 5 🔱 e 5 ⭐ para a batalha final!"]] },
+        { titulo: "Junte o poder do Rei do Mar", frag: [{ ic: "🔱", nome: "do Tridente", cor: "#3fd0c8", brilho: "rgba(60,210,200,1)" }, { ic: "⭐", nome: "de Estrela-do-mar", cor: "#ffb84d", brilho: "rgba(255,185,80,1)" }] }],
+      fimFalas: fim => [["Bip", "Com o tridente do Rei do Mar... ATACAR!"], ["Bop", "Todo mundo junto! Vai!"], ["Kraken", "Blub... eu desisto! Eu só estava sozinho no fundo do mar..."],
+        ["Bip", "Então vem ser nosso amigo!"], ["Kraken", fim ? `Amigos! BLUB BLUB! A coleção Oceano está na loja${fim}. Toma seus prêmios!` : "Amigos! BLUB BLUB! Toma seus prêmios!"]] } },
+  dinos: { nome: "Batalha contra o Rei Rex", cols: ["trex", "ptero", "vulcaojur"], skins: ["trex", "ptero"],
+    boss: { nome: "Rei Rex", ic: "🦖", tiros: ["🥚", "🪶"], volta: "🔥", ceu: "#8a4a2a", derrotaEm: 2 },
+    falas: fim => [["Bip", "Bip! Olha, achei um ovo gigante aqui na praça!"], ["Bop", "Bop! Ele está mexendo... CRACK!"], ["Rei Rex", "ROOOAR! Eu sou o REI REX! Esse ovo é MEU e a praça também!"],
+      ["Bip", "Vamos lutar! Rugidão do T-Rex!"], ["Bop", "Ataque do Pterodáctilo, lá de cima!"], ["Rei Rex", "ROAR! Isso doeu! Eu volto mais forte!"],
+      ["Bip", "Ele fugiu e derrubou ovos e ossos pela praça toda!"], ["Bop", fim ? `Pegue 5 🥚 e 5 🦴! E a coleção Dinossauros está na loja${fim}!` : "Pegue 5 🥚 e 5 🦴 antes que ele volte!"]],
+    missao: { titulo: "Vença o Rei Rex", feitoTitulo: "Você venceu o Rei Rex!", qtd: 5, moedas: 300, exclusivo: "gesto:heroidino", fimEfeito: "batalha",
+      etapas: [
+        { titulo: "Pegue os ovos e os ossos", frag: [{ ic: "🥚", nome: "de Ovo", cor: "#f4ecd6", brilho: "rgba(250,240,210,1)" }, { ic: "🦴", nome: "de Osso", cor: "#e8e2d0", brilho: "rgba(240,230,200,1)" }],
+          depois: [["Rei Rex", "ROOOAR! Devolvam os meus ovos!"], ["Bip", "Ele voltou! Precisamos do poder do vulcão!"], ["Bop", "Pegue 5 🌋 e 5 🪶 para a batalha final!"]] },
+        { titulo: "Junte o poder do vulcão", frag: [{ ic: "🌋", nome: "de Vulcão", cor: "#ff6a2a", brilho: "rgba(255,110,40,1)" }, { ic: "🪶", nome: "de Pena", cor: "#c39a6b", brilho: "rgba(200,160,110,1)" }] }],
+      fimFalas: fim => [["Bip", "Força do Vulcão Jurássico... JÁ!"], ["Bop", "Asas do Pterodáctilo, junto!"], ["Rei Rex", "Roar... tá bom, tá bom! Eu só queria cuidar dos meus ovos..."],
+        ["Bip", "A gente te ajuda a cuidar deles!"], ["Rei Rex", fim ? `Amigos? ROAR de alegria! A coleção Dinossauros está na loja${fim}. Toma seus prêmios!` : "Amigos? ROAR de alegria! Toma seus prêmios!"]] } },
+  natal: { nome: "Batalha contra o Duende Ranzinza", cols: ["papainoel", "rena", "boneconeve"], skins: ["papainoel", "rena"],
+    boss: { nome: "Duende", ic: "🧝", tiros: ["❄️", "🎁"], volta: "🪨", ceu: "#1f3a6b", derrotaEm: 2 },
+    falas: fim => [["Bip", "Ho ho ho! Bip! Os presentes de Natal estão prontos!"], ["Bop", "Bop! O trenó está carregado!"], ["Duende", "Hehehe! Eu sou o DUENDE RANZINZA! Natal é chato! Vou roubar tudo!"],
+      ["Bip", "Nada disso! Chuva de bolas de neve!"], ["Bop", "Coice de rena! Toma!"], ["Duende", "Aaai, que frio! Vou fugir... ops, derrubei tudo!"],
+      ["Bip", "Ele espalhou presentes e sinos pela praça!"], ["Bop", fim ? `Pegue 5 🎁 e 5 🔔 para salvar o Natal! E a coleção Natal está na loja${fim}!` : "Pegue 5 🎁 e 5 🔔 para salvar o Natal!"]],
+    missao: { titulo: "Salve o Natal", feitoTitulo: "Você salvou o Natal!", qtd: 5, moedas: 300, exclusivo: "gesto:heroinatal", fimEfeito: "batalha",
+      etapas: [
+        { titulo: "Pegue os presentes e os sinos", frag: [{ ic: "🎁", nome: "de Presente", cor: "#ff4d4d", brilho: "rgba(255,80,80,1)" }, { ic: "🔔", nome: "de Sino", cor: "#ffd23f", brilho: "rgba(255,210,60,1)" }],
+          depois: [["Duende", "Hehe! Mas eu ainda tenho a estrela da árvore!"], ["Bip", "Sem a estrela não tem Natal!"], ["Bop", "Pegue 5 ⭐ e 5 🍪 para a batalha final!"]] },
+        { titulo: "Junte a estrela e os biscoitos", frag: [{ ic: "⭐", nome: "de Estrela", cor: "#fff3a0", brilho: "rgba(255,240,150,1)" }, { ic: "🍪", nome: "de Biscoito", cor: "#c98a4b", brilho: "rgba(210,150,80,1)" }] }],
+      fimFalas: fim => [["Bip", "Espírito de Natal... AGORA!"], ["Bop", "Todo mundo junto!"], ["Duende", "Snif... ninguém nunca me deu um presente..."],
+        ["Bip", "Então esse aqui é para você! Feliz Natal!"], ["Duende", fim ? `Feliz Natal! Agora eu adoro o Natal! A coleção está na loja${fim}. Toma seus prêmios!` : "Feliz Natal! Agora eu adoro o Natal! Toma seus prêmios!"]] } } };
+// prêmio só da missão: um gesto de herói para cada batalha (não aparece na loja)
+GESTOS.push({ k: "heroimar", icone: "🌊", nome: "Herói do Mar", preco: 999, dura: 2.4, tipo: "gesto", missao: true, pose: "giro", emo: ["🌊", "🔱"], som: [[60, 72, 0, .3, "triangle"], [72, 79, .3, .3, "triangle"], [79, 91, .6, .6, "sine"]] },
+  { k: "heroidino", icone: "🦖", nome: "Domador de Dinos", preco: 999, dura: 2.4, tipo: "gesto", missao: true, pose: "tremedeira", emo: ["🦖", "🦴"], som: [[40, 33, 0, .6, "sawtooth"], [60, 72, .6, .3, "square"], [72, 84, .9, .5, "square"]] },
+  { k: "heroinatal", icone: "🎄", nome: "Salvador do Natal", preco: 999, dura: 2.4, tipo: "gesto", missao: true, pose: "pulinho", emo: ["🎄", "⭐"], som: [[76, 76, 0, .2, "sine"], [76, 76, .25, .2, "sine"], [76, 76, .5, .4, "sine"], [79, 72, .95, .5, "sine"]] });
+for (const [k, t] of Object.entries(HIST_BATALHA)) {
+  const robos = [{ nome: "Bip", cor: "#3dd9ff", skin: t.skins[0] }, { nome: "Bop", cor: "#ff8a1f", skin: t.skins[1] }]; robos.boss = t.boss;   // o boss viaja junto da lista (também nos capítulos e no final)
+  HIST_TEMAS[k] = { ...t, robos, efeito: "batalha", efeitoEm: 2, quebraEm: 5, missao: { ...t.missao, boss: t.boss } };
+}
+// os gestos de herói usam a pose e os ícones do próprio gesto
+const _poseGestoHeroi = poseGesto;
+poseGesto = function (k, f) { const g = gestoInfo(k); return _poseGestoHeroi(g && g.emo ? g.pose : k, f); };
+const _efeitoGestoHeroi = efeitoGesto2D;
+efeitoGesto2D = function (c, x, y, k, f) {
+  const g = gestoInfo(k); if (!g || !g.emo) return _efeitoGestoHeroi(c, x, y, k, f);
+  c.save(); c.textAlign = "center"; c.textBaseline = "middle";
+  for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2 - f * 5, d = 26 + f * 80; c.globalAlpha = Math.max(0, 1 - f * .9); c.font = (20 + 12 * Math.sin(f * Math.PI)) + "px sans-serif"; c.fillText(g.emo[i % 2], x + Math.cos(a) * d, y - 34 + Math.sin(a) * d * .55); }
+  c.restore();
+};
+/* o boss entra na cena como mais um "personagem" (fala com balão) e a batalha é um efeito novo */
+function bossDaHistoria(h) { return h.boss || (h.robos && h.robos.boss) || null; }
+const _iniciarHistoriaAntes = iniciarHistoria;
+iniciarHistoria = function (h) {
+  _iniciarHistoriaAntes(h);
+  const bc = bossDaHistoria(h), o = PRACA.hist; if (!bc || !o || o.h !== h) return;
+  const g = new THREE.Group(), sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTextoSemana(bc.ic), transparent: true, depthWrite: false }));
+  sp.scale.setScalar(2.6); sp.position.y = 2.6; g.add(sp);
+  const aura = new THREE.Sprite(new THREE.SpriteMaterial({ map: brilhoTextura("rgba(255,80,110,1)"), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: .55 })); aura.scale.setScalar(4.2); aura.position.y = 2.6; g.add(aura);
+  g.position.set(0, 0, 2.2); PRACA.cena.add(g);
+  const vivo = h.tipo !== "batalha" || !String(h.id).startsWith("hi-");   // na 1ª história ele só aparece quando a batalha começa
+  g.visible = vivo;
+  o.robos.push({ g, corpo: g, sp, aura, bracoD: new THREE.Object3D(), bracoE: new THREE.Object3D(), boss: true }); o.nomes.push(bc.nome); o.bossCfg = bc;
+};
+const _efeitoHistoriaAntes = efeitoHistoria;
+efeitoHistoria = function (o) {
+  if (o.h.tipo !== "batalha") return _efeitoHistoriaAntes(o);
+  const bc = o.bossCfg || bossDaHistoria(o.h) || { ic: "👾", tiros: ["⭐", "⭐"], volta: "💥" }, B = o.robos.find(r => r.boss);
+  const tiros = new THREE.Group(); PRACA.cena.add(tiros);
+  o.fx.push({ m: tiros, batalha: { t: 0, prox: .2, proxB: 1.1, voando: [], booms: [], bc, B, final: String(o.h.id).startsWith("fim-"), lado: 0 } });
+  if (B) { B.g.visible = true; B.sp.scale.setScalar(.1); }
+  if (typeof tocarNotas === "function") tocarNotas([[48, 48, 0, .15, "sawtooth"], [48, 48, .2, .15, "sawtooth"], [55, 55, .4, .15, "sawtooth"], [60, 72, .6, .5, "square"]]);
+};
+function tiroHistoria(B, ic, de, para, dur) {
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTextoSemana(ic), transparent: true, depthWrite: false })); sp.scale.setScalar(.7); sp.position.copy(de); B.m.add(sp);
+  B.batalha.voando.push({ sp, de: de.clone(), para: para.clone(), t: 0, dur });
+}
+function boomHistoria(e, pos, ic, tam) {   // explosão rápida (💥) onde a bola bate
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTextoSemana(ic || "💥"), transparent: true, depthWrite: false })); sp.position.copy(pos); sp.scale.setScalar(.3); e.m.add(sp);
+  e.batalha.booms.push({ sp, t: 0, tam: tam || 1.5 });
+}
+const _passoHistoriaAntes = passoHistoria;
+passoHistoria = function (dt) {
+  const o = PRACA.hist; _passoHistoriaAntes(dt); if (!o || PRACA.hist !== o) return;
+  const B = o.robos.find(r => r.boss); if (!B) return;
+  const tt = performance.now() / 1000, cam = PRACA.cam, S = (o.fx.find(e => e.batalha) || {}).batalha, e = o.fx.find(x => x.batalha);
+  B.sp.position.y = 2.6 + Math.sin(tt * 2) * .15; B.aura.material.opacity = .4 + .2 * Math.sin(tt * 4);
+  if (o.fase === "fala") o.nave.position.y += (13 - o.nave.position.y) * Math.min(1, dt * 1.5); else if (o.fase === "tchau" || o.fase === "sobe") o.nave.position.y += (5.6 - o.nave.position.y) * Math.min(1, dt * 3);   // a nave sobe para deixar ver a batalha
+  if (!S) {   // conversa (capítulo): o boss fica bravo, indo de um lado para o outro
+    if (o.fase === "fala") { B.g.position.x = Math.sin(tt * 1.6) * 1.4; B.g.position.y = Math.abs(Math.sin(tt * 3)) * .3; B.sp.material.rotation = Math.sin(tt * 4) * .15; }
+    return;
+  }
+  S.t += dt;
+  const alvo = new THREE.Vector3(B.g.position.x, B.g.position.y + 2.6, B.g.position.z);
+  const esc = Math.min(1, S.t / 1.2) * (S.fugiu || S.vencido ? Math.max(0, 1 - (S.tFim || 0) / 1.5) : 1);
+  if (PRACA.luzes) PRACA.luzes.forEach(([l, v]) => (l.intensity = v * (1 - .45 * esc))); if (PRACA.ceu) PRACA.ceu.material.color.set(S.bc.ceu || "#553366").lerp(new THREE.Color(1, 1, 1), 1 - esc * .8);
+  const luta = !S.fugiu && !S.vencido && o.fase === "fala";
+  // robôs correm de um lado para o outro, pulam, atiram e desviam
+  o.robos.forEach((r, i) => {
+    if (r.boss || o.fase !== "fala") return;
+    r.base = r.base || { x: r.g.position.x, z: r.g.position.z };
+    const ph = S.t * 2.2 + i * Math.PI, festa = S.vencido;
+    r.g.position.x = r.base.x + Math.sin(ph) * (festa ? .2 : .75); r.g.position.z = r.base.z - .3 + Math.cos(ph * .8) * .45;
+    if (r.puloEm !== undefined) { r.puloEm -= dt; if (r.puloEm <= 0) { r.pulo = .55; r.puloEm = undefined; } }
+    r.pulo = Math.max(0, (r.pulo || 0) - dt); r.arr = Math.max(0, (r.arr || 0) - dt);
+    r.g.position.y = r.pulo > 0 ? Math.sin(Math.PI * (1 - r.pulo / .55)) * .9 : festa ? Math.abs(Math.sin(S.t * 8 + i)) * .45 : Math.abs(Math.sin(ph * 3)) * .08;
+    if (r.pernaD) { const p = Math.sin(S.t * 14 + i * 2) * (r.pulo > 0 ? .2 : .75); r.pernaD.rotation.x = p; r.pernaE.rotation.x = -p; }
+    const vira = r.arr > 0 ? Math.PI - Math.sign(alvo.x - r.g.position.x || 1) * .9 : Math.PI;
+    r.corpo.rotation.y += (vira - r.corpo.rotation.y) * Math.min(1, dt * 10);
+    if (r.arr > 0) r.bracoD.rotation.x = -2.8 + (1 - r.arr / .3) * 2; else if (festa) { r.bracoD.rotation.x = -2.7 + Math.sin(S.t * 12) * .4; r.bracoE.rotation.x = -2.7 + Math.cos(S.t * 12) * .4; }
+  });
+  if (!S.fugiu && !S.vencido) {
+    B.sp.scale.setScalar(B.sp.scale.x + (2.6 - B.sp.scale.x) * Math.min(1, dt * 4));
+    // o boss anda pelo céu e de vez em quando dá um bote na direção dos robôs
+    S.bote = (S.bote ?? 3) - dt; let avanco = 0;
+    if (S.bote < 0) { const f = Math.min(1, -S.bote / .9); avanco = Math.sin(Math.PI * f); if (f > .45 && !S.bateuBote) { S.bateuBote = true; S.treme = .35; boomHistoria(e, new THREE.Vector3(B.g.position.x, .3, 3.6), "💥", 2.4); o.robos.forEach(r => { if (!r.boss) r.pulo = .55; }); if (typeof bip === "function") bip(90, .2); } if (f >= 1) { S.bote = 2.6 + Math.random() * 1.5; S.bateuBote = false; } }
+    B.g.position.x = Math.sin(S.t * 1.3) * 1.5 + (S.hit > 0 ? Math.sin(tt * 60) * .15 : 0);
+    B.g.position.z = 2.2 + Math.sin(S.t * .9) * .4 + avanco * 1.5; B.g.position.y = Math.sin(S.t * 2.1) * .25 - avanco * 1.2;
+    B.sp.material.rotation = Math.sin(S.t * 3) * .12 + avanco * .3;
+    if (luta) {
+      S.prox -= dt; if (S.prox <= 0) { S.prox = .3 + Math.random() * .25; const r = o.robos.filter(x => !x.boss)[S.lado % 2]; S.lado++;
+        if (r) { r.arr = .3; if (Math.random() < .5) r.pulo = .55; tiroHistoria(e, S.bc.tiros[S.lado % 2], new THREE.Vector3(r.g.position.x, r.g.position.y + 1.5, r.g.position.z), alvo, .5); } }
+      S.proxB -= dt; if (S.proxB <= 0) { S.proxB = .9 + Math.random() * .6; const rs = o.robos.filter(x => !x.boss), r = rs[Math.floor(Math.random() * rs.length)];
+        if (r) { r.puloEm = .38; tiroHistoria(e, S.bc.volta, alvo, new THREE.Vector3(r.g.position.x, .6, r.g.position.z + .3), .6); } }
+    }
+    if (!S.final && o.h.quebraEm != null && o.fala >= o.h.quebraEm) { S.fugiu = true; S.tFim = 0; S.treme = .3; boomHistoria(e, alvo, "💥", 3.2); }
+    if (S.final && o.fala >= (S.bc.derrotaEm ?? 2)) { S.vencido = true; S.tFim = 0; S.treme = .45; boomHistoria(e, alvo, "💥", 3.6); for (let i = 0; i < 6; i++) boomHistoria(e, alvo.clone().add(new THREE.Vector3((Math.random() - .5) * 3, (Math.random() - .5) * 2, 0)), "⭐", 1.2); if (typeof sfxVitoria === "function") sfxVitoria(); }
+  } else {
+    S.tFim = (S.tFim || 0) + dt;
+    if (S.fugiu) { B.g.position.y = S.tFim * S.tFim * 6; B.g.position.x += Math.sin(S.tFim * 9) * .05; B.sp.material.rotation = Math.sin(S.tFim * 12) * .4; if (S.tFim > 2) B.g.visible = false; }
+    else { const f = Math.min(1, S.tFim / 1.2); B.sp.scale.setScalar(2.6 - 1.3 * f); B.sp.material.rotation = Math.sin(S.tFim * 10) * .25 * (1 - f); B.aura.material.color.set(f > .5 ? "#ffe680" : "#ff506e");
+      B.g.position.x *= 1 - Math.min(1, dt * 3); B.g.position.z += (2.6 - B.g.position.z) * Math.min(1, dt * 3); B.g.position.y = Math.abs(Math.sin(S.tFim * 5)) * .4 * f; }
+  }
+  // bolas voando em arco; ao acertar o boss ele pisca, treme e sai uma explosão
+  S.voando = S.voando.filter(v => {
+    v.t += dt; const q = Math.min(1, v.t / v.dur); v.sp.position.lerpVectors(v.de, v.para, q); v.sp.position.y += Math.sin(Math.PI * q) * 1.4; v.sp.material.rotation += dt * 10;
+    if (q < 1) return true;
+    e.m.remove(v.sp); v.sp.material.dispose();
+    if (v.para.y > 1.5) { S.hit = .22; S.treme = Math.max(S.treme || 0, .08); boomHistoria(e, v.sp.position, "💥", 1.4); if (typeof bip === "function") bip(140 + Math.random() * 60, .06); }
+    else { boomHistoria(e, v.sp.position, S.bc.volta, 1.1); if (typeof bip === "function") bip(520, .04); }
+    return false;
+  });
+  S.booms = S.booms.filter(b => { b.t += dt; const q = b.t / .4; b.sp.scale.setScalar(.3 + q * b.tam); b.sp.material.opacity = 1 - q; if (q < 1) return true; e.m.remove(b.sp); b.sp.material.dispose(); return false; });
+  S.hit = Math.max(0, (S.hit || 0) - dt);
+  if (!S.fugiu && !S.vencido) B.sp.material.color.set(S.hit > 0 ? "#ff8080" : "#ffffff");
+  // a tela treme nas pancadas
+  S.treme = Math.max(0, (S.treme || 0) - dt * .8); if (S.treme > 0) { cam.position.x += (Math.random() - .5) * S.treme; cam.position.y += (Math.random() - .5) * S.treme; }
+};
+const _acabarHistoriaAntes = acabarHistoria;
+acabarHistoria = function () { const o = PRACA.hist; _acabarHistoriaAntes(); if (o && PRACA.ceu) PRACA.ceu.material.color.setScalar(1); };
 </script>
 
 <script>
@@ -10883,6 +11280,22 @@ async function entregarMundos() {
   AMG.entregandoMundos = false;
 }
 setInterval(() => { if (!document.hidden && ((G.mundoPend || []).length || (G.pagPend || []).length)) entregarMundos(); }, 20000);
+
+/* ===================== Versão nova do site =====================
+   O montar.py grava a impressão do conteúdo em <meta name="versao-site"> e em versao.json (ao lado do index.html).
+   Se o versao.json do site for diferente da página aberta (o Chrome guardou a cópia antiga), aparece a faixa "Versão nova" com o botão Atualizar. */
+function checarVersaoSite() {
+  const atual = (document.querySelector('meta[name="versao-site"]') || {}).content; if (!atual || $("faixa-versao")) return;
+  fetch("versao.json?t=" + Date.now(), { cache: "no-store" }).then(r => r.ok ? r.json() : null).then(j => {
+    if (!j || !j.v || j.v === atual || $("faixa-versao")) return;
+    const f = document.createElement("div"); f.id = "faixa-versao"; f.className = "faixa-versao";
+    f.innerHTML = `<span>🆕 Tem versão nova do jogo!</span><button type="button">Atualizar</button>`;
+    f.querySelector("button").addEventListener("click", () => { const u = new URL(location.href); u.searchParams.set("v", j.v); location.replace(u.toString()); });
+    document.body.appendChild(f);
+  }).catch(() => {});
+}
+setTimeout(checarVersaoSite, 4000); setInterval(checarVersaoSite, 60000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) checarVersaoSite(); });
 
 
 render();
