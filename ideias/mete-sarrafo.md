@@ -340,3 +340,25 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
 - Aquário:
   - Tem um tanque de vidro no Bosque com os seus peixes nadando.
   - O painel do aquário mostra o aquário animado, a barra de progresso e um cartão para cada peixe, com o maior tamanho que você já pescou.
+
+## Pescaria no estilo dos jogos de pesca (pedido do Andre, 23/11)
+
+- Como pescar:
+  1. 🎯 **Lançar:** segure para encher a barra de força e solte na faixa verde. Acertar é um lançamento perfeito: o peixe morde mais rápido e você tem mais sorte.
+  2. 👆 **Chacoalhar:** enquanto espera, toque no botão "Chacoalhar!" que aparece pela tela. Quanto mais tocar, mais rápido o peixe morde.
+  3. 🐟 **Puxar:** segure para levar a barrinha para a direita e solte para ela voltar. Mantenha o peixe dentro dela até a barra verde encher.
+- Lugares:
+  - 🏞️ o lago e o 🌊 mar novo, ao sul do Bosque, com um píer e um farol;
+  - alguns peixes só aparecem à noite.
+- Peixes:
+  - são 24, com raridade de lixo até lendário;
+  - às vezes vem um peixe especial (✨ brilhante, 🔷 gigante, 🪙 dourado ou 🌈 arco-íris), que vale mais.
+- Varas e iscas:
+  - **Varas**, compradas com moedas do jogo: madeira, bambu, fibra, ouro e abismo. Cada uma tem mais sorte, uma barra maior, mais força ou faz o peixe morder mais rápido.
+  - **Iscas:** gasta uma a cada lançamento.
+- Vender:
+  - **Regra nova, escolhida pelo Andre:** os peixes vão para a mochila (até 60) e são vendidos na 🏪 Loja de pesca. Acabou o limite de 15 pescas por dia valendo moedas.
+  - O 🎁 Baú do fundo dá moedas na hora.
+- 📖 **Livro dos peixes:**
+  - mostra todos os peixes, onde e quando cada um aparece, e o maior que você já pegou;
+  - completar o livro dá +300.

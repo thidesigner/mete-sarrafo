@@ -21,14 +21,14 @@ const { chromium } = require('playwright'); const fs = require('fs'); const T = 
   // pescaria
   await pg.evaluate(() => { PRACA.eu.x = PESCA_LUGAR.x; PRACA.eu.z = PESCA_LUGAR.z; PRACA.yaw = .3; PRACA.alt = .5; }); await pg.waitForTimeout(400);
   r.botaoPesca = await pg.evaluate(() => $("pr-acao").textContent);
-  await pg.click('#pr-acao', { force: true }); await pg.waitForFunction(() => PRACA.pesca && PRACA.pesca.fase === 'espera');
-  await pg.evaluate(() => { PRACA.pesca.t = .05; PRACA.pesca.belisca = []; }); await pg.waitForFunction(() => PRACA.pesca && PRACA.pesca.fase === 'morde');
-  r.morde = await pg.evaluate(() => ({ fase: PRACA.pesca.fase, botao: $("pr-acao").textContent }));
+  await pg.click('#pr-acao', { force: true }); await pg.waitForFunction(() => PRACA.pesca && PRACA.pesca.fase === 'carrega');
+  await pg.evaluate(() => { PRACA.pescaSegura = true; }); await pg.waitForTimeout(400); await pg.evaluate(() => { PRACA.pescaSegura = false; }); await pg.waitForFunction(() => PRACA.pesca && PRACA.pesca.fase === 'espera');
+  r.morde = await pg.evaluate(() => ({ fase: PRACA.pesca.fase, chacoalhar: !$('pp-chac').hidden }));
   await pg.screenshot({ path: S + '/bq-pesca.png' });
   const m0 = await pg.evaluate(() => G.banco.Andre);
-  await pg.click('#pr-acao', { force: true }); await pg.waitForTimeout(100);
-  await pg.evaluate(() => { PRACA.pesca.dist = 1; PRACA.pesca.tensao = 0; PRACA.pescaSegura = true; }); await pg.waitForTimeout(400); await pg.evaluate(() => { PRACA.pescaSegura = false; });   // briga rápida
-  r.pescou = await pg.evaluate(m => ({ peixes: G.peixes.Andre, ganhou: G.banco.Andre - m, hoje: G.pesca.por.Andre, toast: (document.querySelector(".toast") || {}).textContent }), m0);
+  await pg.evaluate(() => { PRACA.pesca.t = .01; }); await pg.waitForFunction(() => PRACA.pesca && PRACA.pesca.fase === 'briga');
+  await pg.evaluate(() => { PRACA.pesca.prog = .995; PRACA.pesca.peixe = PRACA.pesca.bar + .05; }); await pg.waitForFunction(() => PRACA.pesca && PRACA.pesca.fase === 'fim');   // briga rápida
+  r.pescou = await pg.evaluate(m => ({ peixes: G.peixes.Andre, mochila: mochilaDe('Andre').length, hoje: G.pesca.por.Andre, toast: (document.querySelector('.toast') || {}).textContent }), m0);
   await pg.screenshot({ path: S + '/bq-peixe.png' });
   // aquário
   await pg.evaluate(() => { PRACA.pesca = null; PRACA.eu.x = AQUARIO.x; PRACA.eu.z = AQUARIO.z; }); await pg.waitForTimeout(400); await pg.click('#pr-acao', { force: true }); await pg.waitForTimeout(300);
