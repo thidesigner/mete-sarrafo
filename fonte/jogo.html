@@ -434,6 +434,21 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .pr-flash { position: absolute; inset: 0; background: #fff; z-index: 5; pointer-events: none; animation: prFlash .5s ease-out forwards; }
 @keyframes prFlash { from { opacity: .9; } to { opacity: 0; } }
 .pr-tesouro { top: auto; bottom: 178px; left: auto; right: 14px; transform: none; font-size: 13px; padding: 4px 10px; }
+.pr-pesca { position: absolute; left: 50%; bottom: 170px; transform: translateX(-50%); width: min(330px, calc(100% - 32px)); background: rgba(11,27,51,.88); color: #fff; border: 3px solid #3dd9ff; border-radius: 18px; padding: 10px 12px; display: grid; gap: 6px; z-index: 6; text-align: center; font: 700 15px Nunito, sans-serif; }
+.pr-pesca[hidden] { display: none; }
+.pp-bar { display: grid; grid-template-columns: 74px 1fr; align-items: center; gap: 6px; font-size: 13px; text-align: left; }
+.pp-bar i { height: 14px; background: rgba(255,255,255,.15); border-radius: 8px; overflow: hidden; display: block; }
+.pp-bar em { display: block; height: 100%; width: 0; background: #37d99a; border-radius: 8px; transition: width .08s; }
+.pp-btn { background: #ffd23f; color: #0b1b33; border: 3px solid #0b1b33; box-shadow: 0 4px 0 #0b1b33; border-radius: 14px; padding: 12px; font: 900 18px Nunito, sans-serif; touch-action: none; user-select: none; -webkit-user-select: none; }
+.pp-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #0b1b33; }
+.aq-cv { width: 100%; height: auto; border-radius: 14px; border: 3px solid #0b1b33; display: block; margin: 8px 0; }
+.aq-prog { position: relative; height: 22px; background: rgba(255,255,255,.15); border-radius: 12px; overflow: hidden; margin: 6px 0; }
+.aq-prog i { position: absolute; inset: 0 auto 0 0; background: #37d99a; display: block; }
+.aq-prog span { position: relative; font: 800 13px Nunito, sans-serif; line-height: 22px; padding: 0 10px; color: #fff; text-shadow: 0 1px 2px #0b1b33; }
+.aq-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+.aq-card { border: 3px solid; border-radius: 14px; padding: 8px 4px; display: grid; justify-items: center; gap: 2px; background: rgba(255,255,255,.7); color: #0b1b33; text-align: center; }
+.aq-card b { font-size: 13px; line-height: 1.1; } .aq-card small { font-size: 11px; line-height: 1.2; }
+.aq-ic { font-size: 30px; line-height: 1.1; } .aq-falta { opacity: .55; filter: grayscale(.6); }
 .pr-corrida { top: 136px; font-size: 20px; border-color: #37d99a; }
 .praca.pr-cena .pr-tesouro, .praca.pr-cena .pr-corrida { display: none !important; }
 .praca.pr-cena .pr-missao { display: none !important; }
@@ -7774,7 +7789,7 @@ function montarBosque3D(s) {
   add(new THREE.CylinderGeometry(.04, .04, 1.8, 6), "#6b4423", 0, 1.1, 0, barco); const vela = add(new THREE.PlaneGeometry(.9, 1.2), new THREE.MeshLambertMaterial({ color: "#ffffff", side: THREE.DoubleSide }), .02, 1.3, .3, barco); vela.rotation.y = Math.PI / 2;
   // boia da pescaria (aparece quando joga a linha)
   B.boia = new THREE.Group(); add(new THREE.SphereGeometry(.22, 12, 10), "#ff4d4d", 0, 0, 0, B.boia); add(new THREE.SphereGeometry(.225, 12, 10, 0, Math.PI * 2, 0, Math.PI / 2), "#ffffff", 0, .01, 0, B.boia); add(new THREE.CylinderGeometry(.03, .03, .35, 6), "#ffd23f", 0, .3, 0, B.boia); B.boia.visible = false; s.add(B.boia);
-  B.linha = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineBasicMaterial({ color: "#ffffff" })); B.linha.visible = false; s.add(B.linha);
+  B.linha = new THREE.Line(new THREE.BufferGeometry().setFromPoints(Array.from({ length: 12 }, () => new THREE.Vector3())), new THREE.LineBasicMaterial({ color: "#ffffff" })); B.linha.visible = false; s.add(B.linha);
   const placa = (x, z, txt, cor, ry = 0) => { const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry; s.add(g); add(new THREE.BoxGeometry(.12, 1.4, .12), "#6b4423", 0, .7, 0, g);
     add(new THREE.PlaneGeometry(1.9, .55), new THREE.MeshBasicMaterial({ map: texTexto(txt, "#ffffff", cor, 512, 140, 50), side: THREE.DoubleSide }), 0, 1.5, 0, g); };
   placa(AQUARIO.x, AQUARIO.z, "🐠 Aquário", "#2f80ed", Math.PI / 2); placa(PIER.x + 1.6, PIER.z1 + .3, "🎣 Pescaria", "#2f80ed", Math.PI / 2);
@@ -7796,6 +7811,7 @@ function montarBosque3D(s) {
     add(new THREE.BoxGeometry(4.6, .5, .15), m, 0, 2.8, 0, g);
     const t = add(new THREE.PlaneGeometry(1.6, .45), new THREE.MeshBasicMaterial({ map: texTexto(i ? String(i + 1) : "🏁 1", "#0b1b33", cor, 256, 72, 52), side: THREE.DoubleSide }), 0, 2.8, .09, g); t.rotation.y = 0;
     g.visible = false; B.arcos.push({ g, m }); });
+  montarAquario3D(s);
   // tira o poste que ficava bem na passagem para o Bosque (e o brilho dele à noite)
   const px = Math.cos(Math.PI) * (PRACA_R - .6);
   s.children.filter(o => Math.abs(o.position.x - px) < .05 && Math.abs(o.position.z) < .05).forEach(o => s.remove(o));
@@ -7814,7 +7830,7 @@ function modeloKart(cor) {
 const _lugaresPracaAntes = lugaresPraca;
 lugaresPraca = function () {
   if (PRACA.kart) return [{ x: PRACA.eu.x, z: PRACA.eu.z, r: 99, txt: "🚶 Sair do carrinho", abrir: sairKart }];
-  if (PRACA.pesca) return [{ x: PRACA.eu.x, z: PRACA.eu.z, r: 99, txt: PRACA.pesca.fase === "morde" ? "❗ PUXA AGORA!" : PRACA.pesca.fase === "fim" ? "🎣 Pescar de novo" : "🎣 Esperando o peixe...", abrir: puxarPesca }];
+  if (PRACA.pesca) return PRACA.pesca.fase === "briga" || PRACA.pesca.fase === "lanca" ? [] : [{ x: PRACA.eu.x, z: PRACA.eu.z, r: 99, txt: PRACA.pesca.fase === "morde" ? "❗ FISGAR AGORA!" : PRACA.pesca.fase === "fim" ? "🎣 Pescar de novo" : "🎣 Esperando o peixe...", abrir: puxarPesca }];
   const l = _lugaresPracaAntes();
   if (PRACA.naRoda) return l;
   l.push({ x: PESCA_LUGAR.x, z: PESCA_LUGAR.z, r: 1.5, txt: "🎣 Pescar", abrir: comecarPesca });
@@ -7823,40 +7839,203 @@ lugaresPraca = function () {
   l.push({ x: KART_LUGAR.x, z: KART_LUGAR.z, r: 2.2, txt: "🏎️ Dirigir o carrinho", abrir: entrarKart });
   return l;
 };
-/* ---------- pescaria ---------- */
+/* ---------- pescaria de verdade (pedido do Andre): vara na mão, lançar, beliscadas, fisgar, brigar com o peixe e o tamanho de cada um ----------
+   Fases de PRACA.pesca: "lanca" (a boia voa), "espera" (beliscadas falsas), "morde" (1,2 s para fisgar), "briga" (segurar para puxar sem arrebentar a linha), "fim".
+   Briga: segurar (botão do #pr-pesca ou espaço) puxa e aumenta a tensão; soltar alivia e o peixe foge um pouco. Tensão no máximo = linha arrebenta; longe demais = escapa. */
+const PEIXE_TAM = { peixinho: [5, 14, 1], palhaco: [6, 12, 1.1], baiacu: [10, 32, 1.4], camarao: [4, 11, .8], lula: [15, 48, 1.7], polvo: [20, 85, 2], tubarao: [60, 190, 2.6], bota: [26, 31, .4], dourado: [20, 45, 2.3] };   // [min cm, max cm, força]
+const raridadePeixe = p => p.p >= 20 ? ["Comum", "#9fb3c8", 1] : p.p >= 8 ? ["Incomum", "#37d99a", 2] : p.p >= 2 ? ["Raro", "#3d9bff", 3] : ["Lendário", "#ffd23f", 4];
 function pescaHoje(nome) { G.pesca = G.pesca && G.pesca.dia === diaBR() ? G.pesca : { dia: diaBR(), por: {} }; return G.pesca.por[nome] || 0; }
-function comecarPesca() {
-  const B = PRACA.bosque; if (!B) return;
-  PRACA.pesca = { fase: "espera", t: 1.6 + Math.random() * 3 }; PRACA.eu.r = 0;
-  B.boia.position.set(PESCA_LUGAR.x + (Math.random() - .5) * 1.2, .06, PESCA_LUGAR.z - 2.6 - Math.random()); B.boia.visible = B.linha.visible = true;
-  if (typeof tocarNotas === "function") tocarNotas([[79, 67, 0, .25, "sine"]]);
-}
 function sortearPeixe() { let r = Math.random() * PEIXES.reduce((a, p) => a + p.p, 0); for (const p of PEIXES) { r -= p.p; if (r <= 0) return p; } return PEIXES[0]; }
+function modeloVara() {
+  const g = new THREE.Group(), m = c => new THREE.MeshLambertMaterial({ color: c });
+  const cabo = new THREE.Mesh(new THREE.CylinderGeometry(.025, .03, .35, 8), m("#3a2a1a")); cabo.position.y = .1; g.add(cabo);
+  const haste = new THREE.Mesh(new THREE.CylinderGeometry(.008, .018, 1.7, 6), m("#c8a26a")); haste.position.y = 1.1; g.add(haste);
+  const mol = new THREE.Mesh(new THREE.CylinderGeometry(.06, .06, .05, 12), m("#9aa7b8")); mol.rotation.z = Math.PI / 2; mol.position.set(.05, .2, 0); g.add(mol);
+  const ponta = new THREE.Object3D(); ponta.position.y = 1.95; g.add(ponta); g.userData.ponta = ponta;
+  g.rotation.x = -1; g.position.set(.27, .72, -.25); return g;
+}
+function comecarPesca() {
+  const B = PRACA.bosque, eu = PRACA.eu; if (!B || !eu) return;
+  eu.r = 0;
+  const alvo = new THREE.Vector3(PESCA_LUGAR.x + (Math.random() - .5) * 2.2, .06, PESCA_LUGAR.z - 3 - Math.random() * 1.6);
+  PRACA.pesca = { fase: "lanca", t: 0, alvo, belisca: [], tensao: 0, dist: 0 };
+  B.boia.visible = B.linha.visible = true; B.boia.scale.setScalar(1);
+  if (typeof tocarNotas === "function") tocarNotas([[84, 60, 0, .5, "sine"]]);   // fiuuu da linha
+}
+function onda(B, x, z, forte) { const m = new THREE.Mesh(new THREE.RingGeometry(.15, .25, 24), new THREE.MeshBasicMaterial({ color: "#e8f8ff", transparent: true, opacity: .8, side: THREE.DoubleSide, depthWrite: false })); m.rotation.x = -Math.PI / 2; m.position.set(x, .05, z); PRACA.cena.add(m); (B.ondas = B.ondas || []).push({ m, t: 0, forte: forte || 1 }); }
+function respingo(x, z, n) { for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI * 2, v = 1 + Math.random() * 2; faiscaPracaCor(x, .1, z, Math.cos(a) * v, 3 + Math.random() * 3, Math.sin(a) * v, .6, "#dff6ff"); } }
+function faiscaPracaCor(x, y, z, vx, vy, vz, vida, cor) {
+  if (typeof faiscaPraca !== "function") return; faiscaPraca(x, y, z, vx, vy, vz, vida); const f = PRACA.faiscas && PRACA.faiscas[PRACA.faiscas.length - 1]; if (f) f.m.material.color.set(cor);
+}
 function puxarPesca() {
   const P = PRACA.pesca; if (!P) return;
   if (P.fase === "fim") { comecarPesca(); return; }
-  if (P.fase === "espera") { acabarPesca("Puxou cedo! O peixe fugiu 🙈"); return; }
-  const nome = perfil(), px = sortearPeixe(), n = pescaHoje(nome);
+  if (P.fase === "lanca") return;
+  if (P.fase === "espera") { acabarPesca(P.mordisca > 0 ? "Era só uma beliscada! O peixe fugiu 🙈" : "Puxou cedo! O peixe fugiu 🙈"); return; }
+  if (P.fase === "morde") {   // fisgou! começa a briga
+    const px = sortearPeixe(), [a, b, forca] = PEIXE_TAM[px.k] || [5, 10, 1], tam = Math.round(a + (b - a) * Math.pow(Math.random(), 1.6));
+    Object.assign(P, { fase: "briga", px, tam, forca: forca * (.85 + .3 * (tam - a) / Math.max(1, b - a)), dist: 100, tensao: 20, surto: 0, tSurto: 1 + Math.random(), lado: 0, inicio: P.alvo.clone() });
+    if (typeof vibrar === "function") vibrar(80); if (typeof bip === "function") bip(220, .12);
+    onda(PRACA.bosque, P.alvo.x, P.alvo.z, 2); respingo(P.alvo.x, P.alvo.z, 14);
+    mostrarHudPesca(true);
+  }
+}
+function pegarPeixe(P) {
+  const nome = perfil(), px = P.px, n = pescaHoje(nome);
   G.peixes = G.peixes || {}; const aq = G.peixes[nome] = G.peixes[nome] || {}; aq[px.k] = (aq[px.k] || 0) + 1;
+  aq.max = aq.max || {}; const recorde = !aq.max[px.k] || P.tam > aq.max[px.k]; if (recorde) aq.max[px.k] = P.tam;
   let ganho = 0; if (px.m && n < PESCA_LIMITE) { ganho = px.m; G.banco[nome] = Math.round(((G.banco[nome] || 0) + ganho) * 10) / 10; }
   G.pesca.por[nome] = n + 1;
   let extra = ""; if (!aq.bonus && PEIXES.every(p => aq[p.k])) { aq.bonus = 1; G.banco[nome] = Math.round(((G.banco[nome] || 0) + PESCA_BONUS) * 10) / 10; extra = ` Aquário completo! +${PESCA_BONUS} 🎉`; }
-  salvarPlacar();
-  pulaPeixe(px.ic);
-  if (px.k === "dourado" && typeof fogosPraca === "function") fogosPraca(PRACA.bosque.boia.position.x, 1, PRACA.bosque.boia.position.z, 40);
+  salvarPlacar(); montarPeixesAquario3D();
+  const B = PRACA.bosque; pulaPeixe(px.ic, P.tam);
+  if (px.k === "dourado" && typeof fogosPraca === "function") fogosPraca(B.boia.position.x, 1, B.boia.position.z, 40);
   if (typeof tocarNotas === "function") tocarNotas(px.m >= 15 ? [[72, 72, 0, .1, "square"], [76, 76, .1, .1, "square"], [79, 79, .2, .1, "square"], [84, 84, .3, .3, "square"]] : [[72, 84, 0, .2, "triangle"]]);
-  acabarPesca(`${px.ic} Pegou: ${px.nome}!${ganho ? ` +${ganho} moedas` : px.m && n >= PESCA_LIMITE ? " (moedas de pesca de hoje acabaram)" : ""}${extra}`);
+  const rar = raridadePeixe(px);
+  acabarPesca(`${px.ic} ${px.nome} de ${P.tam} cm (${rar[0]})!${recorde && aq[px.k] > 1 ? " 🏅 Recorde!" : ""}${ganho ? ` +${ganho} moedas` : px.m && n >= PESCA_LIMITE ? " (moedas de pesca de hoje acabaram)" : ""}${extra}`);
 }
-function acabarPesca(msg) { const B = PRACA.bosque; if (PRACA.pesca) PRACA.pesca = { fase: "fim", t: 0 }; if (B) { B.boia.visible = B.linha.visible = false; B.boia.scale.setScalar(1); } if (msg) toast(msg); }
-function pulaPeixe(ic) {
-  const B = PRACA.bosque, sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTextoSemana(ic), transparent: true, depthWrite: false })); sp.scale.setScalar(.9);
+function acabarPesca(msg) {
+  const B = PRACA.bosque; if (PRACA.pesca) PRACA.pesca = { fase: "fim", t: 0 };
+  if (B) { B.boia.visible = B.linha.visible = false; B.boia.scale.setScalar(1); if (B.sombra) B.sombra.visible = false; }
+  PRACA.pescaSegura = false; mostrarHudPesca(false); if (msg) toast(msg);
+}
+function pulaPeixe(ic, tam) {
+  const B = PRACA.bosque, sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTextoSemana(ic), transparent: true, depthWrite: false })); sp.scale.setScalar(.6 + Math.min(1.2, (tam || 20) / 100));
   const de = B.boia.position.clone(), para = new THREE.Vector3(PRACA.eu.x, 1.6, PRACA.eu.z); sp.position.copy(de); PRACA.cena.add(sp); B.pulos = B.pulos || []; B.pulos.push({ sp, de, para, t: 0 });
 }
+/* HUD da briga: barras de tensão e distância e o botão de segurar */
+function mostrarHudPesca(on) {
+  let el = $("pr-pesca"); const box = $("praca"); if (!box) return;
+  if (!el) { box.insertAdjacentHTML("beforeend", `<div class="pr-pesca" id="pr-pesca" hidden><b id="pp-txt">🎣 Peixe fisgado!</b>
+    <div class="pp-bar"><span>Linha</span><i><em id="pp-tensao"></em></i></div><div class="pp-bar"><span>Distância</span><i><em id="pp-dist" style="background:#3dd9ff"></em></i></div>
+    <button type="button" class="pp-btn" id="pp-btn">🎣 Segure para puxar</button></div>`); el = $("pr-pesca");
+    const b = $("pp-btn"), on1 = e => { PRACA.pescaSegura = true; try { b.setPointerCapture(e.pointerId); } catch {} e.preventDefault(); }, off = () => { PRACA.pescaSegura = false; };
+    b.addEventListener("pointerdown", on1); ["pointerup", "pointercancel", "lostpointercapture"].forEach(k => b.addEventListener(k, off)); }
+  el.hidden = !on;
+}
+function atualizarHudPesca(P) {
+  const t = $("pp-tensao"), d = $("pp-dist"), x = $("pp-txt"); if (!t) return;
+  t.style.width = Math.min(100, P.tensao) + "%"; t.style.background = P.tensao > 80 ? "#ff4d4d" : P.tensao > 55 ? "#ffd23f" : "#37d99a";
+  d.style.width = Math.max(0, Math.min(100, P.dist)) + "%";
+  x.textContent = P.tensao > 80 ? "⚠️ Solta um pouco! A linha vai arrebentar!" : P.surto > 0 ? "💪 O peixe está puxando forte!" : PRACA.pescaSegura ? "🎣 Puxando..." : "🎣 Segure para puxar!";
+}
+/* um passo da pescaria (chamado por passoBosque) */
+function passoPesca(dt, t) {
+  const B = PRACA.bosque, eu = PRACA.eu, P = PRACA.pesca;
+  // vara na mão de quem está no píer pescando
+  const comVara = !!(P && P.fase !== "fim");
+  if (comVara && (!eu.m.vara || eu.m.vara.parent !== eu.m.corpo)) { eu.m.vara = modeloVara(); eu.m.corpo.add(eu.m.vara); }
+  if (eu.m.vara) eu.m.vara.visible = comVara;
+  if (B.ondas) B.ondas = B.ondas.filter(o => { o.t += dt; const q = o.t / 1.2; o.m.scale.setScalar(1 + q * 5 * o.forte); o.m.material.opacity = .8 * (1 - q); if (q < 1) return true; PRACA.cena.remove(o.m); o.m.material.dispose(); return false; });
+  if (!P) { B.boia.visible = B.linha.visible = false; mostrarHudPesca(false); return; }
+  if (Math.hypot(eu.x - PESCA_LUGAR.x, eu.z - PESCA_LUGAR.z) > 2.2) { PRACA.pesca = null; B.boia.visible = B.linha.visible = false; if (B.sombra) B.sombra.visible = false; mostrarHudPesca(false); return; }
+  if (P.fase === "fim") return;
+  const vara = eu.m.vara, ponta = new THREE.Vector3(); eu.m.g.updateMatrixWorld(true); vara.userData.ponta.getWorldPosition(ponta);
+  const bo = B.boia.position; let curva = 0;
+  if (P.fase === "lanca") {   // a boia voa da ponta da vara até a água
+    P.t += dt; const q = Math.min(1, P.t / .7); bo.lerpVectors(ponta, P.alvo, q); bo.y = ponta.y + (P.alvo.y - ponta.y) * q + Math.sin(Math.PI * q) * 1.6;
+    vara.rotation.x = -1 - Math.sin(Math.PI * Math.min(1, P.t / .35)) * .6; curva = .2;
+    if (q >= 1) { P.fase = "espera"; P.t = 2.5 + Math.random() * 4; P.mordisca = 0; P.belisca = Array.from({ length: Math.floor(Math.random() * 3) }, () => .4 + Math.random() * (P.t - .8)); onda(B, bo.x, bo.z); respingo(bo.x, bo.z, 6); if (typeof bip === "function") bip(180, .06); }
+  } else if (P.fase === "espera" || P.fase === "morde") {
+    P.t -= dt; vara.rotation.x += (-1 - vara.rotation.x) * Math.min(1, dt * 6); curva = .45;
+    if (P.fase === "espera") {
+      P.mordisca = Math.max(0, (P.mordisca || 0) - dt);
+      if (P.belisca.length && P.t <= Math.max(...P.belisca)) { P.belisca.splice(P.belisca.indexOf(Math.max(...P.belisca)), 1); P.mordisca = .25; onda(B, bo.x, bo.z, .5); if (typeof bip === "function") bip(420, .03); }
+      bo.y = .06 + Math.sin(t * 3) * .03 - (P.mordisca > 0 ? .07 : 0);
+      if (P.t <= 0) { P.fase = "morde"; P.t = 1.2; onda(B, bo.x, bo.z, 1.5); respingo(bo.x, bo.z, 8); if (typeof bip === "function") bip(300, .1); if (typeof vibrar === "function") vibrar(60); }
+    } else { bo.y = -.02 + Math.sin(t * 30) * .05; B.boia.scale.setScalar(1 + .25 * Math.abs(Math.sin(t * 15))); if (Math.random() < dt * 8) onda(B, bo.x, bo.z, .6); if (P.t <= 0) acabarPesca("O peixe escapou! Tente de novo 🐟"); }
+  } else if (P.fase === "briga") {
+    const segura = PRACA.pescaSegura || (PRACA.keys && PRACA.keys[" "]);
+    P.tSurto -= dt; if (P.tSurto <= 0) { P.surto = .5 + Math.random() * .6 * P.forca / 2; P.tSurto = 1.2 + Math.random() * 1.8 / P.forca; P.lado = (Math.random() - .5) * 2; onda(B, bo.x, bo.z, 1.2); respingo(bo.x, bo.z, 5); if (P.forca > 1.5 && Math.random() < .4) pulinhoPeixe(P, bo); }
+    P.surto = Math.max(0, P.surto - dt);
+    const puxa = (P.surto > 0 ? 26 : 8) * P.forca;
+    if (segura) { P.dist -= (30 - (P.surto > 0 ? 14 : 0)) * dt; P.tensao += (14 + (P.surto > 0 ? 45 : 0) * P.forca / 1.5) * dt; }
+    else { P.dist += puxa * dt * .5; P.tensao -= 38 * dt; }
+    P.tensao = Math.max(0, P.tensao);
+    // o peixe nada de um lado para o outro e vai chegando perto do píer
+    const f = Math.max(0, P.dist) / 100, perto = new THREE.Vector3(PESCA_LUGAR.x, .05, PESCA_LUGAR.z - 1.1);
+    bo.lerpVectors(perto, P.inicio, f); bo.x += Math.sin(t * 2.3 + P.lado) * 1.3 * f; bo.y = .02 + Math.sin(t * 20) * .03;
+    if (!B.sombra) { B.sombra = new THREE.Mesh(new THREE.CircleGeometry(.4, 16), new THREE.MeshBasicMaterial({ color: "#0b2236", transparent: true, opacity: .45, depthWrite: false })); B.sombra.rotation.x = -Math.PI / 2; PRACA.cena.add(B.sombra); }
+    B.sombra.visible = true; B.sombra.position.set(bo.x, .045, bo.z + .2); B.sombra.scale.set(.6 + P.forca * .3, .3 + P.forca * .15, 1);
+    if (Math.random() < dt * 4) onda(B, bo.x, bo.z, .4);
+    vara.rotation.x = -1 + Math.min(.8, P.tensao / 120) + Math.sin(t * 25) * .03 * (segura ? 1 : 0);   // a vara enverga
+    if (P.tensao >= 100) { acabarPesca(`💥 A linha arrebentou! Era ${P.px.ic === "👢" ? "algo" : "um peixe"} de ${P.tam} cm...`); return; }
+    if (P.dist >= 130) { acabarPesca("🐟 O peixe fugiu para longe!"); return; }
+    if (P.dist <= 0) { pegarPeixe(P); return; }
+    atualizarHudPesca(P);
+  }
+  // a linha: cai um pouco quando está frouxa e fica esticada na briga
+  const ps = B.linha.geometry.attributes.position, n = ps.count;
+  for (let i = 0; i < n; i++) { const q = i / (n - 1), x = ponta.x + (bo.x - ponta.x) * q, z = ponta.z + (bo.z - ponta.z) * q, y = ponta.y + (bo.y - ponta.y) * q - Math.sin(Math.PI * q) * curva; ps.setXYZ(i, x, y, z); }
+  ps.needsUpdate = true; B.linha.geometry.computeBoundingSphere();
+}
+function pulinhoPeixe(P, bo) {   // peixe grande pula fora da água na briga
+  const B = PRACA.bosque, sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTextoSemana(P.px.ic), transparent: true, depthWrite: false })); sp.scale.setScalar(.5 + Math.min(1, P.tam / 120)); PRACA.cena.add(sp);
+  B.pulos = B.pulos || []; B.pulos.push({ sp, de: bo.clone(), para: bo.clone().add(new THREE.Vector3((Math.random() - .5) * 1.5, 0, -.5)), t: 0 }); respingo(bo.x, bo.z, 10);
+}
+/* ---------- aquário: tanque de vidro no Bosque com os peixes que você pescou, e o painel com a coleção ---------- */
+const TANQUE = { x: -30.6, z: .6, w: 2.6, h: 1.4, d: 1.1 };
+function montarAquario3D(s) {
+  const B = PRACA.bosque, g = new THREE.Group(); g.position.set(TANQUE.x, 0, TANQUE.z); s.add(g); B.tanque = g;
+  const add = (geo, mat, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); g.add(m); return m; };
+  add(new THREE.BoxGeometry(TANQUE.w + .2, .5, TANQUE.d + .2), new THREE.MeshLambertMaterial({ color: "#6b4423" }), 0, .25, 0);   // móvel
+  add(new THREE.BoxGeometry(TANQUE.w, .12, TANQUE.d), new THREE.MeshLambertMaterial({ color: "#e8d8a8" }), 0, .56, 0);   // areia
+  add(new THREE.BoxGeometry(TANQUE.w, TANQUE.h - .1, TANQUE.d), new THREE.MeshLambertMaterial({ color: "#5fc8f0", transparent: true, opacity: .35, emissive: "#1a5a80", depthWrite: false }), 0, .5 + TANQUE.h / 2, 0);   // água
+  const vidro = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(TANQUE.w, TANQUE.h, TANQUE.d)), new THREE.LineBasicMaterial({ color: "#e8f8ff" })); vidro.position.y = .5 + TANQUE.h / 2; g.add(vidro);
+  add(new THREE.BoxGeometry(TANQUE.w + .06, .06, TANQUE.d + .06), new THREE.MeshLambertMaterial({ color: "#2b2f3a" }), 0, .5 + TANQUE.h, 0);   // tampa
+  for (let i = 0; i < 5; i++) { const alga = add(new THREE.ConeGeometry(.06, .5 + (i % 3) * .2, 5), new THREE.MeshLambertMaterial({ color: i % 2 ? "#2f8a3a" : "#3fa34d" }), -1.1 + i * .55, .85, (i % 2 ? .3 : -.3)); alga.userData.alga = i; }
+  add(new THREE.DodecahedronGeometry(.14), new THREE.MeshLambertMaterial({ color: "#8a8f99" }), .7, .68, .2); add(new THREE.SphereGeometry(.1, 8, 6, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshLambertMaterial({ color: "#ff9ad5" }), -.4, .62, .3);   // pedra e coral
+  B.tanquePeixes = new THREE.Group(); g.add(B.tanquePeixes); B.bolhasT = [];
+  montarPeixesAquario3D();
+}
+function montarPeixesAquario3D() {
+  const B = PRACA.bosque; if (!B || !B.tanquePeixes) return;
+  B.tanquePeixes.clear(); const aq = (G.peixes || {})[perfil()] || {}, lista = [];
+  for (const p of PEIXES) if (aq[p.k] && p.k !== "bota") for (let i = 0; i < Math.min(3, aq[p.k]); i++) lista.push(p);
+  lista.slice(0, 14).forEach((p, i) => { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTextoSemana(p.ic), transparent: true, depthWrite: false })); const tam = ((aq.max || {})[p.k] || 20);
+    sp.scale.setScalar(.22 + Math.min(.35, tam / 400)); sp.userData = { fase: Math.random() * 9, vel: .4 + Math.random() * .5, y: .8 + Math.random() * (TANQUE.h - .5), z: (Math.random() - .5) * (TANQUE.d - .3) }; B.tanquePeixes.add(sp); });
+  if (aq.bota) { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTextoSemana("👢"), transparent: true, depthWrite: false })); sp.scale.setScalar(.3); sp.position.set(.95, .75, -.2); sp.userData.parado = true; B.tanquePeixes.add(sp); }
+}
+function passoAquario3D(dt, t) {
+  const B = PRACA.bosque; if (!B || !B.tanque) return;
+  if (B.tanquePeixes.userData.perfil !== perfil()) { B.tanquePeixes.userData.perfil = perfil(); montarPeixesAquario3D(); }
+  for (const sp of B.tanquePeixes.children) { const u = sp.userData; if (u.parado) continue; const x = Math.sin(t * u.vel + u.fase) * (TANQUE.w / 2 - .25); sp.position.set(x, u.y + Math.sin(t * 2 + u.fase) * .05, u.z); sp.scale.x = Math.abs(sp.scale.x) * (Math.cos(t * u.vel + u.fase) > 0 ? -1 : 1); }
+  B.tanque.children.forEach(m => { if (m.userData.alga !== undefined) m.rotation.z = Math.sin(t * 1.5 + m.userData.alga) * .15; });
+  if (Math.random() < dt * 3 && B.bolhasT.length < 12) { const b = new THREE.Mesh(new THREE.SphereGeometry(.03, 6, 4), new THREE.MeshBasicMaterial({ color: "#ffffff", transparent: true, opacity: .7 })); b.position.set((Math.random() - .5) * TANQUE.w * .8, .65, (Math.random() - .5) * TANQUE.d * .6); B.tanque.add(b); B.bolhasT.push(b); }
+  B.bolhasT = B.bolhasT.filter(b => { b.position.y += dt * .5; b.position.x += Math.sin(t * 5 + b.id) * dt * .05; if (b.position.y < .5 + TANQUE.h - .1) return true; B.tanque.remove(b); b.material.dispose(); return false; });
+}
 function aquarioHTML() {
-  const nome = perfil(), aq = (G.peixes || {})[nome] || {}, tipos = PEIXES.filter(p => aq[p.k]).length, hoje = pescaHoje(nome);
-  return `<div class="mi-caixa"><h2 class="lb-secao">🐠 Aquário de ${esc(nome)}</h2><p class="lb-sub">${tipos}/${PEIXES.length} tipos pescados${aq.bonus ? " · completo! 🎉" : ` · pegue todos e ganhe ${PESCA_BONUS} moedas`}</p>
-    <ul class="pr-premios">${PEIXES.map(p => `<li>${aq[p.k] ? `${p.ic} ${esc(p.nome)} × ${aq[p.k]}` : "❔ ???"}${p.m ? ` · ${p.m} moedas` : ""}</li>`).join("")}</ul>
-    <p class="lb-sub">Hoje: ${Math.min(hoje, PESCA_LIMITE)}/${PESCA_LIMITE} pescas valendo moedas.</p></div>`;
+  const nome = perfil(), aq = (G.peixes || {})[nome] || {}, tipos = PEIXES.filter(p => aq[p.k]).length, hoje = pescaHoje(nome), total = PEIXES.reduce((a, p) => a + (aq[p.k] || 0), 0);
+  const cards = PEIXES.map(p => { const tem = aq[p.k], r = raridadePeixe(p), mx = (aq.max || {})[p.k];
+    return `<div class="aq-card${tem ? "" : " aq-falta"}" style="border-color:${r[1]}"><span class="aq-ic">${tem ? p.ic : "❔"}</span><b>${tem ? esc(p.nome) : "???"}</b>
+      <small style="color:${r[1]}">${"★".repeat(r[2])} ${r[0]}</small>${tem ? `<small>× ${tem}${mx ? ` · maior: ${mx} cm` : ""}</small>` : `<small>ainda não pescou</small>`}${p.m ? `<small>🪙 ${p.m}</small>` : ""}</div>`; }).join("");
+  setTimeout(animarAquarioPainel, 30);
+  return `<div class="mi-caixa"><h2 class="lb-secao">🐠 Aquário de ${esc(nome)}</h2>
+    <canvas id="aq-cv" class="aq-cv" width="640" height="300" aria-label="Seus peixes nadando no aquário"></canvas>
+    <div class="aq-prog"><i style="width:${Math.round(tipos / PEIXES.length * 100)}%"></i><span>${tipos}/${PEIXES.length} tipos${aq.bonus ? " · completo! 🎉" : ` · pegue todos e ganhe ${PESCA_BONUS} moedas`}</span></div>
+    <p class="lb-sub">${total} pescados no total · hoje ${Math.min(hoje, PESCA_LIMITE)}/${PESCA_LIMITE} valendo moedas</p>
+    <div class="aq-grid">${cards}</div></div>`;
+}
+function animarAquarioPainel() {
+  const cv = $("aq-cv"); if (!cv || cv.dataset.on) return; cv.dataset.on = "1";
+  const c = cv.getContext("2d"), W = cv.width, H = cv.height, aq = (G.peixes || {})[perfil()] || {}, peixes = [];
+  for (const p of PEIXES) if (aq[p.k] && p.k !== "bota") for (let i = 0; i < Math.min(3, aq[p.k]); i++) peixes.push({ ic: p.ic, x: Math.random() * W, y: 40 + Math.random() * (H - 110), v: (20 + Math.random() * 40) * (Math.random() < .5 ? -1 : 1), tam: 40 + Math.min(40, ((aq.max || {})[p.k] || 20) / 3), f: Math.random() * 9 });
+  const bolhas = Array.from({ length: 14 }, () => ({ x: Math.random() * W, y: H - Math.random() * H, r: 2 + Math.random() * 4, v: 20 + Math.random() * 30 }));
+  let ult = performance.now();
+  const quadro = ts => {
+    if (!cv.isConnected) return; const dt = Math.min(.05, (ts - ult) / 1000); ult = ts; const t = ts / 1000;
+    const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#5fd0f5"); g.addColorStop(1, "#1d6fa8"); c.fillStyle = g; c.fillRect(0, 0, W, H);
+    c.fillStyle = "rgba(255,255,255,.08)"; for (let i = 0; i < 5; i++) { c.beginPath(); c.moveTo(60 + i * 130 + Math.sin(t + i) * 20, 0); c.lineTo(100 + i * 130 + Math.sin(t + i) * 20, 0); c.lineTo(40 + i * 130, H); c.lineTo(0 + i * 130, H); c.fill(); }   // raios de sol
+    c.fillStyle = "#e8d8a8"; c.beginPath(); c.moveTo(0, H - 34); for (let x = 0; x <= W; x += 40) c.lineTo(x, H - 34 + Math.sin(x * .05) * 6); c.lineTo(W, H); c.lineTo(0, H); c.fill();
+    for (let i = 0; i < 7; i++) { const bx = 40 + i * 95; c.strokeStyle = i % 2 ? "#2f8a3a" : "#3fa34d"; c.lineWidth = 7; c.lineCap = "round"; c.beginPath(); c.moveTo(bx, H - 30); c.quadraticCurveTo(bx + Math.sin(t * 1.5 + i) * 16, H - 80, bx + Math.sin(t * 1.5 + i + 1) * 10, H - 110 - (i % 3) * 20); c.stroke(); }
+    c.font = "30px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("🪨", W - 70, H - 38); c.fillText("🐚", 120, H - 30); if (aq.bota) c.fillText("👢", W - 150, H - 36);
+    for (const b of bolhas) { b.y -= b.v * dt; b.x += Math.sin(t * 3 + b.r) * .3; if (b.y < -5) { b.y = H; b.x = Math.random() * W; } c.strokeStyle = "rgba(255,255,255,.7)"; c.lineWidth = 1.5; c.beginPath(); c.arc(b.x, b.y, b.r, 0, Math.PI * 2); c.stroke(); }
+    for (const p of peixes) { p.x += p.v * dt; if (p.x < 20 || p.x > W - 20) p.v *= -1; p.x = Math.max(20, Math.min(W - 20, p.x));
+      c.save(); c.translate(p.x, p.y + Math.sin(t * 2 + p.f) * 6); c.scale(p.v > 0 ? -1 : 1, 1); c.font = p.tam + "px sans-serif"; c.fillText(p.ic, 0, 0); c.restore(); }
+    if (!peixes.length) { c.fillStyle = "rgba(11,27,51,.7)"; c.font = "800 22px Nunito, sans-serif"; c.fillText("Vá ao píer e pesque o seu primeiro peixe! 🎣", W / 2, H / 2); }
+    requestAnimationFrame(quadro);
+  };
+  requestAnimationFrame(quadro);
 }
 /* ---------- labirinto ---------- */
 function abrirBau() {
@@ -7930,13 +8109,14 @@ function passoKartCorrida(dt) {
   el.innerHTML = K.corrida ? `<b>🏎️ ${K.corrida.t.toFixed(1)} s</b><span>arco ${K.prox === 0 ? N : K.prox}/${N}</span>${rec ? `<span>recorde ${rec} s</span>` : ""}` : `<b>🏎️ Passe pelo arco 🏁</b>${rec ? `<span>recorde ${rec} s</span>` : ""}`;
 }
 const _pularPracaAntes = pularPraca;
-pularPraca = function () { if (PRACA.kart) { if (typeof tocarNotas === "function") tocarNotas([[67, 67, 0, .12, "square"], [67, 67, .16, .2, "square"]]); return; } return _pularPracaAntes(); };
+pularPraca = function () { if (PRACA.pesca && PRACA.pesca.fase !== "fim") { if (PRACA.pesca.fase === "espera" || PRACA.pesca.fase === "morde") puxarPesca(); return; } if (PRACA.kart) { if (typeof tocarNotas === "function") tocarNotas([[67, 67, 0, .12, "square"], [67, 67, .16, .2, "square"]]); return; } return _pularPracaAntes(); };
 const _efeitosPracaAntes = efeitosPraca;
 efeitosPraca = function () { return _efeitosPracaAntes() | (PRACA.kart ? 8 : 0); };
 /* ---------- pet andando junto ---------- */
 const _animarBonecoAntes = animarBonecoPraca;
 animarBonecoPraca = function (m, x, y, z, r, anda, dt) {
   _animarBonecoAntes(m, x, y, z, r, anda, dt);
+  if (m.vara && m.vara.visible) { m.bracoD.rotation.x = .9; m.bracoE.rotation.x = .6; }
   if (m.kartM) { m.kartM.rotation.y = r; m.corpo.position.y = .18; m.pernaE.rotation.x = m.pernaD.rotation.x = -1.4; m.bracoE.rotation.x = m.bracoD.rotation.x = -1; for (const w of m.kartM.userData.rodas) w.rotation.x -= (m.kartV || 0) * dt * 3; }
   const p = m.pet; if (!p) return;
   const W = m.petW || (m.petW = { x: x + .8, z: z + .8, y, r, hop: 0, t: Math.random() * 9 });
@@ -7955,6 +8135,7 @@ quadroPraca = function (ts) {
   const dt = Math.min(.05, (ts - (PRACA.ultB || ts)) / 1000); PRACA.ultB = ts;
   let guardaMov = null, guardaKeys = null;
   if (PRACA.kart && PRACA.eu) { passoKartFisica(dt); guardaMov = PRACA.mov; guardaKeys = PRACA.keys; PRACA.mov = { x: 0, y: 0 }; PRACA.keys = {}; }
+  else if (PRACA.pesca && PRACA.pesca.fase !== "fim" && PRACA.eu) { guardaMov = PRACA.mov; guardaKeys = PRACA.keys; PRACA.mov = { x: 0, y: 0 }; PRACA.keys = {}; PRACA.eu.r = 0; }   // pescando: fica parado olhando o lago
   try { _quadroPracaAntes(ts); } finally { if (guardaMov) { PRACA.mov = guardaMov; PRACA.keys = guardaKeys; } }
   if (!PRACA.on || !PRACA.bosque || !PRACA.eu) return;
   try { passoBosque(dt, ts / 1000); } catch (e) { console.error(e); }
@@ -7964,17 +8145,8 @@ function passoBosque(dt, t) {
   // o barquinho balança e a água brilha
   B.barco.rotation.z = Math.sin(t * 1.3) * .06; B.barco.position.y = .1 + Math.sin(t * 1.7) * .04; B.barco.rotation.y = Math.sin(t * .2) * .4;
   B.agua.material.emissive.setRGB(.05, .22 + .03 * Math.sin(t * 2), .35 + .04 * Math.sin(t * 2));
-  // pescaria
-  const P = PRACA.pesca;
-  if (P) {
-    if (Math.hypot(eu.x - PESCA_LUGAR.x, eu.z - PESCA_LUGAR.z) > 2.2) { PRACA.pesca = null; B.boia.visible = B.linha.visible = false; }
-    else if (P.fase === "espera" || P.fase === "morde") {
-      P.t -= dt; const bo = B.boia.position;
-      if (P.fase === "espera") { bo.y = .06 + Math.sin(t * 3) * .03; if (P.t <= 0) { P.fase = "morde"; P.t = 1.2; if (typeof bip === "function") bip(300, .1); if (typeof vibrar === "function") vibrar(60); } }
-      else { bo.y = .03 + Math.sin(t * 30) * .06; B.boia.scale.setScalar(1 + .25 * Math.abs(Math.sin(t * 15))); if (P.t <= 0) acabarPesca("O peixe escapou! Tente de novo 🐟"); }
-      const g = B.linha.geometry, ps = g.attributes.position; ps.setXYZ(0, eu.x, eu.y + 1.5, eu.z - .3); ps.setXYZ(1, bo.x, bo.y, bo.z); ps.needsUpdate = true;
-    }
-  } else { B.boia.visible = B.linha.visible = false; }
+  // pescaria e aquário
+  passoPesca(dt, t); passoAquario3D(dt, t);
   if (B.pulos) B.pulos = B.pulos.filter(j => { j.t += dt; const q = Math.min(1, j.t / .8); j.sp.position.lerpVectors(j.de, j.para, q); j.sp.position.y += Math.sin(Math.PI * q) * 2.2; j.sp.material.rotation += dt * 6; if (q < 1) return true; PRACA.cena.remove(j.sp); j.sp.material.dispose(); return false; });
   // peixinho pulando de vez em quando no lago
   B.tPeixe = (B.tPeixe ?? 3) - dt; if (B.tPeixe <= 0) { B.tPeixe = 4 + Math.random() * 5; const a = Math.random() * Math.PI * 2, x = LAGO.x + Math.cos(a) * LAGO.rx * .5, z = LAGO.z + Math.sin(a) * LAGO.rz * .5, sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTextoSemana("🐟"), transparent: true, depthWrite: false })); sp.scale.setScalar(.6); PRACA.cena.add(sp); B.pulos = B.pulos || []; B.pulos.push({ sp, de: new THREE.Vector3(x, 0, z), para: new THREE.Vector3(x + 1.4, 0, z), t: 0 }); }

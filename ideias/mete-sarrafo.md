@@ -328,3 +328,15 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
     - 💪 Pivô: pega mais rebote, acerta mais perto da cesta e é difícil roubar a bola dele.
 - Os robôs ficam nas posições que sobram e jogam do jeito da posição. O goleiro robô fica no gol.
 - O campo de futebol ficou maior (mais largo e mais comprido, com gol maior), e o 🦘 Super pulo saiu dos poderes. Quem tinha ganha as 300 moedas de volta.
+
+## Pescaria de verdade e aquário novo (pedido do Andre, 23/11)
+
+- Pescaria:
+  - Agora o bonequinho segura uma vara e joga a linha.
+  - Às vezes o peixe só belisca: se puxar nessa hora, ele foge.
+  - Quando morde, aparece "FISGAR AGORA!". Depois começa a **briga**: segure para puxar, mas se a linha ficar muito esticada ela arrebenta. Peixe grande puxa mais forte e até pula da água.
+  - Cada peixe tem tamanho (em cm) e raridade: comum, incomum, raro ou lendário. O jogo guarda o maior de cada tipo.
+  - As moedas continuam iguais: as 15 primeiras pescas do dia valem moedas, e quem completa o aquário ganha +100.
+- Aquário:
+  - Tem um tanque de vidro no Bosque com os seus peixes nadando.
+  - O painel do aquário mostra o aquário animado, a barra de progresso e um cartão para cada peixe, com o maior tamanho que você já pescou.
