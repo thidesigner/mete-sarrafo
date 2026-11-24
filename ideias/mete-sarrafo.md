@@ -362,3 +362,4 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
 - 📖 **Livro dos peixes:**
   - mostra todos os peixes, onde e quando cada um aparece, e o maior que você já pegou;
   - completar o livro dá +300.
+- Os peixes agora são desenhados de verdade (escamas, nadadeiras, listras, rabo mexendo), e quando pega aparece uma janela "Pegou!" com o desenho, o tamanho e quanto vale. No livro, quem ainda não foi pescado aparece como sombra.

@@ -11,13 +11,14 @@ const { chromium } = require('playwright'); const fs = require('fs'); const T = 
   await pg.goto('http://localhost:8767/teste/'); { const ab = await pg.$('#abertura'); if (ab) await ab.click(); }
   await pg.evaluate(() => { window.PRACA_HORA_TESTE = 12; G.perfil = "Andre"; G.banco.Andre = 3000; G.peixes = {}; G.mochila = {}; G.historias = { vistas: historiasAgora().map(h => h.id) }; salvar(); ir("lobby"); });
   await pg.click('[data-a="praca"]'); await pg.waitForTimeout(1500); const r = {};
-  const espera = f => pg.waitForFunction(f, null, { timeout: 15000 });
+  let shot2 = false; const espera = f => pg.waitForFunction(f, null, { timeout: 15000 });
   const lancar = async perfeito => { await pg.click('#pr-acao', { force: true }); await espera(() => PRACA.pesca && PRACA.pesca.fase === 'carrega');
     await pg.evaluate(p => { PRACA.pescaSegura = true; if (p) PRACA.pesca.tc = .81; }, perfeito); await pg.waitForTimeout(perfeito ? 30 : 300); await pg.evaluate(() => { PRACA.pescaSegura = false; }); await espera(() => PRACA.pesca && PRACA.pesca.fase === 'espera'); };
   const puxar = async (jogar) => { await pg.evaluate(() => { PRACA.pesca.t = .01; }); await espera(() => PRACA.pesca && PRACA.pesca.fase === 'briga'); let shot = false;
     for (let i = 0; i < 600; i++) { const st = await pg.evaluate(j => { const P = PRACA.pesca; if (!P || P.fase !== "briga") return null; PRACA.pescaSegura = j ? P.peixe > P.bar + P.vara.controle * .5 : false; return P.prog; }, jogar);
       if (st === null) break; if (!shot && st > .5) { shot = true; await pg.screenshot({ path: S + '/pe-briga.png' }); } await pg.waitForTimeout(40); }
-    await pg.evaluate(() => { PRACA.pescaSegura = false; }); return pg.evaluate(() => (document.querySelector(".toast") || {}).textContent); };
+    await pg.evaluate(() => { PRACA.pescaSegura = false; }); await pg.waitForTimeout(150); if (jogar && !shot2) { shot2 = true; await pg.screenshot({ path: S + '/pe-pegou.png' }); }
+    return pg.evaluate(() => { const p = $("pp-pegou"); return p && !p.hidden ? "PEGOU: " + p.textContent : (document.querySelector(".toast") || {}).textContent; }); };
   // lago: barra de força
   await pg.evaluate(() => { PRACA.eu.x = PESCA_LUGAR.x; PRACA.eu.z = PESCA_LUGAR.z; PRACA.yaw = .5; PRACA.alt = .45; }); await pg.waitForTimeout(400);
   r.botao = await pg.evaluate(() => $("pr-acao").textContent);
