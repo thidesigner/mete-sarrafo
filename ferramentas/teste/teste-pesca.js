@@ -9,7 +9,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const T = 
   await ctx.route(u => u.pathname.endsWith('/avisos.json'), r => r.fulfill({ contentType: 'application/json', body: '{"avisos":[]}' }));
   const pg = await ctx.newPage(); const errs = []; pg.on('pageerror', e => errs.push(e.message));
   await pg.goto('http://localhost:8767/teste/'); { const ab = await pg.$('#abertura'); if (ab) await ab.click(); }
-  await pg.evaluate(() => { window.PRACA_HORA_TESTE = 12; G.perfil = "Andre"; G.banco.Andre = 3000; G.peixes = {}; G.mochila = {}; G.historias = { vistas: historiasAgora().map(h => h.id) }; salvar(); ir("lobby"); });
+  await pg.evaluate(() => { window.PRACA_HORA_TESTE = 12; window.PESCA_CLIMA_TESTE = "sol"; G.perfil = "Andre"; G.banco.Andre = 3000; G.peixes = {}; G.mochila = {}; G.historias = { vistas: historiasAgora().map(h => h.id) }; salvar(); ir("lobby"); });
   await pg.click('[data-a="praca"]'); await pg.waitForTimeout(1500); const r = {};
   let shot2 = false; const espera = f => pg.waitForFunction(f, null, { timeout: 15000 });
   const lancar = async perfeito => { await pg.click('#pr-acao', { force: true }); await espera(() => PRACA.pesca && PRACA.pesca.fase === 'carrega');
@@ -25,7 +25,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const T = 
   await pg.click('#pr-acao', { force: true }); await espera(() => PRACA.pesca && PRACA.pesca.fase === 'carrega'); await pg.evaluate(() => { PRACA.pescaSegura = true; }); await pg.waitForTimeout(500);
   await pg.screenshot({ path: S + '/pe-forca.png' }); await pg.evaluate(() => { PRACA.pescaSegura = false; }); await espera(() => PRACA.pesca && PRACA.pesca.fase === 'espera');
   // chacoalhar
-  const t0 = await pg.evaluate(() => PRACA.pesca.t); await pg.click('#pp-chac'); await pg.click('#pp-chac'); await pg.click('#pp-chac');
+  const t0 = await pg.evaluate(() => PRACA.pesca.t); await pg.evaluate(() => { PRACA.pesca.t += 20; }); for (let i = 0; i < 3; i++) await pg.click('#pp-chac', { force: true });
   r.chacoalhar = await pg.evaluate(t0 => ({ menos: +(t0 - PRACA.pesca.t).toFixed(1), vezes: PRACA.pesca.chac }), t0); await pg.screenshot({ path: S + '/pe-chacoalhar.png' });
   r.peixe1 = await puxar(true); r.mochila = await pg.evaluate(() => mochilaDe("Andre").length);
   // lançamento perfeito

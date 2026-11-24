@@ -363,3 +363,22 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
   - mostra todos os peixes, onde e quando cada um aparece, e o maior que você já pegou;
   - completar o livro dá +300.
 - Os peixes agora são desenhados de verdade (escamas, nadadeiras, listras, rabo mexendo), e quando pega aparece uma janela "Pegou!" com o desenho, o tamanho e quanto vale. No livro, quem ainda não foi pescado aparece como sombra.
+
+## Pescaria 2 (pedido do Andre, 24/11)
+
+- **⛵ Barco e ilhas:** o barco sai do píer do mar e leva para as ilhas:
+  - Ilha do Recife (nível 2);
+  - Ilha de Gelo (nível 4);
+  - Ilha do Vulcão (nível 6).
+  Cada ilha tem peixes que só existem lá.
+- **⭐ Nível de pescador:** cada peixe dá XP, e subir de nível dá moedas e um título. As varas melhores pedem nível.
+- **🔍 Avaliador** (na Loja de pesca): paga para avaliar um peixe. Ele pode ficar maior, menor, virar especial ou não mudar nada.
+- **✨ Encantar a vara** (nível 3, 500 moedas): sorteia um poder para a vara.
+- **🌧️ Clima:** muda a cada 20 minutos, e é igual para todo mundo:
+  - chuva: mais sorte;
+  - neblina: os peixes da noite aparecem de dia;
+  - tempestade: os lendários aparecem o dobro;
+  - 🌠 chuva de estrelas (à noite): aparece o Peixe-cometa.
+- **📜 Vovô Pescador:** todo dia pede 3 peixes e paga bem.
+- **🦀 Gaiolas:** coloque no começo de um píer e volte em 4 minutos para pegar os bichos que caíram nela.
+- **🗺️ Mapa do tesouro:** às vezes vem junto com um peixe. Siga a dica (quente ou frio) e cave no X para ganhar o prêmio.
