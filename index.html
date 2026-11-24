@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="versao-site" content="65f7ad24bb">
+<meta name="versao-site" content="1511555858">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0f3057">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;-webkit-text-size-adjust:100%}img{max-width:100%}[hidden]{display:none!important}.faixa-teste{position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:50;background:#ff4d6d;color:#fff;font:800 12px/1 system-ui,sans-serif;letter-spacing:.08em;padding:4px 10px;border-radius:0 0 8px 8px;pointer-events:none}</style>
@@ -460,6 +460,20 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .pp-prog i { display: block; height: 100%; width: 30%; background: #37d99a; }
 .pp-chac { position: absolute; z-index: 7; background: #ff8a3c; color: #fff; border: 3px solid #0b1b33; box-shadow: 0 4px 0 #0b1b33; border-radius: 16px; padding: 12px 16px; font: 900 18px Nunito, sans-serif; touch-action: manipulation; }
 .pp-chac[hidden] { display: none; }
+.aq-img { width: 92px; height: 46px; object-fit: contain; }
+.pp-peixe img { width: 48px; height: 24px; display: block; }
+.pp-pegou { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); z-index: 8; background: rgba(11,27,51,.92); color: #fff; border: 4px solid #ffd23f; border-radius: 22px; padding: 14px 18px; display: grid; justify-items: center; gap: 4px; width: min(300px, calc(100% - 40px)); text-align: center; font: 700 15px Nunito, sans-serif; animation: ppPegou .35s ease-out; }
+.pp-pegou[hidden] { display: none; } .pp-pegou img { width: 220px; height: 110px; object-fit: contain; } .pp-pegou b { font: 900 22px Nunito, sans-serif; }
+@keyframes ppPegou { from { transform: translate(-50%, -50%) scale(.6); opacity: 0; } }
+.pp-esp-brilho { filter: drop-shadow(0 0 6px #fff) brightness(1.25); } .pp-esp-ouro { filter: sepia(1) saturate(4) hue-rotate(-8deg) brightness(1.15) drop-shadow(0 0 6px #ffd23f); }
+.pp-esp-arco { animation: ppArco 2s linear infinite; } .pp-esp-gigante { transform: scale(1.12); filter: drop-shadow(0 0 5px #3d9bff); }
+@keyframes ppArco { to { filter: hue-rotate(360deg) drop-shadow(0 0 6px #ff7ad9); } }
+@media (prefers-reduced-motion: reduce) { .pp-pegou, .pp-esp-arco { animation: none; } }
+.pr-mapa { top: 172px; border-color: #c08a3a; } .pr-clima { position: absolute; right: 12px; top: 100px; z-index: 5; background: rgba(11,27,51,.8); color: #fff; border: 2px solid #3dd9ff; border-radius: 14px; padding: 6px 10px; font: 800 13px Nunito, sans-serif; }
+.pr-clima[hidden] { display: none; } .praca.pr-cena .pr-mapa, .praca.pr-cena .pr-clima { display: none !important; }
+.pp-viagem { position: absolute; inset: 0; z-index: 9; display: grid; place-items: center; background: linear-gradient(#5fc8f0, #1d6fa8); color: #fff; font: 900 28px Nunito, sans-serif; animation: ppViagem 1.3s ease-in-out; }
+@keyframes ppViagem { 0%, 100% { opacity: 0; } 30%, 70% { opacity: 1; } }
+.pp-res { background: rgba(255,210,63,.15); border: 2px solid #ffd23f; border-radius: 12px; padding: 8px; font-weight: 800; } .pp-mini { font-size: 13px; margin: 4px 0; opacity: .9; }
 .pp-item { display: grid; grid-template-columns: 44px 1fr auto; gap: 8px; align-items: center; padding: 8px; border-radius: 12px; background: rgba(255,255,255,.08); margin: 6px 0; text-align: left; }
 .pp-item small { display: block; font-size: 12px; opacity: .85; } .pp-col { display: grid; gap: 4px; }
 .pp-btn { background: #ffd23f; color: #0b1b33; border: 3px solid #0b1b33; box-shadow: 0 4px 0 #0b1b33; border-radius: 14px; padding: 12px; font: 900 18px Nunito, sans-serif; touch-action: none; user-select: none; -webkit-user-select: none; }
@@ -7832,7 +7846,7 @@ function montarBosque3D(s) {
     add(new THREE.BoxGeometry(4.6, .5, .15), m, 0, 2.8, 0, g);
     const t = add(new THREE.PlaneGeometry(1.6, .45), new THREE.MeshBasicMaterial({ map: texTexto(i ? String(i + 1) : "🏁 1", "#0b1b33", cor, 256, 72, 52), side: THREE.DoubleSide }), 0, 2.8, .09, g); t.rotation.y = 0;
     g.visible = false; B.arcos.push({ g, m }); });
-  montarAquario3D(s); montarMar3D(s);
+  montarAquario3D(s); montarMar3D(s); montarIlhas3D(s);
   // tira o poste que ficava bem na passagem para o Bosque (e o brilho dele à noite)
   const px = Math.cos(Math.PI) * (PRACA_R - .6);
   s.children.filter(o => Math.abs(o.position.x - px) < .05 && Math.abs(o.position.z) < .05).forEach(o => s.remove(o));
@@ -7916,15 +7930,16 @@ const ISCAS = [
   { k: "brilho", ic: "✨", nome: "Isca brilhante", preco: 25, dica: "Muita sorte e o dobro de chance de peixe especial.", sorte: .45, esp: 2 } ];
 const PESCA_MAR = { x: -27, z: -24.3 }, PIER_MAR = { x: -27, z0: -25, z1: -16.5, w: 1.6 }, LOJA_PESCA = { x: -31.5, z: -14.6 }, MAR = { x0: -64, x1: -19, z0: -18.6, z1: -64 };
 function invPesca(nome) { G.inv = G.inv || {}; const inv = G.inv[nome] = G.inv[nome] || { vidas: 0 }; inv.varas = Array.isArray(inv.varas) ? inv.varas : ["madeira"]; if (!inv.varas.includes("madeira")) inv.varas.unshift("madeira"); if (!VARAS.some(v => v.k === inv.vara)) inv.vara = "madeira"; inv.iscas = inv.iscas || {}; return inv; }
-const varaDe = nome => VARAS.find(v => v.k === invPesca(nome).vara) || VARAS[0];
+const varaDe = nome => varaComEncanto(nome);   // com o encanto da vara (bloco Pescaria 2)
 function iscaDe(nome) { const inv = invPesca(nome); return inv.isca && (inv.iscas[inv.isca] || 0) > 0 ? ISCAS.find(i => i.k === inv.isca) : null; }
 function mochilaDe(nome) { G.mochila = G.mochila || {}; return G.mochila[nome] = Array.isArray(G.mochila[nome]) ? G.mochila[nome] : []; }
 const ehNoite = () => typeof noiteFator === "function" && typeof horaPraca === "function" && noiteFator(horaPraca()) > .5;
 function lugarPesca(eu) { return Math.hypot(eu.x - PESCA_MAR.x, eu.z - PESCA_MAR.z) < 2.4 ? "mar" : "lago"; }
 function pescaHoje(nome) { G.pesca = G.pesca && G.pesca.dia === diaBR() ? G.pesca : { dia: diaBR(), por: {} }; return G.pesca.por[nome] || 0; }
 function sortearPeixe(zona, sorte, grande) {
-  const noite = ehNoite(), lista = PEIXES.filter(p => (p.z === zona || p.z === "todos") && (!p.noite || noite));
-  const peso = p => p.p * (1 + sorte * Math.max(0, p.r - 1) * 1.6) * (grande && p.f >= 1.6 ? 2 : 1) * (p.r === 0 ? Math.max(.3, 1 - sorte) : 1);
+  const cl = typeof climaPesca === "function" ? climaPesca() : { k: "sol", sorte: 0 }, noite = ehNoite() || cl.k === "neblina", lista = PEIXES.filter(p => (p.z === zona || p.z === "todos") && (!p.noite || noite) && (!p.evento || p.evento === cl.k));
+  sorte += cl.sorte || 0;
+  const peso = p => p.p * (1 + sorte * Math.max(0, p.r - 1) * 1.6) * (grande && p.f >= 1.6 ? 2 : 1) * (p.r === 0 ? Math.max(.3, 1 - sorte) : 1) * (p.r === 4 && cl.lend ? cl.lend : 1);
   let x = Math.random() * lista.reduce((a, p) => a + peso(p), 0); for (const p of lista) { x -= peso(p); if (x <= 0) return p; } return lista[0];
 }
 function sortearEspecial(mult) { for (const e of ESPECIAIS_PEIXE.slice().reverse()) if (Math.random() < e.ch * mult) return e; return null; }
@@ -7932,13 +7947,14 @@ function valorPeixe(px, tam, esp) { if (px.r === 0) return px.m; const meio = (p
 /* ---------- começar, chacoalhar, puxar ---------- */
 function comecarPesca() {
   const B = PRACA.bosque, eu = PRACA.eu; if (!B || !eu) return;
+  { const pg = $("pp-pegou"); if (pg) pg.hidden = true; }
   eu.r = 0; PRACA.pesca = { fase: "carrega", forca: 0, segurando: false, zona: lugarPesca(eu) }; PRACA.pescaSegura = false;
   mostrarHudPesca();
 }
 function lancarPesca(P) {
   const eu = PRACA.eu, nome = perfil(), vara = varaDe(nome), isca = iscaDe(nome), perf = P.forca >= .82 && P.forca <= .98;
   if (isca) { invPesca(nome).iscas[isca.k]--; salvar(); }
-  const base = P.zona === "mar" ? PESCA_MAR : PESCA_LUGAR;
+  const base = pontoPesca(P.zona);
   Object.assign(P, { fase: "lanca", t: 0, perfeito: perf, isca, vara, alvo: new THREE.Vector3(base.x + (Math.random() - .5) * 1.6, .06, base.z - 1.6 - P.forca * 3.2) });
   PRACA.bosque.boia.visible = PRACA.bosque.linha.visible = true; PRACA.bosque.boia.scale.setScalar(1);
   if (perf) toast("🎯 Lançamento perfeito!"); if (typeof tocarNotas === "function") tocarNotas([[84, 60, 0, .5, "sine"]].concat(perf ? [[88, 96, .1, .25, "triangle"]] : []));
@@ -7952,7 +7968,7 @@ function chacoalhar() {
 function moverBotaoChacoalhar() { const b = $("pp-chac"), box = $("praca"); if (!b || !box) return; const W = box.clientWidth, H = box.clientHeight; b.style.left = (20 + Math.random() * Math.max(10, W - 180)) + "px"; b.style.top = (150 + Math.random() * Math.max(10, H - 420)) + "px"; }
 function morderPeixe(P) {
   const nome = perfil(), sorte = (P.vara.sorte || 0) + (P.isca && P.isca.sorte || 0) + (P.perfeito ? .1 : 0);
-  const px = sortearPeixe(P.zona, sorte, P.isca && P.isca.grande && P.zona === "mar"), esp = px.r > 0 ? sortearEspecial((P.isca && P.isca.esp) || 1) : null;
+  const px = sortearPeixe(P.zona, sorte, P.isca && P.isca.grande && P.zona === "mar"), esp = px.r > 0 ? sortearEspecial(((P.isca && P.isca.esp) || 1) * (P.vara.esp || 1) * (climaPesca().esp || 1)) : null;
   const tam = Math.round((px.tam[0] + (px.tam[1] - px.tam[0]) * Math.pow(Math.random(), 1.6)) * (esp && esp.tam || 1));
   Object.assign(P, { fase: "briga", px, esp, tam, prog: .3, bar: .3, barV: 0, peixe: .5, alvoP: .5, tAlvo: 0, inicio: P.alvo.clone() });
   const B = PRACA.bosque; onda(B, P.alvo.x, P.alvo.z, 2); respingo(P.alvo.x, P.alvo.z, 14);
@@ -7970,12 +7986,13 @@ function pegarPeixe(P) {
   if (px.k === "bau") { const v = 30 + Math.floor(Math.random() * 51); G.banco[nome] = Math.round(((G.banco[nome] || 0) + v) * 10) / 10; extra = ` Dentro tinha ${v} moedas! 🪙`; }
   else { const mo = mochilaDe(nome); if (mo.length < MOCHILA_MAX) mo.push({ k: px.k, tam: P.tam, esp: esp ? esp.k : null, v: valorPeixe(px, P.tam, esp) }); else extra = " (mochila cheia: venda na Loja de pesca!)"; }
   if (!aq.bonusLivro && PEIXES.every(p => aq[p.k])) { aq.bonusLivro = 1; G.banco[nome] = Math.round(((G.banco[nome] || 0) + PESCA_LIVRO_BONUS) * 10) / 10; extra += ` Livro dos peixes completo! +${PESCA_LIVRO_BONUS} 🎉`; }
+  extra += ganharXpPesca(nome, xpDoPeixe(px, esp)) + talvezMapa(nome, px);
   salvarPlacar(); montarPeixesAquario3D();
-  const B = PRACA.bosque; pulaPeixe(px.ic, P.tam);
+  const B = PRACA.bosque; pulaPeixe(px.k, P.tam);
   if ((px.r >= 3 || esp) && typeof fogosPraca === "function") fogosPraca(B.boia.position.x, 1, B.boia.position.z, 40);
   if (typeof tocarNotas === "function") tocarNotas(px.r >= 3 || esp ? [[72, 72, 0, .1, "square"], [76, 76, .1, .1, "square"], [79, 79, .2, .1, "square"], [84, 84, .3, .3, "square"]] : [[72, 84, 0, .2, "triangle"]]);
-  const rar = raridadePeixe(px);
-  acabarPesca(`${esp ? esp.ic + " " + esp.nome + " " : ""}${px.ic} ${px.nome} de ${fmtTam(P.tam)} (${rar[0]})!${recorde && aq[px.k] > 1 ? " 🏅 Recorde!" : ""}${extra}`, true);
+  const ganhoTxt = [recorde && aq[px.k] > 1 ? "🏅 Recorde!" : "", px.k === "bau" ? "" : `🪙 vale ${valorPeixe(px, P.tam, esp)}`, extra.trim()].filter(Boolean).join(" · ");
+  mostrarPegou(px, P.tam, esp, ganhoTxt); acabarPesca(null, true);
 }
 const fmtTam = cm => cm >= 100 ? (Math.round(cm / 10) / 10).toString().replace(".", ",") + " m" : cm + " cm";
 function acabarPesca(msg, pegou) {
@@ -7984,9 +8001,9 @@ function acabarPesca(msg, pegou) {
   PRACA.pescaSegura = false; mostrarHudPesca(); if (msg) toast(msg);
 }
 function pararPesca() { const B = PRACA.bosque; PRACA.pesca = null; PRACA.pescaSegura = false; if (B) { B.boia.visible = B.linha.visible = false; if (B.sombra) B.sombra.visible = false; } mostrarHudPesca(); }
-function pulaPeixe(ic, tam) {
-  const B = PRACA.bosque, sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTextoSemana(ic), transparent: true, depthWrite: false })); sp.scale.setScalar(.6 + Math.min(1.4, (tam || 20) / 150));
-  const de = B.boia.position.clone(), para = new THREE.Vector3(PRACA.eu.x, 1.6, PRACA.eu.z); sp.position.copy(de); PRACA.cena.add(sp); B.pulos = B.pulos || []; B.pulos.push({ sp, de, para, t: 0 });
+function pulaPeixe(k, tam) {
+  const B = PRACA.bosque, de = B.boia.position.clone(), para = new THREE.Vector3(PRACA.eu.x, 1.6, PRACA.eu.z), sp = spritePeixe(k, .4 + Math.min(1, (tam || 20) / 200), para.x < de.x);
+  sp.position.copy(de); PRACA.cena.add(sp); B.pulos = B.pulos || []; B.pulos.push({ sp, de, para, t: 0 });
 }
 /* ---------- a tela da pescaria (HUD) ---------- */
 function mostrarHudPesca() {
@@ -7996,12 +8013,12 @@ function mostrarHudPesca() {
   const P = PRACA.pesca, fase = P && P.fase;
   el.hidden = !P || fase === "fim"; ch.hidden = fase !== "espera"; if (fase === "espera") moverBotaoChacoalhar();
   if (el.hidden) return;
-  const nome = perfil(), vara = varaDe(nome), isca = iscaDe(nome), lugar = P.zona === "mar" ? "🌊 Mar" : "🏞️ Lago";
-  const topo = `<div class="pp-top"><span>${lugar}${ehNoite() ? " · 🌙" : ""}</span><span>${vara.ic} ${esc(vara.nome)}${isca ? ` · ${isca.ic} ${invPesca(nome).iscas[isca.k] || 0}` : ""}</span><button type="button" class="pp-x" id="pp-parar" aria-label="Parar de pescar">✕</button></div>`;
+  const nome = perfil(), vara = varaDe(nome), isca = iscaDe(nome), lugar = nomeLugarPesca(P.zona) + " · " + climaPesca().ic;
+  const topo = `<div class="pp-top"><span>${lugar}${ehNoite() ? " · 🌙" : ""}</span><span>${vara.ic} ${esc(vara.nome)}${vara.enc ? " " + vara.enc.ic : ""}${isca ? ` · ${isca.ic} ${invPesca(nome).iscas[isca.k] || 0}` : ""}</span><button type="button" class="pp-x" id="pp-parar" aria-label="Parar de pescar">✕</button></div>`;
   if (fase === "carrega") el.innerHTML = topo + `<b>🎯 Segure e solte na faixa verde!</b><div class="pp-forca"><i id="pp-forca"></i><em></em></div><button type="button" class="pp-btn" id="pp-btn">🎣 Segure para lançar</button>`;
   else if (fase === "lanca" || fase === "espera") el.innerHTML = topo + `<b>${fase === "lanca" ? "🎣 Lá vai!" : "👆 Toque em Chacoalhar para o peixe morder!"}</b>`;
   else if (fase === "briga") el.innerHTML = topo + `<b id="pp-txt">${P.esp ? P.esp.ic + " " : ""}Peixe fisgado! Segure para a barra ir para a direita</b>
-    <div class="pp-trilho"><div class="pp-barra" id="pp-barra" style="width:${Math.round(P.vara.controle * 100)}%"></div><span class="pp-peixe" id="pp-peixe">🐟</span></div>
+    <div class="pp-trilho"><div class="pp-barra" id="pp-barra" style="width:${Math.round(P.vara.controle * 100)}%"></div><span class="pp-peixe" id="pp-peixe"><img src="${urlPeixe(P.px.k, true)}" alt=""></span></div>
     <div class="pp-prog"><i id="pp-prog"></i></div><button type="button" class="pp-btn" id="pp-btn">🎣 Segure para puxar</button>`;
   const b = $("pp-btn"); if (b) { const on = e => { PRACA.pescaSegura = true; try { b.setPointerCapture(e.pointerId); } catch {} e.preventDefault(); }, off = () => { PRACA.pescaSegura = false; };
     b.addEventListener("pointerdown", on); ["pointerup", "pointercancel", "lostpointercapture"].forEach(k => b.addEventListener(k, off)); }
@@ -8015,7 +8032,7 @@ function passoPesca(dt, t) {
   if (eu.m.vara) eu.m.vara.visible = comVara;
   if (B.ondas) B.ondas = B.ondas.filter(o => { o.t += dt; const q = o.t / 1.2; o.m.scale.setScalar(1 + q * 5 * o.forte); o.m.material.opacity = .8 * (1 - q); if (q < 1) return true; PRACA.cena.remove(o.m); o.m.material.dispose(); return false; });
   if (!P) { B.boia.visible = B.linha.visible = false; return; }
-  const base = P.zona === "mar" ? PESCA_MAR : PESCA_LUGAR;
+  const base = pontoPesca(P.zona);
   if (P.fase !== "fim" && Math.hypot(eu.x - base.x, eu.z - base.z) > 2.4) { pararPesca(); return; }
   if (P.fase === "fim") return;
   const segura = PRACA.pescaSegura || (PRACA.keys && PRACA.keys[" "]);
@@ -8030,7 +8047,7 @@ function passoPesca(dt, t) {
   if (P.fase === "lanca") {   // a boia voa da ponta da vara até a água
     P.t += dt; const q = Math.min(1, P.t / .7); bo.lerpVectors(ponta, P.alvo, q); bo.y = ponta.y + (P.alvo.y - ponta.y) * q + Math.sin(Math.PI * q) * 1.6;
     vara.rotation.x = -1 - Math.sin(Math.PI * Math.min(1, P.t / .35)) * .6; curva = .2;
-    if (q >= 1) { P.fase = "espera"; P.t = (4 + Math.random() * 5) / ((P.vara.vel || 1) * (P.isca && P.isca.vel || 1) * (P.perfeito ? 1.4 : 1)); onda(B, bo.x, bo.z); respingo(bo.x, bo.z, 6); if (typeof bip === "function") bip(180, .06); mostrarHudPesca(); }
+    if (q >= 1) { P.fase = "espera"; P.t = (4 + Math.random() * 5) / ((P.vara.vel || 1) * (P.isca && P.isca.vel || 1) * (P.perfeito ? 1.4 : 1) * (climaPesca().vel || 1)); onda(B, bo.x, bo.z); respingo(bo.x, bo.z, 6); if (typeof bip === "function") bip(180, .06); mostrarHudPesca(); }
   } else if (P.fase === "espera") {
     P.t -= dt; vara.rotation.x += (-1 - vara.rotation.x) * Math.min(1, dt * 6); curva = .45;
     if (PRACA.keys && PRACA.keys[" "] && !P.espacoAntes) chacoalhar(); P.espacoAntes = !!(PRACA.keys && PRACA.keys[" "]);
@@ -8046,7 +8063,7 @@ function passoPesca(dt, t) {
     const dentro = P.peixe >= P.bar && P.peixe <= P.bar + w;
     P.prog += (dentro ? .22 * P.vara.forca / Math.max(.6, P.px.f * .55 + .45) : -.16 * Math.max(.6, P.px.f * .5)) * dt;
     const bb = $("pp-barra"), pp = $("pp-peixe"), pr = $("pp-prog");
-    if (bb) { bb.style.left = (P.bar * 100) + "%"; bb.classList.toggle("ok", dentro); } if (pp) { pp.style.left = (P.peixe * 100) + "%"; pp.textContent = "🐟"; } if (pr) { pr.style.width = Math.max(0, Math.min(100, P.prog * 100)) + "%"; }
+    if (bb) { bb.style.left = (P.bar * 100) + "%"; bb.classList.toggle("ok", dentro); } if (pp) { pp.style.left = (P.peixe * 100) + "%"; } if (pr) { pr.style.width = Math.max(0, Math.min(100, P.prog * 100)) + "%"; }
     // na água: o peixe vem chegando perto do píer
     const f = 1 - Math.max(0, Math.min(1, P.prog)), perto = new THREE.Vector3(base.x, .05, base.z - 1.1);
     bo.lerpVectors(perto, P.inicio, f); bo.x += (P.peixe - .5) * 2.6 * f; bo.y = .02 + Math.sin(t * 20) * .03;
@@ -8062,7 +8079,7 @@ function passoPesca(dt, t) {
   ps.needsUpdate = true; B.linha.geometry.computeBoundingSphere();
 }
 function pulinhoPeixe(P, bo) {
-  const B = PRACA.bosque, sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTextoSemana(P.px.ic), transparent: true, depthWrite: false })); sp.scale.setScalar(.5 + Math.min(1.5, P.tam / 200)); PRACA.cena.add(sp);
+  const B = PRACA.bosque, sp = spritePeixe(P.px.k, .35 + Math.min(1.2, P.tam / 250), Math.random() < .5); PRACA.cena.add(sp);
   B.pulos = B.pulos || []; B.pulos.push({ sp, de: bo.clone(), para: bo.clone().add(new THREE.Vector3((Math.random() - .5) * 1.5, 0, -.5)), t: 0 }); respingo(bo.x, bo.z, 10);
 }
 /* ---------- mar, píer do mar e Loja de pesca (3D) ---------- */
@@ -8099,24 +8116,25 @@ function passoMar(dt, t) {
 /* ---------- Loja de pesca: vender, varas e iscas ---------- */
 function lojaPescaHTML() {
   const nome = perfil(), inv = invPesca(nome), aba = PRACA.pescaAba || "vender", mo = mochilaDe(nome), total = mo.reduce((a, x) => a + x.v, 0);
-  const abas = [["vender", "💰 Vender"], ["varas", "🎣 Varas"], ["iscas", "🪱 Iscas"]].map(([k, t]) => `<button type="button" class="chip pick" data-a="pescaAba" data-k="${k}" aria-pressed="${aba === k}">${t}</button>`).join("");
+  const abas = [["vender", "💰 Vender"], ["avaliar", "🔍 Avaliador"], ["varas", "🎣 Varas"], ["encantar", "✨ Encantar"], ["iscas", "🪱 Iscas"], ["gaiolas", "🦀 Gaiolas"]].map(([k, t]) => `<button type="button" class="chip pick" data-a="pescaAba" data-k="${k}" aria-pressed="${aba === k}">${t}</button>`).join("");
   let corpo = "";
   if (aba === "vender") corpo = mo.length ? `<p class="lb-sub">🎒 Mochila: ${mo.length}/${MOCHILA_MAX} · vale ${total} moedas</p><button class="lb-comprar" data-a="pescaVenderTudo">💰 Vender tudo por ${total}</button>
     <div class="aq-grid">${mo.map((x, i) => { const p = PEIXES.find(q => q.k === x.k) || PEIXES[0], e = x.esp && ESPECIAIS_PEIXE.find(q => q.k === x.esp), r = raridadePeixe(p);
-      return `<button type="button" class="aq-card" style="border-color:${r[1]}" data-a="pescaVender" data-i="${i}"><span class="aq-ic">${p.ic}</span><b>${e ? e.ic + " " : ""}${esc(p.nome)}</b><small>${fmtTam(x.tam)}</small><small>🪙 ${x.v}</small></button>`; }).join("")}</div>`
+      return `<button type="button" class="aq-card" style="border-color:${r[1]}" data-a="pescaVender" data-i="${i}"><img class="aq-img${e ? " pp-esp-" + e.k : ""}" src="${urlPeixe(p.k)}" alt=""><b>${e ? e.ic + " " : ""}${esc(p.nome)}</b><small>${fmtTam(x.tam)}</small><small>🪙 ${x.v}</small></button>`; }).join("")}</div>`
     : `<p class="lb-sub">🎒 Sua mochila está vazia. Vá pescar no lago ou no mar!</p>`;
   if (aba === "varas") corpo = VARAS.map(v => { const tem = inv.varas.includes(v.k), usando = inv.vara === v.k;
     return `<div class="pp-item"><span class="aq-ic">${v.ic}</span><div><b>${esc(v.nome)}</b><small>🍀 sorte ${Math.round(v.sorte * 100)}% · 📏 barra ${Math.round(v.controle * 100)}% · 💪 força ${v.forca} · ⏱️ ${v.vel}x</small></div>
-      <button class="lb-comprar" data-a="pescaVara" data-k="${v.k}" ${usando ? "disabled" : ""}>${usando ? "Usando" : tem ? "Usar" : `🪙 ${v.preco}`}</button></div>`; }).join("");
+      <button class="lb-comprar" data-a="pescaVara" data-k="${v.k}" ${usando || (!tem && nivelPesca(nome) < (v.nivel || 0)) ? "disabled" : ""}>${usando ? "Usando" : tem ? "Usar" : nivelPesca(nome) < (v.nivel || 0) ? `🔒 Nível ${v.nivel}` : `🪙 ${v.preco}`}</button></div>`; }).join("");
   if (aba === "iscas") corpo = `<p class="lb-sub">Gasta 1 isca a cada lançamento. ${inv.isca && (inv.iscas[inv.isca] || 0) > 0 ? "" : "Sem isca também dá para pescar."}</p>` + ISCAS.map(i => { const n = inv.iscas[i.k] || 0, usando = inv.isca === i.k && n > 0;
     return `<div class="pp-item"><span class="aq-ic">${i.ic}</span><div><b>${esc(i.nome)} × ${n}</b><small>${esc(i.dica)}</small></div><div class="pp-col"><button class="lb-comprar" data-a="pescaIsca" data-k="${i.k}">🪙 ${i.preco * 5} (5)</button>${n ? `<button class="btn small" data-a="pescaUsarIsca" data-k="${i.k}" ${usando ? "disabled" : ""}>${usando ? "Usando" : "Usar"}</button>` : ""}</div></div>`; }).join("");
-  return `<div class="mi-caixa"><p class="lb-sub">🪙 ${fmtM(G.banco[nome] || 0)} moedas</p><div class="chips" style="justify-content:center">${abas}</div>${corpo}</div>`;
+  corpo = corpo || lojaPesca2Corpo(aba, nome, inv); const nv = nivelPesca(nome);
+  return `<div class="mi-caixa"><p class="lb-sub">🪙 ${fmtM(G.banco[nome] || 0)} moedas · ⭐ Nível ${nv} (${tituloPesca(nv)})</p><div class="chips" style="justify-content:center">${abas}</div>${corpo}</div>`;
 }
 acoes.pescaAba = el => { PRACA.pescaAba = el.dataset.k; };
 acoes.pescaVender = el => { const nome = perfil(), mo = mochilaDe(nome), x = mo[+el.dataset.i]; if (!x) return; mo.splice(+el.dataset.i, 1); G.banco[nome] = Math.round(((G.banco[nome] || 0) + x.v) * 10) / 10; salvarPlacar(); if (typeof bip === "function") bip(900, .05); };
 acoes.pescaVenderTudo = () => { const nome = perfil(), mo = mochilaDe(nome), v = mo.reduce((a, x) => a + x.v, 0); if (!v) return; mo.length = 0; G.banco[nome] = Math.round(((G.banco[nome] || 0) + v) * 10) / 10; salvarPlacar(); toast(`💰 Vendeu tudo por ${v} moedas!`); if (typeof sfxJogar === "function") sfxJogar(); };
 acoes.pescaVara = el => { const nome = perfil(), inv = invPesca(nome), v = VARAS.find(x => x.k === el.dataset.k); if (!v) return;
-  if (!inv.varas.includes(v.k)) { if ((G.banco[nome] || 0) < v.preco) { toast("Faltam moedas para essa vara"); return; } G.banco[nome] = Math.round(((G.banco[nome] || 0) - v.preco) * 10) / 10; inv.varas.push(v.k); toast(`🎣 Comprou a ${v.nome}!`); }
+  if (!inv.varas.includes(v.k)) { if (nivelPesca(nome) < (v.nivel || 0)) { toast(`🔒 Precisa do nível ${v.nivel} de pescador`); return; } if ((G.banco[nome] || 0) < v.preco) { toast("Faltam moedas para essa vara"); return; } G.banco[nome] = Math.round(((G.banco[nome] || 0) - v.preco) * 10) / 10; inv.varas.push(v.k); toast(`🎣 Comprou a ${v.nome}!`); }
   inv.vara = v.k; salvarPlacar(); };
 acoes.pescaIsca = el => { const nome = perfil(), inv = invPesca(nome), i = ISCAS.find(x => x.k === el.dataset.k); if (!i) return; const preco = i.preco * 5;
   if ((G.banco[nome] || 0) < preco) { toast("Faltam moedas para essa isca"); return; } G.banco[nome] = Math.round(((G.banco[nome] || 0) - preco) * 10) / 10; inv.iscas[i.k] = (inv.iscas[i.k] || 0) + 5; if (!iscaDe(nome)) inv.isca = i.k; salvarPlacar(); };
@@ -8124,17 +8142,209 @@ acoes.pescaUsarIsca = el => { const inv = invPesca(perfil()); if ((inv.iscas[el.
 /* ---------- Livro dos peixes (o painel do aquário) ---------- */
 function aquarioHTML() {
   const nome = perfil(), aq = (G.peixes || {})[nome] || {}, tipos = PEIXES.filter(p => aq[p.k]).length, total = PEIXES.reduce((a, p) => a + (aq[p.k] || 0), 0);
-  const onde = p => (p.z === "lago" ? "🏞️ Lago" : p.z === "mar" ? "🌊 Mar" : "🏞️🌊 Lago e mar") + (p.noite ? " · 🌙 noite" : "");
+  const onde = p => nomeLugarPesca(p.z) + (p.noite ? " · 🌙 noite" : "") + (p.evento ? " · 🌠 só na Chuva de estrelas" : "");
   const cards = PEIXES.slice().sort((a, b) => a.r - b.r || a.z.localeCompare(b.z)).map(p => { const tem = aq[p.k], r = raridadePeixe(p), mx = (aq.max || {})[p.k];
-    return `<div class="aq-card${tem ? "" : " aq-falta"}" style="border-color:${r[1]}"><span class="aq-ic">${tem ? p.ic : "❔"}</span><b>${tem ? esc(p.nome) : "???"}</b>
+    return `<div class="aq-card${tem ? "" : " aq-falta"}" style="border-color:${r[1]}"><img class="aq-img" src="${urlPeixe(p.k, !tem)}" alt=""><b>${tem ? esc(p.nome) : "???"}</b>
       <small style="color:${r[1]}">${p.r ? "★".repeat(p.r) : "🗑️"} ${r[0]}</small><small>${onde(p)}</small>${tem ? `<small>× ${tem}${mx ? ` · maior: ${fmtTam(mx)}` : ""}</small>` : ""}<small>🪙 ${p.m}</small></div>`; }).join("");
   const esp = ESPECIAIS_PEIXE.map(e => `${e.ic} ${e.nome}: ${(aq.esp || {})[e.k] || 0}`).join(" · ");
   setTimeout(animarAquarioPainel, 30);
-  return `<div class="mi-caixa"><h2 class="lb-secao">📖 Livro dos peixes de ${esc(nome)}</h2>
+  return `<div class="mi-caixa"><h2 class="lb-secao">📖 Livro dos peixes de ${esc(nome)}</h2><p class="pp-mini">⭐ Nível ${nivelPesca(nome)} · ${tituloPesca(nivelPesca(nome))} · ${xpPescaDe(nome)} XP</p>
     <canvas id="aq-cv" class="aq-cv" width="640" height="300" aria-label="Seus peixes nadando no aquário"></canvas>
     <div class="aq-prog"><i style="width:${Math.round(tipos / PEIXES.length * 100)}%"></i><span>${tipos}/${PEIXES.length} tipos${aq.bonusLivro ? " · completo! 🎉" : ` · complete e ganhe ${PESCA_LIVRO_BONUS} moedas`}</span></div>
     <p class="lb-sub">${total} pescados · especiais: ${esp}</p>
     <div class="aq-grid">${cards}</div></div>`;
+}
+/* ---------- Desenho dos peixes (pedido do Andre: "peixes mais realistas") ----------
+   desenharPeixeArte(c, k, W, H, t) desenha cada bicho de lado (olhando para a direita) dentro da caixa W x H, num espaço de 200 x 100.
+   t mexe o rabo/tentáculos. texPeixe(k) é a textura para o 3D e urlPeixe(k, sombra) a imagem para o HTML (sombra = silhueta de quem ainda não pegou). */
+const ARTE_PEIXE = {
+  peixinho: { L: 70, h: 18, cima: "#4f7491", barriga: "#eef3f6", nad: "#c9b46a", rabo: "garfo", linha: true },
+  palhaco: { L: 58, h: 26, cima: "#ff6a00", barriga: "#ff9a3c", nad: "#ff7a1a", borda: "#1b1b1b", listras: ["#ffffff"], rabo: "redondo" },
+  baiacu: { L: 50, h: 38, cima: "#b89a4e", barriga: "#f6efd8", nad: "#d6c38a", pintas: "#5a4524", espinhos: true, rabo: "redondo" },
+  dourado: { L: 66, h: 24, cima: "#e0a100", barriga: "#ffe680", nad: "#ffcf3f", rabo: "garfo", brilho: "#fff6b0", linha: true },
+  fantasma: { L: 64, h: 22, cima: "#bcd9ff", barriga: "#eef6ff", nad: "#d8e8ff", rabo: "fita", transp: .62, olhoBrilho: "#7fe0ff" },
+  tubarao: { L: 82, h: 20, cima: "#66788a", barriga: "#eef2f5", nad: "#5c6d7e", rabo: "tubarao", dorsalGrande: true, guelras: true, dentes: true },
+  golfinho: { L: 80, h: 19, cima: "#5f86ad", barriga: "#e4edf5", nad: "#557aa0", rabo: "cauda", bico: true, dorsalCurva: true },
+  baleia: { L: 86, h: 26, cima: "#2c4a68", barriga: "#c8d6e3", nad: "#26425d", rabo: "cauda", sulcos: true, olhoPequeno: true }
+};
+function desenharPeixeArte(c, k, W, H, t = 0) {
+  c.save(); c.scale(W / 200, H / 100); c.lineJoin = c.lineCap = "round";
+  const a = ARTE_PEIXE[k];
+  if (a) peixeGenerico(c, a, t);
+  else if (k === "enguia") enguiaArte(c, t);
+  else (ARTE_OUTROS[k] || ARTE_OUTROS.peixinho)(c, t);
+  c.restore();
+}
+function gradV(c, y0, y1, ...cores) { const g = c.createLinearGradient(0, y0, 0, y1); cores.forEach((cor, i) => g.addColorStop(i / (cores.length - 1), cor)); return g; }
+function olhoArte(c, x, y, r, brilho) {
+  c.fillStyle = brilho || "#f4f4f4"; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill(); c.fillStyle = "#111"; c.beginPath(); c.arc(x + r * .15, y, r * .62, 0, 7); c.fill();
+  c.fillStyle = "rgba(255,255,255,.9)"; c.beginPath(); c.arc(x + r * .35, y - r * .3, r * .25, 0, 7); c.fill();
+}
+function peixeGenerico(c, a, t) {
+  const cx = 105, cy = 50, rx = a.L, ry = a.h, nariz = cx + rx, cauda = cx - rx, mexe = Math.sin(t * 6) * .25;
+  if (a.transp) c.globalAlpha = a.transp;
+  // rabo
+  c.save(); c.translate(cauda + 6, cy); c.rotate(mexe); c.fillStyle = gradV(c, -30, 30, a.nad, a.cima, a.nad); c.beginPath();
+  if (a.rabo === "garfo") { c.moveTo(4, 0); c.quadraticCurveTo(-14, -6, -30, -ry * 1.2); c.quadraticCurveTo(-18, 0, -30, ry * 1.2); c.quadraticCurveTo(-14, 6, 4, 0); }
+  else if (a.rabo === "redondo") { c.moveTo(4, -ry * .35); c.quadraticCurveTo(-34, -ry * 1.1, -30, 0); c.quadraticCurveTo(-34, ry * 1.1, 4, ry * .35); }
+  else if (a.rabo === "fita") { c.moveTo(4, -4); for (let i = 0; i <= 10; i++) c.lineTo(-i * 5, Math.sin(t * 5 + i * .8) * 6 - 4 + i * .2); for (let i = 10; i >= 0; i--) c.lineTo(-i * 5, Math.sin(t * 5 + i * .8) * 6 + 6 - i * .2); }
+  else if (a.rabo === "tubarao") { c.moveTo(6, -3); c.quadraticCurveTo(-18, -14, -30, -34); c.quadraticCurveTo(-22, -8, -16, 0); c.quadraticCurveTo(-24, 10, -26, 18); c.quadraticCurveTo(-8, 6, 6, 4); }
+  else { c.moveTo(6, -3); c.quadraticCurveTo(-10, -4, -26, -16); c.quadraticCurveTo(-20, 0, -26, 16); c.quadraticCurveTo(-10, 4, 6, 3); }   // cauda de golfinho/baleia
+  c.fill(); if (a.borda) { c.strokeStyle = a.borda; c.lineWidth = 2.5; c.stroke(); } c.restore();
+  // nadadeira de cima
+  c.fillStyle = a.nad; c.beginPath();
+  if (a.dorsalGrande) { c.moveTo(cx - 8, cy - ry + 3); c.quadraticCurveTo(cx - 2, cy - ry - 30, cx + 18, cy - ry - 26); c.quadraticCurveTo(cx + 10, cy - ry - 10, cx + 20, cy - ry + 3); }
+  else if (a.dorsalCurva) { c.moveTo(cx - 10, cy - ry + 3); c.quadraticCurveTo(cx - 4, cy - ry - 22, cx + 10, cy - ry - 16); c.quadraticCurveTo(cx + 4, cy - ry - 6, cx + 12, cy - ry + 3); }
+  else { c.moveTo(cx - rx * .6, cy - ry * .75); c.quadraticCurveTo(cx - rx * .2, cy - ry * 1.7, cx + rx * .35, cy - ry * .9); }
+  c.fill(); if (a.borda) { c.strokeStyle = a.borda; c.lineWidth = 2.5; c.stroke(); }
+  if (!a.dorsalGrande && !a.dorsalCurva) { c.beginPath(); c.moveTo(cx - rx * .5, cy + ry * .75); c.quadraticCurveTo(cx - rx * .25, cy + ry * 1.45, cx + rx * .1, cy + ry * .85); c.fill(); }
+  // corpo
+  c.save(); c.beginPath();
+  if (a.bico) { c.moveTo(nariz + 14, cy + 4); c.quadraticCurveTo(nariz - 4, cy - ry * 1.15, cx - rx * .3, cy - ry); c.quadraticCurveTo(cauda, cy - ry * .4, cauda, cy); c.quadraticCurveTo(cauda, cy + ry * .5, cx - rx * .2, cy + ry); c.quadraticCurveTo(nariz - 6, cy + ry, nariz + 14, cy + 4); }
+  else { c.moveTo(nariz, cy + (a.dentes ? 2 : 0)); c.bezierCurveTo(nariz - rx * .15, cy - ry * 1.2, cauda + rx * .35, cy - ry * 1.05, cauda, cy - ry * .15); c.lineTo(cauda, cy + ry * .15); c.bezierCurveTo(cauda + rx * .35, cy + ry * 1.05, nariz - rx * .15, cy + ry * 1.15, nariz, cy + (a.dentes ? 2 : 0)); }
+  c.closePath(); c.fillStyle = gradV(c, cy - ry, cy + ry, a.cima, a.cima, a.barriga, a.barriga); c.fill(); c.clip();
+  // listras, pintas, escamas e sulcos
+  if (a.listras) [cx + rx * .45, cx - rx * .05, cx - rx * .6].forEach((x, i) => { c.fillStyle = a.borda; c.fillRect(x - 9, cy - ry - 5, 18, ry * 2 + 10); c.fillStyle = a.listras[0]; c.beginPath(); c.ellipse(x, cy, 6 - i, ry + 4, 0, 0, 7); c.fill(); });
+  if (a.pintas) { c.fillStyle = a.pintas; for (let i = 0; i < 18; i++) { const px = cauda + 10 + (i * 37) % (rx * 2 - 20), py = cy - ry * .9 + (i * 23) % (ry * 1.1); c.beginPath(); c.arc(px, py, 2.4, 0, 7); c.fill(); } }
+  if (!a.transp && !a.bico && !a.sulcos) { c.strokeStyle = "rgba(255,255,255,.18)"; c.lineWidth = 1; for (let x = cauda + 8; x < nariz - 18; x += 7) for (let y = cy - ry; y < cy + ry; y += 7) { c.beginPath(); c.arc(x + ((y / 7) % 2) * 3.5, y, 3.5, .3, 2.8); c.stroke(); } }
+  if (a.sulcos) { c.strokeStyle = "rgba(255,255,255,.45)"; c.lineWidth = 1.5; for (let i = 0; i < 6; i++) { c.beginPath(); c.moveTo(nariz - 6, cy + ry * .45 + i * 2.2); c.quadraticCurveTo(cx + 10, cy + ry * .55 + i * 2.4, cx - 12, cy + ry * .4 + i * 2); c.stroke(); } }
+  if (a.brilho) { c.fillStyle = "rgba(255,255,255,.35)"; c.beginPath(); c.ellipse(cx + 10, cy - ry * .45, rx * .55, ry * .22, -.05, 0, 7); c.fill(); }
+  c.fillStyle = "rgba(255,255,255,.22)"; c.beginPath(); c.ellipse(cx + 5, cy - ry * .5, rx * .7, ry * .18, 0, 0, 7); c.fill();   // reflexo de luz
+  c.restore();
+  if (a.borda) { c.strokeStyle = a.borda; c.lineWidth = 2.5; c.stroke(); }
+  if (a.linha) { c.strokeStyle = "rgba(255,255,255,.55)"; c.lineWidth = 1.2; c.beginPath(); c.moveTo(nariz - 20, cy - 2); c.quadraticCurveTo(cx, cy - 4, cauda + 6, cy); c.stroke(); }
+  // guelra, nadadeira do peito, olho e boca
+  c.strokeStyle = "rgba(0,0,0,.25)"; c.lineWidth = 1.6;
+  if (a.guelras) for (let i = 0; i < 4; i++) { c.beginPath(); c.moveTo(nariz - 34 - i * 5, cy - 6); c.lineTo(nariz - 36 - i * 5, cy + 7); c.stroke(); }
+  else if (!a.bico && !a.sulcos) { c.beginPath(); c.arc(nariz - 26, cy, ry * .75, -1, 1); c.stroke(); }
+  c.fillStyle = a.nad; c.globalAlpha = (a.transp || 1) * .85; c.beginPath(); c.moveTo(nariz - 28, cy + ry * .3); c.quadraticCurveTo(nariz - 50, cy + ry * .9 + Math.sin(t * 8) * 3, nariz - 44, cy + ry * .2); c.fill(); c.globalAlpha = a.transp || 1;
+  if (a.espinhos) { c.strokeStyle = "#8a7340"; c.lineWidth = 1.4; for (let i = 0; i < 14; i++) { const an = Math.PI * (i / 13) + Math.PI, x = cx + Math.cos(an) * rx * .9, y = cy + Math.sin(an) * ry * .95; c.beginPath(); c.moveTo(x, y); c.lineTo(x + Math.cos(an) * 6, y + Math.sin(an) * 6); c.stroke(); } }
+  olhoArte(c, nariz - (a.bico ? 26 : 16), cy - ry * (a.olhoPequeno ? .05 : .3), a.olhoPequeno ? 2.6 : Math.max(4, ry * .22), a.olhoBrilho);
+  c.strokeStyle = "rgba(0,0,0,.5)"; c.lineWidth = 1.5; c.beginPath(); c.moveTo(nariz - (a.bico ? -10 : 2), cy + 3); c.quadraticCurveTo(nariz - 10, cy + 6, nariz - (a.dentes ? 22 : 12), cy + 5); c.stroke();
+  if (a.dentes) { c.fillStyle = "#fff"; for (let i = 0; i < 5; i++) { c.beginPath(); c.moveTo(nariz - 20 + i * 3.5, cy + 4.5); c.lineTo(nariz - 18.5 + i * 3.5, cy + 8); c.lineTo(nariz - 17 + i * 3.5, cy + 4.5); c.fill(); } }
+  c.globalAlpha = 1;
+}
+function enguiaArte(c, t) {
+  const pts = []; for (let i = 0; i <= 30; i++) { const x = 16 + i * 5.6, y = 50 + Math.sin(i * .45 - t * 5) * (8 + i * .1); pts.push([x, y]); }
+  c.lineWidth = 16; c.strokeStyle = gradV(c, 35, 65, "#3d4a1e", "#5f6b2c", "#b6b56e"); c.beginPath(); pts.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.stroke();
+  c.lineWidth = 4; c.strokeStyle = "rgba(255,255,255,.18)"; c.beginPath(); pts.forEach(([x, y], i) => i ? c.lineTo(x, y - 4) : c.moveTo(x, y - 4)); c.stroke();
+  const [hx, hy] = pts[30]; c.fillStyle = "#4a5626"; c.beginPath(); c.ellipse(hx + 4, hy, 12, 8, 0, 0, 7); c.fill(); olhoArte(c, hx + 8, hy - 3, 3); c.strokeStyle = "#222"; c.lineWidth = 1.5; c.beginPath(); c.moveTo(hx + 15, hy + 2); c.lineTo(hx + 6, hy + 3); c.stroke();
+}
+const ARTE_OUTROS = {
+  sapo(c, t) {
+    c.fillStyle = "#3f8f2f"; c.beginPath(); c.ellipse(64, 70, 26, 10, -.3, 0, 7); c.fill(); c.beginPath(); c.ellipse(52, 84, 22, 6, 0, 0, 7); c.fill();   // perna de trás
+    c.fillStyle = gradV(c, 25, 80, "#6cc04a", "#4e9e36", "#d9e8a0"); c.beginPath(); c.ellipse(100, 58, 52, 28, -.08, 0, 7); c.fill();
+    c.fillStyle = "#2f6f22"; for (let i = 0; i < 8; i++) { c.beginPath(); c.arc(70 + i * 9, 44 + (i % 3) * 5, 3, 0, 7); c.fill(); }
+    c.fillStyle = "#4e9e36"; c.beginPath(); c.ellipse(134, 80, 6, 14, .3, 0, 7); c.fill();
+    c.fillStyle = "#6cc04a"; c.beginPath(); c.arc(132, 34, 12, 0, 7); c.fill(); olhoArte(c, 134, 32, 8, "#ffd23f");
+    c.strokeStyle = "#2f5f22"; c.lineWidth = 2; c.beginPath(); c.moveTo(150, 60); c.quadraticCurveTo(130, 70, 112, 62); c.stroke();
+  },
+  camarao(c, t) {
+    c.strokeStyle = "rgba(200,120,90,.8)"; c.lineWidth = 1.2; for (let i = 0; i < 2; i++) { c.beginPath(); c.moveTo(160, 42); c.quadraticCurveTo(190, 10 + i * 8, 198, 30 + i * 30 + Math.sin(t * 4) * 4); c.stroke(); }
+    for (let i = 0; i < 6; i++) { const x = 70 + i * 16, y = 50 + Math.sin(i * .5) * 6; c.fillStyle = gradV(c, y - 16, y + 14, "#f0a080", "#e2805c", "#f8d0b8"); c.beginPath(); c.ellipse(x, y, 13, 15 - i * .5, -.2 + i * .08, 0, 7); c.fill(); c.strokeStyle = "rgba(160,70,40,.4)"; c.stroke(); }
+    c.fillStyle = "#e2805c"; c.beginPath(); c.moveTo(60, 50); c.lineTo(28, 30 + Math.sin(t * 6) * 4); c.lineTo(36, 52); c.lineTo(28, 72 - Math.sin(t * 6) * 4); c.closePath(); c.fill();
+    c.strokeStyle = "#d87050"; c.lineWidth = 2; for (let i = 0; i < 5; i++) { c.beginPath(); c.moveTo(90 + i * 12, 62); c.lineTo(86 + i * 12, 80 + Math.sin(t * 8 + i) * 3); c.stroke(); }
+    olhoArte(c, 158, 42, 4);
+  },
+  tartaruga(c, t) {
+    c.fillStyle = "#8fa86a"; const nad = (x, y, rot) => { c.save(); c.translate(x, y); c.rotate(rot + Math.sin(t * 3) * .2); c.beginPath(); c.ellipse(0, 10, 9, 20, 0, 0, 7); c.fill(); c.restore(); };
+    nad(70, 66, .9); nad(132, 66, -.9); nad(78, 38, 2.4);
+    c.beginPath(); c.ellipse(162, 52, 16, 11, 0, 0, 7); c.fill(); olhoArte(c, 170, 48, 3.5);
+    c.fillStyle = gradV(c, 18, 70, "#7a6a3a", "#5a5a2a", "#3f4a22"); c.beginPath(); c.ellipse(102, 52, 52, 30, 0, Math.PI, 0); c.quadraticCurveTo(102, 68, 50, 52); c.fill();
+    c.strokeStyle = "rgba(240,220,150,.6)"; c.lineWidth = 2; for (const [x, y] of [[102, 36], [78, 44], [126, 44], [90, 26], [114, 26]]) { c.beginPath(); for (let i = 0; i < 6; i++) { const an = i / 6 * Math.PI * 2; c.lineTo(x + Math.cos(an) * 10, y + Math.sin(an) * 8); } c.closePath(); c.stroke(); }
+    c.fillStyle = "#d8c88a"; c.fillRect(52, 52, 100, 6);
+  },
+  jacare(c, t) {
+    c.fillStyle = gradV(c, 30, 70, "#3c5a2a", "#4f6f34", "#a8b070"); c.beginPath(); c.moveTo(8, 52 + Math.sin(t * 4) * 4); c.quadraticCurveTo(50, 36, 110, 40); c.lineTo(190, 46); c.lineTo(190, 56); c.lineTo(110, 66); c.quadraticCurveTo(50, 66, 8, 54 + Math.sin(t * 4) * 4); c.fill();
+    c.fillStyle = "#2f4a20"; for (let i = 0; i < 14; i++) { c.beginPath(); c.moveTo(20 + i * 8, 44 - (i > 4 ? 2 : 0)); c.lineTo(24 + i * 8, 36 + (i % 2) * 2); c.lineTo(28 + i * 8, 44); c.fill(); }
+    c.fillStyle = "#3c5a2a"; for (const x of [70, 120]) { c.beginPath(); c.ellipse(x, 70, 7, 12, .4, 0, 7); c.fill(); }
+    c.fillStyle = "#fff"; for (let i = 0; i < 9; i++) { c.beginPath(); c.moveTo(140 + i * 5.5, 56); c.lineTo(142.5 + i * 5.5, 61); c.lineTo(145 + i * 5.5, 56); c.fill(); }
+    olhoArte(c, 138, 40, 4.5, "#e8d24a");
+  },
+  caranguejo(c, t) {
+    c.strokeStyle = "#c0391b"; c.lineWidth = 4; for (let i = 0; i < 3; i++) for (const s of [-1, 1]) { c.beginPath(); c.moveTo(100 + s * 30, 58); c.quadraticCurveTo(100 + s * (52 + i * 6), 48 + i * 10, 100 + s * (60 + i * 8), 82 + Math.sin(t * 8 + i) * 3); c.stroke(); }
+    for (const s of [-1, 1]) { c.fillStyle = "#e0482a"; c.beginPath(); c.moveTo(100 + s * 34, 48); c.quadraticCurveTo(100 + s * 52, 30, 100 + s * 62, 26); c.lineTo(100 + s * 58, 34); c.fill();
+      c.beginPath(); c.ellipse(100 + s * 70, 24, 12, 9, s * .4, 0, 7); c.fill(); c.fillStyle = "#ffd0b8"; c.beginPath(); c.ellipse(100 + s * 76, 20, 5, 3, s * .4, 0, 7); c.fill(); }
+    c.fillStyle = gradV(c, 34, 76, "#ff6a3c", "#d83c1c", "#a82a12"); c.beginPath(); c.ellipse(100, 56, 38, 22, 0, 0, 7); c.fill();
+    c.fillStyle = "rgba(255,255,255,.25)"; c.beginPath(); c.ellipse(96, 46, 20, 6, 0, 0, 7); c.fill();
+    for (const s of [-1, 1]) { c.strokeStyle = "#c0391b"; c.lineWidth = 3; c.beginPath(); c.moveTo(100 + s * 8, 38); c.lineTo(100 + s * 10, 26); c.stroke(); olhoArte(c, 100 + s * 10, 24, 4); }
+  },
+  estrela(c, t) {
+    c.save(); c.translate(100, 52); c.rotate(Math.sin(t) * .05); c.beginPath(); for (let i = 0; i < 10; i++) { const r = i % 2 ? 16 : 46, an = -Math.PI / 2 + i * Math.PI / 5; c.lineTo(Math.cos(an) * r * 1.2, Math.sin(an) * r); } c.closePath();
+    const g = c.createRadialGradient(0, 0, 4, 0, 0, 50); g.addColorStop(0, "#ffb36b"); g.addColorStop(1, "#e2582a"); c.fillStyle = g; c.fill();
+    c.fillStyle = "#fff1d6"; for (let i = 0; i < 5; i++) { const an = -Math.PI / 2 + i * Math.PI * 2 / 5; for (let j = 1; j < 4; j++) { c.beginPath(); c.arc(Math.cos(an) * j * 12 * 1.2, Math.sin(an) * j * 12, 2.4, 0, 7); c.fill(); } } c.restore();
+  },
+  lagosta(c, t) {
+    c.strokeStyle = "#b0301c"; c.lineWidth = 1.6; for (let i = 0; i < 2; i++) { c.beginPath(); c.moveTo(162, 46); c.quadraticCurveTo(190, 20 - i * 10, 198, 6 + i * 4 + Math.sin(t * 3) * 4); c.stroke(); }
+    c.fillStyle = "#c8381e"; c.beginPath(); c.moveTo(150, 50); c.quadraticCurveTo(176, 70, 186, 80); c.lineTo(176, 84); c.fill(); c.beginPath(); c.ellipse(186, 84, 13, 7, .5, 0, 7); c.fill();
+    for (let i = 0; i < 6; i++) { c.fillStyle = gradV(c, 34, 68, "#e0482a", "#b0301c", "#e88060"); c.beginPath(); c.ellipse(140 - i * 16, 52, 14, 16 - i * 1.4, 0, 0, 7); c.fill(); c.strokeStyle = "rgba(90,20,10,.35)"; c.stroke(); }
+    c.fillStyle = "#c8381e"; c.beginPath(); c.moveTo(50, 52); c.lineTo(22, 34 + Math.sin(t * 6) * 3); c.lineTo(30, 52); c.lineTo(22, 70 - Math.sin(t * 6) * 3); c.closePath(); c.fill();
+    c.strokeStyle = "#b0301c"; c.lineWidth = 2.5; for (let i = 0; i < 4; i++) { c.beginPath(); c.moveTo(130 - i * 10, 64); c.lineTo(124 - i * 10, 80 + Math.sin(t * 8 + i) * 3); c.stroke(); }
+    olhoArte(c, 156, 44, 3.5);
+  },
+  lula(c, t) { lulaArte(c, t, "#f2b8c6", "#d36f8a"); },
+  lulagigante(c, t) { lulaArte(c, t, "#c0392b", "#7a1a12"); },
+  aguaviva(c, t) {
+    c.strokeStyle = "rgba(220,140,255,.7)"; c.lineWidth = 2; for (let i = 0; i < 7; i++) { c.beginPath(); c.moveTo(70 + i * 10, 50); for (let j = 1; j <= 8; j++) c.lineTo(70 + i * 10 + Math.sin(t * 3 + i + j * .7) * 5, 50 + j * 6); c.stroke(); }
+    const g = c.createRadialGradient(100, 40, 4, 100, 46, 46); g.addColorStop(0, "rgba(255,220,255,.95)"); g.addColorStop(1, "rgba(190,110,240,.55)"); c.fillStyle = g;
+    c.beginPath(); c.moveTo(56, 52); c.bezierCurveTo(56, 4, 144, 4, 144, 52); for (let i = 0; i <= 8; i++) c.lineTo(144 - i * 11, 52 + (i % 2) * 5); c.fill();
+    c.strokeStyle = "rgba(255,255,255,.5)"; c.lineWidth = 2; for (let i = 0; i < 4; i++) { c.beginPath(); c.ellipse(100, 34, 8 + i * 8, 4 + i * 3, 0, Math.PI, 0); c.stroke(); }
+  },
+  polvo(c, t) {
+    for (let i = 0; i < 8; i++) { const x0 = 70 + i * 9, cor = i % 2 ? "#c2452c" : "#d9573a"; c.strokeStyle = cor; c.lineWidth = 9 - i * .3; c.beginPath(); c.moveTo(x0, 52);
+      for (let j = 1; j <= 7; j++) c.lineTo(x0 - 30 + j * 2 + Math.sin(t * 3 + i + j * .6) * 6 - (i - 4) * j * .8, 52 + j * 6 - j * j * .25); c.stroke(); }
+    c.fillStyle = "#ffd8c8"; for (let i = 0; i < 10; i++) { c.beginPath(); c.arc(56 + i * 6, 76 - (i % 3) * 3, 1.8, 0, 7); c.fill(); }
+    c.fillStyle = gradV(c, 4, 60, "#f07050", "#d9573a", "#b03a22"); c.beginPath(); c.ellipse(118, 34, 40, 28, .35, 0, 7); c.fill();
+    c.fillStyle = "rgba(255,255,255,.25)"; c.beginPath(); c.ellipse(126, 22, 16, 7, .35, 0, 7); c.fill(); olhoArte(c, 104, 46, 6.5, "#ffe9a8");
+  },
+  bau(c) {
+    c.fillStyle = gradV(c, 40, 90, "#9a6a34", "#6b4423"); c.fillRect(40, 44, 120, 46); c.fillStyle = gradV(c, 10, 46, "#b07a3c", "#7a4e26"); c.beginPath(); c.moveTo(40, 46); c.quadraticCurveTo(100, 4, 160, 46); c.fill();
+    c.fillStyle = "#e8b830"; for (const x of [52, 146]) c.fillRect(x - 4, 22, 8, 68); c.fillRect(40, 44, 120, 6); c.fillRect(92, 50, 16, 18); c.fillStyle = "#6b4423"; c.fillRect(98, 56, 4, 8);
+    c.fillStyle = "rgba(255,240,150,.8)"; for (let i = 0; i < 5; i++) { c.beginPath(); c.arc(60 + i * 20, 30 - (i % 2) * 6, 2, 0, 7); c.fill(); }
+  },
+  bota(c) {
+    c.fillStyle = gradV(c, 10, 90, "#7a5230", "#4e3218"); c.beginPath(); c.moveTo(70, 12); c.lineTo(110, 12); c.lineTo(112, 62); c.quadraticCurveTo(160, 62, 170, 76); c.lineTo(170, 88); c.lineTo(66, 88); c.closePath(); c.fill();
+    c.fillStyle = "#2e1e0e"; c.fillRect(64, 84, 108, 8); c.strokeStyle = "#c8a070"; c.lineWidth = 2; for (let i = 0; i < 4; i++) { c.beginPath(); c.moveTo(84, 26 + i * 9); c.lineTo(100, 30 + i * 9); c.stroke(); }
+    c.fillStyle = "#3a7a3a"; c.beginPath(); c.ellipse(80, 12, 10, 4, 0, 0, 7); c.fill();   // alga presa
+  },
+  lata(c) {
+    const g = c.createLinearGradient(60, 0, 140, 0); g.addColorStop(0, "#7d848c"); g.addColorStop(.5, "#e6eaee"); g.addColorStop(1, "#7d848c"); c.fillStyle = g; c.fillRect(64, 18, 72, 70);
+    c.fillStyle = "#d63a2a"; c.fillRect(64, 36, 72, 30); c.fillStyle = "#fff"; c.font = "bold 14px sans-serif"; c.textAlign = "center"; c.fillText("SOPA", 100, 56);
+    c.fillStyle = "#6a7078"; c.beginPath(); c.ellipse(100, 18, 36, 6, 0, 0, 7); c.fill(); c.fillStyle = "#a0603a"; c.beginPath(); c.arc(120, 78, 5, 0, 7); c.fill();   // ferrugem
+  },
+  concha(c) {
+    c.save(); c.translate(100, 82); const g = c.createRadialGradient(0, -30, 4, 0, -20, 70); g.addColorStop(0, "#fff0e8"); g.addColorStop(1, "#f2a6a0"); c.fillStyle = g;
+    c.beginPath(); c.moveTo(-10, 0); for (let i = 0; i <= 12; i++) { const an = Math.PI + i * Math.PI / 12; c.quadraticCurveTo(Math.cos(an - .13) * 62, Math.sin(an - .13) * 66 - 6, Math.cos(an) * 58, Math.sin(an) * 62); } c.lineTo(10, 0); c.closePath(); c.fill();
+    c.strokeStyle = "rgba(190,100,100,.5)"; c.lineWidth = 2; for (let i = 0; i <= 12; i++) { const an = Math.PI + i * Math.PI / 12; c.beginPath(); c.moveTo(0, 0); c.lineTo(Math.cos(an) * 56, Math.sin(an) * 60); c.stroke(); }
+    c.fillStyle = "#e89890"; c.fillRect(-14, -2, 28, 10); c.restore();
+  }
+};
+function lulaArte(c, t, cor, escuro) {
+  c.strokeStyle = cor; for (let i = 0; i < 8; i++) { c.lineWidth = i < 2 ? 3 : 5; c.beginPath(); c.moveTo(60, 50 + (i - 4) * 2); for (let j = 1; j <= 8; j++) c.lineTo(60 - j * (i < 2 ? 7 : 5), 50 + (i - 4) * (2 + j * .8) + Math.sin(t * 4 + i + j * .5) * 3); c.stroke(); }
+  c.fillStyle = gradV(c, 30, 70, cor, escuro, cor); c.beginPath(); c.moveTo(58, 40); c.quadraticCurveTo(150, 26, 186, 50); c.quadraticCurveTo(150, 74, 58, 60); c.closePath(); c.fill();
+  c.fillStyle = escuro; c.beginPath(); c.moveTo(160, 50); c.lineTo(194, 30); c.lineTo(186, 50); c.lineTo(194, 70); c.closePath(); c.fill();
+  c.fillStyle = "rgba(255,255,255,.2)"; for (let i = 0; i < 12; i++) { c.beginPath(); c.arc(80 + i * 8, 44 + (i % 3) * 5, 1.6, 0, 7); c.fill(); } olhoArte(c, 72, 48, 6);
+}
+const CACHE_ARTE_PEIXE = {};
+function canvasPeixe(k, sombra) {
+  const ch = k + (sombra ? ":s" : ""); if (CACHE_ARTE_PEIXE[ch]) return CACHE_ARTE_PEIXE[ch];
+  const cv = document.createElement("canvas"); cv.width = 256; cv.height = 128; const c = cv.getContext("2d"); desenharPeixeArte(c, k, 256, 128, 0);
+  if (sombra) { c.globalCompositeOperation = "source-in"; c.fillStyle = "rgba(11,27,51,.55)"; c.fillRect(0, 0, 256, 128); }
+  return CACHE_ARTE_PEIXE[ch] = cv;
+}
+function urlPeixe(k, sombra) { const ch = "u" + k + (sombra ? ":s" : ""); return CACHE_ARTE_PEIXE[ch] = CACHE_ARTE_PEIXE[ch] || canvasPeixe(k, sombra).toDataURL(); }
+const TEX_PEIXE = {};
+function texPeixe(k, inv) { const ch = k + (inv ? ":i" : ""); if (TEX_PEIXE[ch]) return TEX_PEIXE[ch]; const tx = new THREE.CanvasTexture(canvasPeixe(k)); if (inv) { tx.repeat.x = -1; tx.offset.x = 1; } return TEX_PEIXE[ch] = tx; }   // inv = virado para a esquerda (sprite não vira com escala negativa)
+function spritePeixe(k, tam, inv) { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texPeixe(k, inv), transparent: true, depthWrite: false })); sp.scale.set(tam * 2, tam, 1); sp.userData.k = k; return sp; }
+const _abrirPainelPracaPeixe = abrirPainelPraca;
+abrirPainelPraca = function (...a) { const pg = $("pp-pegou"); if (pg) pg.hidden = true; return _abrirPainelPracaPeixe(...a); };
+/* janela "Pegou!" com o desenho do peixe */
+function mostrarPegou(px, tam, esp, extra) {
+  const box = $("praca"); if (!box) return; const r = raridadePeixe(px);
+  let el = $("pp-pegou"); if (!el) { box.insertAdjacentHTML("beforeend", `<div class="pp-pegou" id="pp-pegou" hidden></div>`); el = $("pp-pegou"); el.addEventListener("click", () => (el.hidden = true)); }
+  el.style.borderColor = r[1];
+  el.innerHTML = `<small style="color:${r[1]}">${px.r ? "★".repeat(px.r) : "🗑️"} ${r[0]}${esp ? ` · ${esp.ic} ${esp.nome}` : ""}</small><img src="${urlPeixe(px.k)}" alt="${esc(px.nome)}" class="${esp ? "pp-esp-" + esp.k : ""}"><b>${esc(px.nome)}</b><span>${fmtTam(tam)}${extra ? " · " + esc(extra) : ""}</span>`;
+  el.hidden = false; clearTimeout(mostrarPegou.t); mostrarPegou.t = setTimeout(() => { el.hidden = true; }, 3200);
 }
 function modeloVara() {
   const g = new THREE.Group(), m = c => new THREE.MeshLambertMaterial({ color: c });
@@ -8170,14 +8380,13 @@ function montarPeixesAquario3D() {
   const B = PRACA.bosque; if (!B || !B.tanquePeixes) return;
   B.tanquePeixes.clear(); const aq = (G.peixes || {})[perfil()] || {}, lista = [];
   for (const p of PEIXES) if (aq[p.k] && p.k !== "bota") for (let i = 0; i < Math.min(3, aq[p.k]); i++) lista.push(p);
-  lista.slice(0, 14).forEach((p, i) => { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTextoSemana(p.ic), transparent: true, depthWrite: false })); const tam = ((aq.max || {})[p.k] || 20);
-    sp.scale.setScalar(.22 + Math.min(.35, tam / 400)); sp.userData = { fase: Math.random() * 9, vel: .4 + Math.random() * .5, y: .8 + Math.random() * (TANQUE.h - .5), z: (Math.random() - .5) * (TANQUE.d - .3) }; B.tanquePeixes.add(sp); });
-  if (aq.bota) { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTextoSemana("👢"), transparent: true, depthWrite: false })); sp.scale.setScalar(.3); sp.position.set(.95, .75, -.2); sp.userData.parado = true; B.tanquePeixes.add(sp); }
+  lista.slice(0, 14).forEach((p, i) => { const tam = ((aq.max || {})[p.k] || 20), sp = spritePeixe(p.k, .14 + Math.min(.2, tam / 900)); sp.userData = { fase: Math.random() * 9, vel: .4 + Math.random() * .5, y: .8 + Math.random() * (TANQUE.h - .5), z: (Math.random() - .5) * (TANQUE.d - .3) }; B.tanquePeixes.add(sp); });
+  if (aq.bota) { const sp = spritePeixe("bota", .18); sp.position.set(.95, .75, -.2); sp.userData.parado = true; B.tanquePeixes.add(sp); }
 }
 function passoAquario3D(dt, t) {
   const B = PRACA.bosque; if (!B || !B.tanque) return;
   if (B.tanquePeixes.userData.perfil !== perfil()) { B.tanquePeixes.userData.perfil = perfil(); montarPeixesAquario3D(); }
-  for (const sp of B.tanquePeixes.children) { const u = sp.userData; if (u.parado) continue; const x = Math.sin(t * u.vel + u.fase) * (TANQUE.w / 2 - .25); sp.position.set(x, u.y + Math.sin(t * 2 + u.fase) * .05, u.z); sp.scale.x = Math.abs(sp.scale.x) * (Math.cos(t * u.vel + u.fase) > 0 ? -1 : 1); }
+  for (const sp of B.tanquePeixes.children) { const u = sp.userData; if (u.parado) continue; const x = Math.sin(t * u.vel + u.fase) * (TANQUE.w / 2 - .25); sp.position.set(x, u.y + Math.sin(t * 2 + u.fase) * .05, u.z); const inv = Math.cos(t * u.vel + u.fase) < 0; if (u.inv !== inv) { u.inv = inv; sp.material.map = texPeixe(sp.userData.k, inv); } }
   B.tanque.children.forEach(m => { if (m.userData.alga !== undefined) m.rotation.z = Math.sin(t * 1.5 + m.userData.alga) * .15; });
   if (Math.random() < dt * 3 && B.bolhasT.length < 12) { const b = new THREE.Mesh(new THREE.SphereGeometry(.03, 6, 4), new THREE.MeshBasicMaterial({ color: "#ffffff", transparent: true, opacity: .7 })); b.position.set((Math.random() - .5) * TANQUE.w * .8, .65, (Math.random() - .5) * TANQUE.d * .6); B.tanque.add(b); B.bolhasT.push(b); }
   B.bolhasT = B.bolhasT.filter(b => { b.position.y += dt * .5; b.position.x += Math.sin(t * 5 + b.id) * dt * .05; if (b.position.y < .5 + TANQUE.h - .1) return true; B.tanque.remove(b); b.material.dispose(); return false; });
@@ -8185,7 +8394,7 @@ function passoAquario3D(dt, t) {
 function animarAquarioPainel() {
   const cv = $("aq-cv"); if (!cv || cv.dataset.on) return; cv.dataset.on = "1";
   const c = cv.getContext("2d"), W = cv.width, H = cv.height, aq = (G.peixes || {})[perfil()] || {}, peixes = [];
-  for (const p of PEIXES) if (aq[p.k] && p.k !== "bota") for (let i = 0; i < Math.min(3, aq[p.k]); i++) peixes.push({ ic: p.ic, x: Math.random() * W, y: 40 + Math.random() * (H - 110), v: (20 + Math.random() * 40) * (Math.random() < .5 ? -1 : 1), tam: 40 + Math.min(40, ((aq.max || {})[p.k] || 20) / 3), f: Math.random() * 9 });
+  for (const p of PEIXES) if (aq[p.k] && p.k !== "bota") for (let i = 0; i < Math.min(3, aq[p.k]); i++) peixes.push({ k: p.k, ic: p.ic, x: Math.random() * W, y: 40 + Math.random() * (H - 110), v: (20 + Math.random() * 40) * (Math.random() < .5 ? -1 : 1), tam: 40 + Math.min(40, ((aq.max || {})[p.k] || 20) / 3), f: Math.random() * 9 });
   const bolhas = Array.from({ length: 14 }, () => ({ x: Math.random() * W, y: H - Math.random() * H, r: 2 + Math.random() * 4, v: 20 + Math.random() * 30 }));
   let ult = performance.now();
   const quadro = ts => {
@@ -8194,10 +8403,10 @@ function animarAquarioPainel() {
     c.fillStyle = "rgba(255,255,255,.08)"; for (let i = 0; i < 5; i++) { c.beginPath(); c.moveTo(60 + i * 130 + Math.sin(t + i) * 20, 0); c.lineTo(100 + i * 130 + Math.sin(t + i) * 20, 0); c.lineTo(40 + i * 130, H); c.lineTo(0 + i * 130, H); c.fill(); }   // raios de sol
     c.fillStyle = "#e8d8a8"; c.beginPath(); c.moveTo(0, H - 34); for (let x = 0; x <= W; x += 40) c.lineTo(x, H - 34 + Math.sin(x * .05) * 6); c.lineTo(W, H); c.lineTo(0, H); c.fill();
     for (let i = 0; i < 7; i++) { const bx = 40 + i * 95; c.strokeStyle = i % 2 ? "#2f8a3a" : "#3fa34d"; c.lineWidth = 7; c.lineCap = "round"; c.beginPath(); c.moveTo(bx, H - 30); c.quadraticCurveTo(bx + Math.sin(t * 1.5 + i) * 16, H - 80, bx + Math.sin(t * 1.5 + i + 1) * 10, H - 110 - (i % 3) * 20); c.stroke(); }
-    c.font = "30px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("🪨", W - 70, H - 38); c.fillText("🐚", 120, H - 30); if (aq.bota) c.fillText("👢", W - 150, H - 36);
+    c.font = "30px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("🪨", W - 70, H - 38); c.drawImage(canvasPeixe("concha"), 90, H - 52, 64, 32); if (aq.bota) c.drawImage(canvasPeixe("bota"), W - 190, H - 70, 80, 40);
     for (const b of bolhas) { b.y -= b.v * dt; b.x += Math.sin(t * 3 + b.r) * .3; if (b.y < -5) { b.y = H; b.x = Math.random() * W; } c.strokeStyle = "rgba(255,255,255,.7)"; c.lineWidth = 1.5; c.beginPath(); c.arc(b.x, b.y, b.r, 0, Math.PI * 2); c.stroke(); }
     for (const p of peixes) { p.x += p.v * dt; if (p.x < 20 || p.x > W - 20) p.v *= -1; p.x = Math.max(20, Math.min(W - 20, p.x));
-      c.save(); c.translate(p.x, p.y + Math.sin(t * 2 + p.f) * 6); c.scale(p.v > 0 ? -1 : 1, 1); c.font = p.tam + "px sans-serif"; c.fillText(p.ic, 0, 0); c.restore(); }
+      c.save(); c.translate(p.x, p.y + Math.sin(t * 2 + p.f) * 6); c.scale(p.v > 0 ? 1 : -1, 1); const w = p.tam * 2.4, h = p.tam * 1.2; c.translate(-w / 2, -h / 2); desenharPeixeArte(c, p.k, w, h, t + p.f); c.restore(); }
     if (!peixes.length) { c.fillStyle = "rgba(11,27,51,.7)"; c.font = "800 22px Nunito, sans-serif"; c.fillText("Vá ao píer e pesque o seu primeiro peixe! 🎣", W / 2, H / 2); }
     requestAnimationFrame(quadro);
   };
@@ -8312,10 +8521,10 @@ function passoBosque(dt, t) {
   B.barco.rotation.z = Math.sin(t * 1.3) * .06; B.barco.position.y = .1 + Math.sin(t * 1.7) * .04; B.barco.rotation.y = Math.sin(t * .2) * .4;
   B.agua.material.emissive.setRGB(.05, .22 + .03 * Math.sin(t * 2), .35 + .04 * Math.sin(t * 2));
   // pescaria e aquário
-  passoPesca(dt, t); passoAquario3D(dt, t); passoMar(dt, t);
-  if (B.pulos) B.pulos = B.pulos.filter(j => { j.t += dt; const q = Math.min(1, j.t / .8); j.sp.position.lerpVectors(j.de, j.para, q); j.sp.position.y += Math.sin(Math.PI * q) * 2.2; j.sp.material.rotation += dt * 6; if (q < 1) return true; PRACA.cena.remove(j.sp); j.sp.material.dispose(); return false; });
+  passoPesca(dt, t); passoAquario3D(dt, t); passoMar(dt, t); passoPesca2(dt, t);
+  if (B.pulos) B.pulos = B.pulos.filter(j => { j.t += dt; const q = Math.min(1, j.t / .8); j.sp.position.lerpVectors(j.de, j.para, q); j.sp.position.y += Math.sin(Math.PI * q) * 2.2; j.sp.material.rotation = (.5 - q) * 1.3 * (j.sp.material.map && j.sp.material.map.repeat.x < 0 ? -1 : 1); if (q < 1) return true; PRACA.cena.remove(j.sp); j.sp.material.dispose(); return false; });
   // peixinho pulando de vez em quando no lago
-  B.tPeixe = (B.tPeixe ?? 3) - dt; if (B.tPeixe <= 0) { B.tPeixe = 4 + Math.random() * 5; const a = Math.random() * Math.PI * 2, x = LAGO.x + Math.cos(a) * LAGO.rx * .5, z = LAGO.z + Math.sin(a) * LAGO.rz * .5, sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTextoSemana("🐟"), transparent: true, depthWrite: false })); sp.scale.setScalar(.6); PRACA.cena.add(sp); B.pulos = B.pulos || []; B.pulos.push({ sp, de: new THREE.Vector3(x, 0, z), para: new THREE.Vector3(x + 1.4, 0, z), t: 0 }); }
+  B.tPeixe = (B.tPeixe ?? 3) - dt; if (B.tPeixe <= 0) { B.tPeixe = 4 + Math.random() * 5; const a = Math.random() * Math.PI * 2, x = LAGO.x + Math.cos(a) * LAGO.rx * .5, z = LAGO.z + Math.sin(a) * LAGO.rz * .5, sp = spritePeixe(Math.random() < .7 ? "peixinho" : "dourado", .3); PRACA.cena.add(sp); B.pulos = B.pulos || []; B.pulos.push({ sp, de: new THREE.Vector3(x, 0, z), para: new THREE.Vector3(x + 1.4, 0, z), t: 0 }); }
   passoLabirinto(dt);
   // carrinho: o seu e o dos amigos
   if (PRACA.kart) { vestirKart(eu.m, corDoKart(eu.info && eu.info.skin), PRACA.kart.v); passoKartCorrida(dt); }
@@ -8331,6 +8540,276 @@ abrirPraca = function () {
 };
 const _fecharPracaAntes = fecharPraca;
 fecharPraca = function (irLobby) { PRACA.kart = null; PRACA.pesca = null; PRACA.lab = null; return _fecharPracaAntes(irLobby); };
+/* ===================== Pescaria 2 (pedido do Andre): barco e ilhas, nível de pescador, avaliador, encantar a vara,
+   clima e eventos, pedidos do pescador, armadilhas e mapa do tesouro ===================== */
+// peixes das ilhas e do evento
+PEIXES.push(
+  { k: "cirurgiao", ic: "🐟", nome: "Cirurgião-azul", z: "recife", r: 1, p: 26, m: 8, tam: [10, 30], f: 1.1 },
+  { k: "anjo", ic: "🐠", nome: "Peixe-anjo", z: "recife", r: 2, p: 13, m: 16, tam: [12, 35], f: 1.3 },
+  { k: "papagaio", ic: "🐠", nome: "Peixe-papagaio", z: "recife", r: 2, p: 12, m: 18, tam: [20, 60], f: 1.5 },
+  { k: "leao", ic: "🐡", nome: "Peixe-leão", z: "recife", r: 3, p: 4, m: 45, tam: [20, 40], f: 2.2 },
+  { k: "bacalhau", ic: "🐟", nome: "Bacalhau", z: "gelo", r: 1, p: 28, m: 7, tam: [30, 90], f: 1.2 },
+  { k: "salmao", ic: "🐟", nome: "Salmão", z: "gelo", r: 2, p: 14, m: 18, tam: [40, 100], f: 1.6 },
+  { k: "peixegelo", ic: "🧊", nome: "Peixe-de-gelo", z: "gelo", r: 3, p: 5, m: 50, tam: [20, 50], f: 2.1 },
+  { k: "narval", ic: "🐋", nome: "Narval", z: "gelo", r: 4, p: .7, m: 220, tam: [300, 550], f: 3.2 },
+  { k: "obsidiana", ic: "🐟", nome: "Peixe-obsidiana", z: "vulcao", r: 1, p: 26, m: 9, tam: [10, 30], f: 1.2 },
+  { k: "brasa", ic: "🔥", nome: "Peixe-brasa", z: "vulcao", r: 2, p: 14, m: 20, tam: [15, 45], f: 1.6 },
+  { k: "magma", ic: "🌋", nome: "Tubarão-de-magma", z: "vulcao", r: 3, p: 5, m: 55, tam: [40, 120], f: 2.4 },
+  { k: "dragaomar", ic: "🐉", nome: "Dragão-do-mar", z: "vulcao", r: 4, p: .6, m: 240, tam: [200, 600], f: 3.4 },
+  { k: "cometa", ic: "🌠", nome: "Peixe-cometa", z: "todos", r: 4, p: 3, m: 180, tam: [30, 60], f: 2.8, evento: "estrelas" });
+Object.assign(PEIXE_TAM, Object.fromEntries(PEIXES.map(p => [p.k, [p.tam[0], p.tam[1], p.f]])));
+Object.assign(ARTE_PEIXE, {
+  cirurgiao: { L: 58, h: 24, cima: "#1f5fd0", barriga: "#3d8ff0", nad: "#ffd23f", borda: "#0b1b33", rabo: "garfo" },
+  anjo: { L: 46, h: 34, cima: "#ffd23f", barriga: "#fff3a0", nad: "#3d9bff", listras: ["#3d9bff"], borda: "#0b3b8a", rabo: "redondo" },
+  papagaio: { L: 64, h: 26, cima: "#2ab0a0", barriga: "#9ff0c0", nad: "#ff7ad9", rabo: "garfo" },
+  leao: { L: 56, h: 24, cima: "#b8321e", barriga: "#fff0e0", nad: "#e8a080", listras: ["#fff4ea"], borda: "#6a1a0e", espinhos: true, rabo: "redondo" },
+  bacalhau: { L: 72, h: 20, cima: "#6f7a5a", barriga: "#e8e6d8", nad: "#8a8f70", pintas: "#4a5038", rabo: "garfo", linha: true },
+  salmao: { L: 74, h: 21, cima: "#5a7088", barriga: "#ff9a7a", nad: "#7a8ea0", pintas: "#2a3a4a", rabo: "garfo", linha: true },
+  peixegelo: { L: 66, h: 20, cima: "#bfe8ff", barriga: "#ffffff", nad: "#e0f6ff", rabo: "fita", transp: .55, olhoBrilho: "#7fe0ff" },
+  narval: { L: 84, h: 22, cima: "#8a9aa8", barriga: "#eef2f5", nad: "#7a8a98", rabo: "cauda", pintas: "#5a6a78", chifre: true, olhoPequeno: true },
+  obsidiana: { L: 60, h: 22, cima: "#1a1a22", barriga: "#3a3a48", nad: "#ff6a2a", rabo: "garfo", rachas: "#ff7a1a" },
+  brasa: { L: 62, h: 24, cima: "#ff3a1a", barriga: "#ffb03b", nad: "#ffd23f", rabo: "fita", brilho: "#ffe0a0" },
+  magma: { L: 76, h: 26, cima: "#2a1410", barriga: "#4a2018", nad: "#ff5a1a", rachas: "#ffb03b", rabo: "tubarao", dorsalGrande: true },
+  dragaomar: { L: 82, h: 20, cima: "#c0201a", barriga: "#ffcf3f", nad: "#ffd23f", rabo: "fita", chifre: true, espinhos: true, borda: "#5a0a06" },
+  cometa: { L: 60, h: 22, cima: "#3a2a8a", barriga: "#c8b8ff", nad: "#ffe680", rabo: "fita", brilho: "#ffffff", pintas: "#ffffff", olhoBrilho: "#fff6b0" } });
+// chifre e rachaduras de lava (por cima do desenho genérico)
+const _peixeGenericoAntes = peixeGenerico;
+peixeGenerico = function (c, a, t) {
+  if (a.chifre) { c.save(); c.strokeStyle = "#f2ead6"; c.lineWidth = 3.5; c.beginPath(); c.moveTo(105 + a.L - 4, 48); c.lineTo(199, 42); c.stroke(); c.strokeStyle = "rgba(160,140,100,.6)"; c.lineWidth = 1; for (let i = 0; i < 6; i++) { c.beginPath(); c.moveTo(105 + a.L + i * 6, 46.5 - i * .4); c.lineTo(108 + a.L + i * 6, 48 - i * .4); c.stroke(); } c.restore(); }
+  _peixeGenericoAntes(c, a, t);
+  if (a.rachas) { c.save(); c.strokeStyle = a.rachas; c.shadowColor = a.rachas; c.shadowBlur = 6; c.lineWidth = 1.6; [[70, 40, 90, 52, 84, 62], [110, 36, 122, 50, 112, 62], [140, 42, 150, 54, 142, 60]].forEach(([x1, y1, x2, y2, x3, y3]) => { c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.lineTo(x3, y3); c.stroke(); }); c.restore(); }
+};
+/* ---------- lugares de pesca e ilhas ---------- */
+const ILHAS = {
+  recife: { x: -52, z: -26, r: 6, nome: "Ilha do Recife", ic: "🪸", nivel: 2, chao: "#f2e2b4" },
+  gelo: { x: -32, z: -48, r: 6, nome: "Ilha de Gelo", ic: "🧊", nivel: 4, chao: "#eef6ff" },
+  vulcao: { x: -55, z: -44, r: 6, nome: "Ilha do Vulcão", ic: "🌋", nivel: 6, chao: "#3a3030" } };
+const pontoIlha = k => ({ x: ILHAS[k].x, z: ILHAS[k].z - ILHAS[k].r + .6 });
+const chegadaIlha = k => ({ x: ILHAS[k].x, z: ILHAS[k].z + ILHAS[k].r - 1.6 });
+function pontoPesca(z) { return z === "mar" ? PESCA_MAR : ILHAS[z] ? pontoIlha(z) : PESCA_LUGAR; }
+const nomeLugarPesca = z => z === "lago" ? "🏞️ Lago" : z === "mar" ? "🌊 Mar" : ILHAS[z] ? `${ILHAS[z].ic} ${ILHAS[z].nome}` : "🏞️🌊 Todos os lugares";
+lugarPesca = function (eu) { for (const k of Object.keys(ILHAS)) { const p = pontoIlha(k); if (Math.hypot(eu.x - p.x, eu.z - p.z) < 2.4) return k; } return Math.hypot(eu.x - PESCA_MAR.x, eu.z - PESCA_MAR.z) < 2.4 ? "mar" : "lago"; };
+const naIlha = (x, z) => Object.values(ILHAS).some(i => Math.hypot(x - i.x, z - i.z) < i.r - .3);
+const _pracaLivrePesca2 = pracaLivre;
+pracaLivre = function (x, z) { return naIlha(x, z) || _pracaLivrePesca2(x, z); };
+/* ---------- nível de pescador ---------- */
+const TITULOS_PESCA = [[1, "Iniciante"], [3, "Pescador"], [5, "Pescador experiente"], [8, "Mestre pescador"], [12, "Lenda dos mares"]];
+const xpPara = n => Math.round(25 * Math.pow(Math.max(0, n - 1), 1.7));
+function xpPescaDe(nome) { G.pescaXp = G.pescaXp || {}; return G.pescaXp[nome] || 0; }
+function nivelPesca(nome) { const xp = xpPescaDe(nome); let n = 1; while (n < 40 && xp >= xpPara(n + 1)) n++; return n; }
+const tituloPesca = n => TITULOS_PESCA.filter(([m]) => n >= m).pop()[1];
+function ganharXpPesca(nome, xp) {
+  const antes = nivelPesca(nome); G.pescaXp[nome] = xpPescaDe(nome) + Math.round(xp); const depois = nivelPesca(nome);
+  if (depois > antes) { const premio = 20 * depois; G.banco[nome] = Math.round(((G.banco[nome] || 0) + premio) * 10) / 10;
+    setTimeout(() => toast(`⭐ Nível ${depois} de pescador: ${tituloPesca(depois)}! +${premio} moedas${Object.values(ILHAS).some(i => i.nivel === depois) ? " · ilha nova liberada no barco ⛵" : ""}`), 1200);
+    if (typeof sfxVitoria === "function") sfxVitoria(); }
+  return ` +${Math.round(xp)} XP`;
+}
+const xpDoPeixe = (px, esp) => [2, 5, 12, 30, 80][px.r] * (esp ? 1.5 : 1);
+VARAS.find(v => v.k === "fibra").nivel = 2; VARAS.find(v => v.k === "ouro").nivel = 5; VARAS.find(v => v.k === "abismo").nivel = 8;
+/* ---------- encantamentos da vara ---------- */
+const ENCANTOS = [
+  { k: "sortudo", ic: "🍀", nome: "Sortudo", dica: "+20% de sorte", sorte: .2, peso: 23 }, { k: "rapido", ic: "⏱️", nome: "Rápido", dica: "o peixe morde 30% mais rápido", vel: 1.3, peso: 23 },
+  { k: "forte", ic: "💪", nome: "Forte", dica: "puxa 25% mais forte", forca: 1.25, peso: 23 }, { k: "brilhante", ic: "✨", nome: "Brilhante", dica: "o dobro de peixe especial", esp: 2, peso: 15 },
+  { k: "largo", ic: "📏", nome: "Largo", dica: "barrinha maior", controle: .05, peso: 15 }, { k: "mestre", ic: "👑", nome: "Mestre", dica: "um pouco de tudo (raro!)", sorte: .12, vel: 1.12, forca: 1.12, controle: .03, esp: 1.3, peso: 6 } ];
+const PRECO_ENCANTO = 500, NIVEL_ENCANTO = 3;
+function varaComEncanto(nome) {
+  const inv = invPesca(nome), b = VARAS.find(v => v.k === inv.vara) || VARAS[0], e = ENCANTOS.find(x => x.k === (inv.encantos || {})[b.k]);
+  if (!e) return b; return { ...b, sorte: b.sorte + (e.sorte || 0), controle: b.controle + (e.controle || 0), forca: b.forca * (e.forca || 1), vel: b.vel * (e.vel || 1), esp: e.esp || 1, enc: e };
+}
+/* ---------- clima e eventos (igual em todos os aparelhos: muda a cada 20 minutos) ---------- */
+const CLIMAS_PESCA = {
+  sol: { k: "sol", ic: "☀️", nome: "Tempo bom", dica: "Pescaria normal.", sorte: 0, esp: 1, vel: 1 },
+  chuva: { k: "chuva", ic: "🌧️", nome: "Chuva", dica: "Os peixes ficam animados: mais sorte e mordem mais rápido.", sorte: .15, esp: 1.2, vel: 1.25 },
+  neblina: { k: "neblina", ic: "🌫️", nome: "Neblina", dica: "Os peixes da noite aparecem até de dia!", sorte: .1, esp: 1, vel: 1 },
+  tempestade: { k: "tempestade", ic: "⛈️", nome: "Tempestade", dica: "Peixes lendários aparecem o dobro! Muita sorte.", sorte: .3, esp: 1.5, vel: 1, lend: 2 },
+  estrelas: { k: "estrelas", ic: "🌠", nome: "Chuva de estrelas", dica: "EVENTO! O Peixe-cometa aparece e os especiais vêm 3x mais.", sorte: .4, esp: 3, vel: 1.1 } };
+function climaPesca() {
+  if (window.PESCA_CLIMA_TESTE && CLIMAS_PESCA[window.PESCA_CLIMA_TESTE]) return CLIMAS_PESCA[window.PESCA_CLIMA_TESTE];
+  const slot = Math.floor(Date.now() / 1200000), h = (Math.sin(slot * 12.9898) * 43758.5453) % 1, r = Math.abs(h);
+  return CLIMAS_PESCA[r < .45 ? "sol" : r < .68 ? "chuva" : r < .82 ? "neblina" : r < .93 ? "tempestade" : ehNoite() ? "estrelas" : "sol"];
+}
+/* ---------- armadilhas (gaiolas) ---------- */
+const GAIOLA_PRECO = 150, GAIOLA_MAX = 3, GAIOLA_MIN = 4;
+function gaiolasDe(nome) { G.gaiolas = G.gaiolas || {}; return G.gaiolas[nome] = G.gaiolas[nome] || {}; }
+const lugarGaiola = z => { const p = pontoPesca(z); return { x: p.x, z: p.z + 2.4 }; };
+function prontaGaiola(g) { return Date.now() - g.desde >= GAIOLA_MIN * 60000; }
+/* ---------- pedidos do pescador ---------- */
+const VOVO = { x: -39, z: -1.4 };
+function pedidosDoDia() {
+  const dia = diaBR(); let s = [...dia].reduce((a, ch) => a * 31 + ch.charCodeAt(0), 7) % 2147483647; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  const ok = PEIXES.filter(p => p.r >= 1 && p.r <= 3 && !p.evento && p.k !== "bau"), faceis = ok.filter(p => p.r <= 2), dificeis = ok.filter(p => p.r === 3), l = [];
+  while (l.length < 2) { const p = faceis[Math.floor(rnd() * faceis.length)]; if (!l.includes(p)) l.push(p); }
+  l.push(dificeis[Math.floor(rnd() * dificeis.length)]);
+  return l.map(p => ({ p, moedas: Math.round(p.m * 4), xp: Math.round(xpDoPeixe(p) * 2) }));
+}
+function pedidosFeitos(nome) { G.pedPesca = G.pedPesca || {}; const e = G.pedPesca[nome]; if (!e || e.dia !== diaBR()) G.pedPesca[nome] = { dia: diaBR(), feitos: [] }; return G.pedPesca[nome].feitos; }
+/* ---------- mapa do tesouro ---------- */
+const MAPA_LUGARES = [
+  { dica: "Na Ilha do Recife, perto das palmeiras", ilha: "recife", dx: 2.5, dz: 1.5 }, { dica: "Na Ilha de Gelo, do lado do cristal grande", ilha: "gelo", dx: -2.5, dz: .5 },
+  { dica: "Na Ilha do Vulcão, no pé do vulcão", ilha: "vulcao", dx: 2.8, dz: -1 }, { dica: "No Bosque, perto da cerca do sul, longe do lago", x: -43, z: -15.2 },
+  { dica: "Na Praça, atrás das placas de classificação", x: 0, z: -15.5 }, { dica: "No Parque, perto da roda-gigante", x: 43, z: -3.5 },
+  { dica: "No Bosque, perto da praia e do píer do mar", x: -23, z: -15.5 }, { dica: "Na Praça, pertinho do chafariz", x: 4.5, z: 4.5 } ];
+function posMapa(i) { const m = MAPA_LUGARES[i]; return m.ilha ? { x: ILHAS[m.ilha].x + m.dx, z: ILHAS[m.ilha].z + m.dz } : { x: m.x, z: m.z }; }
+function mapasDe(nome) { G.mapas = G.mapas || {}; return G.mapas[nome] = Array.isArray(G.mapas[nome]) ? G.mapas[nome] : []; }
+function talvezMapa(nome, px) {
+  if (px.r < 1 || px.k === "bau") return ""; const ms = mapasDe(nome); if (ms.length >= 3 || Math.random() > .035 + (climaPesca().k === "tempestade" ? .03 : 0)) return "";
+  ms.push(Math.floor(Math.random() * MAPA_LUGARES.length)); return " · 🗺️ Achou um mapa do tesouro!";
+}
+/* ---------- avaliador ---------- */
+const custoAvaliar = x => Math.max(10, Math.round(x.v * .4));
+function avaliarPeixe(x) {
+  const p = PEIXES.find(q => q.k === x.k); if (!p) return "nada"; const r = Math.random();
+  if (r < .4) { const novo = Math.round(Math.min(p.tam[1] * 1.3 * (x.esp === "gigante" ? 2 : 1), Math.max(p.tam[0], x.tam * (.9 + Math.random() * .5)))); const ant = x.tam; x.tam = novo; x.v = valorPeixe(p, x.tam, ESPECIAIS_PEIXE.find(e => e.k === x.esp)); return novo > ant ? "maior" : novo < ant ? "menor" : "nada"; }
+  if (r < .55 && !x.esp) { const e = sortearEspecial(6) || ESPECIAIS_PEIXE[0]; x.esp = e.k; if (e.tam) x.tam = Math.round(x.tam * e.tam); x.v = valorPeixe(p, x.tam, e); return "especial"; }
+  return "nada";
+}
+/* ---------- tudo junto nas telas ---------- */
+function lojaPesca2Corpo(aba, nome, inv) {
+  if (aba === "avaliar") { const mo = mochilaDe(nome);
+    return `<p class="lb-sub">🔍 O avaliador olha o seu peixe com a lupa. Às vezes ele fica <b>maior</b>, às vezes vira <b>especial</b>… e às vezes não muda nada!</p>${PRACA.avalRes ? `<p class="pp-res">${PRACA.avalRes}</p>` : ""}` +
+      (mo.length ? `<div class="aq-grid">${mo.map((x, i) => { const p = PEIXES.find(q => q.k === x.k) || PEIXES[0], e = x.esp && ESPECIAIS_PEIXE.find(q => q.k === x.esp);
+        return `<button type="button" class="aq-card" data-a="pescaAvaliar" data-i="${i}"><img class="aq-img${e ? " pp-esp-" + e.k : ""}" src="${urlPeixe(p.k)}" alt=""><b>${e ? e.ic + " " : ""}${esc(p.nome)}</b><small>${fmtTam(x.tam)} · 🪙 ${x.v}</small><small>🔍 custa ${custoAvaliar(x)}</small></button>`; }).join("")}</div>` : `<p class="lb-sub">🎒 A mochila está vazia.</p>`); }
+  if (aba === "encantar") { const v = varaComEncanto(nome), nv = nivelPesca(nome);
+    return `<div class="pp-item"><span class="aq-ic">${v.ic}</span><div><b>${esc(v.nome)}</b><small>${v.enc ? `Encanto: ${v.enc.ic} ${v.enc.nome} (${v.enc.dica})` : "Sem encanto"}</small></div><span></span></div>
+      ${PRACA.encRes ? `<p class="pp-res">${PRACA.encRes}</p>` : ""}
+      <button class="lb-comprar" data-a="pescaEncantar" ${nv < NIVEL_ENCANTO ? "disabled" : ""}>${nv < NIVEL_ENCANTO ? `🔒 Nível ${NIVEL_ENCANTO} de pescador` : `✨ Encantar por 🪙 ${PRACA_ENC_TXT(v)}`}</button>
+      <p class="lb-sub">Sorteia um encanto para a vara que você está usando (troca o que ela já tem):</p>${ENCANTOS.map(e => `<p class="pp-mini">${e.ic} <b>${e.nome}</b>: ${e.dica}</p>`).join("")}`; }
+  if (aba === "gaiolas") { const n = invPesca(nome).gaiolas || 0, postas = Object.keys(gaiolasDe(nome)).length;
+    return `<p class="lb-sub">🦀 A gaiola fica na água e pega bichos sozinha. Ponha no começo de um píer (lago, mar ou ilha) e volte em ${GAIOLA_MIN} minutos para recolher.</p>
+      <div class="pp-item"><span class="aq-ic">🦀</span><div><b>Gaiolas: ${n} (${postas} na água)</b><small>Máximo ${GAIOLA_MAX}</small></div><button class="lb-comprar" data-a="pescaGaiola" ${n >= GAIOLA_MAX ? "disabled" : ""}>${n >= GAIOLA_MAX ? "Máximo" : `🪙 ${GAIOLA_PRECO}`}</button></div>`; }
+  return "";
+}
+const PRACA_ENC_TXT = () => PRECO_ENCANTO;
+acoes.pescaAvaliar = el => { const nome = perfil(), mo = mochilaDe(nome), x = mo[+el.dataset.i]; if (!x) return; const c = custoAvaliar(x);
+  if ((G.banco[nome] || 0) < c) { toast("Faltam moedas para avaliar"); return; } G.banco[nome] = Math.round(((G.banco[nome] || 0) - c) * 10) / 10;
+  const p = PEIXES.find(q => q.k === x.k), r = avaliarPeixe(x), e = x.esp && ESPECIAIS_PEIXE.find(q => q.k === x.esp);
+  PRACA.avalRes = r === "maior" ? `📈 O ${esc(p.nome)} ficou maior: ${fmtTam(x.tam)}! Agora vale 🪙 ${x.v}` : r === "menor" ? `📉 Ih, o ${esc(p.nome)} encolheu: ${fmtTam(x.tam)} (vale 🪙 ${x.v})` : r === "especial" ? `🌟 UAU! O ${esc(p.nome)} virou ${e.ic} ${e.nome}! Vale 🪙 ${x.v}` : `🤷 O avaliador olhou, olhou… e não mudou nada.`;
+  if (typeof bip === "function") bip(r === "nada" ? 300 : 900, .08); salvarPlacar(); };
+acoes.pescaEncantar = () => { const nome = perfil(), inv = invPesca(nome); if (nivelPesca(nome) < NIVEL_ENCANTO) return;
+  if ((G.banco[nome] || 0) < PRECO_ENCANTO) { toast("Faltam moedas para encantar"); return; } G.banco[nome] = Math.round(((G.banco[nome] || 0) - PRECO_ENCANTO) * 10) / 10;
+  let x = Math.random() * ENCANTOS.reduce((a, e) => a + e.peso, 0), e = ENCANTOS[0]; for (const q of ENCANTOS) { x -= q.peso; if (x <= 0) { e = q; break; } }
+  inv.encantos = inv.encantos || {}; inv.encantos[inv.vara] = e.k; PRACA.encRes = `✨ A vara ganhou o encanto ${e.ic} <b>${e.nome}</b>: ${e.dica}!`; if (typeof sfxVitoria === "function") sfxVitoria(); salvarPlacar(); };
+acoes.pescaGaiola = () => { const nome = perfil(), inv = invPesca(nome); if ((inv.gaiolas || 0) >= GAIOLA_MAX) return; if ((G.banco[nome] || 0) < GAIOLA_PRECO) { toast("Faltam moedas para a gaiola"); return; }
+  G.banco[nome] = Math.round(((G.banco[nome] || 0) - GAIOLA_PRECO) * 10) / 10; inv.gaiolas = (inv.gaiolas || 0) + 1; toast("🦀 Comprou uma gaiola! Ponha no começo de um píer."); salvarPlacar(); };
+function porGaiola(z) { const nome = perfil(), g = gaiolasDe(nome), inv = invPesca(nome); if (g[z]) return; if (Object.keys(g).length >= (inv.gaiolas || 0)) { toast("🦀 Compre uma gaiola na Loja de pesca"); return; }
+  g[z] = { desde: Date.now() }; salvar(); toast(`🦀 Gaiola na água! Volte em ${GAIOLA_MIN} minutos.`); if (typeof bip === "function") bip(260, .1); }
+function recolherGaiola(z) {
+  const nome = perfil(), g = gaiolasDe(nome); if (!g[z]) return;
+  if (!prontaGaiola(g[z])) { const f = Math.ceil((GAIOLA_MIN * 60000 - (Date.now() - g[z].desde)) / 60000); toast(`⏳ Ainda vazia. Volte em ${f} min.`); return; }
+  delete g[z]; const lista = PEIXES.filter(p => (p.z === z || p.z === "todos") && p.r <= 2 && p.k !== "bau" && !p.evento && !p.noite), n = 2 + Math.floor(Math.random() * 3), pegos = [];
+  G.peixes = G.peixes || {}; const aq = G.peixes[nome] = G.peixes[nome] || {}; let xp = 0;
+  for (let i = 0; i < n; i++) { let x = Math.random() * lista.reduce((a, p) => a + p.p, 0), p = lista[0]; for (const q of lista) { x -= q.p; if (x <= 0) { p = q; break; } }
+    const tam = Math.round(p.tam[0] + (p.tam[1] - p.tam[0]) * Math.random() * .7); aq[p.k] = (aq[p.k] || 0) + 1; aq.max = aq.max || {}; if (!aq.max[p.k] || tam > aq.max[p.k]) aq.max[p.k] = tam;
+    const mo = mochilaDe(nome); if (mo.length < MOCHILA_MAX) mo.push({ k: p.k, tam, esp: null, v: valorPeixe(p, tam, null) }); pegos.push(p); xp += xpDoPeixe(p) * .5; }
+  ganharXpPesca(nome, xp); salvarPlacar(); montarPeixesAquario3D();
+  toast(`🦀 A gaiola pegou: ${pegos.map(p => p.nome).join(", ")}!`); if (typeof tocarNotas === "function") tocarNotas([[72, 84, 0, .2, "triangle"]]);
+}
+function pedidosHTML() {
+  const nome = perfil(), feitos = pedidosFeitos(nome), mo = mochilaDe(nome), nv = nivelPesca(nome);
+  return `<div class="mi-caixa"><p class="lb-sub">🧓 "Olá, ${esc(nome)}! Hoje eu quero estes peixes. Traga na mochila que eu pago bem!"</p>
+    <p class="pp-mini">⭐ Nível ${nv} · ${tituloPesca(nv)} · ${xpPescaDe(nome)} XP${nv < 40 ? ` (próximo nível: ${xpPara(nv + 1)})` : ""}</p>
+    ${pedidosDoDia().map((pd, i) => { const tem = mo.some(x => x.k === pd.p.k), feito = feitos.includes(i);
+      return `<div class="pp-item"><img class="aq-img" style="width:64px;height:32px" src="${urlPeixe(pd.p.k, !(G.peixes || {})[nome] || !((G.peixes[nome] || {})[pd.p.k]))}" alt=""><div><b>${esc(pd.p.nome)}</b><small>${nomeLugarPesca(pd.p.z)}${pd.p.noite ? " · 🌙" : ""} · 🪙 ${pd.moedas} · +${pd.xp} XP</small></div>
+        <button class="lb-comprar" data-a="pescaEntregar" data-i="${i}" ${feito || !tem ? "disabled" : ""}>${feito ? "✔ Feito" : tem ? "Entregar" : "Falta"}</button></div>`; }).join("")}
+    <p class="lb-sub">Os pedidos mudam todo dia.</p></div>`;
+}
+acoes.pescaEntregar = el => { const nome = perfil(), i = +el.dataset.i, pd = pedidosDoDia()[i], feitos = pedidosFeitos(nome), mo = mochilaDe(nome); if (!pd || feitos.includes(i)) return;
+  const j = mo.findIndex(x => x.k === pd.p.k); if (j < 0) return; mo.splice(j, 1); feitos.push(i);
+  G.banco[nome] = Math.round(((G.banco[nome] || 0) + pd.moedas) * 10) / 10; ganharXpPesca(nome, pd.xp); salvarPlacar();
+  toast(`🧓 "Muito obrigado!" +${pd.moedas} moedas, +${pd.xp} XP`); if (typeof sfxJogar === "function") sfxJogar(); };
+function viagemHTML() {
+  const nome = perfil(), nv = nivelPesca(nome), aqui = Object.keys(ILHAS).find(k => Math.hypot(PRACA.eu.x - ILHAS[k].x, PRACA.eu.z - ILHAS[k].z) < ILHAS[k].r + 2) || "bosque";
+  const dest = [["bosque", "🌳", "Píer do mar (Bosque)", 1, "Lago, mar e a Loja de pesca"]].concat(Object.entries(ILHAS).map(([k, i]) => [k, i.ic, i.nome, i.nivel, PEIXES.filter(p => p.z === k).map(p => p.nome).join(", ")]));
+  return `<div class="mi-caixa"><p class="lb-sub">⛵ Para onde vamos? (Nível ${nv} de pescador)</p>${dest.map(([k, ic, n, nivel, dica]) => `<div class="pp-item"><span class="aq-ic">${ic}</span><div><b>${esc(n)}</b><small>${esc(dica)}</small></div>
+    <button class="lb-comprar" data-a="pescaViajar" data-k="${k}" ${k === aqui || nv < nivel ? "disabled" : ""}>${k === aqui ? "Você está aqui" : nv < nivel ? `🔒 Nível ${nivel}` : "Ir ⛵"}</button></div>`).join("")}</div>`;
+}
+acoes.pescaViajar = el => { const k = el.dataset.k, nome = perfil(); if (ILHAS[k] && nivelPesca(nome) < ILHAS[k].nivel) return;
+  const dest = k === "bosque" ? { x: PESCA_MAR.x, z: PIER_MAR.z1 - 1.5 } : chegadaIlha(k); fecharPainelPraca();
+  const box = $("praca"), fl = document.createElement("div"); fl.className = "pp-viagem"; fl.innerHTML = `<b>⛵ Navegando…</b>`; box.appendChild(fl);
+  if (typeof tocarNotas === "function") tocarNotas([[60, 64, 0, .3, "sine"], [64, 67, .3, .3, "sine"], [67, 72, .6, .5, "sine"]]);
+  setTimeout(() => { const eu = PRACA.eu; eu.x = dest.x; eu.z = dest.z; eu.y = 0; eu.vy = 0; PRACA.yaw = 0; if (PRACA.eu.m.petW) PRACA.eu.m.petW = null; }, 600);
+  setTimeout(() => { fl.remove(); toast(k === "bosque" ? "⛵ De volta ao píer do mar!" : `${ILHAS[k].ic} Chegou na ${ILHAS[k].nome}!`); }, 1300); };
+const _lugaresPesca2 = lugaresPraca;
+lugaresPraca = function () {
+  const l = _lugaresPesca2(); if (PRACA.kart || PRACA.pesca || PRACA.naRoda) return l;
+  const nome = perfil(), g = gaiolasDe(nome), eu = PRACA.eu;
+  // mapa do tesouro: cavar quando está em cima do X
+  for (const i of mapasDe(nome)) { const p = posMapa(i); if (Math.hypot(eu.x - p.x, eu.z - p.z) < 1.6) l.unshift({ x: p.x, z: p.z, r: 1.6, txt: "⛏️ Cavar o tesouro!", abrir: () => cavarTesouro(i) }); }
+  for (const k of Object.keys(ILHAS)) { const p = pontoIlha(k), c = chegadaIlha(k); l.push({ x: p.x, z: p.z, r: 1.5, txt: `🎣 Pescar na ${ILHAS[k].nome}`, abrir: comecarPesca }, { x: c.x, z: c.z, r: 1.6, txt: "⛵ Barco", abrir: () => abrirPainelPraca("⛵ Barco", viagemHTML) }); }
+  l.push({ x: PESCA_MAR.x, z: PIER_MAR.z1 - 1.5, r: 1.2, txt: "⛵ Barco para as ilhas", abrir: () => abrirPainelPraca("⛵ Barco", viagemHTML) });
+  l.push({ x: VOVO.x, z: VOVO.z, r: 2, txt: "🧓 Pedidos do Vovô Pescador", abrir: () => abrirPainelPraca("🧓 Vovô Pescador", pedidosHTML) });
+  for (const z of ["lago", "mar", ...Object.keys(ILHAS)]) { const p = lugarGaiola(z), tem = g[z];
+    l.push({ x: p.x, z: p.z, r: 1, txt: tem ? (prontaGaiola(tem) ? "🦀 Recolher a gaiola (cheia!)" : "🦀 Ver a gaiola") : "🦀 Pôr gaiola", abrir: () => (tem ? recolherGaiola(z) : porGaiola(z)) }); }
+  return l;
+};
+function cavarTesouro(i) {
+  const nome = perfil(), ms = mapasDe(nome), j = ms.indexOf(i); if (j < 0) return; ms.splice(j, 1);
+  const v = 80 + Math.floor(Math.random() * 121), inv = invPesca(nome); G.banco[nome] = Math.round(((G.banco[nome] || 0) + v) * 10) / 10; inv.iscas.brilho = (inv.iscas.brilho || 0) + 3;
+  ganharXpPesca(nome, 40); salvarPlacar(); const p = posMapa(i);
+  if (typeof fogosPraca === "function") fogosPraca(p.x, 1, p.z, 50); if (typeof sfxVitoria === "function") sfxVitoria();
+  toast(`💰 TESOURO! +${v} moedas, +3 iscas brilhantes ✨ e +40 XP!`);
+}
+/* ---------- 3D: ilhas, Vovô, gaiolas, X do tesouro e o clima ---------- */
+function montarIlhas3D(s) {
+  const B = PRACA.bosque, add = (geo, cor, x, y, z, pai = s) => { const m = new THREE.Mesh(geo, typeof cor === "string" ? new THREE.MeshLambertMaterial({ color: cor }) : cor); m.position.set(x, y, z); pai.add(m); return m; };
+  for (const [k, il] of Object.entries(ILHAS)) {
+    const g = new THREE.Group(); g.position.set(il.x, 0, il.z); s.add(g);
+    add(new THREE.CylinderGeometry(il.r + .8, il.r + 1.4, .5, 28), k === "vulcao" ? "#2a2222" : "#e8d8a8", 0, -.15, 0, g);
+    add(new THREE.CylinderGeometry(il.r, il.r + .6, .3, 28), il.chao, 0, .1, 0, g);
+    const p = pontoIlha(k); add(new THREE.BoxGeometry(1.4, .15, 2.2), "#8a5a2b", p.x - il.x, .2, p.z - il.z - .2, g);
+    const barco = new THREE.Group(); barco.position.set(1.8, .1, il.r + .6); g.add(barco); add(new THREE.BoxGeometry(1, .35, 2), "#d9643a", 0, .1, 0, barco); add(new THREE.CylinderGeometry(.04, .04, 1.6, 6), "#6b4423", 0, 1, 0, barco);
+    const vela = add(new THREE.PlaneGeometry(.8, 1), new THREE.MeshLambertMaterial({ color: "#ffffff", side: THREE.DoubleSide }), 0, 1.2, .2, barco); vela.rotation.y = Math.PI / 2;
+    if (k === "recife") { for (const [x, z] of [[-3, -1], [2.5, 1.5], [-1, 3]]) { add(new THREE.CylinderGeometry(.12, .16, 2.4, 6), "#8a6a3a", x, 1.3, z, g); for (let i = 0; i < 5; i++) { const f = add(new THREE.ConeGeometry(.25, 1.6, 4), "#3fa34d", x, 2.5, z, g); f.rotation.z = Math.PI / 2.3; f.rotation.y = i * 1.25; } }
+      for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; add(new THREE.SphereGeometry(.35, 8, 6), ["#ff7a9a", "#ffb03b", "#c26dff"][i % 3], Math.cos(a) * (il.r + .3), .05, Math.sin(a) * (il.r + .3), g); } }
+    if (k === "gelo") { for (const [x, z, h] of [[-2.5, .5, 3.2], [2, -1.5, 2], [0, 2.5, 1.6], [-3, -2, 1.4]]) { const cr = add(new THREE.OctahedronGeometry(.7), new THREE.MeshLambertMaterial({ color: "#bfe8ff", transparent: true, opacity: .8, emissive: "#3a7aa0" }), x, h / 2 + .2, z, g); cr.scale.y = h / 1.4; } }
+    if (k === "vulcao") { add(new THREE.ConeGeometry(3, 4.5, 14), "#4a3a34", -1.5, 2.4, .5, g); B.lavaTopo = add(new THREE.CylinderGeometry(.6, .9, .2, 12), new THREE.MeshBasicMaterial({ color: "#ff6a1a" }), -1.5, 4.6, .5, g);
+      B.fumaca = []; for (let i = 0; i < 6; i++) { const f = add(new THREE.SphereGeometry(.5, 8, 6), new THREE.MeshLambertMaterial({ color: "#8a8a8a", transparent: true, opacity: .5 }), -1.5, 5 + i, .5, g); B.fumaca.push(f); } }
+    const pl = new THREE.Group(); pl.position.set(-1.6, 0, il.r - 1.2); g.add(pl); add(new THREE.BoxGeometry(.1, 1.3, .1), "#6b4423", 0, .65, 0, pl);
+    { const tx = texTexto(`${il.ic} ${il.nome}`, "#ffffff", "#0b6fa8", 512, 110, 44); add(new THREE.PlaneGeometry(2.2, .5), new THREE.MeshBasicMaterial({ map: tx }), 0, 1.4, .01, pl); add(new THREE.PlaneGeometry(2.2, .5), new THREE.MeshBasicMaterial({ map: tx }), 0, 1.4, -.01, pl).rotation.y = Math.PI; }
+  }
+  // Vovô Pescador
+  const v = pracaModelo({ nome: "🧓 Vovô Pescador", skin: "classico", cor: "#3f6f8f", pele: "#e8c39e" }); v.g.position.set(VOVO.x, 0, VOVO.z); v.corpo.rotation.y = Math.PI * .8; s.add(v.g); B.vovo = v;
+  const chapeu = new THREE.Group(); chapeu.position.y = 1.6; v.corpo.add(chapeu); add(new THREE.CylinderGeometry(.42, .42, .04, 16), "#d8b86a", 0, 0, 0, chapeu); add(new THREE.CylinderGeometry(.22, .25, .2, 14), "#d8b86a", 0, .1, 0, chapeu);
+  const vara = modeloVara(); v.corpo.add(vara);
+  B.gaiolasM = {}; B.xTesouro = {}; B.chuva = null;
+}
+function passoPesca2(dt, t) {
+  const B = PRACA.bosque, eu = PRACA.eu, nome = perfil(); if (!B) return;
+  if (PRACA.ceu) PRACA.ceu.position.set(eu.x, 0, eu.z); if (PRACA.ceuNoite) PRACA.ceuNoite.position.set(eu.x, 0, eu.z);   // o céu acompanha (as ilhas ficam longe do meio)
+  if (B.fumaca) B.fumaca.forEach((f, i) => { f.position.y += dt * .6; f.scale.setScalar(1 + (f.position.y - 5) * .25); f.material.opacity = Math.max(0, .55 - (f.position.y - 5) * .08); if (f.position.y > 11) f.position.y = 5; });
+  if (B.lavaTopo) B.lavaTopo.material.color.setRGB(1, .35 + .15 * Math.sin(t * 3), .1);
+  if (B.vovo) { B.vovo.corpo.rotation.y = Math.PI * .8 + Math.sin(t * .5) * .3; B.vovo.bracoD.rotation.x = .9; }
+  // gaiolas na água (boia laranja)
+  const g = gaiolasDe(nome);
+  for (const z of ["lago", "mar", ...Object.keys(ILHAS)]) { let m = B.gaiolasM[z];
+    if (g[z] && !m) { const p = pontoPesca(z); m = B.gaiolasM[z] = new THREE.Group(); m.position.set(p.x + 1.4, 0, p.z - .4); const bo = new THREE.Mesh(new THREE.SphereGeometry(.2, 10, 8), new THREE.MeshLambertMaterial({ color: "#ff8a1f" })); bo.position.y = .12; m.add(bo);
+      const cx = new THREE.Mesh(new THREE.BoxGeometry(.5, .3, .5), new THREE.MeshLambertMaterial({ color: "#c8c8c8", wireframe: true })); cx.position.y = -.1; m.add(cx); PRACA.cena.add(m); }
+    if (!g[z] && m) { PRACA.cena.remove(m); delete B.gaiolasM[z]; }
+    if (m) { m.position.y = Math.sin(t * 2 + z.length) * .05; m.children[0].material.color.set(prontaGaiola(g[z]) ? (Math.sin(t * 6) > 0 ? "#37d99a" : "#ff8a1f") : "#ff8a1f"); } }
+  // mapa do tesouro: X no chão e dica quente/frio
+  const ms = mapasDe(nome), dica = $("pr-mapa");
+  for (const i of Object.keys(B.xTesouro)) if (!ms.includes(+i)) { PRACA.cena.remove(B.xTesouro[i]); delete B.xTesouro[i]; }
+  for (const i of ms) if (!B.xTesouro[i]) { const p = posMapa(i), x = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.2), new THREE.MeshBasicMaterial({ map: texTexto("❌", "#c0392b", "rgba(0,0,0,0)", 128, 128, 100), transparent: true, depthWrite: false })); x.rotation.x = -Math.PI / 2; x.position.set(p.x, .08, p.z); PRACA.cena.add(x); B.xTesouro[i] = x; }
+  for (const [i, x] of Object.entries(B.xTesouro)) { const p = posMapa(+i), d = Math.hypot(eu.x - p.x, eu.z - p.z); x.visible = d < 9; x.material.opacity = Math.max(0, 1 - d / 9); }
+  if (dica) { if (ms.length) { const i = ms[0], p = posMapa(i), d = Math.hypot(eu.x - p.x, eu.z - p.z); dica.hidden = !!PRACA.pesca || !!PRACA.hist; dica.innerHTML = `<b>🗺️ ${esc(MAPA_LUGARES[i].dica)}</b><span>${d < 6 ? "🔥 Quente!" : d < 18 ? "🌡️ Morno" : "❄️ Frio"}</span>${ms.length > 1 ? `<span>+${ms.length - 1}</span>` : ""}`; } else dica.hidden = true; }
+  // clima da pescaria (só perto da água: Bosque, mar e ilhas)
+  const cl = climaPesca(), longe = eu.x > -19, cena = PRACA.cena;
+  if (!B.fogBase && cena.fog) B.fogBase = [cena.fog.near, cena.fog.far];
+  if (cena.fog && B.fogBase) { const neb = cl.k === "neblina" && !longe; cena.fog.near += ((neb ? 6 : B.fogBase[0]) - cena.fog.near) * Math.min(1, dt); cena.fog.far += ((neb ? 26 : B.fogBase[1]) - cena.fog.far) * Math.min(1, dt); }
+  const chove = (cl.k === "chuva" || cl.k === "tempestade") && !longe;
+  if (chove && !B.chuva) { const N = 500, pos = new Float32Array(N * 3); for (let i = 0; i < N; i++) { pos[i * 3] = (Math.random() - .5) * 36; pos[i * 3 + 1] = Math.random() * 18; pos[i * 3 + 2] = (Math.random() - .5) * 36; }
+    const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos, 3)); B.chuva = new THREE.Points(geo, new THREE.PointsMaterial({ color: "#a8d8ff", size: .1, transparent: true, opacity: .8, depthWrite: false })); cena.add(B.chuva); }
+  if (!chove && B.chuva) { cena.remove(B.chuva); B.chuva.geometry.dispose(); B.chuva = null; }
+  if (B.chuva) { const a = B.chuva.geometry.attributes.position; for (let i = 0; i < a.count; i++) { let y = a.getY(i) - 15 * dt; if (y < 0) y += 18; a.setY(i, y); } a.needsUpdate = true; B.chuva.position.set(eu.x, 0, eu.z);
+    if (cl.k === "tempestade") { B.tRaio = (B.tRaio ?? 6) - dt; if (B.tRaio <= 0) { B.tRaio = 6 + Math.random() * 8; const fl = document.createElement("div"); fl.className = "pr-flash"; fl.style.opacity = ".55"; $("praca").appendChild(fl); setTimeout(() => fl.remove(), 260); if (typeof ruido === "function" && typeof MUS !== "undefined" && MUS.ctx && somLigado()) ruido(MUS.ctx.currentTime + .2, 1.2, .25, "lowpass", 300); } } }
+  if (cl.k === "estrelas" && !longe) { B.tEstrela = (B.tEstrela ?? 1) - dt; if (B.tEstrela <= 0) { B.tEstrela = .6 + Math.random(); const x = eu.x + (Math.random() - .5) * 30, z = eu.z - 10 - Math.random() * 10; for (let i = 0; i < 6; i++) if (typeof faiscaPracaCor === "function") faiscaPracaCor(x + i * .4, 14 - i * .3, z, 6, -3, 0, 1.2, "#fff6b0"); } }
+  const bc = $("pr-clima"); if (bc) { bc.hidden = longe || !!PRACA.hist; bc.innerHTML = `${cl.ic} ${cl.nome}`; bc.title = cl.dica; }
+}
+// HUD: dica do mapa e o clima
+const _abrirPracaPesca2 = abrirPraca;
+abrirPraca = function () { _abrirPracaPesca2(); const box = $("praca"); if (!box || !PRACA.on) return; box.insertAdjacentHTML("beforeend", `<div class="pr-missao pr-mapa" id="pr-mapa" hidden></div><button type="button" class="pr-clima" id="pr-clima" hidden></button>`);
+  $("pr-clima").addEventListener("click", () => { const c = climaPesca(); toast(`${c.ic} ${c.nome}: ${c.dica}`); }); };
 </script>
 
 <script>
