@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="versao-site" content="93f3cc3820">
+<meta name="versao-site" content="f706dc1195">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0f3057">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;-webkit-text-size-adjust:100%}img{max-width:100%}[hidden]{display:none!important}.faixa-teste{position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:50;background:#ff4d6d;color:#fff;font:800 12px/1 system-ui,sans-serif;letter-spacing:.08em;padding:4px 10px;border-radius:0 0 8px 8px;pointer-events:none}</style>
@@ -466,6 +466,13 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .pp-pegou[hidden] { display: none; } .pp-pegou img { width: 220px; height: 110px; object-fit: contain; } .pp-pegou b { font: 900 22px Nunito, sans-serif; }
 @keyframes ppPegou { from { transform: translate(-50%, -50%) scale(.6); opacity: 0; } }
 .pp-esp-brilho { filter: drop-shadow(0 0 6px #fff) brightness(1.25); } .pp-esp-ouro { filter: sepia(1) saturate(4) hue-rotate(-8deg) brightness(1.15) drop-shadow(0 0 6px #ffd23f); }
+.pp-esp-eletrico { animation: ppEletrico .5s steps(2) infinite; } @keyframes ppEletrico { 50% { filter: drop-shadow(0 0 8px #ffe14d) brightness(1.5) saturate(1.5); } }
+.pp-esp-congelado { filter: hue-rotate(170deg) saturate(.6) brightness(1.4) drop-shadow(0 0 6px #9fe0ff); } .pp-esp-fantasma { opacity: .55; filter: grayscale(.6) brightness(1.4) drop-shadow(0 0 8px #e0f0ff); }
+.pp-esp-queimado { filter: sepia(.8) saturate(3) hue-rotate(-25deg) brightness(.85) drop-shadow(0 0 7px #ff5a1a); } .pp-esp-musgo { filter: hue-rotate(60deg) saturate(1.4) drop-shadow(0 0 5px #7dbb4c); }
+.pp-esp-cristal { filter: hue-rotate(200deg) saturate(2) brightness(1.3) drop-shadow(0 0 8px #c8a0ff); }
+.pr-chefe { top: 142px; border-color: #ffd23f; } .pr-chefe.on { background: rgba(120,20,40,.9); animation: prChefe 1s ease-in-out infinite alternate; } @keyframes prChefe { to { box-shadow: 0 0 16px #ffd23f; } }
+.pp-hist { border: 2px solid #ffd23f; margin-bottom: 8px; }
+@media (prefers-reduced-motion: reduce) { .pp-esp-eletrico, .pr-chefe.on { animation: none; } }
 .pp-esp-arco { animation: ppArco 2s linear infinite; } .pp-esp-gigante { transform: scale(1.12); filter: drop-shadow(0 0 5px #3d9bff); }
 @keyframes ppArco { to { filter: hue-rotate(360deg) drop-shadow(0 0 6px #ff7ad9); } }
 @media (prefers-reduced-motion: reduce) { .pp-pegou, .pp-esp-arco { animation: none; } }
@@ -1704,7 +1711,7 @@ const skinInfo = k => SKINS.find(s => s.k === k) || SKINS[0];
 /* Robôs vestem skins do jogo: cada um sorteia uma (sem repetir, se der) a cada partida e fica igual a um jogador */
 const roboVestido = p => !p.humano && !!p.skin && p.skin !== "classico";
 function vestirRobos(lista) {
-  const pool = SKINS.filter(x => x.k !== "classico" && !x.secreto && !x.codigo), usadas = new Set();
+  const pool = SKINS.filter(x => x.k !== "classico" && !x.secreto && !x.codigo && !x.adm), usadas = new Set();
   lista.filter(p => !p.humano).forEach(p => { const livres = pool.filter(x => !usadas.has(x.k)), x = (livres.length ? livres : pool)[Math.floor(Math.random() * (livres.length || pool.length))]; usadas.add(x.k); vestir(p, x.k); });
 }
 /* skin "base" (a original de uma versão Neon) para enfeites, efeitos e pets */
@@ -6074,7 +6081,7 @@ TELAS.loja = () => {
     </div>
     <div class="loja-sec" data-sec="skins"${secOculta("skins")}>
     <h2 class="lb-secao">Skins</h2>
-    <div class="fd-grid">${SKINS.filter(s => !s.secreto && !s.variante && (!s.codigo || temSkin(nome, s.k)) && (naVenda(s) || temSkin(nome, s.k))).sort((a, b) => !!b.limitada - !!a.limitada).map(s => {
+    <div class="fd-grid">${SKINS.filter(s => !s.secreto && !s.variante && (!(s.codigo || s.adm) || temSkin(nome, s.k)) && (naVenda(s) || temSkin(nome, s.k))).sort((a, b) => !!b.limitada - !!a.limitada).map(s => {
       const tem = temSkin(nome, s.k), usando = skinDe(nome) === s.k, podeS = moedas >= s.preco, neon = SKINS.find(v => v.variante && v.base === s.k), usandoNeon = !!neon && skinDe(nome) === neon.k;
       const rotulo = usando ? "Usando" : tem ? "Usar" : G.lojaConf === "skin:" + s.k ? "Confirmar?" : podeS ? `<span class="lb-coin" aria-hidden="true">$</span>${s.preco}` : `$ ${s.preco}`;
       return `<div class="fd-tile${tem ? "" : " fd-travado"}${s.limitada ? " sk-limitada" : ""}"${usando ? ' aria-current="true"' : ""}>
@@ -7320,6 +7327,7 @@ acoes.comprarSkin = el => {
   const k = el.dataset.s, nome = perfil(), s = skinInfo(k);
   if (temSkin(nome, k)) { usarSkin(nome, k); salvarPlacar(); const y = window.scrollY; render(); window.scrollTo(0, y); toast(`Agora você está de ${s.nome}`); return; }
   if (s.codigo) { toast("Essa skin só se ganha com um código de presente"); return; }
+  if (s.adm) { toast("Essa skin só o ADM pode dar 👑"); return; }
   if (s.variante) {   // versão Neon: precisa ter a original e ela ainda estar à venda
     if (!temSkin(nome, s.base)) { toast(`Primeiro compre a skin ${skinInfo(s.base).nome}`); return; }
     if (!naVenda(skinInfo(s.base))) { toast("A versão Neon só dá para comprar enquanto a coleção estiver na loja"); return; }
@@ -8125,8 +8133,8 @@ function lojaPescaHTML() {
       return `<button type="button" class="aq-card" style="border-color:${r[1]}" data-a="pescaVender" data-i="${i}"><img class="aq-img${e ? " pp-esp-" + e.k : ""}" src="${urlPeixe(p.k)}" alt=""><b>${e ? e.ic + " " : ""}${esc(p.nome)}</b><small>${fmtTam(x.tam)}</small><small>🪙 ${x.v}</small></button>`; }).join("")}</div>`
     : `<p class="lb-sub">🎒 Sua mochila está vazia. Vá pescar no lago ou no mar!</p>`;
   if (aba === "varas") corpo = VARAS.map(v => { const tem = inv.varas.includes(v.k), usando = inv.vara === v.k;
-    return `<div class="pp-item"><span class="aq-ic">${v.ic}</span><div><b>${esc(v.nome)}</b><small>🍀 sorte ${Math.round(v.sorte * 100)}% · 📏 barra ${Math.round(v.controle * 100)}% · 💪 força ${v.forca} · ⏱️ ${v.vel}x</small></div>
-      <button class="lb-comprar" data-a="pescaVara" data-k="${v.k}" ${usando || (!tem && nivelPesca(nome) < (v.nivel || 0)) ? "disabled" : ""}>${usando ? "Usando" : tem ? "Usar" : nivelPesca(nome) < (v.nivel || 0) ? `🔒 Nível ${v.nivel}` : `🪙 ${v.preco}`}</button></div>`; }).join("");
+    return `<div class="pp-item"><span class="aq-ic">${v.ic}</span><div><b>${esc(v.nome)}</b><small>🍀 sorte ${Math.round(v.sorte * 100)}% · 📏 barra ${Math.round(v.controle * 100)}% · 💪 força ${v.forca} · ⏱️ ${v.vel}x</small>${v.dica ? `<small>✨ ${esc(v.dica)}</small>` : ""}</div>
+      <button class="lb-comprar" data-a="pescaVara" data-k="${v.k}" ${usando || (!tem && (v.especial || nivelPesca(nome) < (v.nivel || 0))) ? "disabled" : ""}>${usando ? "Usando" : tem ? "Usar" : v.especial ? `🔒 ${esc(v.especial)}` : nivelPesca(nome) < (v.nivel || 0) ? `🔒 Nível ${v.nivel}` : `🪙 ${v.preco}`}</button></div>`; }).join("");
   if (aba === "iscas") corpo = `<p class="lb-sub">Gasta 1 isca a cada lançamento. ${inv.isca && (inv.iscas[inv.isca] || 0) > 0 ? "" : "Sem isca também dá para pescar."}</p>` + ISCAS.map(i => { const n = inv.iscas[i.k] || 0, usando = inv.isca === i.k && n > 0;
     return `<div class="pp-item"><span class="aq-ic">${i.ic}</span><div><b>${esc(i.nome)} × ${n}</b><small>${esc(i.dica)}</small></div><div class="pp-col"><button class="lb-comprar" data-a="pescaIsca" data-k="${i.k}">🪙 ${i.preco * 5} (5)</button>${n ? `<button class="btn small" data-a="pescaUsarIsca" data-k="${i.k}" ${usando ? "disabled" : ""}>${usando ? "Usando" : "Usar"}</button>` : ""}</div></div>`; }).join("");
   corpo = corpo || lojaPesca2Corpo(aba, nome, inv); const nv = nivelPesca(nome);
@@ -8136,7 +8144,7 @@ acoes.pescaAba = el => { PRACA.pescaAba = el.dataset.k; };
 acoes.pescaVender = el => { const nome = perfil(), mo = mochilaDe(nome), x = mo[+el.dataset.i]; if (!x) return; mo.splice(+el.dataset.i, 1); G.banco[nome] = Math.round(((G.banco[nome] || 0) + x.v) * 10) / 10; salvarPlacar(); if (typeof bip === "function") bip(900, .05); };
 acoes.pescaVenderTudo = () => { const nome = perfil(), mo = mochilaDe(nome), v = mo.reduce((a, x) => a + x.v, 0); if (!v) return; mo.length = 0; G.banco[nome] = Math.round(((G.banco[nome] || 0) + v) * 10) / 10; salvarPlacar(); toast(`💰 Vendeu tudo por ${v} moedas!`); if (typeof sfxJogar === "function") sfxJogar(); };
 acoes.pescaVara = el => { const nome = perfil(), inv = invPesca(nome), v = VARAS.find(x => x.k === el.dataset.k); if (!v) return;
-  if (!inv.varas.includes(v.k)) { if (nivelPesca(nome) < (v.nivel || 0)) { toast(`🔒 Precisa do nível ${v.nivel} de pescador`); return; } if ((G.banco[nome] || 0) < v.preco) { toast("Faltam moedas para essa vara"); return; } G.banco[nome] = Math.round(((G.banco[nome] || 0) - v.preco) * 10) / 10; inv.varas.push(v.k); toast(`🎣 Comprou a ${v.nome}!`); }
+  if (!inv.varas.includes(v.k)) { if (v.especial) { toast(`🔒 ${v.especial}`); return; } if (nivelPesca(nome) < (v.nivel || 0)) { toast(`🔒 Precisa do nível ${v.nivel} de pescador`); return; } if ((G.banco[nome] || 0) < v.preco) { toast("Faltam moedas para essa vara"); return; } G.banco[nome] = Math.round(((G.banco[nome] || 0) - v.preco) * 10) / 10; inv.varas.push(v.k); toast(`🎣 Comprou a ${v.nome}!`); }
   inv.vara = v.k; salvarPlacar(); };
 acoes.pescaIsca = el => { const nome = perfil(), inv = invPesca(nome), i = ISCAS.find(x => x.k === el.dataset.k); if (!i) return; const preco = i.preco * 5;
   if ((G.banco[nome] || 0) < preco) { toast("Faltam moedas para essa isca"); return; } G.banco[nome] = Math.round(((G.banco[nome] || 0) - preco) * 10) / 10; inv.iscas[i.k] = (inv.iscas[i.k] || 0) + 5; if (!iscaDe(nome)) inv.isca = i.k; salvarPlacar(); };
@@ -8144,7 +8152,7 @@ acoes.pescaUsarIsca = el => { const inv = invPesca(perfil()); if ((inv.iscas[el.
 /* ---------- Livro dos peixes (o painel do aquário) ---------- */
 function aquarioHTML() {
   const nome = perfil(), aq = (G.peixes || {})[nome] || {}, tipos = PEIXES.filter(p => aq[p.k]).length, total = PEIXES.reduce((a, p) => a + (aq[p.k] || 0), 0);
-  const onde = p => nomeLugarPesca(p.z) + (p.noite ? " · 🌙 noite" : "") + (p.evento ? " · 🌠 só na Chuva de estrelas" : "");
+  const onde = p => nomeLugarPesca(p.z) + (p.noite ? " · 🌙 noite" : "") + (p.chefe ? " · 👑 peixe chefe" : p.evento ? " · 🌠 só na Chuva de estrelas" : "");
   const cards = PEIXES.slice().sort((a, b) => a.r - b.r || a.z.localeCompare(b.z)).map(p => { const tem = aq[p.k], r = raridadePeixe(p), mx = (aq.max || {})[p.k];
     return `<div class="aq-card${tem ? "" : " aq-falta"}" style="border-color:${r[1]}"><img class="aq-img" src="${urlPeixe(p.k, !tem)}" alt=""><b>${tem ? esc(p.nome) : "???"}</b>
       <small style="color:${r[1]}">${p.r ? "★".repeat(p.r) : "🗑️"} ${r[0]}</small><small>${onde(p)}</small>${tem ? `<small>× ${tem}${mx ? ` · maior: ${fmtTam(mx)}` : ""}</small>` : ""}<small>🪙 ${p.m}</small></div>`; }).join("");
@@ -8932,6 +8940,510 @@ abrirPraca = function () { _abrirPracaBarco(); const box = $("praca"); if (!box 
   box.insertAdjacentHTML("beforeend", `<div class="pr-bussola" id="pr-bussola" hidden></div>`); };
 const _fecharPracaBarco = fecharPraca;
 fecharPraca = function (irLobby) { PRACA.barco = null; return _fecharPracaBarco(irLobby); };
+/* ===================== Skins de código e de ADM (pedido do Andre) =====================
+   De código (codigo: true): só chegam por código de presente ou presente para todos. De ADM (adm: true): só o ADM dá, na aba Itens do Painel de ADM.
+   Nenhuma das duas aparece na loja para quem não tem e os robôs não usam. Fantasias em SKINS_ESPECIAIS_2D / SKINS_ESPECIAIS_3D. */
+SKINS.push(
+  { k: "ninjasombra", nome: "Ninja das Sombras", preco: 0, camisa: "#1b1b24", codigo: true },
+  { k: "mago", nome: "Mago", preco: 0, camisa: "#4b2a8e", codigo: true },
+  { k: "cavaleiro", nome: "Cavaleiro", preco: 0, camisa: "#8a96a8", codigo: true },
+  { k: "astrodourado", nome: "Astronauta Dourado", preco: 0, camisa: "#e8b830", codigo: true },
+  { k: "reiadm", nome: "Rei do ADM", preco: 0, camisa: "#c0182a", adm: true },
+  { k: "hacker", nome: "Hacker", preco: 0, camisa: "#101410", adm: true },
+  { k: "trovao", nome: "Deus do Trovão", preco: 0, camisa: "#25368a", adm: true },
+  { k: "fantasmadourado", nome: "Fantasma Dourado", preco: 0, camisa: "#ffd23f", adm: true });
+const SKINS_ESPECIAIS_2D = {
+  ninjasombra(c, x, y, t, hx, hy) {
+    c.fillStyle = "rgba(90,90,110,.35)"; for (let i = 0; i < 5; i++) { const f = (t * .6 + i / 5) % 1; c.globalAlpha = .5 * (1 - f); c.beginPath(); c.arc(x - 20 + i * 10, y + 14 - f * 40, 6 + f * 8, 0, 7); c.fill(); } c.globalAlpha = 1;
+    c.fillStyle = "#15151c"; c.beginPath(); c.arc(hx, hy, 17, Math.PI * .95, Math.PI * 2.05); c.lineTo(hx + 16, hy - 4); c.lineTo(hx - 16, hy - 4); c.fill();
+    c.beginPath(); c.moveTo(hx - 16, hy + 3); c.quadraticCurveTo(hx, hy + 22, hx + 16, hy + 3); c.lineTo(hx + 15, hy + 1); c.lineTo(hx - 15, hy + 1); c.fill();
+    c.fillStyle = "#8a3cff"; c.fillRect(hx - 17, hy - 9, 34, 4);
+    c.strokeStyle = "#8a3cff"; c.lineWidth = 3; for (const k of [0, 1]) { c.beginPath(); c.moveTo(hx + 16, hy - 7); c.quadraticCurveTo(hx + 26, hy - 4 + k * 4 + Math.sin(t * 6 + k) * 3, hx + 34, hy + 2 + k * 6 + Math.sin(t * 6 + k) * 4); c.stroke(); }
+  },
+  mago(c, x, y, t, hx, hy) {
+    c.strokeStyle = "#7a5230"; c.lineWidth = 3; c.beginPath(); c.moveTo(x + 22, y + 20); c.lineTo(x + 22, y - 32); c.stroke();
+    c.save(); c.shadowColor = "#7fd3ff"; c.shadowBlur = 12 + 4 * Math.sin(t * 4); c.fillStyle = "#bff0ff"; c.beginPath(); c.arc(x + 22, y - 36, 5.5, 0, 7); c.fill(); c.restore();
+    c.fillStyle = "#4b2a8e"; c.beginPath(); c.ellipse(hx, hy - 13, 22, 5, 0, 0, 7); c.fill();
+    c.beginPath(); c.moveTo(hx - 13, hy - 14); c.quadraticCurveTo(hx - 2, hy - 30, hx + 6 + Math.sin(t * 2) * 2, hy - 46); c.quadraticCurveTo(hx + 4, hy - 28, hx + 13, hy - 14); c.fill();
+    c.fillStyle = "#ffd23f"; for (const [dx, dy, r] of [[-4, -22, 2.4], [3, -30, 1.8], [-1, -17, 1.6]]) { c.beginPath(); for (let i = 0; i < 10; i++) { const a = i * Math.PI / 5 - Math.PI / 2, rr = i % 2 ? r * .45 : r; c.lineTo(hx + dx + Math.cos(a) * rr, hy + dy + Math.sin(a) * rr); } c.fill(); }
+    c.fillStyle = "rgba(255,240,160,.9)"; for (let i = 0; i < 4; i++) { const a = t * 2 + i * 1.6; c.beginPath(); c.arc(x + Math.cos(a) * 26, y - 20 + Math.sin(a * 1.3) * 18, 1.6, 0, 7); c.fill(); }
+  },
+  cavaleiro(c, x, y, t, hx, hy) {
+    c.strokeStyle = "#c8d0dc"; c.lineWidth = 4; c.beginPath(); c.moveTo(x - 22, y + 18); c.lineTo(x - 22, y - 22); c.stroke(); c.fillStyle = "#e8b830"; c.fillRect(x - 28, y + 2, 12, 3); c.fillStyle = "#6b4423"; c.fillRect(x - 23.5, y + 5, 3, 10);
+    const g = c.createLinearGradient(hx - 17, hy - 17, hx + 17, hy + 10); g.addColorStop(0, "#f2f5f8"); g.addColorStop(.5, "#9aa6b6"); g.addColorStop(1, "#c8d0dc"); c.fillStyle = g;
+    c.beginPath(); c.arc(hx, hy, 17.5, Math.PI * .88, Math.PI * 2.12); c.lineTo(hx + 15, hy + 12); c.lineTo(hx - 15, hy + 12); c.closePath(); c.fill();
+    c.fillStyle = "#1b1f2a"; c.fillRect(hx - 12, hy - 3, 24, 4); c.fillRect(hx - 1, hy - 3, 2, 12);
+    c.fillStyle = "#d62828"; for (let i = 0; i < 5; i++) { c.beginPath(); c.ellipse(hx - 2 + i * 1.5, hy - 20 - i * 3 + Math.sin(t * 3 + i) * 1, 3, 6, .5 + i * .15, 0, 7); c.fill(); }
+  },
+  astrodourado(c, x, y, t, hx, hy) {
+    c.save(); c.globalAlpha = .3; c.fillStyle = "#fff3b0"; c.beginPath(); c.arc(hx, hy, 21, 0, 7); c.fill(); c.restore();
+    c.strokeStyle = "#e8b830"; c.lineWidth = 3.5; c.beginPath(); c.arc(hx, hy, 21, 0, 7); c.stroke(); c.fillStyle = "#e8b830"; c.fillRect(hx - 14, hy + 17, 28, 5);
+    c.fillStyle = "rgba(255,255,255,.7)"; c.beginPath(); c.ellipse(hx - 8, hy - 9, 5, 3, -.6, 0, 7); c.fill();
+    c.strokeStyle = "#e8b830"; c.lineWidth = 2; c.beginPath(); c.moveTo(hx + 12, hy - 16); c.lineTo(hx + 17, hy - 28); c.stroke(); c.fillStyle = Math.sin(t * 6) > 0 ? "#ff4d6d" : "#ffd23f"; c.beginPath(); c.arc(hx + 17, hy - 29, 2.8, 0, 7); c.fill();
+    for (let i = 0; i < 5; i++) { const a = t * .8 + i * 1.25, s = .5 + .5 * Math.sin(t * 5 + i); c.fillStyle = `rgba(255,230,120,${s})`; c.font = "9px sans-serif"; c.fillText("✦", x + Math.cos(a) * 30 - 4, y - 22 + Math.sin(a) * 24); }
+  },
+  reiadm(c, x, y, t, hx, hy) {
+    c.fillStyle = "#a0101e"; c.beginPath(); c.moveTo(x - 12, y - 16); c.quadraticCurveTo(x - 30, y + 6, x - 24 + Math.sin(t * 2) * 2, y + 22); c.lineTo(x - 12, y + 16); c.fill();
+    c.beginPath(); c.moveTo(x + 12, y - 16); c.quadraticCurveTo(x + 30, y + 6, x + 24 + Math.sin(t * 2 + 1) * 2, y + 22); c.lineTo(x + 12, y + 16); c.fill();
+    c.fillStyle = "#ffffff"; c.fillRect(x - 13, y - 18, 26, 4); c.fillStyle = "#111"; for (let i = 0; i < 4; i++) c.fillRect(x - 10 + i * 6, y - 17, 2, 2);
+    c.strokeStyle = "#ffd23f"; c.lineWidth = 3; c.beginPath(); c.moveTo(x + 22, y + 18); c.lineTo(x + 22, y - 24); c.stroke(); c.save(); c.shadowColor = "#ff4d6d"; c.shadowBlur = 10; c.fillStyle = "#ff4d6d"; c.beginPath(); c.arc(x + 22, y - 27, 4.5, 0, 7); c.fill(); c.restore();
+    c.save(); c.shadowColor = "#ffd23f"; c.shadowBlur = 10 + 4 * Math.sin(t * 3); const g = c.createLinearGradient(0, hy - 40, 0, hy - 14); g.addColorStop(0, "#fff3a0"); g.addColorStop(1, "#d99a00"); c.fillStyle = g;
+    c.beginPath(); c.moveTo(hx - 17, hy - 13); [[-17, -36], [-9, -24], [0, -42], [9, -24], [17, -36]].forEach(([dx, dy], i) => { c.lineTo(hx + dx, hy + dy); if (i < 4) c.lineTo(hx + dx + 4.5, hy - 22); }); c.lineTo(hx + 17, hy - 13); c.closePath(); c.fill(); c.restore();
+    [["#ff4d6d", 0, -22], ["#3d9bff", -10, -19], ["#37d99a", 10, -19]].forEach(([cor, dx, dy]) => { c.fillStyle = cor; c.beginPath(); c.arc(hx + dx, hy + dy, 2.8, 0, 7); c.fill(); });
+  },
+  hacker(c, x, y, t, hx, hy) {
+    c.font = "bold 9px monospace"; for (let i = 0; i < 8; i++) { const f = (t * .7 + i / 8) % 1; c.fillStyle = `rgba(60,255,120,${1 - f})`; c.fillText(i % 2 ? "1" : "0", x - 30 + i * 8, y - 50 + f * 70); }
+    c.fillStyle = "#101410"; c.beginPath(); c.arc(hx, hy, 18, Math.PI * .85, Math.PI * 2.15); c.lineTo(hx + 17, hy + 10); c.quadraticCurveTo(hx, hy + 4, hx - 17, hy + 10); c.fill();
+    c.save(); c.shadowColor = "#3cff78"; c.shadowBlur = 8; c.fillStyle = "#3cff78"; c.fillRect(hx - 13, hy - 5, 26, 6); c.restore();
+    c.fillStyle = "#0b2a14"; for (let i = 0; i < 6; i++) c.fillRect(hx - 12 + i * 4.4, hy - 4, 2, 4);
+  },
+  trovao(c, x, y, t, hx, hy) {
+    const raio = (x0, y0, s) => { c.beginPath(); c.moveTo(x0, y0); c.lineTo(x0 + 5 * s, y0 + 8); c.lineTo(x0 + 1 * s, y0 + 8); c.lineTo(x0 + 6 * s, y0 + 18); c.lineTo(x0 - 2 * s, y0 + 6); c.lineTo(x0 + 2 * s, y0 + 6); c.closePath(); c.fill(); };
+    c.save(); c.shadowColor = "#ffe14d"; c.shadowBlur = 10; c.fillStyle = "#ffe14d"; if (Math.sin(t * 7) > -.3) { raio(x - 30, y - 40, 1); raio(x + 28, y - 30, -1); } c.restore();
+    c.fillStyle = "#6b6f7a"; c.fillRect(x + 20, y - 18, 4, 32); c.fillStyle = "#b8c0cc"; c.fillRect(x + 12, y - 26, 20, 11); c.strokeStyle = "#8a92a0"; c.lineWidth = 1.5; c.strokeRect(x + 12, y - 26, 20, 11);
+    c.fillStyle = "#c8d0dc"; c.beginPath(); c.arc(hx, hy - 2, 17, Math.PI, 0); c.fill(); c.fillStyle = "#ffd23f"; c.fillRect(hx - 17, hy - 5, 34, 3);
+    c.fillStyle = "#ffffff"; for (const s of [-1, 1]) { c.beginPath(); c.moveTo(hx + s * 15, hy - 8); c.quadraticCurveTo(hx + s * 30, hy - 22 + Math.sin(t * 5) * 2, hx + s * 32, hy - 30); c.quadraticCurveTo(hx + s * 24, hy - 16, hx + s * 15, hy - 3); c.fill(); }
+    c.save(); c.shadowColor = "#7fe0ff"; c.shadowBlur = 8; c.fillStyle = "rgba(160,240,255,.9)"; c.beginPath(); c.arc(hx - 5, hy + 1, 2.2, 0, 7); c.arc(hx + 5, hy + 1, 2.2, 0, 7); c.fill(); c.restore();
+  },
+  fantasmadourado(c, x, y, t, hx, hy) {
+    c.save(); c.globalCompositeOperation = "lighter"; const g = c.createRadialGradient(x, y - 18, 4, x, y - 18, 54); g.addColorStop(0, "rgba(255,215,80,.45)"); g.addColorStop(1, "rgba(255,215,80,0)"); c.fillStyle = g; c.beginPath(); c.arc(x, y - 18, 54, 0, 7); c.fill(); c.restore();
+    c.save(); c.shadowColor = "#ffd23f"; c.shadowBlur = 10; c.strokeStyle = "#ffe680"; c.lineWidth = 3; c.beginPath(); c.ellipse(hx, hy - 24 + Math.sin(t * 2) * 1.5, 13, 4, 0, 0, 7); c.stroke(); c.restore();
+    for (let i = 0; i < 3; i++) { const a = t * 1.2 + i * 2.1, gx = x + Math.cos(a) * 30, gy = y - 20 + Math.sin(a * 1.4) * 18; c.fillStyle = "rgba(255,230,140,.75)";
+      c.beginPath(); c.arc(gx, gy, 5, Math.PI, 0); c.lineTo(gx + 5, gy + 6); for (let k = 0; k < 3; k++) c.lineTo(gx + 5 - (k + .5) * 10 / 3, gy + 6 - (k % 2 ? 0 : 3)); c.lineTo(gx - 5, gy + 6); c.fill();
+      c.fillStyle = "#5a4000"; c.beginPath(); c.arc(gx - 2, gy - 1, .9, 0, 7); c.arc(gx + 2, gy - 1, .9, 0, 7); c.fill(); }
+  }
+};
+const SKINS_ESPECIAIS_3D = {
+  ninjasombra(cab, add, br) { add(new THREE.SphereGeometry(.215, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), "#15151c", 0, .02, 0); add(new THREE.BoxGeometry(.34, .14, .1), "#15151c", 0, -.1, -.16);
+    add(new THREE.TorusGeometry(.21, .025, 6, 20), "#8a3cff", 0, .06, 0).rotation.x = Math.PI / 2; for (const dx of [-.05, .05]) { const f = add(new THREE.BoxGeometry(.04, .02, .3), "#8a3cff", dx, .04, .3); f.rotation.x = -.4; f.userData.abana = 1; } },
+  mago(cab, add, br) { add(new THREE.CylinderGeometry(.36, .36, .03, 20), "#4b2a8e", 0, .16, 0); const h = add(new THREE.ConeGeometry(.2, .55, 14), "#4b2a8e", 0, .44, .02); h.rotation.z = -.15;
+    for (const [x, y, z] of [[.06, .35, -.12], [-.05, .5, -.06], [.1, .25, -.15]]) add(new THREE.OctahedronGeometry(.03), "#ffd23f", x, y, z, { emissive: "#ffd23f" });
+    add(new THREE.CylinderGeometry(.016, .02, 1.1, 6), "#7a5230", .34, -.4, -.05); add(new THREE.SphereGeometry(.07, 12, 10), "#bff0ff", .34, .18, -.05, { emissive: "#7fd3ff", emissiveIntensity: .9 }); br("rgba(127,211,255,1)", .34, .18, -.05); },
+  cavaleiro(cab, add, br) { add(new THREE.SphereGeometry(.235, 18, 14), "#b8c2d0", 0, 0, 0, { emissive: "#2a3040" }); add(new THREE.BoxGeometry(.3, .05, .08), "#1b1f2a", 0, 0, -.2); add(new THREE.BoxGeometry(.04, .16, .08), "#1b1f2a", 0, -.06, -.21);
+    for (let i = 0; i < 5; i++) add(new THREE.SphereGeometry(.045, 8, 6), "#d62828", 0, .24 + i * .03, .02 + i * .04);
+    add(new THREE.BoxGeometry(.04, .8, .02), "#e8eef5", -.36, -.45, -.05, { emissive: "#556070" }); add(new THREE.BoxGeometry(.16, .03, .05), "#e8b830", -.36, -.84, -.05); add(new THREE.BoxGeometry(.035, .15, .035), "#6b4423", -.36, -.93, -.05); },
+  astrodourado(cab, add, br) { add(new THREE.SphereGeometry(.29, 18, 14), "#fff3b0", 0, 0, 0, { transparent: true, opacity: .32 }); add(new THREE.TorusGeometry(.22, .04, 8, 22), "#e8b830", 0, -.23, 0, { emissive: "#6a4b00" }).rotation.x = Math.PI / 2;
+    add(new THREE.CylinderGeometry(.01, .01, .2, 6), "#e8b830", .12, .32, 0); add(new THREE.SphereGeometry(.035, 8, 6), "#ff4d6d", .12, .43, 0, { emissive: "#ff4d6d" }); br("rgba(255,215,80,1)", 0, 0, 0); },
+  reiadm(cab, add, br) { add(new THREE.CylinderGeometry(.2, .2, .1, 16, 1, true), "#ffd23f", 0, .2, 0, { side: THREE.DoubleSide, emissive: "#7a5a10" });
+    for (let i = 0; i < 7; i++) { const a = i / 7 * Math.PI * 2; add(new THREE.ConeGeometry(.04, .17, 5), "#ffd23f", Math.cos(a) * .2, .33, Math.sin(a) * .2, { emissive: "#7a5a10" }); }
+    add(new THREE.SphereGeometry(.045, 10, 8), "#ff4d6d", 0, .21, -.2, { emissive: "#ff4d6d" });
+    const capa = add(new THREE.PlaneGeometry(.62, .9), "#a0101e", 0, -.62, .17, { side: THREE.DoubleSide }); capa.rotation.x = -.12; capa.userData.abana = 1;
+    add(new THREE.CylinderGeometry(.018, .018, .9, 6), "#ffd23f", .34, -.45, -.05); add(new THREE.SphereGeometry(.06, 10, 8), "#ff4d6d", .34, .02, -.05, { emissive: "#ff4d6d" }); br("rgba(255,210,63,1)", 0, .3, 0); },
+  hacker(cab, add, br) { add(new THREE.SphereGeometry(.225, 16, 12, 0, Math.PI * 2, 0, Math.PI * .62), "#101410", 0, .01, .02); add(new THREE.BoxGeometry(.3, .07, .05), "#3cff78", 0, .02, -.2, { emissive: "#3cff78", emissiveIntensity: .9 });
+    for (let i = 0; i < 6; i++) { const b = add(new THREE.BoxGeometry(.03, .05, .01), "#3cff78", -.3 + i * .12, .2 + (i % 3) * .15, -.25, { emissive: "#3cff78", transparent: true, opacity: .8 }); b.userData.chama = i; } },
+  trovao(cab, add, br) { add(new THREE.SphereGeometry(.22, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), "#c8d0dc", 0, .02, 0, { emissive: "#2a3040" });
+    for (const s of [-1, 1]) { const w = add(new THREE.BoxGeometry(.03, .2, .14), "#ffffff", s * .22, .16, 0); w.rotation.z = -s * .5; w.userData.asa = s; }
+    add(new THREE.CylinderGeometry(.02, .02, .7, 6), "#6b6f7a", .36, -.5, -.05); add(new THREE.BoxGeometry(.22, .14, .14), "#b8c0cc", .36, -.13, -.05, { emissive: "#303848" });
+    for (let i = 0; i < 3; i++) { const r = add(new THREE.BoxGeometry(.03, .18, .01), "#ffe14d", -.3 + i * .3, .45 + (i % 2) * .1, -.1, { emissive: "#ffe14d", transparent: true }); r.rotation.z = .5 - i * .4; r.userData.chama = i; } br("rgba(255,225,80,1)", 0, 0, 0); },
+  fantasmadourado(cab, add, br) { add(new THREE.TorusGeometry(.14, .02, 8, 24), "#ffe680", 0, .34, 0, { emissive: "#ffd23f", emissiveIntensity: 1 }).rotation.x = Math.PI / 2; br("rgba(255,215,80,1)", 0, -.2, 0, 1.6);
+    for (let i = 0; i < 3; i++) { const g = add(new THREE.SphereGeometry(.06, 10, 8), "#fff3c0", Math.cos(i * 2.1) * .4, .1 + i * .1, Math.sin(i * 2.1) * .4, { emissive: "#ffd23f", transparent: true, opacity: .75 }); g.userData.abana = 1; } }
+};
+const _acessorio2DEspeciais = desenharAcessorio2D;
+desenharAcessorio2D = function (c, skin, x, y) {
+  const f = SKINS_ESPECIAIS_2D[skin]; if (!f) return _acessorio2DEspeciais(c, skin, x, y);
+  c.save(); c.lineCap = c.lineJoin = "round"; f(c, x, y, performance.now() / 1000, x, y - 34); c.restore();
+};
+const _acessorio3DEspeciais = acessorio3D;
+acessorio3D = function (cabeca, skin) {
+  const f = SKINS_ESPECIAIS_3D[skin]; if (!f) return _acessorio3DEspeciais(cabeca, skin);
+  const add = (geo, cor, x, y, z, extra) => { const m = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color: cor, ...(extra || {}) })); m.position.set(x, y, z); cabeca.add(m); return m; };
+  const br = (cor, x, y, z, s = 1) => { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: brilhoTextura(cor), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: .5 })); sp.scale.setScalar(.7 * s); sp.position.set(x, y, z); cabeca.add(sp); return sp; };
+  f(cabeca, add, br);
+  const mexe = []; cabeca.traverse(o => { if (o.userData.abana || o.userData.asa || o.userData.chama !== undefined) mexe.push([o, o.rotation.clone(), o.scale.clone(), o.position.clone()]); });
+  if (mexe.length) { const ancora = br("rgba(0,0,0,0)", 0, 0, 0, .01); ancora.onBeforeRender = () => { const t = performance.now() / 1000;
+    for (const [o, r0, s0, p0] of mexe) { if (o.userData.asa) o.rotation.z = r0.z + o.userData.asa * Math.sin(t * 6) * .3; else if (o.userData.abana) { o.rotation.x = r0.x + Math.sin(t * 3 + p0.x * 5) * .12; o.position.y = p0.y + Math.sin(t * 2 + p0.z * 5) * .02; } else { o.material.opacity = .4 + .6 * Math.abs(Math.sin(t * 4 + o.userData.chama)); o.position.y = p0.y + ((t * .3 + o.userData.chama * .2) % .3) * -1; } } }; }
+};
+/* ===================== Ilhas grandes e Pescaria 3 (pedido do Andre) =====================
+   Mapa novo do mar (ILHAS, ILHA_CFG): 6 ilhas maiores, cada uma com vila (casinhas, vendinha, cais com barco, morador com pedido do dia), enfeites,
+   bichos andando, morro, baú escondido (1 por dia). A Ilha do Porto (nível 1) é a ilha inicial: Loja do Porto, Avaliador e o Vovô Pescador.
+   Pescaria: Pântano e Caverna com peixes novos, mutações (ESPECIAIS_PEIXE com cond), varas especiais (VARAS com "especial": só por missão ou chefe),
+   peixes chefes (CHEFES_PESCA: aparecem 10 min a cada 30 min, chefeAgora; para testar window.PESCA_CHEFE_TESTE) e a história do Vovô (HIST_VOVO). */
+{ const v = { ...ILHAS }; for (const k of Object.keys(ILHAS)) delete ILHAS[k];
+  Object.assign(ILHAS, {
+    porto: { x: -62, z: -54, r: 16, nome: "Ilha do Porto", ic: "⚓", nivel: 1, chao: "#8fca5a" },
+    recife: Object.assign(v.recife, { x: -118, z: -38, r: 13 }),
+    pantano: { x: -40, z: -104, r: 14, nome: "Ilha do Pântano", ic: "🐸", nivel: 3, chao: "#5a7a34" },
+    gelo: Object.assign(v.gelo, { x: -95, z: -122, r: 14 }),
+    vulcao: Object.assign(v.vulcao, { x: -172, z: -92, r: 15 }),
+    caverna: { x: -165, z: -175, r: 14, nome: "Ilha da Caverna", ic: "💎", nivel: 8, chao: "#6f6a78" } }); }
+Object.assign(MAR, { x0: -215, z1: -215 });
+Object.assign(VOVO, { x: ILHAS.porto.x - 2.6, z: ILHAS.porto.z - 11.5 });   // o Vovô mudou para a Ilha do Porto
+const LOJA_PORTO = { dx: 4.2, dz: -9.5 }, AVAL_PORTO = { dx: -4.6, dz: -8.5 }, VOVO_ANTES = { x: -39, z: -1.4 };
+// casas: [dx, dz, parede, telhado, giro, tipo]; morro: {dx, dz, R, H}; bau: [dx, dz]; bichos: [emoji, dx, dz, raio, quantos, voa]
+const ILHA_CFG = {
+  porto: { areia: "#ecdcaa", caminho: "#d6c08a", morro: { dx: -9, dz: -3, R: 5, H: 2.4 }, morroCor: "#7dbb4c", barco: "#ff8a1f",
+    casas: [[8, 4, "#ffd9a0", "#c0392b", -1.2], [10, -3, "#bfe3ff", "#2f80ed", -1.6], [-9, 8, "#ffe9f2", "#ff4d6d", 1.3], [-4, 11, "#e8ffd8", "#3fa34d", 2.6]],
+    npc: [3, 11.5], bau: [-9, -3], bichos: [["🦀", 5, -3, 2.5, 2], ["🐈", 4, 6, 2, 1], ["🐦", 0, 0, 7, 2, true]] },
+  recife: { areia: "#f2e2b4", caminho: "#e0cc96", morro: { dx: -5, dz: -4, R: 4, H: 1.6 }, morroCor: "#cfe08a", barco: "#ff4d6d",
+    casas: [[6, 3, "#fff0d0", "#2ab0a0", -1.3], [-6, 5, "#ffe0f0", "#ff7a9a", 1.3]], vend: [4, -6, "#2ab0a0"], npc: [2.4, 8.5], bau: [-9, -5],
+    bichos: [["🦀", 2, -2, 3, 3], ["🐢", -3, 8, 2, 1]] },
+  pantano: { areia: "#8a7a4a", caminho: "#6a5a34", barco: "#3fa34d",
+    casas: [[6, 3, "#a0784a", "#5a3a1a", -1.3, "palafita"], [-6, 4, "#8a6a40", "#4a3018", 1.3, "palafita"], [6, -6, "#9a7a4a", "#5a4020", -1.8, "palafita"]],
+    vend: [-5, -7, "#7a9a3a"], npc: [2.4, 9.5], bau: [9, -8], bichos: [["🐸", -2, -2, 3, 3], ["🦆", -8, 0, 2, 1], ["🦟", 3, 6, 2, 2, true]] },
+  gelo: { areia: "#dfeaf2", caminho: "#c8d8e6", barco: "#3d9bff", cachoeira: { dx: -6, dz: -4 },
+    casas: [[5, 1, "#f4fbff", "#f4fbff", -1.4, "iglu"], [-7, 6, "#f4fbff", "#f4fbff", 1.2, "iglu"], [7, -6, "#f4fbff", "#f4fbff", -2, "iglu"]],
+    vend: [-3, 9.5, "#3d9bff"], npc: [2.4, 9.5], bau: [-6, -7.6], bichos: [["🐧", 3, -3, 3, 4], ["🦭", -9, -1, 1.5, 1]] },
+  vulcao: { areia: "#2a2222", caminho: "#5a4a44", barco: "#c0392b", vulcao: { dx: -6, dz: -3 },
+    casas: [[8, 4, "#6a6060", "#8a2a1a", -1.3, "pedra"], [-8, 7, "#5a5050", "#7a2418", 1.4, "pedra"], [7, -7, "#6a6060", "#8a2a1a", -2, "pedra"]],
+    vend: [-6, 9.5, "#ff6a1a"], npc: [2.4, 10.5], bau: [3, -10], lavas: [[-11, 4, 1.4], [4, -12, 1.2]], bichos: [["🦎", 2, 2, 3, 3], ["🐦‍🔥", -6, -3, 4, 1, true]] },
+  caverna: { areia: "#4a4650", caminho: "#8a8494", barco: "#8a3cff", gruta: { dx: -6, dz: -1, R: 5, sala: 2.3, tunel: 1.1 },
+    casas: [[6, 4, "#c8a070", "#8a6a3a", -1.3, "tenda"], [7, -5, "#b89060", "#7a5a2a", -1.9, "tenda"]],
+    vend: [5, -10, "#8a3cff"], npc: [2.4, 9.5], bau: [-6, -1], bichos: [["🦇", -6, -1, 3, 3, true], ["🐌", 4, 6, 1.5, 1]] } };
+const NPC_ILHA = {
+  porto: { nome: "⚓ Capitã Marina", cor: "#1f4e8c", pele: "#c68b59", falas: ["Bem-vindo à Ilha do Porto! Daqui saem os barcos para todas as ilhas.", "Siga a 🧭 bússola no barco. As ilhas com 🔒 precisam de mais nível de pescador.", "O Vovô Pescador mora aqui agora, lá perto do píer!"] },
+  recife: { nome: "🤿 Mergulhador Coral", cor: "#2ab0a0", pele: "#e8c39e", falas: ["Os corais daqui são os mais bonitos do mar!", "Peixe-leão é bonito, mas cuidado com os espinhos!", "Tem um baú escondido nesta ilha... atrás do morrinho?"] },
+  pantano: { nome: "🐸 Tia Juca", cor: "#5a7a34", pele: "#8d5524", falas: ["Cuidado com o Poraquê: ele dá choque! ⚡", "Quando o 🐊 Jacaré-Rei aparece, a água do pântano treme!", "Peixe que sai daqui às vezes vem 🌿 Musgoso. Vale mais!"] },
+  gelo: { nome: "🧣 Exploradora Neve", cor: "#9fd8ff", pele: "#f1c27d", falas: ["Brrr! Aqui os peixes saem ❄️ Congelados às vezes.", "A cachoeira congela no inverno, mas hoje está correndo!", "Já viu o Narval? Ele tem um chifre comprido!"] },
+  vulcao: { nome: "🔨 Ferreiro Brasa", cor: "#8a2a1a", pele: "#a0662f", falas: ["Não pise na lava! 🔥", "Os peixes daqui às vezes saem 🔥 Queimados. Valem mais!", "Eu faço varas, mas a melhor é a do Vovô..."] },
+  caverna: { nome: "⛏️ Mineiro Zeca", cor: "#6a5a3a", pele: "#e0ac69", falas: ["Dentro da gruta tem cristais que brilham no escuro.", "Dizem que a 🐍 Serpente de Cristal mora aqui embaixo.", "Peixe-diamante! Só os melhores pescadores pegam um."] } };
+/* ---------- peixes novos (Porto, Pântano e Caverna) e peixes chefes ---------- */
+PEIXES.push(
+  { k: "tainha", ic: "🐟", nome: "Tainha", z: "porto", r: 1, p: 26, m: 6, tam: [20, 60], f: 1.1 },
+  { k: "robalo", ic: "🐟", nome: "Robalo", z: "porto", r: 2, p: 14, m: 16, tam: [30, 90], f: 1.5 },
+  { k: "garoupa", ic: "🐟", nome: "Garoupa", z: "porto", r: 3, p: 5, m: 42, tam: [40, 120], f: 2.2 },
+  { k: "marlim", ic: "🗡️", nome: "Marlim-azul", z: "porto", r: 4, p: .6, m: 210, tam: [200, 450], f: 3.3 },
+  { k: "bagre", ic: "🐟", nome: "Bagre", z: "pantano", r: 1, p: 26, m: 7, tam: [20, 70], f: 1.2 },
+  { k: "piranha", ic: "🐟", nome: "Piranha", z: "pantano", r: 2, p: 15, m: 17, tam: [15, 35], f: 1.6 },
+  { k: "poraque", ic: "⚡", nome: "Poraquê", z: "pantano", r: 3, p: 5, m: 48, tam: [80, 200], f: 2.3 },
+  { k: "pirarucu", ic: "🐟", nome: "Pirarucu", z: "pantano", r: 3, p: 4, m: 55, tam: [150, 300], f: 2.5 },
+  { k: "boto", ic: "🐬", nome: "Boto-cor-de-rosa", z: "pantano", r: 4, p: .6, m: 220, tam: [150, 250], f: 3.1 },
+  { k: "peixecego", ic: "🐟", nome: "Peixe-cego", z: "caverna", r: 1, p: 26, m: 10, tam: [5, 15], f: 1.2 },
+  { k: "lanterna", ic: "💡", nome: "Peixe-lanterna", z: "caverna", r: 2, p: 14, m: 24, tam: [10, 30], f: 1.6 },
+  { k: "cristalino", ic: "💠", nome: "Peixe-cristal", z: "caverna", r: 3, p: 5, m: 60, tam: [20, 50], f: 2.3 },
+  { k: "ametista", ic: "🔮", nome: "Peixe-ametista", z: "caverna", r: 3, p: 4, m: 65, tam: [20, 60], f: 2.4 },
+  { k: "diamante", ic: "💎", nome: "Peixe-diamante", z: "caverna", r: 4, p: .5, m: 260, tam: [30, 80], f: 3.5 },
+  // chefes: não saem no sorteio normal (evento "chefe"), só quando o chefe aparece (chefeAgora)
+  { k: "polvocolosso", ic: "🐙", nome: "Polvo Colosso", z: "mar", r: 4, p: 0, m: 450, tam: [600, 1500], f: 3.4, chefe: true, evento: "chefe" },
+  { k: "jacarerei", ic: "🐊", nome: "Jacaré-Rei", z: "pantano", r: 4, p: 0, m: 480, tam: [500, 900], f: 3.5, chefe: true, evento: "chefe" },
+  { k: "serpentecristal", ic: "🐍", nome: "Serpente de Cristal", z: "caverna", r: 4, p: 0, m: 520, tam: [800, 2000], f: 3.6, chefe: true, evento: "chefe" });
+Object.assign(PEIXE_TAM, Object.fromEntries(PEIXES.map(p => [p.k, [p.tam[0], p.tam[1], p.f]])));
+Object.assign(ARTE_PEIXE, {
+  tainha: { L: 70, h: 18, cima: "#5a6f80", barriga: "#e8edf0", nad: "#8a9aa8", rabo: "garfo", linha: true },
+  robalo: { L: 74, h: 21, cima: "#5f7466", barriga: "#f0f2e8", nad: "#8a9a80", rabo: "garfo", linha: true },
+  garoupa: { L: 70, h: 28, cima: "#8a4a2a", barriga: "#e8c8a0", nad: "#6a3a20", pintas: "#f0d8b0", rabo: "redondo", dentes: true },
+  marlim: { L: 84, h: 20, cima: "#1f3f8a", barriga: "#e8f0ff", nad: "#2a5fd0", rabo: "tubarao", chifre: true, dorsalGrande: true },
+  bagre: { L: 72, h: 20, cima: "#5a5040", barriga: "#d8d0b8", nad: "#4a4030", rabo: "redondo", olhoPequeno: true, bigode: true },
+  piranha: { L: 50, h: 30, cima: "#7a8a90", barriga: "#ff5a3a", nad: "#ff7a5a", rabo: "garfo", dentes: true, pintas: "#5a6a70" },
+  pirarucu: { L: 86, h: 20, cima: "#4a5a3a", barriga: "#e8d0a0", nad: "#c0392b", rabo: "redondo", pintas: "#c0392b" },
+  boto: { L: 80, h: 20, cima: "#ff9ab8", barriga: "#ffe0ea", nad: "#ff8aaa", rabo: "cauda", bico: true, dorsalCurva: true },
+  peixecego: { L: 60, h: 18, cima: "#f2c8c8", barriga: "#fff0f0", nad: "#ffd8d8", rabo: "garfo", transp: .85, olhoPequeno: true },
+  lanterna: { L: 56, h: 24, cima: "#1a1a3a", barriga: "#3a3a6a", nad: "#5a5aa0", rabo: "fita", pintas: "#7ff0ff", olhoBrilho: "#7ff0ff", lampada: true },
+  cristalino: { L: 62, h: 22, cima: "#9ff0ff", barriga: "#ffffff", nad: "#d0a0ff", rabo: "fita", transp: .6, brilho: true, olhoBrilho: "#ffffff" },
+  ametista: { L: 58, h: 26, cima: "#7a3ac0", barriga: "#d8b0ff", nad: "#b070ff", rabo: "redondo", rachas: "#ffd0ff", brilho: true },
+  diamante: { L: 60, h: 26, cima: "#d8f4ff", barriga: "#ffffff", nad: "#9ff0ff", rabo: "garfo", brilho: true, olhoBrilho: "#7ff0ff", rachas: "#7fd8ff" } });
+const _peixeGenericoIlhas = peixeGenerico;
+peixeGenerico = function (c, a, t) {
+  _peixeGenericoIlhas(c, a, t);
+  if (a.bigode) { c.save(); c.strokeStyle = "#3a3020"; c.lineWidth = 1.6; for (const d of [-1, 1]) { c.beginPath(); c.moveTo(105 + a.L - 6, 52); c.quadraticCurveTo(105 + a.L + 6, 58 + d * 6, 105 + a.L - 4, 68 + d * 6); c.stroke(); } c.restore(); }
+  if (a.lampada) { c.save(); c.strokeStyle = "#5a5aa0"; c.lineWidth = 2; c.beginPath(); c.moveTo(105 + a.L - 16, 50 - a.h); c.quadraticCurveTo(105 + a.L + 6, 10, 105 + a.L + 14, 22); c.stroke();
+    const g = c.createRadialGradient(105 + a.L + 14, 22, 1, 105 + a.L + 14, 22, 12); g.addColorStop(0, "#ffffff"); g.addColorStop(.3, "#7ff0ff"); g.addColorStop(1, "rgba(127,240,255,0)"); c.fillStyle = g; c.beginPath(); c.arc(105 + a.L + 14, 22, 12, 0, 7); c.fill(); c.restore(); }
+};
+function coroaArte(c, x, y, s) { c.save(); c.translate(x, y); c.scale(s, s); c.fillStyle = "#ffd23f"; c.strokeStyle = "#a87a10"; c.lineWidth = 1.5; c.beginPath(); c.moveTo(-14, 8); c.lineTo(-14, -4); c.lineTo(-7, 3); c.lineTo(0, -8); c.lineTo(7, 3); c.lineTo(14, -4); c.lineTo(14, 8); c.closePath(); c.fill(); c.stroke();
+  c.fillStyle = "#ff4d6d"; c.beginPath(); c.arc(0, 3, 2.4, 0, 7); c.fill(); c.fillStyle = "#3d9bff"; for (const dx of [-8, 8]) { c.beginPath(); c.arc(dx, 4, 1.8, 0, 7); c.fill(); } c.restore(); }
+function serpenteArte(c, t, cores, brilho) {
+  const pts = []; for (let i = 0; i <= 30; i++) pts.push([12 + i * 5.6, 52 + Math.sin(i * .42 - t * 5) * (7 + i * .12)]);
+  c.lineWidth = 17; c.strokeStyle = gradV(c, 35, 68, ...cores); c.beginPath(); pts.forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y))); c.stroke();
+  c.lineWidth = 3; c.strokeStyle = brilho; c.setLineDash([5, 6]); c.beginPath(); pts.forEach(([x, y], i) => (i ? c.lineTo(x, y - 3) : c.moveTo(x, y - 3))); c.stroke(); c.setLineDash([]);
+  const [hx, hy] = pts[30]; c.fillStyle = cores[0]; c.beginPath(); c.ellipse(hx + 5, hy, 13, 9, 0, 0, 7); c.fill(); olhoArte(c, hx + 9, hy - 3, 3.2, brilho);
+  return [hx, hy];
+}
+Object.assign(ARTE_OUTROS, {
+  poraque(c, t) { serpenteArte(c, t, ["#3a3a2a", "#5a5636", "#d8c070"], "#ffe14d");
+    c.strokeStyle = "#ffe14d"; c.lineWidth = 2; c.shadowColor = "#ffe14d"; c.shadowBlur = 6; for (const [x, y] of [[60, 24], [120, 78], [150, 20]]) { c.beginPath(); c.moveTo(x, y); c.lineTo(x + 6, y + 8); c.lineTo(x, y + 9); c.lineTo(x + 7, y + 18); c.stroke(); } c.shadowBlur = 0; },
+  serpentecristal(c, t) { const [hx, hy] = serpenteArte(c, t, ["#7fd8ff", "#c8a0ff", "#ffffff"], "#ffffff");
+    c.fillStyle = "rgba(200,240,255,.85)"; for (let i = 0; i < 9; i++) { const x = 30 + i * 16, y = 40 + Math.sin(i * .9 - t * 5) * 9; c.beginPath(); c.moveTo(x - 4, y); c.lineTo(x, y - 10); c.lineTo(x + 4, y); c.fill(); }
+    coroaArte(c, hx + 4, hy - 14, .8); },
+  jacarerei(c, t) { ARTE_OUTROS.jacare(c, t); coroaArte(c, 150, 30, .9); },
+  polvocolosso(c, t) { c.save(); c.filter = "hue-rotate(250deg) saturate(1.3)"; ARTE_OUTROS.polvo(c, t); c.restore(); coroaArte(c, 122, 8, .9); } });
+/* ---------- mutações (aparecem só em certos lugares ou climas) ---------- */
+ESPECIAIS_PEIXE.push(
+  { k: "eletrico", ic: "⚡", nome: "Elétrico", ch: .05, x: 2.5, mut: true, onde: "na chuva e na tempestade", cond: c => c.clima === "chuva" || c.clima === "tempestade" },
+  { k: "congelado", ic: "❄️", nome: "Congelado", ch: .06, x: 2.2, mut: true, onde: "na Ilha de Gelo", cond: c => c.zona === "gelo" },
+  { k: "fantasma", ic: "👻", nome: "Fantasma", ch: .04, x: 3, mut: true, onde: "de noite ou na neblina", cond: c => c.noite || c.clima === "neblina" },
+  { k: "queimado", ic: "🔥", nome: "Queimado", ch: .06, x: 2.2, mut: true, onde: "na Ilha do Vulcão", cond: c => c.zona === "vulcao" },
+  { k: "musgo", ic: "🌿", nome: "Musgoso", ch: .06, x: 2, mut: true, onde: "no Pântano", cond: c => c.zona === "pantano" },
+  { k: "cristal", ic: "💠", nome: "Cristalizado", ch: .05, x: 3, mut: true, onde: "na Ilha da Caverna", cond: c => c.zona === "caverna" });
+sortearEspecial = function (mult) {
+  const P = PRACA.pesca, vara = (P && P.vara) || {}, ctx = { zona: P && P.zona, clima: climaPesca().k, noite: ehNoite() };
+  for (const e of ESPECIAIS_PEIXE.slice().reverse()) { if (e.cond && !e.cond(ctx)) continue; const m = e.mut && vara.mut ? vara.mut[e.k] || vara.mut.todos || 1 : 1; if (Math.random() < e.ch * mult * m) return e; }
+  return null;
+};
+/* ---------- varas novas: duas para comprar e quatro especiais (só por chefe ou missão) ---------- */
+VARAS.push(
+  { k: "trovao", ic: "⚡", nome: "Vara do Trovão", preco: 3500, nivel: 6, sorte: .35, controle: .32, forca: 1.4, vel: 1.3, mut: { eletrico: 3 }, dica: "3x mais peixe ⚡ Elétrico" },
+  { k: "arcoiris", ic: "🌈", nome: "Vara Arco-íris", preco: 8000, nivel: 10, sorte: .55, controle: .35, forca: 1.6, vel: 1.45, esp: 2, dica: "o dobro de peixe especial" },
+  { k: "tentaculo", ic: "🐙", nome: "Vara do Tentáculo", especial: "Pegue o 🐙 Polvo Colosso", sorte: .4, controle: .38, forca: 1.6, vel: 1.35, dica: "barrinha bem grande" },
+  { k: "dentejacare", ic: "🐊", nome: "Vara Dente-de-Jacaré", especial: "Pegue o 🐊 Jacaré-Rei", sorte: .35, controle: .33, forca: 1.95, vel: 1.3, dica: "puxa muito forte" },
+  { k: "cristal", ic: "💎", nome: "Vara de Cristal", especial: "Pegue a 🐍 Serpente de Cristal", sorte: .6, controle: .36, forca: 1.6, vel: 1.4, esp: 1.6, mut: { todos: 1.5 }, dica: "muita sorte e mais mutações" },
+  { k: "vovo", ic: "🧓", nome: "Vara do Vovô", especial: "Termine a história do Vovô", sorte: .5, controle: .4, forca: 1.75, vel: 1.5, esp: 1.4, mut: { todos: 1.5 }, dica: "a melhor de todas" });
+varaComEncanto = function (nome) {
+  const inv = invPesca(nome), b = VARAS.find(v => v.k === inv.vara) || VARAS[0], e = ENCANTOS.find(x => x.k === (inv.encantos || {})[b.k]);
+  if (!e) return b; return { ...b, sorte: b.sorte + (e.sorte || 0), controle: b.controle + (e.controle || 0), forca: b.forca * (e.forca || 1), vel: b.vel * (e.vel || 1), esp: (b.esp || 1) * (e.esp || 1), enc: e };
+};
+function ganharVara(nome, k) { const inv = invPesca(nome); if (inv.varas.includes(k)) return false; inv.varas.push(k); return true; }
+/* ---------- peixes chefes ---------- */
+const CHEFES_PESCA = [{ k: "polvocolosso", zona: "mar", vara: "tentaculo", onde: "no mar aberto e no píer do mar" }, { k: "jacarerei", zona: "pantano", vara: "dentejacare", onde: "na Ilha do Pântano" }, { k: "serpentecristal", zona: "caverna", vara: "cristal", onde: "na Ilha da Caverna" }];
+const CHEFE_CADA = 30 * 60000, CHEFE_DURA = 10 * 60000;
+function chefeAgora() {
+  if (window.PESCA_CHEFE_TESTE) { const c = CHEFES_PESCA.find(q => q.k === window.PESCA_CHEFE_TESTE); return c ? { ...c, px: PEIXES.find(p => p.k === c.k), resta: 9 } : null; }
+  const agora = Date.now(), slot = Math.floor(agora / CHEFE_CADA), dentro = agora % CHEFE_CADA; if (dentro >= CHEFE_DURA) return null;
+  const c = CHEFES_PESCA[slot % CHEFES_PESCA.length]; return { ...c, px: PEIXES.find(p => p.k === c.k), resta: Math.ceil((CHEFE_DURA - dentro) / 60000) };
+}
+function proximoChefe() { if (window.PESCA_CHEFE_TESTE) return null; const agora = Date.now(), slot = Math.floor(agora / CHEFE_CADA) + 1, c = CHEFES_PESCA[slot % CHEFES_PESCA.length];
+  return { ...c, px: PEIXES.find(p => p.k === c.k), em: Math.ceil((slot * CHEFE_CADA - agora) / 60000) }; }
+const _morderPeixeIlhas = morderPeixe;
+morderPeixe = function (P) {
+  _morderPeixeIlhas(P);
+  const ch = chefeAgora(); if (!ch || P.zona !== ch.zona || !P.px) return;
+  const sorte = (P.vara.sorte || 0) + (P.isca && P.isca.sorte || 0); if (Math.random() > Math.min(.6, .25 + sorte * .3)) return;
+  const px = ch.px; Object.assign(P, { px, esp: null, chefe: true, prog: .35, tam: Math.round(px.tam[0] + (px.tam[1] - px.tam[0]) * Math.random()) });
+  if (typeof vibrar === "function") vibrar(300); if (typeof tocarNotas === "function") tocarNotas([[40, 40, 0, .3, "sawtooth"], [43, 43, .3, .3, "sawtooth"], [47, 47, .6, .5, "sawtooth"]]);
+  toast(`👑 É o ${px.nome}! Segure firme!`); mostrarHudPesca();
+};
+function premiarChefe(nome, px) {
+  G.chefesPegos = G.chefesPegos || {}; const cp = G.chefesPegos[nome] = G.chefesPegos[nome] || {}; cp[px.k] = (cp[px.k] || 0) + 1;
+  const ch = CHEFES_PESCA.find(c => c.k === px.k), moedas = 300, vara = ch && ganharVara(nome, ch.vara) ? VARAS.find(v => v.k === ch.vara) : null;
+  G.banco[nome] = Math.round(((G.banco[nome] || 0) + moedas) * 10) / 10; ganharXpPesca(nome, 150); salvarPlacar();
+  if (typeof fogosPraca === "function" && PRACA.eu) fogosPraca(PRACA.eu.x, 3, PRACA.eu.z, 80);
+  setTimeout(() => toast(`👑 Você venceu o ${px.nome}! +${moedas} moedas, +150 XP${vara ? ` e ganhou a ${vara.ic} ${vara.nome}!` : ""}`), 1400);
+}
+/* ---------- história do Vovô (missões em sequência) ---------- */
+const HIST_VOVO = [
+  { t: "Bem-vindo, pescador!", fala: "Pegue 5 peixes em qualquer lugar.", tipo: "peixes", n: 5, moedas: 60, isca: ["minhoca", 5] },
+  { t: "Visita ao Recife", fala: "Vá de barco até a 🪸 Ilha do Recife e desça lá.", tipo: "ilha", k: "recife", moedas: 100 },
+  { t: "Peixes do recife", fala: "Pegue 3 peixes na Ilha do Recife.", tipo: "zona", k: "recife", n: 3, moedas: 150, isca: ["camarao", 5] },
+  { t: "O pântano misterioso", fala: "Dizem que no 🐸 Pântano tem Piranha... traga uma para mim!", tipo: "peixe", k: "piranha", moedas: 200 },
+  { t: "Peixe gelado", fala: "Pegue um peixe ❄️ Congelado na Ilha de Gelo.", tipo: "esp", k: "congelado", moedas: 250, isca: ["brilho", 3] },
+  { t: "Lenda dos mares", fala: "Pegue um peixe lendário (★★★★) em qualquer lugar.", tipo: "raridade", n: 4, moedas: 300 },
+  { t: "O peixe chefe", fala: "Quando um 👑 chefe aparecer, pesque ele!", tipo: "chefe", moedas: 400 },
+  { t: "O tesouro da caverna", fala: "Na 💎 Ilha da Caverna vive o Peixe-diamante. Traga um e eu te dou a minha vara!", tipo: "peixe", k: "diamante", moedas: 500, vara: "vovo" } ];
+function histVovo(nome) { G.vovoHist = G.vovoHist || {}; return G.vovoHist[nome] = G.vovoHist[nome] || { e: 0, n: 0, pronta: false }; }
+function progressoVovo(nome, ev, d) {
+  const h = histVovo(nome), m = HIST_VOVO[h.e]; if (!m || h.pronta) return; let ok = false;
+  if (ev === "ilha") ok = m.tipo === "ilha" && d.k === m.k;
+  else if (ev === "peixe" && d.px.r > 0) {
+    if (m.tipo === "peixes") ok = ++h.n >= m.n; else if (m.tipo === "zona" && d.zona === m.k) ok = ++h.n >= m.n;
+    else if (m.tipo === "peixe") ok = d.px.k === m.k; else if (m.tipo === "esp") ok = !!d.esp && d.esp.k === m.k;
+    else if (m.tipo === "raridade") ok = d.px.r >= m.n; else if (m.tipo === "chefe") ok = !!d.px.chefe; }
+  if (ok) { h.pronta = true; setTimeout(() => toast(`🧓 Missão do Vovô completa: ${m.t}! Fale com ele na ⚓ Ilha do Porto.`), 2200); }
+  salvar();
+}
+function historiaVovoHTML() {
+  const nome = perfil(), h = histVovo(nome), m = HIST_VOVO[h.e];
+  if (!m) return `<div class="mi-caixa pp-hist"><p class="lb-sub">📜 <b>História do Vovô: completa!</b> 🧓 "Você é o melhor pescador que eu já conheci!"</p></div>`;
+  const cont = m.n && (m.tipo === "peixes" || m.tipo === "zona") ? ` (${Math.min(h.n, m.n)}/${m.n})` : "";
+  return `<div class="mi-caixa pp-hist"><p class="pp-mini">📜 História do Vovô · capítulo ${h.e + 1} de ${HIST_VOVO.length}</p><b>${esc(m.t)}</b>
+    <p class="lb-sub">🧓 "${esc(m.fala)}"${cont}</p><p class="pp-mini">Prêmio: 🪙 ${m.moedas}${m.isca ? ` · ${ISCAS.find(i => i.k === m.isca[0]).ic} ×${m.isca[1]}` : ""}${m.vara ? " · 🧓 Vara do Vovô" : ""}</p>
+    <button class="lb-comprar" data-a="vovoPremio" ${h.pronta ? "" : "disabled"}>${h.pronta ? "🎁 Receber o prêmio" : "⏳ Ainda falta"}</button></div>`;
+}
+acoes.vovoPremio = () => { const nome = perfil(), h = histVovo(nome), m = HIST_VOVO[h.e]; if (!m || !h.pronta) return;
+  G.banco[nome] = Math.round(((G.banco[nome] || 0) + m.moedas) * 10) / 10; const inv = invPesca(nome);
+  if (m.isca) inv.iscas[m.isca[0]] = (inv.iscas[m.isca[0]] || 0) + m.isca[1]; if (m.vara) ganharVara(nome, m.vara);
+  h.e++; h.n = 0; h.pronta = false; ganharXpPesca(nome, 60); salvarPlacar(); if (typeof sfxVitoria === "function") sfxVitoria();
+  toast(m.vara ? "🧓 \"Esta vara agora é sua!\" Você ganhou a 🧓 Vara do Vovô!" : `🧓 "Muito bem!" +${m.moedas} moedas`); };
+const _pedidosHTMLIlhas = pedidosHTML;
+pedidosHTML = function () { return historiaVovoHTML() + _pedidosHTMLIlhas(); };
+const _pegarPeixeIlhas = pegarPeixe;
+pegarPeixe = function (P) {
+  const px = P.px, esp = P.esp, zona = P.zona, nome = perfil(); _pegarPeixeIlhas(P);
+  if (px && px.chefe) premiarChefe(nome, px); if (px) progressoVovo(nome, "peixe", { px, esp, zona });
+};
+/* ---------- moradores das ilhas: pedido do dia e baú escondido ---------- */
+function pedidoIlha(k) {
+  let s = [...(diaBR() + k)].reduce((a, ch) => a * 31 + ch.charCodeAt(0), 11) % 2147483647; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  const l = PEIXES.filter(p => p.z === k && p.r >= 1 && p.r <= 3 && !p.evento); const lista = l.length ? l : PEIXES.filter(p => p.z === "mar" && p.r >= 1 && p.r <= 2);
+  const p = lista[Math.floor(rnd() * lista.length)]; return { p, moedas: Math.round(p.m * 5), xp: Math.round(xpDoPeixe(p) * 2) };
+}
+function ilhaDia(chave, nome) { G[chave] = G[chave] || {}; const e = G[chave][nome]; if (!e || e.dia !== diaBR()) G[chave][nome] = { dia: diaBR(), l: [] }; return G[chave][nome].l; }
+function npcIlhaHTML(k) {
+  const nome = perfil(), n = NPC_ILHA[k], pd = pedidoIlha(k), feito = ilhaDia("npcIlha", nome).includes(k), tem = mochilaDe(nome).some(x => x.k === pd.p.k);
+  const fala = n.falas[Math.floor(Date.now() / 8000) % n.falas.length];
+  return `<div class="mi-caixa"><p class="lb-sub">"${esc(fala)}"</p><p class="pp-mini">📦 Pedido de hoje:</p>
+    <div class="pp-item"><img class="aq-img" style="width:64px;height:32px" src="${urlPeixe(pd.p.k)}" alt=""><div><b>${esc(pd.p.nome)}</b><small>${nomeLugarPesca(pd.p.z)} · 🪙 ${pd.moedas} · +${pd.xp} XP</small></div>
+    <button class="lb-comprar" data-a="npcEntregar" data-k="${k}" ${feito || !tem ? "disabled" : ""}>${feito ? "✔ Feito" : tem ? "Entregar" : "Falta"}</button></div><p class="lb-sub">O pedido muda todo dia.</p></div>`;
+}
+acoes.npcEntregar = el => { const k = el.dataset.k, nome = perfil(), pd = pedidoIlha(k), feitos = ilhaDia("npcIlha", nome), mo = mochilaDe(nome); if (feitos.includes(k)) return;
+  const j = mo.findIndex(x => x.k === pd.p.k); if (j < 0) return; mo.splice(j, 1); feitos.push(k);
+  G.banco[nome] = Math.round(((G.banco[nome] || 0) + pd.moedas) * 10) / 10; ganharXpPesca(nome, pd.xp); salvarPlacar();
+  toast(`${NPC_ILHA[k].nome.split(" ")[0]} "Obrigado!" +${pd.moedas} moedas, +${pd.xp} XP`); if (typeof sfxJogar === "function") sfxJogar(); };
+function abrirBauIlha(k) {
+  const nome = perfil(), abertos = ilhaDia("bauIlha", nome); if (abertos.includes(k)) { toast("🧰 Este baú já foi aberto hoje. Volte amanhã!"); return; }
+  abertos.push(k); const v = 30 + Math.floor(Math.random() * 31), inv = invPesca(nome); G.banco[nome] = Math.round(((G.banco[nome] || 0) + v) * 10) / 10; inv.iscas.camarao = (inv.iscas.camarao || 0) + 2;
+  ganharXpPesca(nome, 15); salvarPlacar(); const p = posIlha(k, ILHA_CFG[k].bau); if (typeof fogosPraca === "function") fogosPraca(p.x, 1.2, p.z, 30); if (typeof sfxVitoria === "function") sfxVitoria();
+  toast(`🧰 Baú escondido! +${v} moedas e +2 🦐 camarões`);
+}
+/* ---------- chão das ilhas: morros (dá para subir) e obstáculos (casas, vulcão, cachoeira, gruta) ---------- */
+const posIlha = (k, d) => ({ x: ILHAS[k].x + d[0], z: ILHAS[k].z + d[1] });
+const OBST_ILHA = [];
+for (const [k, c] of Object.entries(ILHA_CFG)) { const i = ILHAS[k];
+  (c.casas || []).forEach(h => OBST_ILHA.push({ x: i.x + h[0], z: i.z + h[1], r: h[5] === "tenda" ? 1.3 : 1.5 }));
+  if (c.vend) OBST_ILHA.push({ x: i.x + c.vend[0], z: i.z + c.vend[1], r: 1.1 });
+  if (c.vulcao) OBST_ILHA.push({ x: i.x + c.vulcao.dx, z: i.z + c.vulcao.dz, r: 3.9 });
+  if (c.cachoeira) OBST_ILHA.push({ x: i.x + c.cachoeira.dx, z: i.z + c.cachoeira.dz, r: 2.2 });
+  if (c.gruta) OBST_ILHA.push({ x: i.x + c.gruta.dx, z: i.z + c.gruta.dz, r: c.gruta.R, gruta: c.gruta }); }
+OBST_ILHA.push({ x: ILHAS.porto.x + LOJA_PORTO.dx, z: ILHAS.porto.z + LOJA_PORTO.dz, r: 1.1 }, { x: ILHAS.porto.x + AVAL_PORTO.dx, z: ILHAS.porto.z + AVAL_PORTO.dz, r: 1.1 });
+function bloqueioIlha(x, z) {
+  for (const o of OBST_ILHA) { const dx = x - o.x, dz = z - o.z, d = Math.hypot(dx, dz); if (d >= o.r) continue;
+    if (o.gruta && (d < o.gruta.sala || (dx > 0 && Math.abs(dz) < o.gruta.tunel))) continue; return true; }
+  return false;
+}
+function alturaIlha(x, z) {
+  for (const [k, c] of Object.entries(ILHA_CFG)) { if (!c.morro) continue; const i = ILHAS[k], m = c.morro, d = Math.hypot(x - i.x - m.dx, z - i.z - m.dz); if (d < m.R) return m.H * (1 + Math.cos(Math.PI * d / m.R)) / 2; }
+  return 0;
+}
+const _pracaLivreIlhas = pracaLivre;
+pracaLivre = function (x, z) { if (x < -19 && z < -19 && bloqueioIlha(x, z)) return false; return _pracaLivreIlhas(x, z); };
+const _alturaChaoIlhas = alturaChaoPraca;
+alturaChaoPraca = function (x, z, y) {
+  let h = _alturaChaoIlhas(x, z, y); if (x > -19 || z > -19 || PRACA.barco || !naIlha(x, z)) return h;
+  const hi = .2 + alturaIlha(x, z); if (y >= hi - .6) h = Math.max(h, hi); return h;
+};
+const _descerNaIlhaAntes = descerNaIlha;
+descerNaIlha = function (k) {
+  _descerNaIlhaAntes(k); if (PRACA.barco) return; const eu = PRACA.eu;
+  if (bloqueioIlha(eu.x, eu.z) || !naIlha(eu.x, eu.z)) { const c = chegadaIlha(k); eu.x = c.x; eu.z = c.z; }
+  eu.y = .2 + alturaIlha(eu.x, eu.z); progressoVovo(perfil(), "ilha", { k });
+};
+// mapas do tesouro nas ilhas novas (os primeiros continuam no mesmo número, só mudam de lugar)
+Object.assign(MAPA_LUGARES[0], { dx: 7, dz: 5 }); Object.assign(MAPA_LUGARES[1], { dica: "Na Ilha de Gelo, do lado do cristal grande", dx: 9, dz: 6 }); Object.assign(MAPA_LUGARES[2], { dx: -1, dz: 3.5 });
+MAPA_LUGARES.push({ dica: "Na Ilha do Porto, perto dos barris do cais", ilha: "porto", dx: 5.5, dz: 9 }, { dica: "No Pântano, no meio dos cogumelos", ilha: "pantano", dx: -8, dz: 7 },
+  { dica: "Na Ilha da Caverna, na frente da gruta", ilha: "caverna", dx: 4, dz: 1.5 });
+/* ---------- lugares (botões) nas ilhas ---------- */
+const _lugaresPracaIlhas = lugaresPraca;
+lugaresPraca = function () {
+  const l = _lugaresPracaIlhas(); if (PRACA.barco || PRACA.kart || PRACA.pesca || PRACA.naRoda) return l;
+  const P = ILHAS.porto;
+  l.push({ x: P.x + LOJA_PORTO.dx, z: P.z + LOJA_PORTO.dz + 1.4, r: 1.6, txt: "🏪 Loja do Porto", abrir: () => abrirPainelPraca("🏪 Loja do Porto", lojaPescaHTML) },
+    { x: P.x + AVAL_PORTO.dx, z: P.z + AVAL_PORTO.dz + 1.4, r: 1.6, txt: "🔍 Avaliador", abrir: () => { PRACA.pescaAba = "avaliar"; abrirPainelPraca("🔍 Avaliador", lojaPescaHTML); } },
+    { x: VOVO_ANTES.x, z: VOVO_ANTES.z, r: 1.8, txt: "🪧 Recado do Vovô", abrir: () => abrirPainelPraca("🪧 Recado do Vovô", () => `<div class="mi-caixa"><p class="lb-sub">🧓 "Fui morar na ⚓ <b>Ilha do Porto</b>! Pegue o ⛵ barco no píer do mar e siga a 🧭 bússola. Lá tem a Loja do Porto, o Avaliador e as minhas missões!"</p></div>`) });
+  for (const [k, c] of Object.entries(ILHA_CFG)) {
+    const n = posIlha(k, c.npc); l.push({ x: n.x, z: n.z, r: 1.6, txt: `💬 ${NPC_ILHA[k].nome}`, abrir: () => abrirPainelPraca(NPC_ILHA[k].nome, () => npcIlhaHTML(k)) });
+    if (c.vend) { const v = posIlha(k, c.vend); l.push({ x: v.x, z: v.z + 1.3, r: 1.5, txt: "🛖 Vendinha da ilha", abrir: () => abrirPainelPraca("🛖 Vendinha da ilha", lojaPescaHTML) }); }
+    const b = posIlha(k, c.bau); l.push({ x: b.x, z: b.z, r: 1.3, txt: "🧰 Abrir o baú escondido", abrir: () => abrirBauIlha(k) }); }
+  return l;
+};
+/* ---------- 3D das ilhas ---------- */
+montarIlhas3D = function (s) {
+  const B = PRACA.bosque, I = B.ilhas = { bichos: [], quedas: [], lavas: [], luzes: [], janelas: [], npcs: [], baus: {}, cristais: [] };
+  const mat = (cor, ex) => new THREE.MeshLambertMaterial(Object.assign({ color: cor }, ex || {}));
+  const add = (geo, cor, x, y, z, pai = s) => { const m = new THREE.Mesh(geo, typeof cor === "string" ? mat(cor) : cor); m.position.set(x, y, z); pai.add(m); return m; };
+  const placa = (pai, txt, x, y, z, w, fundo) => { const tx = texTexto(txt, "#ffffff", fundo || "#0b6fa8", 512, 110, 44); add(new THREE.PlaneGeometry(w, w * .22), new THREE.MeshBasicMaterial({ map: tx }), x, y, z + .01, pai); add(new THREE.PlaneGeometry(w, w * .22), new THREE.MeshBasicMaterial({ map: tx }), x, y, z - .01, pai).rotation.y = Math.PI; };
+  const palmeira = (g, x, z, h = 2.6) => { const t = add(new THREE.CylinderGeometry(.12, .18, h, 6), "#8a6a3a", x, .2 + h / 2, z, g); t.rotation.z = .08; for (let i = 0; i < 6; i++) { const f = add(new THREE.ConeGeometry(.25, 1.7, 4), "#3fa34d", x, .2 + h, z, g); f.rotation.z = Math.PI / 2.3; f.rotation.y = i * 1.05; } add(new THREE.SphereGeometry(.14, 6, 5), "#6b4423", x + .15, .1 + h, z, g); };
+  const pinheiro = (g, x, z, neve) => { add(new THREE.CylinderGeometry(.1, .14, .7, 6), "#6b4423", x, .55, z, g); for (let i = 0; i < 3; i++) { add(new THREE.ConeGeometry(.9 - i * .22, 1, 8), "#2f6b3a", x, 1.1 + i * .55, z, g); if (neve) add(new THREE.ConeGeometry(.5 - i * .12, .35, 8), "#ffffff", x, 1.5 + i * .55, z, g); } };
+  const pedra = (g, x, z, sc, cor) => { const p = add(new THREE.DodecahedronGeometry(sc), cor || "#8a8f99", x, .2 + sc * .5, z, g); p.rotation.set(x, z, 0); p.scale.y = .7; return p; };
+  const cristal = (g, x, z, h, cor) => { const c = add(new THREE.OctahedronGeometry(.5), mat(cor, { emissive: cor, emissiveIntensity: .35, transparent: true, opacity: .85 }), x, .2 + h / 2, z, g); c.scale.set(.8, h / 1, .8); c.rotation.y = x; I.cristais.push(c); return c; };
+  const casa = (g, [x, z, parede, telhado, rot = 0, tipo = "casa"]) => {
+    const h = new THREE.Group(); h.position.set(x, .2, z); h.rotation.y = rot; g.add(h);
+    if (tipo === "iglu") { add(new THREE.SphereGeometry(1.5, 18, 10, 0, Math.PI * 2, 0, Math.PI / 2), "#f4fbff", 0, 0, 0, h); const ent = add(new THREE.CylinderGeometry(.55, .55, .9, 12, 1, false, 0, Math.PI), "#e8f4ff", 0, 0, 1.45, h); ent.rotation.x = Math.PI / 2; ent.rotation.y = Math.PI / 2;
+      add(new THREE.CircleGeometry(.42, 12, 0, Math.PI), "#20303a", 0, 0, 1.91, h); return; }
+    if (tipo === "tenda") { const t = add(new THREE.ConeGeometry(1.4, 2.2, 4), parede, 0, 1.1, 0, h); t.rotation.y = Math.PI / 4; add(new THREE.PlaneGeometry(.8, 1.1), new THREE.MeshBasicMaterial({ color: "#2a1a0a" }), 0, .55, 1.0, h); add(new THREE.CylinderGeometry(.04, .04, .6, 5), telhado, 0, 2.4, 0, h); return; }
+    const base = tipo === "palafita" ? 1 : 0;
+    if (base) { for (const [a, b] of [[-.9, -.8], [.9, -.8], [-.9, .8], [.9, .8]]) add(new THREE.CylinderGeometry(.08, .08, 1.1, 6), "#4a3018", a, .5, b, h); for (let i = 0; i < 4; i++) add(new THREE.BoxGeometry(.6, .06, .2), "#6b4423", 0, .2 + i * .25, 1.15 + i * .02, h); }
+    add(new THREE.BoxGeometry(2.2, 1.6, 2), parede, 0, base + .8, 0, h);
+    const te = add(new THREE.ConeGeometry(1.85, 1.1, 4), telhado, 0, base + 2.15, 0, h); te.rotation.y = Math.PI / 4;
+    add(new THREE.BoxGeometry(.55, .95, .06), "#6b4423", 0, base + .48, 1.01, h);
+    for (const dx of [-.65, .65]) { const j = mat("#bfe3ff", { emissive: "#000000" }); add(new THREE.BoxGeometry(.42, .4, .06), j, dx, base + 1, 1.01, h); I.janelas.push(j); }
+    if (tipo === "pedra") for (let i = 0; i < 6; i++) add(new THREE.BoxGeometry(.3, .18, .05), "#4a4040", -.8 + (i % 3) * .8, base + .3 + Math.floor(i / 3) * .7, 1.02, h);
+  };
+  const barraca = (g, x, z, cor, txt, fundo) => { const b = new THREE.Group(); b.position.set(x, .2, z); g.add(b);
+    add(new THREE.BoxGeometry(2, .9, .9), "#a0703f", 0, .45, 0, b); [-.9, .9].forEach(dx => add(new THREE.BoxGeometry(.1, 2.2, .1), "#6b4423", dx, 1.1, -.4, b));
+    const lis = texturaCanvas(128, 32, (c, w, h) => { for (let i = 0; i < 8; i++) { c.fillStyle = i % 2 ? "#ffffff" : cor; c.fillRect(i * 16, 0, 16, h); } });
+    add(new THREE.BoxGeometry(2.3, .1, 1.3), new THREE.MeshLambertMaterial({ map: lis }), 0, 2.2, .1, b).rotation.x = .2; placa(b, txt, 0, 1.7, .47, 2, fundo || cor); return b; };
+  const lampiao = (g, x, z) => { add(new THREE.CylinderGeometry(.05, .07, 2.2, 6), "#2a2a2a", x, 1.3, z, g); add(new THREE.BoxGeometry(.3, .35, .3), mat("#fff3b0", { emissive: "#fff3b0", emissiveIntensity: .4 }), x, 2.5, z, g);
+    const l = new THREE.Sprite(new THREE.SpriteMaterial({ map: brilhoTextura("rgba(255,230,150,1)"), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); l.scale.setScalar(2.4); l.position.set(x, 2.5, z); g.add(l); I.luzes.push(l); };
+  for (const [k, il] of Object.entries(ILHAS)) {
+    const c = ILHA_CFG[k], g = new THREE.Group(); g.position.set(il.x, 0, il.z); s.add(g);
+    add(new THREE.CylinderGeometry(il.r + 1.3, il.r + 2.4, .6, 56), c.areia, 0, -.12, 0, g);
+    add(new THREE.CylinderGeometry(il.r, il.r + .9, .34, 56), il.chao, 0, .03, 0, g);
+    const cam = add(new THREE.PlaneGeometry(1.8, il.r * 2 - 1.2), c.caminho, 0, .205, 0, g); cam.rotation.x = -Math.PI / 2;
+    if (c.morro) { const m = c.morro, pts = []; for (let i = 0; i <= 18; i++) { const q = i / 18; pts.push(new THREE.Vector2(m.R * q, m.H * (1 + Math.cos(Math.PI * q)) / 2)); }
+      add(new THREE.LatheGeometry(pts, 32), mat(c.morroCor || il.chao, { side: THREE.DoubleSide }), m.dx, .2, m.dz, g); }
+    // cais do norte (onde para o barco) e píer de pesca do sul
+    add(new THREE.BoxGeometry(1.8, .16, 4.6), "#8a5a2b", 0, .2, il.r + .9, g); for (const dz of [il.r + .2, il.r + 2.8]) for (const dx of [-.8, .8]) add(new THREE.CylinderGeometry(.1, .1, 1, 6), "#6b4423", dx, -.1, dz, g);
+    const amarrado = modeloBarco(c.barco); amarrado.position.set(2.6, 0, il.r + 2.4); amarrado.rotation.y = Math.PI; g.add(amarrado); I.bichos.push({ barco: amarrado });
+    add(new THREE.BoxGeometry(1.5, .15, 3), "#8a5a2b", 0, .2, -il.r - .2, g);
+    { const pl = new THREE.Group(); pl.position.set(-1.7, .2, il.r - 1.4); g.add(pl); add(new THREE.BoxGeometry(.1, 1.4, .1), "#6b4423", 0, .7, 0, pl); placa(pl, `${il.ic} ${il.nome}`, 0, 1.5, 0, 2.4); }
+    (c.casas || []).forEach(h => casa(g, h));
+    if (c.vend) barraca(g, c.vend[0], c.vend[1], c.vend[2], "🛖 Vendinha");
+    { const n = NPC_ILHA[k], p = posIlha(k, c.npc), v = pracaModelo({ nome: n.nome, skin: "classico", cor: n.cor, pele: n.pele }); v.g.position.set(p.x, .2, p.z); s.add(v.g); I.npcs.push({ v, base: Math.PI * .2 + (k.length % 3) }); }
+    { const p = c.bau, bg = new THREE.Group(); bg.position.set(p[0], .2 + alturaIlha(il.x + p[0], il.z + p[1]), p[1]); g.add(bg); add(new THREE.BoxGeometry(.8, .45, .55), "#8a5a2b", 0, .22, 0, bg);
+      const tampa = new THREE.Group(); tampa.position.set(0, .45, -.27); bg.add(tampa); add(new THREE.BoxGeometry(.82, .16, .57), "#a0703f", 0, .08, .27, tampa); add(new THREE.BoxGeometry(.12, .5, .58), "#e8b830", 0, -.05, 0, bg); I.baus[k] = tampa; }
+    for (const b of c.bichos || []) for (let i = 0; i < b[4]; i++) { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTextoSemana(b[0]), transparent: true, depthWrite: false })); sp.scale.setScalar(b[5] ? .7 : .8); s.add(sp);
+      I.bichos.push({ sp, cx: il.x + b[1], cz: il.z + b[2], R: b[3] * (.6 + i * .25), a: i * 2.1, v: (.5 + Math.random() * .4) * (i % 2 ? 1 : -1), voa: !!b[5], pula: b[0] === "🐸" }); }
+    // enfeites de cada ilha
+    if (k === "porto") { [[12, 6], [-12, -1], [7, -2], [12, -8]].forEach(([x, z]) => palmeira(g, x, z)); [[-1.4, 6], [1.4, -3], [-1.4, -12]].forEach(([x, z]) => lampiao(g, x, z));
+      for (const [x, z] of [[4.5, 10.5], [5.2, 10], [4.8, 11.2]]) add(new THREE.CylinderGeometry(.3, .3, .6, 10), "#8a5a2b", x, .5, z, g); for (const [x, z] of [[-3.5, 12], [-3.6, 12.8]]) add(new THREE.BoxGeometry(.6, .6, .6), "#c08a4a", x, .5, z, g);
+      barraca(g, LOJA_PORTO.dx, LOJA_PORTO.dz, "#2f80ed", "🏪 Loja do Porto"); barraca(g, AVAL_PORTO.dx, AVAL_PORTO.dz, "#8a3cff", "🔍 Avaliador");
+      const band = add(new THREE.CylinderGeometry(.06, .06, 4, 6), "#dddddd", 3, 2.2, 7, g); add(new THREE.PlaneGeometry(1, .6), mat("#2f80ed", { side: THREE.DoubleSide }), 3.5, 3.8, 7, g); band.userData = {}; }
+    if (k === "recife") { [[-8, 2], [7, 7], [-2, -9], [9, -2]].forEach(([x, z]) => palmeira(g, x, z));
+      for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2; add(new THREE.SphereGeometry(.4 + (i % 3) * .1, 8, 6), ["#ff7a9a", "#ffb03b", "#c26dff", "#3dd9c0"][i % 4], Math.cos(a) * (il.r + 1.8), .05, Math.sin(a) * (il.r + 1.8), g); }
+      for (const [x, z] of [[3, 4], [-4, -2], [8, 1]]) { const e = add(new THREE.CylinderGeometry(.25, .25, .05, 5), "#ff8a5a", x, .23, z, g); e.rotation.y = x; } }
+    if (k === "pantano") { for (const [x, z] of [[-9, -3], [9, 5], [-3, 8], [3, -10], [-10, 7]]) { add(new THREE.CylinderGeometry(.2, .35, 3, 7), "#3a2a1a", x, 1.7, z, g); const cp = add(new THREE.SphereGeometry(1.3, 10, 8), "#3a5a24", x, 3.4, z, g); cp.scale.y = .6;
+        for (let i = 0; i < 4; i++) { const ci = add(new THREE.CylinderGeometry(.02, .02, 1.4, 4), "#5a7a34", x + Math.cos(i * 1.6) * .9, 2.5, z + Math.sin(i * 1.6) * .9, g); ci.userData = {}; } }
+      for (const [x, z, cc] of [[-7, 6, "#e63946"], [-8.5, 7.5, "#ffb03b"], [-6.5, 8, "#e63946"], [-9, 5.6, "#c26dff"]]) { add(new THREE.CylinderGeometry(.08, .1, .4, 6), "#f2ead6", x, .4, z, g); add(new THREE.SphereGeometry(.3, 10, 6, 0, Math.PI * 2, 0, Math.PI / 2), cc, x, .58, z, g); }
+      for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2 + .2, rr = il.r + 2.6 + (i % 3); const n = add(new THREE.CircleGeometry(.45, 12, .3, Math.PI * 1.8), "#3fa34d", Math.cos(a) * rr, .05, Math.sin(a) * rr, g); n.rotation.x = -Math.PI / 2;
+        if (i % 4 === 0) add(new THREE.SphereGeometry(.1, 6, 4), "#ff9ac0", Math.cos(a) * rr, .1, Math.sin(a) * rr, g); }
+      for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; add(new THREE.CylinderGeometry(.03, .03, 1.2, 4), "#6a8a3a", Math.cos(a) * (il.r - .8), .8, Math.sin(a) * (il.r - .8), g); }
+      [[-1.4, 4], [1.4, -6]].forEach(([x, z]) => lampiao(g, x, z)); }
+    if (k === "gelo") { [[9, 8], [-10, 0], [-3, 10], [10, -3], [-9, -8]].forEach(([x, z]) => pinheiro(g, x, z, true)); cristal(g, 7.5, 7.5, 3, "#9fe0ff"); cristal(g, 10.5, 5, 1.6, "#bfe8ff"); cristal(g, -11, 4, 1.4, "#9fe0ff");
+      const q = c.cachoeira, rocha = add(new THREE.BoxGeometry(3.6, 4, 2.4), "#7a8a9a", q.dx, 2.2, q.dz, g); add(new THREE.BoxGeometry(3.7, .4, 2.5), "#ffffff", q.dx, 4.3, q.dz, g); rocha.rotation.y = .1;
+      const tq = texturaCanvas(64, 256, (cc, w, h) => { cc.fillStyle = "#6fc8ff"; cc.fillRect(0, 0, w, h); for (let i = 0; i < 40; i++) { cc.fillStyle = `rgba(255,255,255,${.3 + Math.random() * .5})`; cc.fillRect(Math.random() * w, Math.random() * h, 2 + Math.random() * 4, 20 + Math.random() * 40); } });
+      tq.wrapS = tq.wrapT = THREE.RepeatWrapping; const qd = add(new THREE.PlaneGeometry(1.5, 3.9), new THREE.MeshBasicMaterial({ map: tq, transparent: true, opacity: .9 }), q.dx + .1, 2.15, q.dz + 1.25, g); I.quedas.push(tq);
+      const poco = add(new THREE.CircleGeometry(1.3, 20), mat("#4fb0ff", { emissive: "#0a3050" }), q.dx + .1, .22, q.dz + 2.2, g); poco.rotation.x = -Math.PI / 2; qd.userData = {}; }
+    if (k === "vulcao") { const v = c.vulcao; add(new THREE.ConeGeometry(4.3, 5.2, 16), "#4a3a34", v.dx, 2.8, v.dz, g);
+      B.lavaTopo = add(new THREE.CylinderGeometry(.7, 1, .2, 12), new THREE.MeshBasicMaterial({ color: "#ff6a1a" }), v.dx, 5.35, v.dz, g);
+      for (let i = 0; i < 3; i++) { const r2 = add(new THREE.BoxGeometry(.35, 3.2, .1), new THREE.MeshBasicMaterial({ color: "#ff5a1a" }), v.dx + Math.cos(i * 2.1) * 2.2, 2.6, v.dz + Math.sin(i * 2.1) * 2.2, g); r2.rotation.y = -i * 2.1; r2.rotation.z = .55 * (i % 2 ? 1 : -1); }
+      B.fumaca = []; for (let i = 0; i < 6; i++) B.fumaca.push(add(new THREE.SphereGeometry(.5, 8, 6), mat("#8a8a8a", { transparent: true, opacity: .5 }), v.dx, 5 + i, v.dz, g));
+      for (const [x, z, r] of c.lavas) { const l = add(new THREE.CircleGeometry(r, 18), new THREE.MeshBasicMaterial({ color: "#ff6a1a" }), x, .22, z, g); l.rotation.x = -Math.PI / 2; I.lavas.push(l); }
+      for (const [x, z, sc] of [[10, 0, .7], [-3, 10, .6], [11, -6, .9], [-11, -6, .8]]) pedra(g, x, z, sc, "#3a3030"); }
+    if (k === "caverna") { const q = c.gruta;
+      for (let i = 0; i < 22; i++) { const a = i / 22 * Math.PI * 2; if (Math.abs(Math.atan2(Math.sin(a), Math.cos(a))) < .42) continue;
+        for (let j = 0; j < 2; j++) { const p = add(new THREE.DodecahedronGeometry(1.5 - j * .3), j ? "#5a5562" : "#4a4652", q.dx + Math.cos(a) * (q.R - 1), .9 + j * 1.9, q.dz + Math.sin(a) * (q.R - 1), g); p.rotation.set(a, i, j); } }
+      const arco = add(new THREE.TorusGeometry(1.6, .5, 8, 16, Math.PI), "#4a4652", q.dx + q.R - 1, .2, q.dz, g); arco.rotation.y = Math.PI / 2;
+      for (const [dx, dz, h, cc] of [[-1, 1, 1.8, "#c26dff"], [1, -1.2, 1.4, "#7fd8ff"], [-1.4, -.8, 1.1, "#ff7ad9"], [.4, 1.6, 1, "#7fd8ff"]]) cristal(g, q.dx + dx, q.dz + dz, h, cc);
+      for (const [x, z, h, cc] of [[9, 2, 1.6, "#c26dff"], [-10, 7, 2, "#7fd8ff"], [10, 8, 1.2, "#ff7ad9"], [-2, -11, 1.4, "#c26dff"]]) cristal(g, x, z, h, cc);
+      for (const [x, z, sc] of [[11, -3, .8], [-11, -7, .9], [3, 11, .5]]) pedra(g, x, z, sc, "#5a5562"); }
+  }
+  // Vovô Pescador (agora na Ilha do Porto)
+  const v = pracaModelo({ nome: "🧓 Vovô Pescador", skin: "classico", cor: "#3f6f8f", pele: "#e8c39e" }); v.g.position.set(VOVO.x, .2, VOVO.z); v.corpo.rotation.y = Math.PI * .8; s.add(v.g); B.vovo = v;
+  const chapeu = new THREE.Group(); chapeu.position.y = 1.6; v.corpo.add(chapeu); add(new THREE.CylinderGeometry(.42, .42, .04, 16), "#d8b86a", 0, 0, 0, chapeu); add(new THREE.CylinderGeometry(.22, .25, .2, 14), "#d8b86a", 0, .1, 0, chapeu);
+  v.corpo.add(modeloVara());
+  // recado no lugar antigo do Vovô (Bosque)
+  { const pl = new THREE.Group(); pl.position.set(VOVO_ANTES.x, 0, VOVO_ANTES.z); s.add(pl); add(new THREE.BoxGeometry(.1, 1.3, .1), "#6b4423", 0, .65, 0, pl); placa(pl, "🧓 Vovô: Ilha do Porto ⛵", 0, 1.4, 0, 2.4, "#8a5a2b"); }
+  // sombra do peixe chefe na água
+  I.chefe = new THREE.Group(); const sb = add(new THREE.CircleGeometry(1, 24), new THREE.MeshBasicMaterial({ color: "#0b1b33", transparent: true, opacity: .5, depthWrite: false }), 0, .06, 0, I.chefe); sb.rotation.x = -Math.PI / 2; sb.scale.set(3.2, 1.4, 1);
+  add(new THREE.ConeGeometry(.5, 1.2, 4), "#2a3a4a", -.6, .5, 0, I.chefe).rotation.z = -.4; const cr = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTextoSemana("👑"), transparent: true, depthWrite: false })); cr.scale.setScalar(1.4); cr.position.y = 2.2; I.chefe.add(cr);
+  I.chefe.visible = false; s.add(I.chefe);
+  B.gaiolasM = {}; B.xTesouro = {}; B.chuva = null;
+};
+function passoIlhas(dt, t) {
+  const B = PRACA.bosque, I = B && B.ilhas, eu = PRACA.eu; if (!I) return;
+  const nf = typeof noiteFator === "function" && typeof horaPraca === "function" ? noiteFator(horaPraca()) : 0;
+  for (const b of I.bichos) { if (b.barco) { b.barco.position.y = Math.sin(t * 1.4) * .05; b.barco.rotation.z = Math.sin(t * 1.1) * .04; continue; }
+    b.a += b.v * dt / Math.max(1, b.R); const x = b.cx + Math.cos(b.a) * b.R, z = b.cz + Math.sin(b.a) * b.R;
+    b.sp.position.set(x, b.voa ? 3 + Math.sin(t * 2 + b.cx) * .6 : .55 + (b.pula ? Math.abs(Math.sin(t * 3 + b.cz)) * .6 : Math.abs(Math.sin(t * 8 + b.cx)) * .08) + alturaIlha(x, z), z); }
+  for (const n of I.npcs) { n.v.corpo.rotation.y = n.base + Math.sin(t * .6 + n.base) * .5; n.v.bracoD.rotation.x = Math.sin(t * 2 + n.base) * .4; }
+  for (const q of I.quedas) q.offset.y = (q.offset.y + dt * 1.6) % 1;
+  for (const l of I.lavas) l.material.color.setRGB(1, .35 + .15 * Math.sin(t * 3 + l.position.x), .08);
+  for (const c of I.cristais) c.material.emissiveIntensity = .3 + .25 * Math.sin(t * 2 + c.position.x) + nf * .4;
+  for (const l of I.luzes) l.material.opacity = .15 + nf * .85;
+  for (const j of I.janelas) j.emissive.setRGB(nf * .9, nf * .75, nf * .3);
+  const nome = perfil(), abertos = ilhaDia("bauIlha", nome); for (const [k, tp] of Object.entries(I.baus)) tp.rotation.x += ((abertos.includes(k) ? -1.6 : 0) - tp.rotation.x) * Math.min(1, dt * 4);
+  for (const [i, x] of Object.entries(B.xTesouro || {})) { const p = posMapa(+i); x.position.y = (naIlha(p.x, p.z) ? .2 + alturaIlha(p.x, p.z) : 0) + .08; }
+  if (B.vovo) B.vovo.g.position.y = .2;
+  if (B.sinais) Object.values(ILHAS).forEach((i, n) => { const sn = B.sinais[n]; if (sn) sn.g.visible = Math.hypot(eu.x - i.x, eu.z - i.z) > i.r + 10; });   // o sinal alto some quando você está na ilha
+  // peixe chefe: sombra rodando na água e o aviso no alto
+  const ch = chefeAgora(), el = $("pr-chefe");
+  if (ch) { const base = ch.zona === "mar" ? { x: PESCA_MAR.x, z: PESCA_MAR.z - 6 } : (() => { const p = pontoIlha(ch.zona); return { x: p.x, z: p.z - 6 }; })();
+    I.chefe.visible = true; const a = t * .5; I.chefe.position.set(base.x + Math.cos(a) * 4, Math.sin(t * 2) * .05, base.z + Math.sin(a) * 2.5); I.chefe.rotation.y = -a; }
+  else I.chefe.visible = false;
+  if (el) { const prox = !ch && proximoChefe(); el.hidden = eu.x > -19 || !!PRACA.hist || (!ch && !prox);
+    el.innerHTML = ch ? `👑 ${ch.px.ic} <b>${esc(ch.px.nome)}</b> ${esc(ch.onde)} · ${ch.resta} min` : prox ? `👑 Próximo chefe: ${prox.px.ic} em ${prox.em} min` : ""; el.classList.toggle("on", !!ch); }
+}
+const _passoPesca2Ilhas = passoPesca2;
+passoPesca2 = function (dt, t) { _passoPesca2Ilhas(dt, t); try { passoIlhas(dt, t); } catch (e) { console.error(e); } };
+const _abrirPracaIlhas = abrirPraca;
+abrirPraca = function () { _abrirPracaIlhas(); const box = $("praca"); if (!box || !PRACA.on) return; box.insertAdjacentHTML("beforeend", `<div class="pr-clima pr-chefe" id="pr-chefe" hidden></div>`); };
 </script>
 
 <script>
@@ -9549,7 +10061,7 @@ TELAS.adm = () => {
     <h3>Jogador</h3>${escolherJog}
     <h3>Vidas extras</h3>
     <div class="stepper"><button class="btn ghost" type="button" data-a="admVida" data-v="-1" aria-label="Menos uma vida">−</button><b>${invVidas(n)}</b><button class="btn ghost" type="button" data-a="admVida" data-v="1" aria-label="Mais uma vida">+</button></div>
-    <h3>Skins</h3><div class="chips">${SKINS.filter(s => !s.variante).map(s => chipItem(temSkin(n, s.k), s.preco === 0, "skin", s.k, esc(s.nome) + (s.limitada ? " ⭐" : ""))).join("")}</div>
+    <h3>Skins</h3><div class="chips">${SKINS.filter(s => !s.variante).map(s => chipItem(temSkin(n, s.k), s.preco === 0 && !s.codigo && !s.adm, "skin", s.k, (s.adm ? "👑 " : s.codigo ? "🔑 " : "") + esc(s.nome) + (s.limitada ? " ⭐" : ""))).join("")}</div>
     <h3>Fundos</h3><div class="chips">${FUNDOS.map(([k, t]) => chipItem(temFundo(n, k), k === "basico", "fundo", k, esc(t))).join("")}</div>
     <h3>Emojis</h3><div class="chips">${EMOJIS.map(e => chipItem(temEmoji(n, e.k), e.preco === 0, "emoji", e.k, e.e)).join("")}</div>
     <h3>Gestos</h3><div class="chips">${GESTOS.map(g => chipItem(temGesto(n, g.k), g.preco === 0, "gesto", g.k, g.icone + " " + esc(g.nome))).join("")}</div>
@@ -12414,7 +12926,7 @@ function prDonoRecebe(conn, d) {
   }
   if (!id) return;
   const c = PR.conns.get(id);
-  if (d.t === "p") { const n = v => Math.max(-180, Math.min(180, +v || 0)); c.pos = [n(d.x), n(d.z), +d.r || 0, Math.max(0, Math.min(30, +d.y || 0)), (+d.e || 0) & 31]; pracaPos(id, ...c.pos); }
+  if (d.t === "p") { const n = v => Math.max(-230, Math.min(230, +v || 0)); c.pos = [n(d.x), n(d.z), +d.r || 0, Math.max(0, Math.min(30, +d.y || 0)), (+d.e || 0) & 31]; pracaPos(id, ...c.pos); }
   else if (d.t === "info") { c.info = prInfoLimpa(d.info); pracaOutro(id, c.info); prMandarInfos(); }
   else if (d.t === "rk") { mesclarRank(d.r, d.m); mesclarBossG(d.bg); }
   else if (d.t === "pg") {   // pega-pega: quem pegou manda para o dono, que avisa todo mundo
@@ -12447,7 +12959,7 @@ function prMembroRecebe(d) {
     for (const id of [...PRACA.outros.keys()]) if (!ids.includes(id)) pracaTirar(id);
     prContar();
   }
-  else if (d.t === "ps" && Array.isArray(d.l)) for (const a of d.l.slice(0, 20)) { if (!Array.isArray(a) || a[0] === PR.meuId) continue; const n = v => Math.max(-180, Math.min(180, +v || 0)); pracaPos(String(a[0]), n(a[1]), n(a[2]), +a[3] || 0, Math.max(0, Math.min(30, +a[4] || 0)), (+a[5] || 0) & 31); }
+  else if (d.t === "ps" && Array.isArray(d.l)) for (const a of d.l.slice(0, 20)) { if (!Array.isArray(a) || a[0] === PR.meuId) continue; const n = v => Math.max(-230, Math.min(230, +v || 0)); pracaPos(String(a[0]), n(a[1]), n(a[2]), +a[3] || 0, Math.max(0, Math.min(30, +a[4] || 0)), (+a[5] || 0) & 31); }
   else if (d.t === "sai") { pracaTirar(String(d.id)); prContar(); }
   else if (d.t === "rk") { mesclarRank(d.r, d.m); mesclarBossG(d.bg); }
   else if (d.t === "portal") toast(`${nomeLimpo(d.nome)} entrou na Partida do Evento! Vá até a porta para jogar junto.`);
