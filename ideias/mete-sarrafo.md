@@ -384,3 +384,21 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
 - **🗺️ Mapa do tesouro:** às vezes vem junto com um peixe. Siga a dica (quente ou frio) e cave no X para ganhar o prêmio.
 - O barco agora é de verdade: no píer do mar você pega o barco e **dirige** até as ilhas, que ficaram bem longe no mar. Tem uma bússola 🧭, cada ilha tem um sinal alto para ver de longe, e dá para descer nas ilhas (se tiver o nível), pegar o barco de novo no cais e até pescar do barco no meio do mar.
 - Skins novas: de código (Ninja das Sombras, Mago, Cavaleiro, Astronauta Dourado; só com código de presente) e de ADM (Rei do ADM, Hacker, Deus do Trovão, Fantasma Dourado; só o ADM dá, pelo Painel).
+
+## Ilhas grandes e Pescaria 3 (pedido do Andre, 24/11)
+
+- **Ilhas maiores e mais longe**, agora são 6: ⚓ Porto (nível 1), 🪸 Recife (2), 🐸 Pântano (3, nova), 🧊 Gelo (4), 🌋 Vulcão (6) e 💎 Caverna (8, nova).
+- **Vila em cada ilha:** casinhas (no Gelo são iglus, no Pântano palafitas, na Caverna tendas), vendinha, cais com barco, morrinho para subir, bichos andando e um morador que conversa e faz um pedido por dia.
+- **Enfeites:** cachoeira no Gelo, vulcão soltando fumaça, gruta com cristais na Caverna, cogumelos e vitórias-régias no Pântano.
+- **Baú escondido** em cada ilha: abre uma vez por dia.
+- **Ilha do Porto** é a ilha inicial: tem a Loja do Porto, o Avaliador e o Vovô Pescador (ele se mudou do Bosque; lá ficou um recado).
+- **Peixes novos:** Tainha, Robalo, Garoupa e Marlim no Porto; Bagre, Piranha, Poraquê, Pirarucu e Boto-cor-de-rosa no Pântano; Peixe-cego, Peixe-lanterna, Peixe-cristal, Peixe-ametista e Peixe-diamante na Caverna.
+- **Mutações:** ⚡ Elétrico (chuva), ❄️ Congelado (Gelo), 👻 Fantasma (noite ou neblina), 🔥 Queimado (Vulcão), 🌿 Musgoso (Pântano) e 💠 Cristalizado (Caverna). Valem mais.
+- **Varas novas:**
+  - para comprar: ⚡ Trovão (mais peixe Elétrico) e 🌈 Arco-íris;
+  - especiais (não se compram): 🐙 Tentáculo, 🐊 Dente-de-Jacaré e 💎 Cristal (do chefe) e 🧓 Vara do Vovô (fim da história).
+- **Peixes chefes:** 🐙 Polvo Colosso (mar), 🐊 Jacaré-Rei (Pântano) e 🐍 Serpente de Cristal (Caverna).
+  - Aparecem 10 minutos a cada meia hora (um aviso mostra qual e quanto falta).
+  - Pegar um dá 300 moedas e, na primeira vez, a vara especial dele.
+- **História do Vovô:** 8 capítulos de missões, cada um com prêmio. O último dá a Vara do Vovô.
+

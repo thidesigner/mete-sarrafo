@@ -39,7 +39,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const T = 
   r.especial = await pg.evaluate(() => { let n = 0; for (let i = 0; i < 2000; i++) if (sortearEspecial(1)) n++; return n; });
   await pg.evaluate(() => { PRACA.pesca = null; PRACA.eu.x = PESCA_MAR.x; PRACA.eu.z = PIER_MAR.z1 - 1; PRACA.yaw = 0; PRACA.alt = .3; }); await pg.keyboard.down('w'); await pg.waitForTimeout(1200); await pg.keyboard.up('w');
   r.pierMar = await pg.evaluate(() => ({ z: +PRACA.eu.z.toFixed(1), botao: $("pr-acao").textContent, agua: pracaLivre(-35, -30) }));
-  await pg.evaluate(() => { PRACA.yaw = .6; PRACA.alt = .5; }); await lancar(false); r.zona = await pg.evaluate(() => PRACA.pesca.zona); await pg.screenshot({ path: S + '/pe-mar.png' }); r.peixeMar = await puxar(true);
+  await pg.evaluate(() => { PRACA.eu.x = PESCA_MAR.x; PRACA.eu.z = PESCA_MAR.z; PRACA.yaw = .6; PRACA.alt = .5; }); await pg.waitForTimeout(300); await lancar(false); r.zona = await pg.evaluate(() => PRACA.pesca.zona); await pg.screenshot({ path: S + '/pe-mar.png' }); r.peixeMar = await puxar(true);
   // Loja de pesca
   await pg.evaluate(() => { PRACA.pesca = null; PRACA.eu.x = LOJA_PESCA.x; PRACA.eu.z = LOJA_PESCA.z + 1.6; PRACA.yaw = Math.PI; PRACA.alt = .3; }); await pg.waitForTimeout(500);
   r.botaoLoja = await pg.evaluate(() => $("pr-acao").textContent); await pg.screenshot({ path: S + '/pe-loja3d.png' });

@@ -1270,7 +1270,7 @@ function prDonoRecebe(conn, d) {
   }
   if (!id) return;
   const c = PR.conns.get(id);
-  if (d.t === "p") { const n = v => Math.max(-180, Math.min(180, +v || 0)); c.pos = [n(d.x), n(d.z), +d.r || 0, Math.max(0, Math.min(30, +d.y || 0)), (+d.e || 0) & 31]; pracaPos(id, ...c.pos); }
+  if (d.t === "p") { const n = v => Math.max(-230, Math.min(230, +v || 0)); c.pos = [n(d.x), n(d.z), +d.r || 0, Math.max(0, Math.min(30, +d.y || 0)), (+d.e || 0) & 31]; pracaPos(id, ...c.pos); }
   else if (d.t === "info") { c.info = prInfoLimpa(d.info); pracaOutro(id, c.info); prMandarInfos(); }
   else if (d.t === "rk") { mesclarRank(d.r, d.m); mesclarBossG(d.bg); }
   else if (d.t === "pg") {   // pega-pega: quem pegou manda para o dono, que avisa todo mundo
@@ -1303,7 +1303,7 @@ function prMembroRecebe(d) {
     for (const id of [...PRACA.outros.keys()]) if (!ids.includes(id)) pracaTirar(id);
     prContar();
   }
-  else if (d.t === "ps" && Array.isArray(d.l)) for (const a of d.l.slice(0, 20)) { if (!Array.isArray(a) || a[0] === PR.meuId) continue; const n = v => Math.max(-180, Math.min(180, +v || 0)); pracaPos(String(a[0]), n(a[1]), n(a[2]), +a[3] || 0, Math.max(0, Math.min(30, +a[4] || 0)), (+a[5] || 0) & 31); }
+  else if (d.t === "ps" && Array.isArray(d.l)) for (const a of d.l.slice(0, 20)) { if (!Array.isArray(a) || a[0] === PR.meuId) continue; const n = v => Math.max(-230, Math.min(230, +v || 0)); pracaPos(String(a[0]), n(a[1]), n(a[2]), +a[3] || 0, Math.max(0, Math.min(30, +a[4] || 0)), (+a[5] || 0) & 31); }
   else if (d.t === "sai") { pracaTirar(String(d.id)); prContar(); }
   else if (d.t === "rk") { mesclarRank(d.r, d.m); mesclarBossG(d.bg); }
   else if (d.t === "portal") toast(`${nomeLimpo(d.nome)} entrou na Partida do Evento! Vá até a porta para jogar junto.`);

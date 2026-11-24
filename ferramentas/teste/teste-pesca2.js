@@ -6,7 +6,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const T = 
   await ctx.route('**/peerjs.min.js', r => r.fulfill({ body: fs.readFileSync(T + 'mockpeer.js'), contentType: 'application/javascript' }));
   await ctx.route('**/three.min.js', r => r.fulfill({ body: fs.readFileSync(T + 'vendor/three.min.js'), contentType: 'application/javascript' }));
   await ctx.route(u => u.pathname.endsWith('/avisos.json'), r => r.fulfill({ contentType: 'application/json', body: '{"avisos":[]}' }));
-  const PESCA_MAR = { x: -27, z: -24.3 }, PIER_MAR = { z1: -16.5 }, LOJA_PESCA = { x: -31.5, z: -14.6 }, VOVO = { x: -39, z: -1.4 }, PESCA_LUGAR = { x: -36, z: -6.3 };
+  const PESCA_MAR = { x: -27, z: -24.3 }, PIER_MAR = { z1: -16.5 }, LOJA_PESCA = { x: -31.5, z: -14.6 }, PESCA_LUGAR = { x: -36, z: -6.3 };
   const pg = await ctx.newPage(); const errs = []; pg.on('pageerror', e => errs.push(e.message));
   await pg.goto('http://localhost:8767/teste/'); { const ab = await pg.$('#abertura'); if (ab) await ab.click(); }
   await pg.evaluate(() => { window.PRACA_HORA_TESTE = 12; window.PESCA_CLIMA_TESTE = "sol"; G.perfil = "Andre"; G.banco.Andre = 9000; G.peixes = {}; G.mochila = {}; G.pescaXp = {}; G.historias = { vistas: historiasAgora().map(h => h.id) }; salvar(); ir("lobby"); });
@@ -46,7 +46,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const T = 
   await pg.evaluate(() => { gaiolasDe("Andre").lago.desde -= 5 * 60000; }); await pg.waitForTimeout(400); r.botaoCheia = await botao();
   const mo0 = await pg.evaluate(() => mochilaDe("Andre").length); await clicar(); r.gaiolaPegou = await pg.evaluate(m => mochilaDe("Andre").length - m, mo0);
   // pedidos do Vovô
-  await ir(VOVO.x + 1, VOVO.z + 1, -.8); await pg.waitForTimeout(400); r.botaoVovo = await botao(); await pg.screenshot({ path: S + '/p2-vovo3d.png' }); await clicar();
+  { const V = await pg.evaluate(() => VOVO); await ir(V.x + 1, V.z + 1, -.8); } await pg.waitForTimeout(400); r.botaoVovo = await botao(); await pg.screenshot({ path: S + '/p2-vovo3d.png' }); await clicar();
   await pg.evaluate(() => { const pd = pedidosDoDia()[0]; mochilaDe("Andre").push({ k: pd.p.k, tam: 10, esp: null, v: 5 }); }); await pg.click('[data-a="pescaAba"]').catch(() => {});
   await pg.evaluate(() => atualizarPainelPraca()); await pg.waitForTimeout(200); const b0 = await pg.evaluate(() => G.banco.Andre);
   await pg.click('[data-a="pescaEntregar"][data-i="0"]'); await pg.waitForTimeout(300); r.entregou = await pg.evaluate(b => ({ ganhou: G.banco.Andre - b, feitos: pedidosFeitos("Andre") }), b0);
