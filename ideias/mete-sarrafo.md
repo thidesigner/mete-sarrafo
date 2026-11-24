@@ -382,3 +382,4 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
 - **📜 Vovô Pescador:** todo dia pede 3 peixes e paga bem.
 - **🦀 Gaiolas:** coloque no começo de um píer e volte em 4 minutos para pegar os bichos que caíram nela.
 - **🗺️ Mapa do tesouro:** às vezes vem junto com um peixe. Siga a dica (quente ou frio) e cave no X para ganhar o prêmio.
+- O barco agora é de verdade: no píer do mar você pega o barco e **dirige** até as ilhas, que ficaram bem longe no mar. Tem uma bússola 🧭, cada ilha tem um sinal alto para ver de longe, e dá para descer nas ilhas (se tiver o nível), pegar o barco de novo no cais e até pescar do barco no meio do mar.

@@ -16,21 +16,13 @@ const { chromium } = require('playwright'); const fs = require('fs'); const T = 
   const clicar = async () => { await pg.waitForSelector('#pr-acao:not([hidden])', { timeout: 5000 }); await pg.click('#pr-acao', { force: true }); await pg.waitForTimeout(350); };
   // nível
   r.nivel = await pg.evaluate(() => { const a = nivelPesca("Andre"); G.pescaXp.Andre = xpPara(3); const b = nivelPesca("Andre"); return { a, b, titulo: tituloPesca(b), xp6: xpPara(6), xp12: xpPara(12) }; });
-  // barco: ilha travada no nível 3? (Recife nível 2 libera, Gelo 4 não)
-  await ir(PESCA_MAR.x, PIER_MAR.z1 - 1.5); await pg.waitForTimeout(300); r.botaoBarco = await botao(); await clicar(); await pg.screenshot({ path: S + '/p2-barco.png' });
-  r.travas = await pg.evaluate(() => [...document.querySelectorAll('[data-a="pescaViajar"]')].map(b => b.dataset.k + ":" + b.textContent));
-  await pg.click('[data-a="pescaViajar"][data-k="recife"]'); await pg.waitForTimeout(1500);
-  r.recife = await pg.evaluate(() => ({ x: Math.round(PRACA.eu.x), z: Math.round(PRACA.eu.z), livre: pracaLivre(PRACA.eu.x, PRACA.eu.z) }));
-  await pg.evaluate(() => { PRACA.yaw = 2.6; PRACA.alt = .5; }); await pg.waitForTimeout(500); await pg.screenshot({ path: S + '/p2-recife.png' });
-  // pescar na ilha
+  // ilhas (o barco de verdade é testado em teste-barco.js): vai direto ao cais
+  await pg.evaluate(() => { const c = chegadaIlha("recife"); PRACA.eu.x = c.x; PRACA.eu.z = c.z; PRACA.yaw = 2.6; PRACA.alt = .5; }); await pg.waitForTimeout(600);
+  r.recife = await pg.evaluate(() => ({ livre: pracaLivre(PRACA.eu.x, PRACA.eu.z) })); await pg.screenshot({ path: S + '/p2-recife.png' });
   await pg.evaluate(() => { const p = pontoIlha("recife"); PRACA.eu.x = p.x; PRACA.eu.z = p.z; PRACA.yaw = .4; }); await pg.waitForTimeout(400); r.botaoIlha = await botao(); await clicar();
   r.zonaIlha = await pg.evaluate(() => PRACA.pesca && PRACA.pesca.zona);
   r.peixesIlha = await pg.evaluate(() => { const c = {}; for (let i = 0; i < 300; i++) { const p = sortearPeixe("vulcao", 0); c[p.k] = (c[p.k] || 0) + 1; } return Object.keys(c); });
-  await pg.evaluate(() => pararPesca());
-  // Vulcão com nível 6
-  await pg.evaluate(() => { G.pescaXp.Andre = xpPara(6); }); await pg.evaluate(() => { const c = chegadaIlha("recife"); PRACA.eu.x = c.x; PRACA.eu.z = c.z; }); await pg.waitForTimeout(300); await clicar();
-  await pg.click('[data-a="pescaViajar"][data-k="vulcao"]'); await pg.waitForTimeout(1500); await pg.evaluate(() => { PRACA.yaw = 2.4; PRACA.alt = .45; }); await pg.waitForTimeout(500); await pg.screenshot({ path: S + '/p2-vulcao.png' });
-  r.vulcao = await pg.evaluate(() => Math.round(Math.hypot(PRACA.eu.x - ILHAS.vulcao.x, PRACA.eu.z - ILHAS.vulcao.z)));
+  await pg.evaluate(() => pararPesca()); await pg.evaluate(() => { G.pescaXp.Andre = xpPara(6); const c = chegadaIlha("vulcao"); PRACA.eu.x = c.x; PRACA.eu.z = c.z; PRACA.yaw = 2.4; PRACA.alt = .45; }); await pg.waitForTimeout(600); await pg.screenshot({ path: S + '/p2-vulcao.png' });
   // clima
   r.clima = await pg.evaluate(() => { const out = {}; window.PESCA_CLIMA_TESTE = "estrelas"; let n = 0; for (let i = 0; i < 400; i++) if (sortearPeixe("mar", 0).k === "cometa") n++; out.cometaEstrelas = n;
     window.PESCA_CLIMA_TESTE = "sol"; n = 0; for (let i = 0; i < 400; i++) if (sortearPeixe("mar", 0).k === "cometa") n++; out.cometaSol = n;

@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="versao-site" content="1511555858">
+<meta name="versao-site" content="93f3cc3820">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0f3057">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;-webkit-text-size-adjust:100%}img{max-width:100%}[hidden]{display:none!important}.faixa-teste{position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:50;background:#ff4d6d;color:#fff;font:800 12px/1 system-ui,sans-serif;letter-spacing:.08em;padding:4px 10px;border-radius:0 0 8px 8px;pointer-events:none}</style>
@@ -469,6 +469,8 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 .pp-esp-arco { animation: ppArco 2s linear infinite; } .pp-esp-gigante { transform: scale(1.12); filter: drop-shadow(0 0 5px #3d9bff); }
 @keyframes ppArco { to { filter: hue-rotate(360deg) drop-shadow(0 0 6px #ff7ad9); } }
 @media (prefers-reduced-motion: reduce) { .pp-pegou, .pp-esp-arco { animation: none; } }
+.pr-bussola { position: absolute; left: 50%; top: 100px; transform: translateX(-50%); z-index: 5; background: rgba(11,27,51,.85); color: #fff; border: 2px solid #ffd23f; border-radius: 14px; padding: 6px 10px; display: grid; gap: 2px; font: 700 13px Nunito, sans-serif; min-width: 190px; }
+.pr-bussola[hidden] { display: none; } .pr-bussola i { display: inline-block; font-style: normal; color: #ffd23f; } .praca.pr-cena .pr-bussola { display: none !important; }
 .pr-mapa { top: 172px; border-color: #c08a3a; } .pr-clima { position: absolute; right: 12px; top: 100px; z-index: 5; background: rgba(11,27,51,.8); color: #fff; border: 2px solid #3dd9ff; border-radius: 14px; padding: 6px 10px; font: 800 13px Nunito, sans-serif; }
 .pr-clima[hidden] { display: none; } .praca.pr-cena .pr-mapa, .praca.pr-cena .pr-clima { display: none !important; }
 .pp-viagem { position: absolute; inset: 0; z-index: 9; display: grid; place-items: center; background: linear-gradient(#5fc8f0, #1d6fa8); color: #fff; font: 900 28px Nunito, sans-serif; animation: ppViagem 1.3s ease-in-out; }
@@ -5475,7 +5477,7 @@ function pracaOutro(id, info) {
   if (info) { o.info = info; anotarMoedas(info.nome, info.moedas); }
   return o;
 }
-function pracaPos(id, x, z, r, y, e) { const o = PRACA.outros.get(id); if (!o) return; if (!o.alvo) { o.x = x; o.z = z; o.m.g.visible = true; } o.alvo = { x, z, r, y, e: (+e || 0) & 15 }; }
+function pracaPos(id, x, z, r, y, e) { const o = PRACA.outros.get(id); if (!o) return; if (!o.alvo) { o.x = x; o.z = z; o.m.g.visible = true; } o.alvo = { x, z, r, y, e: (+e || 0) & 31 }; }
 function pracaTirar(id) { const o = PRACA.outros.get(id); if (!o) return; PRACA.cena.remove(o.m.g); PRACA.outros.delete(id); }
 function pracaTirarTodos() { for (const id of [...PRACA.outros.keys()]) pracaTirar(id); }
 /* ---------- abrir e fechar ---------- */
@@ -7929,7 +7931,7 @@ const ISCAS = [
   { k: "camarao", ic: "🦐", nome: "Camarãozinho", preco: 6, dica: "Mais sorte para peixe raro.", sorte: .2 },
   { k: "mar", ic: "🦑", nome: "Isca do mar", preco: 10, dica: "No mar, os peixes grandes aparecem mais.", grande: true },
   { k: "brilho", ic: "✨", nome: "Isca brilhante", preco: 25, dica: "Muita sorte e o dobro de chance de peixe especial.", sorte: .45, esp: 2 } ];
-const PESCA_MAR = { x: -27, z: -24.3 }, PIER_MAR = { x: -27, z0: -25, z1: -16.5, w: 1.6 }, LOJA_PESCA = { x: -31.5, z: -14.6 }, MAR = { x0: -64, x1: -19, z0: -18.6, z1: -64 };
+const PESCA_MAR = { x: -27, z: -24.3 }, PIER_MAR = { x: -27, z0: -25, z1: -16.5, w: 1.6 }, LOJA_PESCA = { x: -31.5, z: -14.6 }, MAR = { x0: -170, x1: -19, z0: -18.6, z1: -170 };   // mar grande: as ilhas ficam longe (vai de barco)
 function invPesca(nome) { G.inv = G.inv || {}; const inv = G.inv[nome] = G.inv[nome] || { vidas: 0 }; inv.varas = Array.isArray(inv.varas) ? inv.varas : ["madeira"]; if (!inv.varas.includes("madeira")) inv.varas.unshift("madeira"); if (!VARAS.some(v => v.k === inv.vara)) inv.vara = "madeira"; inv.iscas = inv.iscas || {}; return inv; }
 const varaDe = nome => varaComEncanto(nome);   // com o encanto da vara (bloco Pescaria 2)
 function iscaDe(nome) { const inv = invPesca(nome); return inv.isca && (inv.iscas[inv.isca] || 0) > 0 ? ISCAS.find(i => i.k === inv.isca) : null; }
@@ -7955,7 +7957,7 @@ function comecarPesca() {
 function lancarPesca(P) {
   const eu = PRACA.eu, nome = perfil(), vara = varaDe(nome), isca = iscaDe(nome), perf = P.forca >= .82 && P.forca <= .98;
   if (isca) { invPesca(nome).iscas[isca.k]--; salvar(); }
-  const base = pontoPesca(P.zona);
+  const base = P.base || pontoPesca(P.zona);
   Object.assign(P, { fase: "lanca", t: 0, perfeito: perf, isca, vara, alvo: new THREE.Vector3(base.x + (Math.random() - .5) * 1.6, .06, base.z - 1.6 - P.forca * 3.2) });
   PRACA.bosque.boia.visible = PRACA.bosque.linha.visible = true; PRACA.bosque.boia.scale.setScalar(1);
   if (perf) toast("🎯 Lançamento perfeito!"); if (typeof tocarNotas === "function") tocarNotas([[84, 60, 0, .5, "sine"]].concat(perf ? [[88, 96, .1, .25, "triangle"]] : []));
@@ -8033,7 +8035,7 @@ function passoPesca(dt, t) {
   if (eu.m.vara) eu.m.vara.visible = comVara;
   if (B.ondas) B.ondas = B.ondas.filter(o => { o.t += dt; const q = o.t / 1.2; o.m.scale.setScalar(1 + q * 5 * o.forte); o.m.material.opacity = .8 * (1 - q); if (q < 1) return true; PRACA.cena.remove(o.m); o.m.material.dispose(); return false; });
   if (!P) { B.boia.visible = B.linha.visible = false; return; }
-  const base = pontoPesca(P.zona);
+  const base = P.base || pontoPesca(P.zona);
   if (P.fase !== "fim" && Math.hypot(eu.x - base.x, eu.z - base.z) > 2.4) { pararPesca(); return; }
   if (P.fase === "fim") return;
   const segura = PRACA.pescaSegura || (PRACA.keys && PRACA.keys[" "]);
@@ -8582,9 +8584,9 @@ peixeGenerico = function (c, a, t) {
 };
 /* ---------- lugares de pesca e ilhas ---------- */
 const ILHAS = {
-  recife: { x: -52, z: -26, r: 6, nome: "Ilha do Recife", ic: "🪸", nivel: 2, chao: "#f2e2b4" },
-  gelo: { x: -32, z: -48, r: 6, nome: "Ilha de Gelo", ic: "🧊", nivel: 4, chao: "#eef6ff" },
-  vulcao: { x: -55, z: -44, r: 6, nome: "Ilha do Vulcão", ic: "🌋", nivel: 6, chao: "#3a3030" } };
+  recife: { x: -75, z: -60, r: 8, nome: "Ilha do Recife", ic: "🪸", nivel: 2, chao: "#f2e2b4" },
+  gelo: { x: -35, z: -120, r: 8, nome: "Ilha de Gelo", ic: "🧊", nivel: 4, chao: "#eef6ff" },
+  vulcao: { x: -130, z: -115, r: 9, nome: "Ilha do Vulcão", ic: "🌋", nivel: 6, chao: "#3a3030" } };
 const pontoIlha = k => ({ x: ILHAS[k].x, z: ILHAS[k].z - ILHAS[k].r + .6 });
 const chegadaIlha = k => ({ x: ILHAS[k].x, z: ILHAS[k].z + ILHAS[k].r - 1.6 });
 function pontoPesca(z) { return z === "mar" ? PESCA_MAR : ILHAS[z] ? pontoIlha(z) : PESCA_LUGAR; }
@@ -8737,8 +8739,7 @@ lugaresPraca = function () {
   const nome = perfil(), g = gaiolasDe(nome), eu = PRACA.eu;
   // mapa do tesouro: cavar quando está em cima do X
   for (const i of mapasDe(nome)) { const p = posMapa(i); if (Math.hypot(eu.x - p.x, eu.z - p.z) < 1.6) l.unshift({ x: p.x, z: p.z, r: 1.6, txt: "⛏️ Cavar o tesouro!", abrir: () => cavarTesouro(i) }); }
-  for (const k of Object.keys(ILHAS)) { const p = pontoIlha(k), c = chegadaIlha(k); l.push({ x: p.x, z: p.z, r: 1.5, txt: `🎣 Pescar na ${ILHAS[k].nome}`, abrir: comecarPesca }, { x: c.x, z: c.z, r: 1.6, txt: "⛵ Barco", abrir: () => abrirPainelPraca("⛵ Barco", viagemHTML) }); }
-  l.push({ x: PESCA_MAR.x, z: PIER_MAR.z1 - 1.5, r: 1.2, txt: "⛵ Barco para as ilhas", abrir: () => abrirPainelPraca("⛵ Barco", viagemHTML) });
+  for (const k of Object.keys(ILHAS)) { const p = pontoIlha(k), c = chegadaIlha(k); l.push({ x: p.x, z: p.z, r: 1.5, txt: `🎣 Pescar na ${ILHAS[k].nome}`, abrir: comecarPesca }); }
   l.push({ x: VOVO.x, z: VOVO.z, r: 2, txt: "🧓 Pedidos do Vovô Pescador", abrir: () => abrirPainelPraca("🧓 Vovô Pescador", pedidosHTML) });
   for (const z of ["lago", "mar", ...Object.keys(ILHAS)]) { const p = lugarGaiola(z), tem = g[z];
     l.push({ x: p.x, z: p.z, r: 1, txt: tem ? (prontaGaiola(tem) ? "🦀 Recolher a gaiola (cheia!)" : "🦀 Ver a gaiola") : "🦀 Pôr gaiola", abrir: () => (tem ? recolherGaiola(z) : porGaiola(z)) }); }
@@ -8797,7 +8798,7 @@ function passoPesca2(dt, t) {
   // clima da pescaria (só perto da água: Bosque, mar e ilhas)
   const cl = climaPesca(), longe = eu.x > -19, cena = PRACA.cena;
   if (!B.fogBase && cena.fog) B.fogBase = [cena.fog.near, cena.fog.far];
-  if (cena.fog && B.fogBase) { const neb = cl.k === "neblina" && !longe; cena.fog.near += ((neb ? 6 : B.fogBase[0]) - cena.fog.near) * Math.min(1, dt); cena.fog.far += ((neb ? 26 : B.fogBase[1]) - cena.fog.far) * Math.min(1, dt); }
+  if (cena.fog && B.fogBase) { const neb = cl.k === "neblina" && !longe; const nav = PRACA.barco || naIlha(eu.x, eu.z), tn = neb ? 6 : nav ? 60 : B.fogBase[0], tf = neb ? 26 : nav ? 190 : B.fogBase[1]; cena.fog.near += (tn - cena.fog.near) * Math.min(1, dt); cena.fog.far += (tf - cena.fog.far) * Math.min(1, dt); }
   const chove = (cl.k === "chuva" || cl.k === "tempestade") && !longe;
   if (chove && !B.chuva) { const N = 500, pos = new Float32Array(N * 3); for (let i = 0; i < N; i++) { pos[i * 3] = (Math.random() - .5) * 36; pos[i * 3 + 1] = Math.random() * 18; pos[i * 3 + 2] = (Math.random() - .5) * 36; }
     const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos, 3)); B.chuva = new THREE.Points(geo, new THREE.PointsMaterial({ color: "#a8d8ff", size: .1, transparent: true, opacity: .8, depthWrite: false })); cena.add(B.chuva); }
@@ -8811,6 +8812,127 @@ function passoPesca2(dt, t) {
 const _abrirPracaPesca2 = abrirPraca;
 abrirPraca = function () { _abrirPracaPesca2(); const box = $("praca"); if (!box || !PRACA.on) return; box.insertAdjacentHTML("beforeend", `<div class="pr-missao pr-mapa" id="pr-mapa" hidden></div><button type="button" class="pr-clima" id="pr-clima" hidden></button>`);
   $("pr-clima").addEventListener("click", () => { const c = climaPesca(); toast(`${c.ic} ${c.nome}: ${c.dica}`); }); };
+/* ===================== Barco de verdade (pedido do Andre): as ilhas ficam longe no mar e você dirige o barco até elas =====================
+   PRACA.barco = {v} enquanto dirige (círculo: frente/ré e virar; no PC WASD). Só anda na água (naAgua). Perto de um píer ou de uma ilha aparece "⚓ Descer".
+   Para sair de uma ilha: "⛵ Pegar o barco" no cais da ilha (cais = chegadaIlha). Na rede vai o bit 16 de "e" (os amigos veem o barco). */
+const CAIS_PIER = { x: -27, z: -18 }, BARCO_PIER = { x: -25.2, z: -19.6 }, FAROL = { x: -40, z: -34 };
+const barcoDaIlha = k => ({ x: ILHAS[k].x, z: ILHAS[k].z + ILHAS[k].r + 2.2 });
+function naAgua(x, z) {
+  if (x < MAR.x0 + 2 || x > MAR.x1 - .5 || z > MAR.z0 - .4 || z < MAR.z1 + 2) return false;
+  if (Math.abs(x - PIER_MAR.x) < PIER_MAR.w / 2 + .6 && z > PIER_MAR.z0 - .6) return false;   // píer
+  if (Math.hypot(x - FAROL.x, z - FAROL.z) < 2.6) return false;
+  return !Object.values(ILHAS).some(i => Math.hypot(x - i.x, z - i.z) < i.r + 1.4);
+}
+function modeloBarco(cor) {
+  const g = new THREE.Group(), add = (geo, c, x, y, z) => { const m = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color: c })); m.position.set(x, y, z); g.add(m); return m; };
+  add(new THREE.BoxGeometry(1.6, .5, 3), cor, 0, .1, .2); add(new THREE.BoxGeometry(1.3, .12, 2.7), "#f4e3c1", 0, .36, .2);
+  const proa = add(new THREE.ConeGeometry(.8, 1.4, 4), cor, 0, .1, -1.95); proa.rotation.x = -Math.PI / 2; proa.rotation.y = Math.PI / 4; proa.scale.set(1, 1, .45);
+  add(new THREE.BoxGeometry(1.64, .08, 3.04), "#ffffff", 0, .3, .2);
+  add(new THREE.CylinderGeometry(.05, .05, 2.6, 6), "#6b4423", 0, 1.6, -.4);
+  const vela = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 1.9), new THREE.MeshLambertMaterial({ color: "#ffffff", side: THREE.DoubleSide })); vela.position.set(0, 1.9, -.2); g.add(vela); g.userData.vela = vela;
+  const band = new THREE.Mesh(new THREE.PlaneGeometry(.5, .3), new THREE.MeshBasicMaterial({ color: "#ff4d6d", side: THREE.DoubleSide })); band.position.set(.25, 3, -.4); g.add(band); g.userData.band = band;
+  return g;
+}
+function entrarBarco(onde) {
+  const eu = PRACA.eu; if (PRACA.kart || PRACA.voando) { toast("Saia do carrinho ou pare de voar antes 🙂"); return; }
+  PRACA.barco = { v: 0 }; eu.x = onde.x; eu.z = onde.z; eu.y = 0; eu.vy = 0; eu.r = onde.r || 0; PRACA.yaw = eu.r;
+  if (eu.m.petW) eu.m.petW = null; const el = $("pr-bussola"); if (el) el.hidden = false;
+  if (typeof tocarNotas === "function") tocarNotas([[55, 60, 0, .3, "sine"], [60, 67, .3, .4, "sine"]]);
+  toast("⛵ Navegando! Siga a 🧭 bússola até as ilhas.");
+}
+function descerBarco(destino, msg) {
+  const eu = PRACA.eu; PRACA.barco = null; tirarBarco(eu.m); eu.x = destino.x; eu.z = destino.z; eu.y = 0; eu.vy = 0; if (eu.m.petW) eu.m.petW = null;
+  const el = $("pr-bussola"); if (el) el.hidden = true; if (msg) toast(msg);
+}
+function tirarBarco(m) { if (m.barcoM) { if (m.barcoM.parent) m.barcoM.parent.remove(m.barcoM); m.barcoM = null; m.corpo.position.y = 0; } }
+function vestirBarco(m, cor) { if (!m.barcoM || m.barcoM.parent !== m.g) { if (m.barcoM && m.barcoM.parent) m.barcoM.parent.remove(m.barcoM); m.barcoM = modeloBarco(cor); m.g.add(m.barcoM); } }
+function ilhaPerto(x, z) { for (const [k, i] of Object.entries(ILHAS)) if (Math.hypot(x - i.x, z - i.z) < i.r + 5) return k; return null; }
+function descerNaIlha(k) {
+  const il = ILHAS[k], nome = perfil(); if (nivelPesca(nome) < il.nivel) { toast(`🔒 A ${il.nome} precisa do nível ${il.nivel} de pescador`); return; }
+  const eu = PRACA.eu, a = Math.atan2(eu.z - il.z, eu.x - il.x);
+  descerBarco({ x: il.x + Math.cos(a) * (il.r - 1.6), z: il.z + Math.sin(a) * (il.r - 1.6) }, `${il.ic} Chegou na ${il.nome}!`);
+}
+function passoBarcoFisica(dt) {
+  const B = PRACA.barco, eu = PRACA.eu, k = PRACA.keys;
+  let acel = -PRACA.mov.y, vira = PRACA.mov.x;
+  const ky = (k.w || k.arrowup ? 1 : 0) - (k.s || k.arrowdown ? 1 : 0), kx = (k.d || k.arrowright ? 1 : 0) - (k.a || k.arrowleft ? 1 : 0);
+  if (ky || kx) { acel = ky; vira = kx; }
+  if (PRACA.painel || PRACA.hist || PRACA.pesca) { acel = 0; vira = 0; }
+  B.v += acel * 9 * dt; B.v *= Math.pow(.55, dt); B.v = Math.max(-4, Math.min(14, B.v));
+  eu.r -= vira * dt * 1.6 * Math.min(1, (Math.abs(B.v) + 1.2) / 4) * (B.v < -.1 ? -1 : 1);
+  const nx = eu.x - Math.sin(eu.r) * B.v * dt, nz = eu.z - Math.cos(eu.r) * B.v * dt;
+  if (naAgua(nx, nz)) { eu.x = nx; eu.z = nz; } else if (Math.abs(B.v) > .5) { B.v *= -.3; if (typeof bip === "function") bip(140, .06); }
+  eu.y = 0; eu.vy = 0;
+  let d = eu.r - PRACA.yaw; d = (d + Math.PI * 3) % (Math.PI * 2) - Math.PI; PRACA.yaw += d * Math.min(1, dt * 2.5);
+}
+function passoBarco(dt, t) {
+  const eu = PRACA.eu, Bq = PRACA.bosque; if (!Bq) return;
+  // o barco parado no píer (some quando você está navegando)
+  if (!Bq.barcoPier) { Bq.barcoPier = modeloBarco("#2f80ed"); Bq.barcoPier.position.set(BARCO_PIER.x, 0, BARCO_PIER.z); PRACA.cena.add(Bq.barcoPier); }
+  Bq.barcoPier.visible = !PRACA.barco; Bq.barcoPier.position.y = Math.sin(t * 1.5) * .05; Bq.barcoPier.rotation.z = Math.sin(t * 1.2) * .04;
+  if (PRACA.barco) {
+    vestirBarco(eu.m, "#2f80ed"); eu.m.barcoM.userData.v = PRACA.barco.v;
+    // espuma atrás do barco
+    if (Math.abs(PRACA.barco.v) > 2 && Math.random() < .7 && typeof faiscaPracaCor === "function") faiscaPracaCor(eu.x + Math.sin(eu.r) * 1.6 + (Math.random() - .5), .15, eu.z + Math.cos(eu.r) * 1.6, Math.sin(eu.r) * 2, 1, Math.cos(eu.r) * 2, .6, "#ffffff");
+    const el = $("pr-bussola"); if (el) { el.hidden = !!PRACA.hist || !!PRACA.pesca; el.innerHTML = `<b>🧭</b>` + [["🌳", "Píer", CAIS_PIER.x, CAIS_PIER.z]].concat(Object.values(ILHAS).map(i => [i.ic, i.nome.replace("Ilha d", "").replace(/^[oae] /, ""), i.x, i.z])).map(([ic, n, x, z]) => {
+      const dx = x - eu.x, dz = z - eu.z, dist = Math.round(Math.hypot(dx, dz)), ang = Math.atan2(-dx, -dz) - eu.r;
+      return `<span>${ic} ${esc(n)} <i style="transform:rotate(${(-ang * 180 / Math.PI).toFixed(0)}deg)">⬆</i> ${dist} m</span>`; }).join(""); }
+  } else if (eu.m.barcoM) tirarBarco(eu.m);
+  for (const o of PRACA.outros.values()) { if (o.alvo && o.alvo.e & 16) vestirBarco(o.m, "#ff8a1f"); else if (o.m.barcoM) tirarBarco(o.m); }
+  // sinal alto de cada ilha (dá para ver de longe) e a névoa mais longe quando navega
+  if (!Bq.sinais) Bq.sinais = Object.values(ILHAS).map(i => { const g = new THREE.Group(); g.position.set(i.x, 0, i.z); PRACA.cena.add(g);
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTextoSemana(i.ic), transparent: true, depthWrite: false, fog: false })); sp.scale.setScalar(4); sp.position.y = 14; g.add(sp);
+    const luz = new THREE.Sprite(new THREE.SpriteMaterial({ map: brilhoTextura("rgba(255,240,160,1)"), transparent: true, depthWrite: false, fog: false, blending: THREE.AdditiveBlending })); luz.scale.setScalar(8); luz.position.y = 14; g.add(luz);
+    const raio = new THREE.Mesh(new THREE.CylinderGeometry(.15, .15, 14, 8, 1, true), new THREE.MeshBasicMaterial({ color: "#fff3b0", transparent: true, opacity: .35, fog: false, depthWrite: false })); raio.position.y = 7; g.add(raio); return { g, sp }; });
+  Bq.sinais.forEach((s, i) => { s.sp.position.y = 14 + Math.sin(t * 2 + i) * .4; });
+}
+/* ---------- ligar nas telas ---------- */
+const _quadroPracaBarco = quadroPraca;
+quadroPraca = function (ts) {
+  if (!PRACA.on || !PRACA.barco || !PRACA.eu) { _quadroPracaBarco(ts); if (PRACA.on && PRACA.bosque) try { passoBarco(Math.min(.05, (ts - (PRACA.ultBarco || ts)) / 1000), ts / 1000); } catch (e) { console.error(e); } PRACA.ultBarco = ts; return; }
+  const dt = Math.min(.05, (ts - (PRACA.ultBarco || ts)) / 1000); PRACA.ultBarco = ts;
+  passoBarcoFisica(dt); const gm = PRACA.mov, gk = PRACA.keys; PRACA.mov = { x: 0, y: 0 }; PRACA.keys = {};
+  try { _quadroPracaBarco(ts); } finally { PRACA.mov = gm; PRACA.keys = gk; }
+  try { passoBarco(dt, ts / 1000); } catch (e) { console.error(e); }
+};
+const _animarBonecoBarco = animarBonecoPraca;
+animarBonecoPraca = function (m, x, y, z, r, anda, dt) {
+  _animarBonecoBarco(m, x, y, z, r, anda, dt);
+  if (m.barcoM) { const t = performance.now() / 1000, v = m.barcoM.userData.v || 0; m.barcoM.rotation.set(Math.sin(t * 1.4) * .04 - Math.min(.12, Math.abs(v) / 120), r, Math.sin(t * 1.1) * .06);
+    m.corpo.position.y = .35 + Math.sin(t * 1.4) * .04; m.pernaE.rotation.x = m.pernaD.rotation.x = 0; m.bracoD.rotation.x = -.4;
+    if (m.barcoM.userData.band) m.barcoM.userData.band.rotation.x = Math.sin(t * 8) * .3; if (m.pet) m.pet.visible = false; }
+  else if (m.pet) m.pet.visible = true;
+};
+const _efeitosPracaBarco = efeitosPraca;
+efeitosPraca = function () { return _efeitosPracaBarco() | (PRACA.barco ? 16 : 0); };
+const _pularPracaBarco = pularPraca;
+pularPraca = function () { if (PRACA.barco) { if (typeof tocarNotas === "function") tocarNotas([[45, 45, 0, .5, "sawtooth"]]); return; } return _pularPracaBarco(); };   // buzina do barco
+const _lugaresPracaBarco = lugaresPraca;
+lugaresPraca = function () {
+  const eu = PRACA.eu;
+  if (PRACA.barco) {
+    if (PRACA.pesca) return PRACA.pesca.fase === "fim" ? [{ x: eu.x, z: eu.z, r: 99, txt: "🎣 Pescar de novo", abrir: pescarDoBarco }] : [];
+    const l = [], k = ilhaPerto(eu.x, eu.z);
+    if (k) l.push({ x: eu.x, z: eu.z, r: 99, txt: `⚓ Descer na ${ILHAS[k].nome}`, abrir: () => descerNaIlha(k) });
+    else if (Math.hypot(eu.x - BARCO_PIER.x, eu.z - BARCO_PIER.z) < 5) l.push({ x: eu.x, z: eu.z, r: 99, txt: "⚓ Descer no píer", abrir: () => descerBarco(CAIS_PIER, "⚓ De volta ao píer!") });
+    else if (Math.abs(PRACA.barco.v) < 1.2) l.push({ x: eu.x, z: eu.z, r: 99, txt: "🎣 Pescar daqui", abrir: () => { PRACA.barco.v = 0; pescarDoBarco(); } });
+    return l;
+  }
+  const l = _lugaresPracaBarco(); if (PRACA.kart || PRACA.pesca || PRACA.naRoda) return l;
+  l.push({ x: CAIS_PIER.x, z: CAIS_PIER.z, r: 1.3, txt: "⛵ Pegar o barco", abrir: () => entrarBarco({ x: BARCO_PIER.x, z: BARCO_PIER.z, r: 0 }) });
+  for (const k of Object.keys(ILHAS)) { const c = chegadaIlha(k), b = barcoDaIlha(k); l.push({ x: c.x, z: c.z, r: 1.6, txt: "⛵ Pegar o barco", abrir: () => entrarBarco({ x: b.x, z: b.z, r: Math.PI }) }); }
+  return l;
+};
+function pescarDoBarco() {   // pescar no meio do mar: perto de uma ilha pega os peixes dela, senão os do mar
+  const eu = PRACA.eu; let zona = "mar"; for (const [k, i] of Object.entries(ILHAS)) if (Math.hypot(eu.x - i.x, eu.z - i.z) < i.r + 22) zona = k;
+  comecarPesca(); if (PRACA.pesca) { PRACA.pesca.zona = zona; PRACA.pesca.base = { x: eu.x, z: eu.z }; mostrarHudPesca(); }
+}
+const _abrirPracaBarco = abrirPraca;
+abrirPraca = function () { _abrirPracaBarco(); const box = $("praca"); if (!box || !PRACA.on) return; PRACA.barco = null;
+  PRACA.cam.far = 280; PRACA.cam.updateProjectionMatrix(); [PRACA.ceu, PRACA.ceuNoite].forEach(c => { if (c) { c.material.depthWrite = false; c.renderOrder = -10; } });   // as ilhas longe aparecem atrás do céu PRACA.ultBarco = 0; if (PRACA.bosque) { PRACA.bosque.barcoPier = null; PRACA.bosque.sinais = null; }
+  box.insertAdjacentHTML("beforeend", `<div class="pr-bussola" id="pr-bussola" hidden></div>`); };
+const _fecharPracaBarco = fecharPraca;
+fecharPraca = function (irLobby) { PRACA.barco = null; return _fecharPracaBarco(irLobby); };
 </script>
 
 <script>
@@ -12260,7 +12382,7 @@ function prPos(x, z, r, y, e) {
   const num = v => Math.round((+v || 0) * 100) / 100;
   if (PR.dono) return;   // o dono manda a posição dele junto com a de todos (prTick)
   if (PR.hostConn && PR.ultimoPs && Date.now() - PR.ultimoPs > 6000) { PR.ultimoPs = 0; prReconectar(); return; }   // o dono sumiu sem avisar
-  if (PR.t % 6 === 0 && PR.hostConn) enviar(PR.hostConn, { t: "p", x: num(x), z: num(z), r: num(r), y: num(y), e: (+e || 0) & 15 });
+  if (PR.t % 6 === 0 && PR.hostConn) enviar(PR.hostConn, { t: "p", x: num(x), z: num(z), r: num(r), y: num(y), e: (+e || 0) & 31 });
 }
 function prTick() {
   if (!PR.dono || !PRACA.on) return;
@@ -12293,7 +12415,7 @@ function prDonoRecebe(conn, d) {
   }
   if (!id) return;
   const c = PR.conns.get(id);
-  if (d.t === "p") { const n = v => Math.max(-60, Math.min(60, +v || 0)); c.pos = [n(d.x), n(d.z), +d.r || 0, Math.max(0, Math.min(30, +d.y || 0)), (+d.e || 0) & 15]; pracaPos(id, ...c.pos); }
+  if (d.t === "p") { const n = v => Math.max(-180, Math.min(180, +v || 0)); c.pos = [n(d.x), n(d.z), +d.r || 0, Math.max(0, Math.min(30, +d.y || 0)), (+d.e || 0) & 31]; pracaPos(id, ...c.pos); }
   else if (d.t === "info") { c.info = prInfoLimpa(d.info); pracaOutro(id, c.info); prMandarInfos(); }
   else if (d.t === "rk") { mesclarRank(d.r, d.m); mesclarBossG(d.bg); }
   else if (d.t === "pg") {   // pega-pega: quem pegou manda para o dono, que avisa todo mundo
@@ -12326,7 +12448,7 @@ function prMembroRecebe(d) {
     for (const id of [...PRACA.outros.keys()]) if (!ids.includes(id)) pracaTirar(id);
     prContar();
   }
-  else if (d.t === "ps" && Array.isArray(d.l)) for (const a of d.l.slice(0, 20)) { if (!Array.isArray(a) || a[0] === PR.meuId) continue; const n = v => Math.max(-60, Math.min(60, +v || 0)); pracaPos(String(a[0]), n(a[1]), n(a[2]), +a[3] || 0, Math.max(0, Math.min(30, +a[4] || 0)), (+a[5] || 0) & 15); }
+  else if (d.t === "ps" && Array.isArray(d.l)) for (const a of d.l.slice(0, 20)) { if (!Array.isArray(a) || a[0] === PR.meuId) continue; const n = v => Math.max(-180, Math.min(180, +v || 0)); pracaPos(String(a[0]), n(a[1]), n(a[2]), +a[3] || 0, Math.max(0, Math.min(30, +a[4] || 0)), (+a[5] || 0) & 31); }
   else if (d.t === "sai") { pracaTirar(String(d.id)); prContar(); }
   else if (d.t === "rk") { mesclarRank(d.r, d.m); mesclarBossG(d.bg); }
   else if (d.t === "portal") toast(`${nomeLimpo(d.nome)} entrou na Partida do Evento! Vá até a porta para jogar junto.`);
