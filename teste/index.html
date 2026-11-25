@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="versao-site" content="0c3c8cdea9">
+<meta name="versao-site" content="e59d9a2be4">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0f3057">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;-webkit-text-size-adjust:100%}img{max-width:100%}[hidden]{display:none!important}.faixa-teste{position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:50;background:#ff4d6d;color:#fff;font:800 12px/1 system-ui,sans-serif;letter-spacing:.08em;padding:4px 10px;border-radius:0 0 8px 8px;pointer-events:none}</style>
@@ -475,6 +475,14 @@ button.evt-faixa { cursor: pointer; font-family: inherit; }
 @media (prefers-reduced-motion: reduce) { .pp-esp-eletrico, .pr-chefe.on { animation: none; } }
 .pp-pegou.pp-mitico { box-shadow: 0 0 30px #c26dff; } .pp-pegou.pp-cosmico { animation: ppPegou .35s ease-out, ppCosmico 1.6s linear infinite; box-shadow: 0 0 36px #ff4dd2; }
 @keyframes ppCosmico { 0% { border-color: #ff4d6d; } 25% { border-color: #ffd23f; } 50% { border-color: #37d99a; } 75% { border-color: #3d9bff; } 100% { border-color: #ff4dd2; } }
+.pr-nado { position: absolute; left: 12px; top: 186px; z-index: 6; display: grid; gap: 6px; width: 170px; background: rgba(11,27,51,.82); color: #fff; border: 2px solid #3dd9ff; border-radius: 14px; padding: 8px; font: 800 13px Nunito, sans-serif; }
+.pr-nado[hidden] { display: none; } .pn-ar { position: relative; height: 16px; border-radius: 8px; background: rgba(255,255,255,.15); overflow: hidden; } .pn-ar i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, #7fd3ff, #dff6ff); }
+.pn-ar span { position: relative; z-index: 1; font-size: 11px; padding-left: 6px; color: #0b1b33; } .pn-ar.baixo i { background: #ff4d6d; animation: pnPisca .5s steps(2) infinite; } @keyframes pnPisca { 50% { opacity: .4; } }
+.pn-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; } .pn-btns button { min-height: 52px; border-radius: 12px; border: 3px solid #0b1b33; background: linear-gradient(180deg, #7fd3ff, #2f80ed); color: #fff; font: 900 14px Nunito, sans-serif; touch-action: none; }
+.pr-altura { position: absolute; left: 12px; top: 142px; z-index: 5; background: rgba(11,27,51,.8); color: #fff; border: 2px solid #8fca5a; border-radius: 14px; padding: 6px 10px; font: 800 13px Nunito, sans-serif; } .pr-altura[hidden] { display: none; }
+.pr-agua { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0; transition: opacity .3s; background: radial-gradient(ellipse at 50% 0, rgba(120,220,255,.25), transparent 60%), linear-gradient(180deg, rgba(20,110,150,.25), rgba(5,40,70,.45)); }
+.praca.pr-embaixo .pr-agua { opacity: 1; } .praca.pr-cena .pr-nado, .praca.pr-cena .pr-altura { display: none !important; }
+@media (prefers-reduced-motion: reduce) { .pn-ar.baixo i { animation: none; } }
 .pp-esp-arco { animation: ppArco 2s linear infinite; } .pp-esp-gigante { transform: scale(1.12); filter: drop-shadow(0 0 5px #3d9bff); }
 @keyframes ppArco { to { filter: hue-rotate(360deg) drop-shadow(0 0 6px #ff7ad9); } }
 @media (prefers-reduced-motion: reduce) { .pp-pegou, .pp-esp-arco { animation: none; } }
@@ -9299,7 +9307,7 @@ pracaLivre = function (x, z) { if (x < -19 && z < -19 && bloqueioIlha(x, z)) ret
 const _alturaChaoIlhas = alturaChaoPraca;
 alturaChaoPraca = function (x, z, y) {
   let h = _alturaChaoIlhas(x, z, y); if (x > -19 || z > -19 || PRACA.barco || !naIlha(x, z)) return h;
-  const hi = .2 + alturaIlha(x, z); if (y >= hi - .6) h = Math.max(h, hi); return h;
+  return Math.max(h, .2 + alturaIlha(x, z));   // chão da ilha e morros: terreno (sempre embaixo)
 };
 const _descerNaIlhaAntes = descerNaIlha;
 descerNaIlha = function (k) {
@@ -9372,7 +9380,7 @@ montarIlhas3D = function (s) {
     { const p = c.bau, bg = new THREE.Group(); bg.position.set(p[0], .2 + alturaIlha(il.x + p[0], il.z + p[1]), p[1]); g.add(bg); add(new THREE.BoxGeometry(.8, .45, .55), "#8a5a2b", 0, .22, 0, bg);
       const tampa = new THREE.Group(); tampa.position.set(0, .45, -.27); bg.add(tampa); add(new THREE.BoxGeometry(.82, .16, .57), "#a0703f", 0, .08, .27, tampa); add(new THREE.BoxGeometry(.12, .5, .58), "#e8b830", 0, -.05, 0, bg); I.baus[k] = tampa; }
     for (const b of c.bichos || []) for (let i = 0; i < b[4]; i++) { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTextoSemana(b[0]), transparent: true, depthWrite: false })); sp.scale.setScalar(b[5] ? .7 : .8); s.add(sp);
-      I.bichos.push({ sp, cx: il.x + b[1], cz: il.z + b[2], R: b[3] * (.6 + i * .25), a: i * 2.1, v: (.5 + Math.random() * .4) * (i % 2 ? 1 : -1), voa: !!b[5], pula: b[0] === "🐸" }); }
+      I.bichos.push({ sp, cx: il.x + b[1], cz: il.z + b[2], R: b[3] * (.6 + i * .25), a: i * 2.1, v: (.5 + Math.random() * .4) * (i % 2 ? 1 : -1), voa: !!b[5], alt: typeof b[5] === "number" ? b[5] : 0, pula: b[0] === "🐸" }); }
     // enfeites de cada ilha
     if (k === "porto") { [[12, 6], [-12, -1], [7, -2], [12, -8]].forEach(([x, z]) => palmeira(g, x, z)); [[-1.4, 6], [1.4, -3], [-1.4, -12]].forEach(([x, z]) => lampiao(g, x, z));
       for (const [x, z] of [[4.5, 10.5], [5.2, 10], [4.8, 11.2]]) add(new THREE.CylinderGeometry(.3, .3, .6, 10), "#8a5a2b", x, .5, z, g); for (const [x, z] of [[-3.5, 12], [-3.6, 12.8]]) add(new THREE.BoxGeometry(.6, .6, .6), "#c08a4a", x, .5, z, g);
@@ -9424,7 +9432,7 @@ function passoIlhas(dt, t) {
   const nf = typeof noiteFator === "function" && typeof horaPraca === "function" ? noiteFator(horaPraca()) : 0;
   for (const b of I.bichos) { if (b.barco) { b.barco.position.y = Math.sin(t * 1.4) * .05; b.barco.rotation.z = Math.sin(t * 1.1) * .04; continue; }
     b.a += b.v * dt / Math.max(1, b.R); const x = b.cx + Math.cos(b.a) * b.R, z = b.cz + Math.sin(b.a) * b.R;
-    b.sp.position.set(x, b.voa ? 3 + Math.sin(t * 2 + b.cx) * .6 : .55 + (b.pula ? Math.abs(Math.sin(t * 3 + b.cz)) * .6 : Math.abs(Math.sin(t * 8 + b.cx)) * .08) + alturaIlha(x, z), z); }
+    b.sp.position.set(x, b.voa ? (b.alt || 3) + Math.sin(t * 2 + b.cx) * .6 : .55 + (b.pula ? Math.abs(Math.sin(t * 3 + b.cz)) * .6 : Math.abs(Math.sin(t * 8 + b.cx)) * .08) + alturaIlha(x, z), z); }
   for (const n of I.npcs) { n.v.corpo.rotation.y = n.base + Math.sin(t * .6 + n.base) * .5; n.v.bracoD.rotation.x = Math.sin(t * 2 + n.base) * .4; }
   for (const q of I.quedas) q.offset.y = (q.offset.y + dt * 1.6) % 1;
   for (const l of I.lavas) l.material.color.setRGB(1, .35 + .15 * Math.sin(t * 3 + l.position.x), .08);
@@ -9600,6 +9608,208 @@ peixeGenerico = function (c, a, t) {
 const _mostrarPegouRar = mostrarPegou;
 mostrarPegou = function (px, tam, esp, extra) { _mostrarPegouRar(px, tam, esp, extra); const el = $("pp-pegou"); if (!el) return; el.classList.toggle("pp-mitico", px.r === 5); el.classList.toggle("pp-cosmico", px.r === 6);
   if (px.r >= 5) { if (typeof fogosPraca === "function" && PRACA.eu) fogosPraca(PRACA.eu.x, 2.5, PRACA.eu.z, px.r === 6 ? 120 : 70); if (typeof sfxVitoria === "function") sfxVitoria(); toast(px.r === 6 ? "🌌 UAU! Um peixe CÓSMICO!" : "💜 Um peixe MÍTICO!"); } };
+/* ===================== Nadar, mergulhar e a Ilha da Montanha (pedido do Andre) =====================
+   Nadar: saindo do píer ou da ilha para o mar (regiaoNado) o bonequinho nada (PRACA.nado). ⤵ Mergulhar / ⤴ Subir (no PC Shift e espaço)
+   descem até o fundo do mar (fundoEm). O ar (AR_MAX segundos) acaba embaixo da água. No fundo: corais, algas, pedras, cardumes,
+   pérolas do dia (PEROLAS_DIA, G.perolas) e o navio afundado com baú (1 vez por dia, G.navioBau). Rede: bit 32 de "e" (nadando).
+   Ilha da Montanha (nível 5): montanha de 24 m para subir (alturaIlha), medidor de altitude #pr-altura e prêmio no topo 1 vez por dia (G.topo). */
+const AR_MAX = 25, PROF_VEL = 3.2, PEROLAS_DIA = 10, PEROLA_MOEDAS = 15, NAVIO = { x: -44, z: -78 };
+ILHAS.montanha = { x: -128, z: -160, r: 16, nome: "Ilha da Montanha", ic: "🏔️", nivel: 5, chao: "#7a9a5a" };
+ILHA_CFG.montanha = { areia: "#d8c8a0", caminho: "#b8a070", morro: { dx: 0, dz: -2, R: 12.5, H: 24 }, morroCor: "#6f8f4a", barco: "#8a5a2b",
+  casas: [[11, 8, "#c89a6a", "#7a3a1a", -1.2], [-12, 6, "#b8865a", "#6a2a1a", 1.3]], vend: [-6, 12.5, "#3fa34d"], npc: [2.4, 12.5], bau: [-13, -4],
+  bichos: [["🐐", 0, -2, 9, 3], ["🦅", 0, -2, 10, 2, 28]] };
+NPC_ILHA.montanha = { nome: "🧗 Alpinista Rocha", cor: "#d9643a", pele: "#c68b59", falas: ["Lá no topo da montanha tem um prêmio todo dia!", "Veja a altitude no canto da tela enquanto sobe.", "Os peixes do rio da montanha são gelados e fortes."] };
+for (const h of ILHA_CFG.montanha.casas) OBST_ILHA.push({ x: ILHAS.montanha.x + h[0], z: ILHAS.montanha.z + h[1], r: 1.5 });
+OBST_ILHA.push({ x: ILHAS.montanha.x - 6, z: ILHAS.montanha.z + 12.5, r: 1.1 });
+PEIXES.push(
+  { k: "truta", ic: "🐟", nome: "Truta", z: "montanha", r: 1, p: 26, m: 9, tam: [20, 60], f: 1.2 },
+  { k: "trutaarco", ic: "🌈", nome: "Truta-arco-íris", z: "montanha", r: 2, p: 14, m: 20, tam: [25, 70], f: 1.6 },
+  { k: "salmaoreal", ic: "🐟", nome: "Salmão-real", z: "montanha", r: 3, p: 5, m: 52, tam: [60, 140], f: 2.3 },
+  { k: "esturjao", ic: "🐟", nome: "Esturjão-gigante", z: "montanha", r: 4, p: .6, m: 230, tam: [200, 500], f: 3.3 },
+  { k: "peixenuvem", ic: "☁️", nome: "Peixe-nuvem", z: "montanha", r: 5, p: .22, m: 430, tam: [40, 100], f: 3.7 });
+Object.assign(PEIXE_TAM, Object.fromEntries(PEIXES.map(p => [p.k, [p.tam[0], p.tam[1], p.f]])));
+Object.assign(ARTE_PEIXE, {
+  truta: { L: 70, h: 19, cima: "#6a7a4a", barriga: "#f0ead0", nad: "#8a8a5a", pintas: "#3a3a20", rabo: "garfo", linha: true },
+  trutaarco: { L: 70, h: 20, cima: "#5a8a6a", barriga: "#fff0e8", nad: "#c8a0a0", pintas: "#2a3a2a", rabo: "garfo", listras: ["#ff7a9a"], borda: "#3a5a4a" },
+  salmaoreal: { L: 78, h: 22, cima: "#4a6a8a", barriga: "#ff8a6a", nad: "#6a8aa0", pintas: "#1a2a3a", rabo: "garfo", dentes: true, linha: true },
+  esturjao: { L: 88, h: 18, cima: "#5a5a50", barriga: "#d8d0c0", nad: "#4a4a40", rabo: "tubarao", espinhos: true, bigode: true, olhoPequeno: true },
+  peixenuvem: { L: 62, h: 28, cima: "#ffffff", barriga: "#e8f4ff", nad: "#bfe3ff", rabo: "redondo", transp: .85, brilho: true, olhoBrilho: "#7fd3ff" } });
+MAPA_LUGARES.push({ dica: "Na Ilha da Montanha, no pé da montanha, perto das cabras", ilha: "montanha", dx: 9, dz: -9 });
+/* ---------- fundo do mar ---------- */
+function fundoEm(x, z) {
+  let f = -16;
+  f = Math.max(f, -1.4 - Math.max(0, MAR.z0 - z) * .5, -1.4 - Math.max(0, MAR.x1 - x) * .5);   // perto da praia é raso
+  for (const i of Object.values(ILHAS)) { const d = Math.hypot(x - i.x, z - i.z) - (i.r + 1.4); f = Math.max(f, -.8 - Math.max(0, d) * .6); }
+  return Math.min(-1.2, f);
+}
+function regiaoNado(x, z) {
+  if (x < MAR.x0 + 2 || x > MAR.x1 - .4 || z > MAR.z0 - .3 || z < MAR.z1 + 2) return false;
+  if (Math.abs(x - PIER_MAR.x) < PIER_MAR.w / 2 + .05 && z > PIER_MAR.z0 - .3) return false;   // em cima do píer
+  if (Math.hypot(x - FAROL.x, z - FAROL.z) < 2.2) return false;
+  return !naIlha(x, z);
+}
+const podeNadar = () => !PRACA.barco && !PRACA.voando && !PRACA.kart && !PRACA.naRoda;
+const _pracaLivreNado = pracaLivre;
+pracaLivre = function (x, z) { if (podeNadar() && regiaoNado(x, z)) return true; return _pracaLivreNado(x, z); };
+const _alturaChaoNado = alturaChaoPraca;
+alturaChaoPraca = function (x, z, y) { if (podeNadar() && regiaoNado(x, z)) return PRACA.nado ? PRACA.nado.y : -.55; return _alturaChaoNado(x, z, y); };
+const _pularPracaNado = pularPraca;
+pularPraca = function () { if (PRACA.nado) return; return _pularPracaNado(); };
+const _efeitosPracaNado = efeitosPraca;
+efeitosPraca = function () { return _efeitosPracaNado() | (PRACA.nado ? 32 : 0); };
+function perolasDoDia() {
+  let s = [...("perola" + diaBR())].reduce((a, ch) => a * 31 + ch.charCodeAt(0), 5) % 2147483647; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647, l = [];
+  const centros = [{ x: -34, z: -32 }, { x: -50, z: -40 }, NAVIO].concat(Object.values(ILHAS).map(i => ({ x: i.x, z: i.z, r: i.r })));
+  while (l.length < PEROLAS_DIA) { const c = centros[Math.floor(rnd() * centros.length)], a = rnd() * Math.PI * 2, d = (c.r ? c.r + 4 : 2) + rnd() * 10, x = c.x + Math.cos(a) * d, z = c.z + Math.sin(a) * d;
+    if (regiaoNado(x, z) && fundoEm(x, z) < -3) l.push({ x, z, y: fundoEm(x, z) + .35 }); }
+  return l;
+}
+function perolasPegas(nome) { G.perolas = G.perolas && G.perolas.dia === diaBR() ? G.perolas : { dia: diaBR(), por: {} }; return G.perolas.por[nome] = G.perolas.por[nome] || []; }
+function montarFundo3D(s) {
+  const B = PRACA.bosque, F = B.fundo = { algas: [], cardumes: [], perolas: [] };
+  const mat = (cor, ex) => new THREE.MeshLambertMaterial(Object.assign({ color: cor }, ex || {}));
+  const add = (geo, cor, x, y, z, pai = s) => { const m = new THREE.Mesh(geo, typeof cor === "string" ? mat(cor) : cor); m.position.set(x, y, z); pai.add(m); return m; };
+  // chão do fundo (com morros perto das ilhas e da praia)
+  const W = MAR.x1 - MAR.x0, D = MAR.z0 - MAR.z1, geo = new THREE.PlaneGeometry(W, D, 98, 98); geo.rotateX(-Math.PI / 2);
+  const ps = geo.attributes.position, cores = new Float32Array(ps.count * 3), cx = (MAR.x0 + MAR.x1) / 2, cz = (MAR.z0 + MAR.z1) / 2, raso = new THREE.Color("#e8d8a0"), fundo = new THREE.Color("#2a5a6a"), tmp = new THREE.Color();
+  for (let i = 0; i < ps.count; i++) { const x = ps.getX(i) + cx, z = ps.getZ(i) + cz, y = fundoEm(x, z); ps.setY(i, y); tmp.copy(raso).lerp(fundo, Math.min(1, -y / 16)); cores.set([tmp.r, tmp.g, tmp.b], i * 3); }
+  geo.setAttribute("color", new THREE.BufferAttribute(cores, 3)); geo.computeVertexNormals();
+  const chao = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ vertexColors: true })); chao.position.set(cx, 0, cz); s.add(chao);
+  // corais, algas, pedras e estrelas (sorteados sempre do mesmo jeito)
+  let sd = 77; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+  for (let n = 0; n < 420; n++) { const x = MAR.x0 + 3 + rnd() * (W - 6), z = MAR.z1 + 3 + rnd() * (D - 6); if (!regiaoNado(x, z)) continue; const y = fundoEm(x, z); if (y < -14.5 && rnd() < .6) continue; const tipo = rnd();
+    if (tipo < .35) { const c = add(new THREE.SphereGeometry(.3 + rnd() * .4, 8, 6), ["#ff7a9a", "#ffb03b", "#c26dff", "#3dd9c0", "#ff5a5a"][Math.floor(rnd() * 5)], x, y + .15, z); c.scale.y = .7 + rnd(); }
+    else if (tipo < .6) { const h = 1.5 + rnd() * 3.5, a = add(new THREE.BoxGeometry(.12, h, .04), "#3a8a3a", x, y + h / 2, z); a.geometry.translate(0, 0, 0); F.algas.push({ m: a, f: rnd() * 6, base: y }); }
+    else if (tipo < .85) { const p = add(new THREE.DodecahedronGeometry(.4 + rnd() * .8), "#6a7078", x, y + .2, z); p.rotation.set(rnd() * 3, rnd() * 3, 0); p.scale.y = .6; }
+    else { const e = add(new THREE.CylinderGeometry(.22, .22, .05, 5), ["#ff8a5a", "#ffd23f", "#ff4d6d"][Math.floor(rnd() * 3)], x, y + .04, z); e.rotation.y = rnd() * 3; } }
+  // navio afundado com baú
+  { const y = fundoEm(NAVIO.x, NAVIO.z), g = new THREE.Group(); g.position.set(NAVIO.x, y, NAVIO.z); g.rotation.set(.12, .7, .25); s.add(g);
+    add(new THREE.BoxGeometry(3, 1.4, 7), "#5a3a1e", 0, .5, 0, g); add(new THREE.BoxGeometry(2.6, .1, 6.5), "#7a5a3a", 0, 1.2, 0, g); const proa = add(new THREE.ConeGeometry(1.5, 2.4, 4), "#5a3a1e", 0, .5, -4.6, g); proa.rotation.x = -Math.PI / 2; proa.rotation.y = Math.PI / 4; proa.scale.set(1, 1, .6);
+    add(new THREE.CylinderGeometry(.12, .14, 4, 8), "#4a2a14", 0, 3, -.5, g).rotation.z = .4; const vela = add(new THREE.PlaneGeometry(1.8, 1.4), mat("#d8d0b8", { side: THREE.DoubleSide, transparent: true, opacity: .8 }), .7, 3.6, -.5, g); vela.rotation.z = .4;
+    const bau = new THREE.Group(); bau.position.set(.4, 1.25, 1.6); g.add(bau); add(new THREE.BoxGeometry(.9, .5, .6), "#8a5a2b", 0, .25, 0, bau); F.tampaNavio = new THREE.Group(); F.tampaNavio.position.set(0, .5, -.3); bau.add(F.tampaNavio); add(new THREE.BoxGeometry(.92, .16, .62), "#a0703f", 0, .08, .3, F.tampaNavio); add(new THREE.BoxGeometry(.12, .55, .62), "#e8b830", 0, .25, 0, bau);
+    F.brilhoNavio = new THREE.Sprite(new THREE.SpriteMaterial({ map: brilhoTextura("rgba(255,220,120,1)"), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); F.brilhoNavio.scale.setScalar(2); F.brilhoNavio.position.set(.4, 1.6, 1.6); g.add(F.brilhoNavio); }
+  // cardumes nadando (desenhos dos peixes)
+  const ks = ["peixinho", "palhaco", "cirurgiao", "anjo", "tainha", "papagaio", "sardinha", "bacalhau", "garoupa", "lanterna"].filter(k => PEIXES.some(p => p.k === k));
+  const lugares = [{ x: -32, z: -30 }, { x: -45, z: -45 }, NAVIO].concat(Object.values(ILHAS).map(i => ({ x: i.x, z: i.z + i.r + 6 })), Object.values(ILHAS).map(i => ({ x: i.x + i.r + 6, z: i.z })));
+  lugares.forEach((c, n) => { const k = ks[n % ks.length], fy = fundoEm(c.x, c.z); if (fy > -3) return; for (let i = 0; i < 4; i++) { const sp = spritePeixe(k, .35 + rnd() * .2, false); s.add(sp);
+    F.cardumes.push({ sp, k, cx: c.x + (rnd() - .5) * 3, cz: c.z + (rnd() - .5) * 3, y: Math.max(fy + .8, -2.5 - rnd() * 4), A: 3 + rnd() * 3, f: rnd() * 6, v: .3 + rnd() * .2, inv: false }); } });
+  // pérolas do dia
+  perolasDoDia().forEach((p, i) => { const g = new THREE.Group(); g.position.set(p.x, p.y, p.z); s.add(g); const co = add(new THREE.SphereGeometry(.35, 10, 6, 0, Math.PI * 2, 0, Math.PI / 2), "#f2a6a0", 0, -.1, 0, g); co.scale.y = .5;
+    add(new THREE.SphereGeometry(.16, 14, 10), mat("#ffffff", { emissive: "#c8d8ff", emissiveIntensity: .6 }), 0, .08, 0, g); const br = new THREE.Sprite(new THREE.SpriteMaterial({ map: brilhoTextura("rgba(220,235,255,1)"), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); br.scale.setScalar(1.1); br.position.y = .1; g.add(br);
+    F.perolas.push({ g, i, p }); });
+  F.dia = diaBR();
+}
+/* ---------- montanha: neve no topo, bandeiras de altitude e prêmio ---------- */
+function montarMontanha3D(s) {
+  const pos = (o, x, y, z) => { o.position.set(x, y, z); return o; };
+  const il = ILHAS.montanha, m = ILHA_CFG.montanha.morro, cx = il.x + m.dx, cz = il.z + m.dz, mat = (c, ex) => new THREE.MeshLambertMaterial(Object.assign({ color: c }, ex || {}));
+  const pts = []; for (let i = 0; i <= 8; i++) { const q = i / 8 * .38; pts.push(new THREE.Vector2(m.R * q, m.H * (1 + Math.cos(Math.PI * q)) / 2 + .06)); }
+  const neve = new THREE.Mesh(new THREE.LatheGeometry(pts, 32), mat("#ffffff", { side: THREE.DoubleSide })); neve.position.set(cx, .2, cz); s.add(neve);
+  let sd = 9; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+  for (let n = 0; n < 26; n++) { const a = rnd() * Math.PI * 2, d = m.R * (.45 + rnd() * .5), x = cx + Math.cos(a) * d, z = cz + Math.sin(a) * d, y = .2 + alturaIlha(x, z), g = new THREE.Group(); g.position.set(x, y, z); s.add(g);
+    if (rnd() < .65) { g.add(pos(new THREE.Mesh(new THREE.CylinderGeometry(.08, .12, .6, 6), mat("#6b4423")), 0, .3, 0)); for (let i = 0; i < 3; i++) { const c = new THREE.Mesh(new THREE.ConeGeometry(.7 - i * .18, .8, 8), mat("#2f6b3a")); c.position.y = .8 + i * .45; g.add(c); } }
+    else { const p = new THREE.Mesh(new THREE.DodecahedronGeometry(.5 + rnd() * .5), mat("#8a8f99")); p.scale.y = .6; g.add(p); } }
+  // bandeirinhas de altitude subindo em espiral
+  for (const alt of [6, 12, 18]) { const q = Math.acos(2 * alt / m.H - 1) / Math.PI, d = m.R * q, a = alt * .35, x = cx + Math.cos(a) * d, z = cz + Math.sin(a) * d, g = new THREE.Group(); g.position.set(x, .2 + alturaIlha(x, z), z); s.add(g);
+    g.add(pos(new THREE.Mesh(new THREE.CylinderGeometry(.05, .05, 1.6, 6), mat("#dddddd")), 0, .8, 0));
+    const tx = texTexto(`${alt} m`, "#ffffff", "#e63946", 256, 110, 60), b = new THREE.Mesh(new THREE.PlaneGeometry(.9, .4), new THREE.MeshBasicMaterial({ map: tx, side: THREE.DoubleSide })); b.position.set(.45, 1.4, 0); g.add(b); }
+  // topo: bandeira grande e troféu
+  const tg = new THREE.Group(); tg.position.set(cx, .2 + m.H, cz); s.add(tg);
+  tg.add(pos(new THREE.Mesh(new THREE.CylinderGeometry(.08, .08, 3, 8), mat("#dddddd")), -1.2, 1.5, 0));
+  const bd = new THREE.Mesh(new THREE.PlaneGeometry(1.4, .9), new THREE.MeshBasicMaterial({ map: texTexto("🏔️ TOPO", "#ffffff", "#2f80ed", 256, 160, 56), side: THREE.DoubleSide })); bd.position.set(-.5, 2.5, 0); tg.add(bd); PRACA.bosque.bandeiraTopo = bd;
+  const tr = new THREE.Sprite(new THREE.SpriteMaterial({ map: texTextoSemana("🏆"), transparent: true })); tr.scale.setScalar(1.2); tr.position.set(1, 1, 0); tg.add(tr); PRACA.bosque.trofeuTopo = tr;
+}
+function topoHoje(nome) { G.topo = G.topo && G.topo.dia === diaBR() ? G.topo : { dia: diaBR(), por: {} }; return !!G.topo.por[nome]; }
+const _montarIlhas3DNado = montarIlhas3D;
+montarIlhas3D = function (s) { _montarIlhas3DNado(s); try { montarFundo3D(s); montarMontanha3D(s); } catch (e) { console.error(e); } };
+/* ---------- um passo: nadar, ar, pérolas, cardumes, altitude ---------- */
+function passoNado(dt, t) {
+  const B = PRACA.bosque, F = B && B.fundo, eu = PRACA.eu, k = PRACA.keys || {}, nome = perfil(); if (!F) return;
+  const naAguaAgora = podeNadar() && regiaoNado(eu.x, eu.z);
+  if (naAguaAgora && !PRACA.nado) { PRACA.nado = { prof: 0, y: -.55, ar: AR_MAX }; if (PRACA.pesca) pararPesca(); if (typeof respingo === "function") respingo(eu.x, eu.z, 16); if (typeof bip === "function") bip(200, .1); }
+  if (!naAguaAgora && PRACA.nado) { PRACA.nado = null; if (eu.y < 0) eu.y = 0; }
+  const N = PRACA.nado, hud = $("pr-nado");
+  if (N) {
+    const sobe = PRACA.nadoSobe || k[" "], desce = PRACA.nadoDesce || k.shift || k.c, max = Math.max(0, -fundoEm(eu.x, eu.z) - 1.3);
+    if (N.semAr) { N.prof = Math.max(0, N.prof - PROF_VEL * 2 * dt); if (N.prof <= 0) N.semAr = false; }
+    else N.prof = Math.max(0, Math.min(max, N.prof + ((desce ? 1 : 0) - (sobe ? 1 : 0)) * PROF_VEL * dt));
+    N.prof = Math.min(N.prof, max); N.y = -.55 - N.prof;
+    if (eu.y < N.y) eu.y = N.y; eu.vy = Math.min(eu.vy, 0);
+    const embaixo = eu.y < -1.3;
+    if (embaixo) { N.ar -= dt; if (N.ar <= 0 && !N.semAr) { N.ar = 0; N.semAr = true; toast("😮‍💨 O ar acabou! Subindo..."); if (typeof bip === "function") bip(150, .2); } }
+    else N.ar = Math.min(AR_MAX, N.ar + dt * 5);
+    if (embaixo && Math.random() < dt * 3 && typeof faiscaPracaCor === "function") faiscaPracaCor(eu.x + (Math.random() - .5) * .3, eu.y + 1.6, eu.z, 0, 1.5, 0, 1.2, "#dff6ff");   // bolhinhas
+    // pérolas
+    const pegas = perolasPegas(nome);
+    for (const pe of F.perolas) { if (pegas.includes(pe.i)) continue; if (Math.hypot(eu.x - pe.p.x, eu.z - pe.p.z) < 1.3 && Math.abs(eu.y + .8 - pe.p.y) < 1.6) { pegas.push(pe.i);
+      let v = PEROLA_MOEDAS; if (pegas.length === PEROLAS_DIA) v += 50; G.banco[nome] = Math.round(((G.banco[nome] || 0) + v) * 10) / 10; salvarPlacar();
+      toast(pegas.length === PEROLAS_DIA ? `🦪 Achou todas as pérolas de hoje! +${v} moedas` : `🦪 Pérola! +${v} moedas (${pegas.length}/${PEROLAS_DIA})`); if (typeof tocarNotas === "function") tocarNotas([[84, 96, 0, .25, "sine"]]); } }
+    // baú do navio afundado
+    const nb = Math.hypot(eu.x - NAVIO.x, eu.z - NAVIO.z) < 3 && eu.y < fundoEm(NAVIO.x, NAVIO.z) + 3.2;
+    G.navioBau = G.navioBau && G.navioBau.dia === diaBR() ? G.navioBau : { dia: diaBR(), l: [] };
+    if (nb && !G.navioBau.l.includes(nome)) { G.navioBau.l.push(nome); const v = 60 + Math.floor(Math.random() * 41); G.banco[nome] = Math.round(((G.banco[nome] || 0) + v) * 10) / 10; ganharXpPesca(nome, 30); salvarPlacar();
+      toast(`🏴‍☠️ Baú do navio afundado! +${v} moedas`); if (typeof sfxVitoria === "function") sfxVitoria(); }
+  }
+  if (hud) { hud.hidden = !N || !!PRACA.hist; if (N) { const pg = perolasPegas(nome).length;
+    hud.querySelector(".pn-ar i").style.width = Math.round(N.ar / AR_MAX * 100) + "%"; hud.querySelector(".pn-ar").classList.toggle("baixo", N.ar < 7);
+    hud.querySelector(".pn-txt").textContent = `🌊 ${N.prof < .3 ? "Nadando" : Math.round(N.prof + .5) + " m de fundo"} · 🦪 ${pg}/${PEROLAS_DIA}`; } }
+  // enfeites do fundo
+  for (const a of F.algas) a.m.rotation.z = Math.sin(t * 1.2 + a.f) * .18;
+  for (const c of F.cardumes) { const ang = t * c.v + c.f, x = c.cx + Math.sin(ang) * c.A, vx = Math.cos(ang); c.sp.position.set(x, c.y + Math.sin(t * 2 + c.f) * .15, c.cz + Math.cos(ang * .5) * 1.2);
+    const inv = vx < 0; if (inv !== c.inv) { c.inv = inv; c.sp.material.map = texPeixe(c.k, inv); c.sp.material.needsUpdate = true; } }
+  { const pegas = perolasPegas(nome); for (const pe of F.perolas) { pe.g.visible = !pegas.includes(pe.i); pe.g.children[2].material.opacity = .6 + .4 * Math.sin(t * 3 + pe.i); } }
+  if (F.tampaNavio) { const aberto = (G.navioBau && G.navioBau.dia === diaBR() && G.navioBau.l.includes(nome)); F.tampaNavio.rotation.x += ((aberto ? -1.5 : 0) - F.tampaNavio.rotation.x) * Math.min(1, dt * 3); F.brilhoNavio.visible = !aberto; }
+  if (F.dia !== diaBR()) { F.dia = diaBR(); const l = perolasDoDia(); F.perolas.forEach((pe, i) => { pe.p = l[i]; pe.g.position.set(l[i].x, l[i].y, l[i].z); }); }
+  // altitude e topo da montanha
+  const al = $("pr-altura"), il = ILHAS.montanha, m = ILHA_CFG.montanha.morro, naMont = Math.hypot(eu.x - il.x, eu.z - il.z) < il.r;
+  if (al) { const alt = Math.max(0, eu.y - .2); al.hidden = !!PRACA.hist || !!N || !(naMont || alt > 2.5); al.innerHTML = `⛰️ Altitude: <b>${Math.round(alt)} m</b>${naMont ? ` / ${m.H} m` : ""}`; }
+  if (naMont && eu.y > m.H - 1 && !PRACA.voando && !topoHoje(nome)) { G.topo.por[nome] = true; G.banco[nome] = Math.round(((G.banco[nome] || 0) + 100) * 10) / 10; ganharXpPesca(nome, 40); salvarPlacar();
+    if (typeof fogosPraca === "function") fogosPraca(eu.x, eu.y + 2, eu.z, 90); if (typeof sfxVitoria === "function") sfxVitoria(); toast("🏔️ Você chegou no TOPO da montanha! +100 moedas"); }
+  if (B.bandeiraTopo) B.bandeiraTopo.rotation.y = Math.sin(t * 2) * .3; if (B.trofeuTopo) B.trofeuTopo.position.y = 1 + Math.sin(t * 2) * .15;
+  // os amigos nadando
+  for (const o of PRACA.outros.values()) o.m.nadando = !!(o.alvo && o.alvo.e & 32);
+  eu.m.nadando = !!N;
+}
+const _passoPesca2Nado = passoPesca2;
+passoPesca2 = function (dt, t) { _passoPesca2Nado(dt, t); try { passoNado(dt, t); } catch (e) { console.error(e); } };
+const _animarBonecoNado = animarBonecoPraca;
+animarBonecoPraca = function (m, x, y, z, r, anda, dt) {
+  _animarBonecoNado(m, x, y, z, r, anda, dt);
+  if (m.nadando) { const t = performance.now() / 1000, fundo = m === (PRACA.eu && PRACA.eu.m) ? y < -1.3 : false; m.corpo.rotation.order = "YXZ";
+    const alvo = anda || fundo ? -1.25 : -.35; m.corpo.rotation.x += (alvo - m.corpo.rotation.x) * Math.min(1, dt * 6);
+    m.bracoE.rotation.x = Math.sin(t * 5) * 1.6 - 1.2; m.bracoD.rotation.x = Math.sin(t * 5 + Math.PI) * 1.6 - 1.2; m.pernaE.rotation.x = Math.sin(t * 9) * .4; m.pernaD.rotation.x = -Math.sin(t * 9) * .4;
+    if (m !== (PRACA.eu && PRACA.eu.m) && y < .1) m.corpo.position.y = -.55; if (m.pet) m.pet.visible = false; m.nadouAntes = true; }
+  else if (m.nadouAntes) { m.nadouAntes = false; m.corpo.rotation.x = 0; if (!m.barcoM) m.corpo.position.y = 0; if (m.pet) m.pet.visible = true; }
+};
+const _lugaresPracaNado = lugaresPraca;
+lugaresPraca = function () { if (PRACA.nado) return []; return _lugaresPracaNado(); };
+/* ---------- embaixo da água: névoa azul, câmera embaixo e a tela azulada ---------- */
+function depoisDaCamera() {
+  const eu = PRACA.eu, cam = PRACA.cam, cena = PRACA.cena; if (!eu || !cam || PRACA.hist) return null;
+  const box = $("praca");
+  if (PRACA.nado && eu.y < -1.3) { const fy = fundoEm(eu.x, eu.z), alvoY = eu.y + 1;
+    cam.position.y = Math.max(fy + .6, Math.min(cam.position.y, -.4)); const dx = cam.position.x - eu.x, dz = cam.position.z - eu.z, d = Math.hypot(dx, dz); if (d > 4.5) { cam.position.x = eu.x + dx / d * 4.5; cam.position.z = eu.z + dz / d * 4.5; }
+    cam.lookAt(eu.x, alvoY, eu.z); }
+  const embaixo = cam.position.y < 0; if (box) box.classList.toggle("pr-embaixo", embaixo);
+  if (!embaixo || !cena.fog) return null;
+  const antes = { cor: cena.fog.color.clone(), near: cena.fog.near, far: cena.fog.far, bg: cena.background };
+  cena.fog.color.set("#1a6a8a"); cena.fog.near = 1; cena.fog.far = 26; cena.background = new THREE.Color("#1a6a8a"); return antes;
+}
+const _abrirPracaNado = abrirPraca;
+abrirPraca = function () {
+  _abrirPracaNado(); const box = $("praca"); if (!box || !PRACA.on) return; PRACA.nado = null;
+  box.insertAdjacentHTML("beforeend", `<div class="pr-nado" id="pr-nado" hidden><div class="pn-txt"></div><div class="pn-ar"><span>💨 Ar</span><i></i></div>
+    <div class="pn-btns"><button type="button" id="pn-sobe" aria-label="Subir">⤴ Subir</button><button type="button" id="pn-desce" aria-label="Mergulhar">⤵ Mergulhar</button></div></div>
+    <div class="pr-altura" id="pr-altura" hidden></div><div class="pr-agua" aria-hidden="true"></div>`);
+  for (const [id, chave] of [["pn-sobe", "nadoSobe"], ["pn-desce", "nadoDesce"]]) { const b = $(id); const on = e => { PRACA[chave] = true; try { b.setPointerCapture(e.pointerId); } catch {} e.preventDefault(); }, off = () => { PRACA[chave] = false; };
+    b.addEventListener("pointerdown", on); ["pointerup", "pointercancel", "lostpointercapture"].forEach(k => b.addEventListener(k, off)); }
+  const B = PRACA.bosque; if (B && B.mar) { B.mar.material.side = THREE.DoubleSide; B.mar.material.transparent = true; B.mar.material.opacity = .82; B.mar.renderOrder = 2; }
+  const ren = PRACA.r, orig = ren.render.bind(ren);
+  ren.render = (cena, cam) => { let antes = null; try { antes = depoisDaCamera(); } catch (e) { console.error(e); } orig(cena, cam);
+    if (antes) { cena.fog.color.copy(antes.cor); cena.fog.near = antes.near; cena.fog.far = antes.far; cena.background = antes.bg; } };
+};
+const _fecharPracaNado = fecharPraca;
+fecharPraca = function (irLobby) { PRACA.nado = null; PRACA.nadoSobe = PRACA.nadoDesce = false; return _fecharPracaNado(irLobby); };
 </script>
 
 <script>
@@ -13049,7 +13259,7 @@ function prPos(x, z, r, y, e) {
   const num = v => Math.round((+v || 0) * 100) / 100;
   if (PR.dono) return;   // o dono manda a posição dele junto com a de todos (prTick)
   if (PR.hostConn && PR.ultimoPs && Date.now() - PR.ultimoPs > 6000) { PR.ultimoPs = 0; prReconectar(); return; }   // o dono sumiu sem avisar
-  if (PR.t % 6 === 0 && PR.hostConn) enviar(PR.hostConn, { t: "p", x: num(x), z: num(z), r: num(r), y: num(y), e: (+e || 0) & 31 });
+  if (PR.t % 6 === 0 && PR.hostConn) enviar(PR.hostConn, { t: "p", x: num(x), z: num(z), r: num(r), y: num(y), e: (+e || 0) & 63 });
 }
 function prTick() {
   if (!PR.dono || !PRACA.on) return;
@@ -13082,7 +13292,7 @@ function prDonoRecebe(conn, d) {
   }
   if (!id) return;
   const c = PR.conns.get(id);
-  if (d.t === "p") { const n = v => Math.max(-230, Math.min(230, +v || 0)); c.pos = [n(d.x), n(d.z), +d.r || 0, Math.max(0, Math.min(30, +d.y || 0)), (+d.e || 0) & 31]; pracaPos(id, ...c.pos); }
+  if (d.t === "p") { const n = v => Math.max(-230, Math.min(230, +v || 0)); c.pos = [n(d.x), n(d.z), +d.r || 0, Math.max(0, Math.min(30, +d.y || 0)), (+d.e || 0) & 63]; pracaPos(id, ...c.pos); }
   else if (d.t === "info") { c.info = prInfoLimpa(d.info); pracaOutro(id, c.info); prMandarInfos(); }
   else if (d.t === "rk") { mesclarRank(d.r, d.m); mesclarBossG(d.bg); }
   else if (d.t === "pg") {   // pega-pega: quem pegou manda para o dono, que avisa todo mundo
@@ -13115,7 +13325,7 @@ function prMembroRecebe(d) {
     for (const id of [...PRACA.outros.keys()]) if (!ids.includes(id)) pracaTirar(id);
     prContar();
   }
-  else if (d.t === "ps" && Array.isArray(d.l)) for (const a of d.l.slice(0, 20)) { if (!Array.isArray(a) || a[0] === PR.meuId) continue; const n = v => Math.max(-230, Math.min(230, +v || 0)); pracaPos(String(a[0]), n(a[1]), n(a[2]), +a[3] || 0, Math.max(0, Math.min(30, +a[4] || 0)), (+a[5] || 0) & 31); }
+  else if (d.t === "ps" && Array.isArray(d.l)) for (const a of d.l.slice(0, 20)) { if (!Array.isArray(a) || a[0] === PR.meuId) continue; const n = v => Math.max(-230, Math.min(230, +v || 0)); pracaPos(String(a[0]), n(a[1]), n(a[2]), +a[3] || 0, Math.max(0, Math.min(30, +a[4] || 0)), (+a[5] || 0) & 63); }
   else if (d.t === "sai") { pracaTirar(String(d.id)); prContar(); }
   else if (d.t === "rk") { mesclarRank(d.r, d.m); mesclarBossG(d.bg); }
   else if (d.t === "portal") toast(`${nomeLimpo(d.nome)} entrou na Partida do Evento! Vá até a porta para jogar junto.`);

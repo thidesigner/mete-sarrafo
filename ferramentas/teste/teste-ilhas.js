@@ -44,7 +44,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const T = 
   await pg.evaluate(() => { window.PESCA_CHEFE_TESTE = "serpentecristal"; const p = pontoIlha("caverna"); const e = PRACA.eu; e.x = p.x; e.z = p.z; e.y = .2; PRACA.yaw = .5; PRACA.alt = .4; }); await pg.waitForTimeout(800);
   await pg.screenshot({ path: S + '/il-chefe-sombra.png' });
   r.chefeAviso = await pg.evaluate(() => $("pr-chefe").textContent);
-  r.chefe = await pg.evaluate(() => { comecarPesca(); const P = PRACA.pesca; P.vara = varaDe("Andre"); P.alvo = new THREE.Vector3(PRACA.eu.x, .06, PRACA.eu.z - 3); P.isca = { sorte: 5 }; morderPeixe(P); return { px: P.px.k, chefe: !!P.chefe }; });
+  r.chefe = await pg.evaluate(() => { comecarPesca(); const P = PRACA.pesca; P.vara = varaDe("Andre"); P.alvo = new THREE.Vector3(PRACA.eu.x, .06, PRACA.eu.z - 3); P.isca = { sorte: 5 }; for (let i = 0; i < 30 && !P.chefe; i++) { P.fase = "espera"; morderPeixe(P); } return { px: P.px.k, chefe: !!P.chefe }; });
   await pg.waitForTimeout(500); await pg.screenshot({ path: S + '/il-chefe-briga.png' });
   r.chefePego = await pg.evaluate(() => { const m0 = G.banco.Andre; pegarPeixe(PRACA.pesca); return { vara: invPesca("Andre").varas.includes("cristal"), moedas: G.banco.Andre > m0 }; });
   await pg.waitForTimeout(600); await pg.screenshot({ path: S + '/il-chefe-pegou.png' });

@@ -411,3 +411,15 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
   - 💜 **Mítico:** um peixe em cada lugar;
   - 🌌 **Cósmico:** Peixe-galáxia (só à noite), Peixe-prisma e Baleia estelar. São raríssimos e valem muito.
 
+## Nadar, mergulhar e a Ilha da Montanha (pedido do Andre, 25/11)
+
+- **Nadar:** dá para pular do píer ou sair da ilha e nadar no mar.
+- **Mergulhar:**
+  - os botões ⤵ Mergulhar e ⤴ Subir levam até o fundo do mar;
+  - embaixo da água o ar acaba em 25 segundos, e aí o bonequinho sobe sozinho.
+- **Fundo do mar:** corais, algas, peixes nadando e 10 pérolas por dia (15 moedas cada; achar todas dá +50).
+  - Tem também um navio afundado com um baú, que abre uma vez por dia.
+- **Ilha da Montanha** (nível 5): montanha de 24 metros para subir, com medidor de altitude.
+  - Chegar no topo dá 100 moedas uma vez por dia.
+  - Tem 5 peixes novos (Truta, Truta-arco-íris, Salmão-real, Esturjão-gigante e o Mítico Peixe-nuvem).
+
