@@ -402,3 +402,12 @@ Skin que **não aparece na loja** e não pode ser comprada: só se ganha com um 
   - Pegar um dá 300 moedas e, na primeira vez, a vara especial dele.
 - **História do Vovô:** 8 capítulos de missões, cada um com prêmio. O último dá a Vara do Vovô.
 
+## Skins caprichadas e raridades novas (pedido do Andre, 25/11)
+
+- **Skins:**
+  - todas ganharam mãos, sapatos e boca no 3D;
+  - cada skin ganhou detalhes no corpo: capa do Rei, papagaio e espada do Pirata, mochila do Astronauta, escudo do Cavaleiro, rabo do Dino e do Guepardo, cauda de fantasma do Fantasma Dourado, roupa de Papai Noel e outros.
+- **Pescaria, duas raridades novas acima do Lendário:**
+  - 💜 **Mítico:** um peixe em cada lugar;
+  - 🌌 **Cósmico:** Peixe-galáxia (só à noite), Peixe-prisma e Baleia estelar. São raríssimos e valem muito.
+
